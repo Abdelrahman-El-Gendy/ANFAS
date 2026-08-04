@@ -54,6 +54,9 @@ androidx-testExt = "1.3.0"
 # so it can reference AGP/KGP/Compose/KSP/Room extension types at compile time.
 gradlePlugin-android = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 gradlePlugin-kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+gradlePlugin-kotlinSerialization = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+# The io.ktor.plugin marker resolves to io.ktor.plugin:plugin (gradlePluginPortal).
+gradlePlugin-ktor = { module = "io.ktor.plugin:plugin", version.ref = "ktor" }
 gradlePlugin-composeCompiler = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 gradlePlugin-composeMultiplatform = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "composeMultiplatform" }
 gradlePlugin-ksp = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }

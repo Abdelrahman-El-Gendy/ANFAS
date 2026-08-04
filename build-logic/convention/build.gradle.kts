@@ -14,6 +14,8 @@ dependencies {
     // without a version, and use the real `kotlin { android { } }` / `compose { }` DSL.
     implementation(libs.gradlePlugin.android)
     implementation(libs.gradlePlugin.kotlin)
+    implementation(libs.gradlePlugin.kotlinSerialization)
+    implementation(libs.gradlePlugin.ktor)
     implementation(libs.gradlePlugin.composeCompiler)
     implementation(libs.gradlePlugin.composeMultiplatform)
     implementation(libs.gradlePlugin.ksp)
