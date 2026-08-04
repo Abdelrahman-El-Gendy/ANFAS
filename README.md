@@ -1,47 +1,42 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop (JVM), Server.
+This is a Kotlin Multiplatform project targeting Android, iOS, Desktop (JVM) and a Ktor server.
 
-* [/app/iosApp](./app/iosApp/iosApp) contains an iOS application. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+See [CLAUDE.md](./CLAUDE.md) for the module graph, layering rules and build conventions.
 
-* [/app/sharedLogic](./app/sharedLogic/src) is for the code that will be shared between app targets in the project.
-  The most important subfolder is [commonMain](./app/sharedLogic/src/commonMain/kotlin). If preferred, you
-  can add code to the platform-specific folders here too.
+## Structure
 
-* [/app/sharedUI](./app/sharedUI/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./app/sharedUI/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./app/sharedUI/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./app/sharedUI/src/jvmMain/kotlin)
-    folder is the appropriate location.
+* [/composeApp](./composeApp/src) — shared Compose Multiplatform app shell (DI wiring,
+  navigation root, platform entry points). `commonMain` is shared across all targets;
+  `androidMain`, `iosMain` and `jvmMain` hold the platform-specific parts.
+* [/androidApp](./androidApp/src) and [/desktopApp](./desktopApp/src) — thin launchers.
+  AGP 9 no longer allows the Kotlin Multiplatform plugin in the same module as
+  `com.android.application`, so each platform gets its own entry-point module.
+* [/app/iosApp](./app/iosApp) — the iOS application and any SwiftUI code. Links the
+  `ComposeApp` framework produced by `:composeApp`.
+* [/core](./core) — `model`, `common`, `designsystem`, `database`, `network`, `auth`.
+* [/feature](./feature) — one module per feature; features never depend on each other.
+* [/server](./server/src/main/kotlin) — Ktor server. Plain JVM, not a KMP module.
+* [/build-logic](./build-logic) — convention plugins. All shared build config lives here.
 
-* [/core](./core/src) is for the code that will be shared between all targets in the project.
-  The most important subfolder is [commonMain](./core/src/commonMain/kotlin). If preferred, you
-  can add code to the platform-specific folders here too.
+## Running the apps
 
-* [/server](./server/src/main/kotlin) is for the Ktor server application.
+- Android: `./gradlew :androidApp:assembleDebug`
+- Desktop: `./gradlew :desktopApp:run`
+- Server: `./gradlew :server:run`, then `curl localhost:8080/health`
+- iOS: open [/app/iosApp](./app/iosApp) in Xcode and run from there.
 
-### Running the apps
+## Running tests
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
-
-- Android app: `./gradlew :app:androidApp:assembleDebug`
-- Desktop app:
-  - Hot reload: `./gradlew :app:desktopApp:hotRun --auto`
-  - Standard run: `./gradlew :app:desktopApp:run`
-- Server: `./gradlew :server:run`
-- iOS app: open the [/app/iosApp](./app/iosApp) directory in Xcode and run it from there.
-
-### Running tests
-
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
-
-- Android tests: `./gradlew :app:sharedUI:testAndroidHostTest :app:sharedLogic:testAndroidHostTest`
-- Desktop tests: `./gradlew :app:sharedUI:jvmTest :app:sharedLogic:jvmTest`
+- Everything, plus the layering rules: `./gradlew check`
+- Android host tests: `./gradlew testAndroidHostTest`
+- Desktop/JVM tests: `./gradlew jvmTest`
+- iOS tests: `./gradlew :core:common:iosSimulatorArm64Test`
 - Server tests: `./gradlew :server:test`
-- iOS tests: `./gradlew :app:sharedLogic:iosSimulatorArm64Test`
+
+## iOS targets
+
+`iosArm64` and `iosSimulatorArm64` only. `iosX64` (Intel simulator) is not available:
+`androidx.room3` and `androidx.sqlite` no longer publish x64 Apple artifacts. See CLAUDE.md.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html).

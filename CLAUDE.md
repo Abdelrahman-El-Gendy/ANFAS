@@ -69,6 +69,21 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - **`Dispatchers.IO` is unusable in `commonMain`** — absent from the common source set, and
   `internal` on Kotlin/Native. Inject `AppDispatchers` from `:core:common` instead; native
   resolves `io` to the Default pool.
+- **Decompose components must be created on the UI thread.** On desktop that is the AWT event
+  dispatch thread, not the JVM `main` thread — `desktopApp/main.kt` builds the root inside
+  `SwingUtilities.invokeAndWait`. Constructing it directly on `main` throws
+  `NotOnMainThreadException`.
+- **`org.gradle.jvmargs` is what bounds Kotlin/Native**, because KGP runs the native compiler
+  inside the Gradle daemon — not `kotlin.daemon.jvmargs`. Release framework linking for two
+  iOS targets needs ~8g; the wizard's 4g OOMs. Don't lower it.
+- **`:composeApp` exposes Decompose and Koin as `api`, deliberately.** Each launcher owns its
+  platform lifecycle and so constructs the `RootComponent` and calls `initKoin()` itself.
+- **`anfas.kmp.feature` withholds `:core:database` and `:core:network` on purpose.** Features
+  go through repositories/use-cases; if a feature needs data, add the seam to `:core:*`
+  rather than adding the dependency to the convention plugin.
+- **AGP lint vs KSP:** AGP's lint tasks read KSP output directories without declaring a
+  dependency on the producing tasks, which Gradle 9 fails on. `anfas.kmp.library` wires this
+  up once — don't re-patch it per module.
 - A KMP `@Database` needs `@ConstructedBy(…)` plus an `expect object … : RoomDatabaseConstructor<…>`.
   Without it, iOS compiles fail confusingly.
 - `BundledSQLiteDriver` on all three platforms so they run identical SQLite.
@@ -87,3 +102,18 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 ./gradlew :desktopApp:run                          desktop
 ./gradlew :server:run                              server → GET /health
 ```
+
+iOS runs from Xcode: open `app/iosApp/iosApp.xcodeproj`. Its build phase invokes
+`:composeApp:embedAndSignAppleFrameworkForXcode`, and `ContentView.swift` hosts
+`MainViewController()` from the `ComposeApp` framework.
+
+## Adding a module
+
+1. `include(":feature:foo")` in `settings.gradle.kts`.
+2. `feature/foo/build.gradle.kts` → `plugins { id("anfas.kmp.feature") }` and nothing else
+   unless the module genuinely needs something extra.
+3. Add its Koin module to `featureModules` in `composeApp/src/commonMain/.../di/Modules.kt`
+   and the project to `:composeApp`'s dependencies.
+4. `./gradlew check` — the layering rules run automatically.
+
+Never add a version or a `group:artifact:version` string to a build file. Catalog only.
