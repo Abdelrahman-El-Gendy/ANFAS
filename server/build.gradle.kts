@@ -12,8 +12,8 @@ application {
 dependencies {
     api(project(":core"))
     implementation(libs.logback)
-    implementation(libs.ktor.serverCore)
-    implementation(libs.ktor.serverNetty)
-    testImplementation(libs.ktor.serverTestHost)
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+    testImplementation(libs.ktor.server.testHost)
     testImplementation(libs.kotlin.testJunit)
 }
