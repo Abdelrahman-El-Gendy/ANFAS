@@ -71,3 +71,14 @@ kotlin {
         }
     }
 }
+
+/**
+ * AGP's lint tasks read KSP's generated source directories but don't declare a dependency on
+ * the tasks that produce them, which Gradle 9 reports as a validation failure. This is an
+ * AGP/KSP integration gap, so it's patched once here rather than in every KSP module.
+ */
+plugins.withId("com.google.devtools.ksp") {
+    val kspTasks = tasks.matching { it.name.startsWith("ksp") }
+    tasks.matching { it.name.startsWith("lintAnalyze") || it.name.endsWith("LintModel") }
+        .configureEach { dependsOn(kspTasks) }
+}

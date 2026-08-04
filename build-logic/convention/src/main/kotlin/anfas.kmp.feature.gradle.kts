@@ -11,6 +11,9 @@ import com.anfas.buildlogic.libs
  */
 plugins {
     id("anfas.kmp.compose")
+    // Decompose serializes navigation Configs to restore state, so any module that
+    // declares routes needs the serialization plugin.
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 kotlin {

@@ -1,0 +1,44 @@
+package com.anfas.app.di
+
+import com.anfas.core.common.AppDispatchers
+import com.anfas.core.common.DefaultAppDispatchers
+import com.anfas.feature.announcements.AnnouncementsModule
+import com.anfas.feature.classes.ClassesModule
+import com.anfas.feature.equipment.EquipmentModule
+import com.anfas.feature.intakeocr.IntakeOcrModule
+import com.anfas.feature.members.MembersModule
+import com.anfas.feature.subscriptions.SubscriptionsModule
+import com.anfas.feature.therapy.TherapyModule
+import org.koin.core.KoinApplication
+import org.koin.core.context.startKoin
+import org.koin.core.module.Module
+import org.koin.dsl.KoinAppDeclaration
+import org.koin.dsl.module
+
+val coreModule: Module = module {
+    single<AppDispatchers> { DefaultAppDispatchers }
+}
+
+/**
+ * Every feature's Koin module, collected in the one place that is allowed to see them all.
+ * Add a feature here when you add it to :composeApp's dependencies.
+ */
+val featureModules: List<Module> = listOf(
+    MembersModule,
+    SubscriptionsModule,
+    IntakeOcrModule,
+    TherapyModule,
+    ClassesModule,
+    AnnouncementsModule,
+    EquipmentModule,
+)
+
+/**
+ * Platform launchers call this once at startup. [declaration] is where Android passes
+ * `androidContext(...)`.
+ */
+fun initKoin(declaration: KoinAppDeclaration = {}): KoinApplication = startKoin {
+    declaration()
+    modules(coreModule)
+    modules(featureModules)
+}
