@@ -1,9 +1,12 @@
 [versions]
 # --- Build tooling ---------------------------------------------------------
-agp = "9.3.1"
-android-compileSdk = "37"
+# AGP is capped by the IDE, not by what is newest. Android Studio 2026.1 supports AGP
+# 7.1-9.2; going above that ceiling stops the IDE syncing, which breaks run configurations
+# and leaves them pointing at stale modules. Raise this only together with Android Studio.
+agp = "9.0.1"
+android-compileSdk = "36"
 android-minSdk = "24"
-android-targetSdk = "37"
+android-targetSdk = "36"
 jvmToolchain = "17"
 kotlin = "2.4.10"
 # KSP is versioned INDEPENDENTLY of Kotlin since 2.3.0 — there is no "2.4.10-x.y.z".
@@ -19,7 +22,9 @@ composeMaterial3 = "1.11.0-alpha07"
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.19.0"
-androidx-lifecycle = "2.11.0"
+# 2.11.0 is stable but requires AGP 9.1+ and compileSdk 37. 2.10.0 is the newest stable
+# that works with AGP 9.0.1 / compileSdk 36 — bump together with agp above.
+androidx-lifecycle = "2.10.0"
 coil = "3.5.0"
 decompose = "3.5.0"
 essenty = "2.5.0"

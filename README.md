@@ -17,6 +17,15 @@ See [CLAUDE.md](./CLAUDE.md) for the module graph, layering rules and build conv
 * [/server](./server/src/main/kotlin) — Ktor server. Plain JVM, not a KMP module.
 * [/build-logic](./build-logic) — convention plugins. All shared build config lives here.
 
+## Before running from the IDE
+
+Android Studio derives its run configurations from its Gradle project model, so after
+pulling structural changes run **File → Sync Project with Gradle Files** first. If Studio
+offers configurations for modules that no longer exist, that sync is what clears them.
+
+AGP is pinned to what the installed Android Studio supports (2026.1 → AGP ≤ 9.2). Raising
+`agp` past that ceiling breaks IDE sync. See CLAUDE.md.
+
 ## Running the apps
 
 - Android: `./gradlew :androidApp:assembleDebug`

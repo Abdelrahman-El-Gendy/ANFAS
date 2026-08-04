@@ -1,9 +1,19 @@
 # ANFAS — Kotlin Multiplatform
 
-Android · iOS · Desktop (JVM) · Ktor server. Kotlin 2.4.10, AGP 9.3.1,
-Compose Multiplatform 1.11.1, Gradle 9.6.1, compileSdk 37, JDK toolchain 17.
+Android · iOS · Desktop (JVM) · Ktor server. Kotlin 2.4.10, AGP 9.0.1,
+Compose Multiplatform 1.11.1, Gradle 9.1.0, compileSdk 36, JDK toolchain 17.
 
-AGP 9.3.x requires Gradle 9.5.0+ — the wrapper and AGP versions move together.
+**AGP is capped by Android Studio, not by what is newest.** Studio 2026.1 supports AGP
+7.1–9.2. Going above the IDE's ceiling stops Gradle sync, and a Studio that cannot sync
+keeps offering run configurations for modules that no longer exist. Raise `agp` only
+together with Android Studio, and remember these move as a set:
+
+| | |
+|---|---|
+| `agp` | capped by the installed Android Studio |
+| `gradle-wrapper` | AGP 9.0.x needs Gradle 9.1+; AGP 9.3.x needs 9.5+ |
+| `android-compileSdk` | AGP 9.0.1 tops out at 36 |
+| `androidx-lifecycle` | 2.11.0 needs AGP 9.1+/SDK 37, so we are on 2.10.0 |
 
 ## Module graph
 
@@ -84,6 +94,12 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - **AGP lint vs KSP:** AGP's lint tasks read KSP output directories without declaring a
   dependency on the producing tasks, which Gradle 9 fails on. `anfas.kmp.library` wires this
   up once — don't re-patch it per module.
+- **If the IDE offers run configs for modules that don't exist** (e.g. `app.androidApp`,
+  `app [hot]`), it has not re-synced. Those entries are derived from Studio's in-memory
+  Gradle model, not stored in the repo, so deleting files won't clear them: run
+  **File → Sync Project with Gradle Files**. `autoReloadType` in `.idea/workspace.xml` is
+  set to `SELECTIVE` so this should not recur; if sync itself fails, check the AGP/Studio
+  ceiling above first.
 - A KMP `@Database` needs `@ConstructedBy(…)` plus an `expect object … : RoomDatabaseConstructor<…>`.
   Without it, iOS compiles fail confusingly.
 - `BundledSQLiteDriver` on all three platforms so they run identical SQLite.
