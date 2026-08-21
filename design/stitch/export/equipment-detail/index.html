@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FAHD Staff - Equipment Inventory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#e6e2de",
+                        "on-surface-variant": "#d6c4b0",
+                        "surface-variant": "#363432",
+                        "primary-fixed": "#ffddb5",
+                        "on-tertiary-container": "#653541",
+                        "on-primary-fixed-variant": "#643f00",
+                        "surface-tint": "#ffb956",
+                        "outline-variant": "#514536",
+                        "outline": "#9e8e7c",
+                        "primary-container": "#e8a33d",
+                        "on-secondary": "#213528",
+                        "surface-bright": "#3b3936",
+                        "tertiary-container": "#dfa0ad",
+                        "surface-container-low": "#1d1b19",
+                        "on-background": "#e6e2de",
+                        "on-surface": "#e6e2de",
+                        "on-secondary-fixed": "#0c1f14",
+                        "tertiary-fixed-dim": "#f7b5c3",
+                        "primary": "#ffc16c",
+                        "on-tertiary": "#4e232e",
+                        "secondary-fixed": "#d1e8d6",
+                        "primary-fixed-dim": "#ffb956",
+                        "secondary": "#b5ccba",
+                        "on-primary-fixed": "#2a1800",
+                        "on-primary-container": "#5f3c00",
+                        "on-secondary-fixed-variant": "#374b3e",
+                        "surface-container": "#211f1d",
+                        "secondary-fixed-dim": "#b5ccba",
+                        "on-error-container": "#ffdad6",
+                        "secondary-container": "#394e40",
+                        "surface-container-highest": "#363432",
+                        "background": "#141311",
+                        "on-error": "#690005",
+                        "tertiary-fixed": "#ffd9e0",
+                        "on-tertiary-fixed-variant": "#683844",
+                        "on-tertiary-fixed": "#340e1a",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#0f0e0c",
+                        "on-primary": "#462b00",
+                        "inverse-on-surface": "#32302e",
+                        "surface": "#141311",
+                        "inverse-primary": "#835400",
+                        "surface-dim": "#141311",
+                        "on-secondary-container": "#a7bead",
+                        "tertiary": "#fdbbc8",
+                        "surface-container-high": "#2b2a27",
+                        "error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1440px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["IBM Plex Sans"],
+                        "headline-sm": ["IBM Plex Sans"],
+                        "body-md": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"],
+                        "data-mono": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .texture-mask {
+            mask-image: url('data:image/svg+xml;utf8,<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="100" r="2" fill="black"/></svg>');
+            mask-size: 10px 10px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container border-r border-outline-variant/10 flex flex-col h-full p-margin-desktop z-50">
+<div class="mb-10">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">FAHD</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Staff Portal</p>
+</div>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+                Members
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+                Subscriptions
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">description</span>
+                Intake
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+                Classes
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">self_improvement</span>
+                Recovery
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary-container text-on-primary-container rounded-lg cursor-pointer active:scale-95 duration-200 font-bold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings_input_component</span>
+                Equipment
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">campaign</span>
+                Announcements
+            </a>
+</nav>
+<div class="mt-auto pt-6 border-t border-outline-variant/10 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-surface docked full-width top-0 sticky z-40 border-b border-outline-variant/10 flex justify-between items-center h-16 px-margin-desktop">
+<div class="flex items-center gap-4">
+<span class="font-headline-sm text-headline-sm font-IBM Plex Sans text-on-surface">Equipment Inventory</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary-fixed transition-all duration-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-fixed transition-all duration-300">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/20 ml-2">
+<img alt="Staff Avatar" class="w-full h-full object-cover" data-alt="Professional studio portrait of a fitness club staff member in soft warm lighting, cinematic depth of field." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHQvgJVzp9GqH141FZNXx93YsLaONaBY95g-pnkFmrDLSnvAc08BAPFtK2Po8MJTG0qoHAFaekpPiQY9WNp3vLAAzc-hGN60njt-hQSMIEYObiAI6LrwsTKYU13RgPV297bCUuSFJMfnKgBvLAGbOHhVxOC0zD1hR6-jQ3Jn-PYW7mr8mnE47_iZumYZBn5_9znhC-QS8bt9B-XmkyfJV_4bOP2xbp3oGRjzWZy1Uk9u_BP6ukY885"/>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-margin-desktop flex-1">
+<!-- Toolbar -->
+<div class="flex justify-between items-center mb-8">
+<div class="flex items-center gap-4">
+<div class="flex bg-surface-container rounded-lg p-1 border border-outline-variant/10">
+<button class="px-4 py-1.5 rounded-md bg-surface-container-high text-on-surface font-medium text-sm">All</button>
+<button class="px-4 py-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors text-sm">Operational</button>
+<button class="px-4 py-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors text-sm">Needs service</button>
+<button class="px-4 py-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors text-sm">Out of order</button>
+<button class="px-4 py-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors text-sm">On order</button>
+</div>
+<select class="bg-surface-container border-outline-variant/10 text-on-surface text-sm rounded-lg h-9 px-3 focus:ring-primary focus:border-primary">
+<option>Zone: All</option>
+<option>Cardio floor</option>
+<option>Weight room</option>
+<option>Recovery</option>
+</select>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2 text-on-surface-variant text-sm">search</span>
+<input class="bg-background border-outline-variant/10 text-on-surface text-sm rounded-lg h-9 pl-9 pr-4 focus:ring-primary focus:border-primary w-64 placeholder:text-on-surface-variant/50" placeholder="Search equipment..." type="text"/>
+</div>
+</div>
+<button class="bg-primary-container text-on-primary-container font-medium px-4 py-2 rounded-lg hover:bg-primary transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Add equipment
+                </button>
+</div>
+<!-- Grid -->
+<div class="grid grid-cols-4 gap-6">
+<!-- Card 1: Needs Service (Selected for Drawer) -->
+<div class="bg-surface-container border border-primary/30 rounded-xl overflow-hidden cursor-pointer hover:border-primary transition-colors relative shadow-[0_0_15px_rgba(232,163,61,0.1)]">
+<div class="h-32 bg-surface-container-high relative">
+<img alt="Treadmill" class="w-full h-full object-cover opacity-90" data-alt="High-end Matrix treadmill in a dimly lit, premium modern gym setting, warm amber accent lighting, professional photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdW0Mw95V1tZtNY8kOyJdylN1g7UL4LnX6MKDjWC_WVtVU8Rjo7demipQiOsSmnbPy3jq0pMaJaRpKsEOCN9BO-Nk4SfiBCCrZE5jdhM4D6kmS8-ldRGkQHyquT3s6cGMCB6ssjK6LTeuCZENIhAhSlVrAZnTcd48A4KEDRAZCM6lEmymPKVZaVsgdKUJwSEGmR6ZsGs8ssKfjVpnPdGrtKN3OE6dPggeA2crbGXu5QRgU2KbQVLZ3"/>
+<div class="absolute top-3 right-3 px-2 py-1 bg-surface-tint/15 text-surface-tint border border-surface-tint/20 rounded text-xs font-medium flex items-center gap-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">build</span> Needs service
+                        </div>
+</div>
+<div class="p-4">
+<h3 class="font-headline-sm text-on-surface mb-1 truncate">Treadmill</h3>
+<p class="font-data-mono text-on-surface-variant text-sm mb-3">FH-TRD-004</p>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                            Cardio floor
+                        </div>
+</div>
+</div>
+<!-- Card 2: Operational -->
+<div class="bg-surface border border-outline-variant/10 rounded-xl overflow-hidden cursor-pointer hover:border-outline-variant transition-colors relative">
+<div class="h-32 bg-surface-container relative">
+<img alt="Rowing machine" class="w-full h-full object-cover" data-alt="Professional concept 2 rowing machine in a premium dark gym environment, moody lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSsxbEcGcOF8O9g6KdF-zXEB5tqoC0_MVFjUKaqp-D7rdA_iuxaXXFzcROMaoZbjoGJpx5GnVJVlPHlTFWqMmUmItcbQQy3Ih0Kv0vbw_Pc8Ik9HUivjVF6r9FlcUVTHJFAdsLkBzdwn8Mhx8pzZ4Qg0khMkkM8VAP3g_G_QGb7OXjf_fYa1O_YbAi-2LRHsFm2y3meyWaVuUpFXio0xLRResHJXf4hbRN9PMN81JeVX0QCZDloYbK"/>
+<div class="absolute top-3 right-3 px-2 py-1 bg-secondary/15 text-secondary border border-secondary/20 rounded text-xs font-medium flex items-center gap-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Operational
+                        </div>
+</div>
+<div class="p-4">
+<h3 class="font-headline-sm text-on-surface mb-1 truncate">Rowing machine</h3>
+<p class="font-data-mono text-on-surface-variant text-sm mb-3">FH-ROW-001</p>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                            Cardio floor
+                        </div>
+</div>
+</div>
+<!-- Card 3: Operational -->
+<div class="bg-surface border border-outline-variant/10 rounded-xl overflow-hidden cursor-pointer hover:border-outline-variant transition-colors relative">
+<div class="h-32 bg-surface-container relative">
+<img alt="Cable crossover" class="w-full h-full object-cover" data-alt="Large cable crossover machine in a modern fitness center, dramatic spotlighting on the weights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB670tEllRDZPrhnOp2OXWi9tou7YgqbG-XIRjvwRaXvIW9_9bMSaoCpODcMZuxUJ5bPzFcrxTnn3MB8eWafN2AoMSKh1PxRjckape5W0hxuhqvdvyR8pasxuDcGsUOq2xUn6WPNxFFJOefl_A1Nv09jF7z3A2unh296pGBPuNU4Sy3cAPAwNsAZJ50-qKwM2S3AKClDP9h5MazC7y0hSfKF5QKcExZ4SM_BwSIQAgi_N6qmVuhcU7J"/>
+<div class="absolute top-3 right-3 px-2 py-1 bg-secondary/15 text-secondary border border-secondary/20 rounded text-xs font-medium flex items-center gap-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Operational
+                        </div>
+</div>
+<div class="p-4">
+<h3 class="font-headline-sm text-on-surface mb-1 truncate">Cable crossover</h3>
+<p class="font-data-mono text-on-surface-variant text-sm mb-3">FH-CBL-002</p>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                            Weight room
+                        </div>
+</div>
+</div>
+<!-- Card 4: Operational -->
+<div class="bg-surface border border-outline-variant/10 rounded-xl overflow-hidden cursor-pointer hover:border-outline-variant transition-colors relative">
+<div class="h-32 bg-surface-container relative">
+<img alt="Leg press" class="w-full h-full object-cover" data-alt="Heavy duty leg press machine, dark metallic finish, professional gym setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-U3DjP4pF6kO6WVgktaS0zsGAP8kqAAcE5CkBt9b59KQFg9wDM0IsVwMlpjXRa4DGTVe05Qy759bdLAOIRiFZgYKjNIMswtA6qMe8lZED51JG3Tg9h_zcdYSmNStgTDbPhUgOzqtYVAKl_bhY3xTr03d-BaY1OQbu3F24juIvCl8g7dizZgsQYwRHHL9OTWmDEaPBQe0fAwdnrZ15JPoGAc5eiPSPApq2_li4PWA5HM1f-FGDaRhT"/>
+<div class="absolute top-3 right-3 px-2 py-1 bg-secondary/15 text-secondary border border-secondary/20 rounded text-xs font-medium flex items-center gap-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Operational
+                        </div>
+</div>
+<div class="p-4">
+<h3 class="font-headline-sm text-on-surface mb-1 truncate">Leg press</h3>
+<p class="font-data-mono text-on-surface-variant text-sm mb-3">FH-LGP-001</p>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                            Weight room
+                        </div>
+</div>
+</div>
+<!-- Card 5: Needs Service -->
+<div class="bg-surface border border-outline-variant/10 rounded-xl overflow-hidden cursor-pointer hover:border-outline-variant transition-colors relative">
+<div class="h-32 bg-surface-container relative">
+<img alt="Smith machine" class="w-full h-full object-cover" data-alt="Smith machine rack in a dark premium gym, slightly dusty or showing minor wear." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW64jPzoclyJyY7BS_sAHzej5n0jlHsWqj2tDxyJXYLVK8DjXawPOZ2Rhr6bjJYMUCUO5cfOsAkCv5_aPyaArU1Iq6exqfLEpDtzPMSxCv5hN-FX6jCIMujZnKDZYlbrDreBFoUSvJBQ7qykwf9r0t3TOdHgd5YbwcqVlSku10H8l6Wy2JDu9y-ufbpCAGaOOJXfaYv8ABiJE1KxI45lp4YofJnbXYKE6w3dw2jwQeDPikkNQj8mYm"/>
+<div class="absolute top-3 right-3 px-2 py-1 bg-surface-tint/15 text-surface-tint border border-surface-tint/20 rounded text-xs font-medium flex items-center gap-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">build</span> Needs service
+                        </div>
+</div>
+<div class="p-4">
+<h3 class="font-headline-sm text-on-surface mb-1 truncate">Smith machine</h3>
+<p class="font-data-mono text-on-surface-variant text-sm mb-3">FH-SMT-003</p>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                            Weight room
+                        </div>
+</div>
+</div>
+<!-- Card 6: Out of order -->
+<div class="bg-surface border border-error/20 rounded-xl overflow-hidden cursor-pointer hover:border-error/40 transition-colors relative">
+<div class="h-32 bg-surface-container relative">
+<img alt="Elliptical" class="w-full h-full object-cover grayscale opacity-50" data-alt="Elliptical machine in a premium gym, desaturated tones indicating it is broken or unavailable." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNChFpawXmydBC-xdSiu09t3AQxqayMssuPnBegElYTVNd8W1RDJDxXpGKQsioYlvcip4rmo_rCl1Tr4bNDUbeKgJYOkE7ZXKvbboisUMpI1HzN7EkXZELT0YTQ3XoeliE-biu3AokUgdfoyrtT3L0R2Fs8UyCUZgR1y5XNUXmkBvSmBCIzCc-pBrEJwJUl-P9NJasETnncyAtlxsZNAB_pLwgq1b39fAgWY4G8fafMUncvjY4xiCo"/>
+<div class="absolute top-3 right-3 px-2 py-1 bg-error/15 text-error border border-error/20 rounded text-xs font-medium flex items-center gap-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">cancel</span> Out of order
+                        </div>
+</div>
+<div class="p-4">
+<h3 class="font-headline-sm text-on-surface mb-1 truncate">Elliptical</h3>
+<p class="font-data-mono text-on-surface-variant text-sm mb-3">FH-ELP-005</p>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                            Cardio floor
+                        </div>
+</div>
+</div>
+<!-- Card 7: On order -->
+<div class="bg-background border border-dashed border-outline-variant/30 rounded-xl overflow-hidden cursor-pointer hover:border-outline-variant transition-colors relative">
+<div class="h-32 bg-surface flex items-center justify-center relative">
+<span class="material-symbols-outlined text-outline-variant/30 text-4xl">fitness_center</span>
+<div class="absolute top-3 right-3 px-2 py-1 bg-surface-container-high text-on-surface-variant border border-outline-variant/20 rounded text-xs font-medium flex items-center gap-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span> On order
+                        </div>
+</div>
+<div class="p-4 opacity-70">
+<h3 class="font-headline-sm text-on-surface mb-1 truncate">Assault Bike</h3>
+<p class="font-data-mono text-on-surface-variant text-sm mb-3">TBD</p>
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-[16px]">location_on</span>
+                            Cardio floor
+                        </div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Detail Drawer Overlay & Drawer -->
+<div class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex justify-end">
+<aside class="w-[480px] bg-surface border-l border-outline-variant/10 shadow-[-8px_0_24px_rgba(0,0,0,0.4)] h-full flex flex-col relative overflow-hidden">
+<!-- Texture Header Background -->
+<div class="absolute top-0 left-0 right-0 h-[120px] bg-surface-tint/5 texture-mask pointer-events-none"></div>
+<!-- Drawer Header -->
+<div class="p-6 pb-4 border-b border-outline-variant/10 relative z-10">
+<button class="absolute top-6 right-6 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+<div class="flex gap-4">
+<div class="w-24 h-24 rounded-lg overflow-hidden border border-outline-variant/10 flex-shrink-0">
+<img alt="Treadmill Detail" class="w-full h-full object-cover" data-alt="Close up detail of a high-end treadmill console, modern premium gym setting, dramatic dark aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjhJzHQwKWTE3AphCsqMDlCPMHQEMt7kggJSKdXeJF2a9FoF154KH6JABUxpDachvZncNvCQJH5R1gjv2EzR-nl7XPbeBafPetitKOoYLTyUcP66Sr7Xt6uADKgGCsZAwV8WCrG6NchAjHDfC66nyUs5AOUtDCDgjwxQ310vQKFd7890aJsvL63YVzQMlqJe1crpHqKqyHvXmpXNooN-nVYoipCmls-9wfNV8aSRduhDkFX6u5V6R4"/>
+</div>
+<div class="flex flex-col justify-center">
+<h2 class="font-headline-md text-on-surface mb-1">Treadmill</h2>
+<p class="font-data-mono text-on-surface-variant mb-2">FH-TRD-004</p>
+<div class="inline-flex px-2 py-1 bg-surface-tint/15 text-surface-tint border border-surface-tint/20 rounded text-xs font-medium items-center gap-1 w-max">
+<span class="material-symbols-outlined text-[14px]">build</span> Needs service
+                        </div>
+</div>
+</div>
+</div>
+<!-- Drawer Content (Scrollable) -->
+<div class="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+<!-- Details List -->
+<div>
+<h4 class="font-label-caps text-on-surface-variant mb-4 uppercase tracking-wider">Specifications</h4>
+<div class="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+<div>
+<span class="text-on-surface-variant block mb-1">Zone</span>
+<span class="text-on-surface font-medium">Cardio floor</span>
+</div>
+<div>
+<span class="text-on-surface-variant block mb-1">Manufacturer</span>
+<span class="text-on-surface font-medium">Matrix</span>
+</div>
+<div>
+<span class="text-on-surface-variant block mb-1">Serial</span>
+<span class="text-on-surface font-data-mono">MX-8892-K</span>
+</div>
+<div>
+<span class="text-on-surface-variant block mb-1">Purchased</span>
+<span class="text-on-surface font-medium">12 Jan 2025</span>
+</div>
+<div>
+<span class="text-on-surface-variant block mb-1">Warranty until</span>
+<span class="text-on-surface font-medium">12 Jan 2027</span>
+</div>
+<div>
+<span class="text-on-surface-variant block mb-1">Last service</span>
+<span class="text-on-surface font-medium">3 May 2026</span>
+</div>
+</div>
+</div>
+<div class="border-t border-outline-variant/10"></div>
+<!-- Maintenance Log -->
+<div>
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-label-caps text-on-surface-variant uppercase tracking-wider">Maintenance log</h4>
+</div>
+<div class="relative pl-4 space-y-6">
+<!-- Timeline Line -->
+<div class="absolute left-[7px] top-2 bottom-2 w-px bg-outline-variant/20"></div>
+<!-- Entry 1 -->
+<div class="relative pl-6">
+<div class="absolute left-[-4px] top-1.5 w-2 h-2 rounded-full bg-surface-tint border-2 border-surface shadow-[0_0_0_2px_#141311]"></div>
+<div class="text-xs text-on-surface-variant mb-1 font-data-mono">Today, 09:30</div>
+<div class="bg-surface-container rounded-lg p-3 border border-outline-variant/10">
+<p class="text-sm font-medium text-on-surface mb-1">Reported strange noise</p>
+<p class="text-xs text-on-surface-variant">Belt squeaks persistently above 8km/h.</p>
+<div class="mt-2 text-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">person</span> Alex (Staff)
+                                </div>
+</div>
+</div>
+<!-- Entry 2 -->
+<div class="relative pl-6">
+<div class="absolute left-[-4px] top-1.5 w-2 h-2 rounded-full bg-outline-variant border-2 border-surface shadow-[0_0_0_2px_#141311]"></div>
+<div class="text-xs text-on-surface-variant mb-1 font-data-mono">3 May 2026</div>
+<div class="bg-surface-container rounded-lg p-3 border border-outline-variant/10">
+<p class="text-sm font-medium text-on-surface mb-1">Routine maintenance</p>
+<p class="text-xs text-on-surface-variant">Lubricated deck, checked motor tension.</p>
+<div class="mt-2 flex justify-between items-center text-xs text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">engineering</span> Tech: Omar</span>
+<span class="font-data-mono">Cost: 350 EGP</span>
+</div>
+</div>
+</div>
+<!-- Entry 3 -->
+<div class="relative pl-6">
+<div class="absolute left-[-4px] top-1.5 w-2 h-2 rounded-full bg-outline-variant border-2 border-surface shadow-[0_0_0_2px_#141311]"></div>
+<div class="text-xs text-on-surface-variant mb-1 font-data-mono">14 Nov 2025</div>
+<div class="bg-surface-container rounded-lg p-3 border border-outline-variant/10">
+<p class="text-sm font-medium text-on-surface mb-1">Console replacement</p>
+<p class="text-xs text-on-surface-variant">Replaced faulty display panel under warranty.</p>
+<div class="mt-2 text-xs text-surface-tint border border-surface-tint/20 bg-surface-tint/5 rounded px-2 py-0.5 inline-block mb-2">Parts: Display Panel v2</div>
+<div class="flex justify-between items-center text-xs text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">engineering</span> Tech: Matrix Service</span>
+<span class="font-data-mono">Cost: 0 EGP</span>
+</div>
+</div>
+</div>
+<!-- Entry 4 -->
+<div class="relative pl-6">
+<div class="absolute left-[-4px] top-1.5 w-2 h-2 rounded-full bg-outline-variant border-2 border-surface shadow-[0_0_0_2px_#141311]"></div>
+<div class="text-xs text-on-surface-variant mb-1 font-data-mono">12 Jan 2025</div>
+<div class="bg-surface-container rounded-lg p-3 border border-outline-variant/10">
+<p class="text-sm font-medium text-on-surface mb-1">Installation</p>
+<p class="text-xs text-on-surface-variant">Initial setup and calibration.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Drawer Footer -->
+<div class="p-6 border-t border-outline-variant/10 bg-surface z-10 flex justify-between items-center">
+<button class="text-error text-sm font-medium hover:bg-error/10 px-4 py-2 rounded-lg transition-colors border border-transparent hover:border-error/20">
+                    Mark out of order
+                </button>
+<button class="bg-primary-container text-on-primary-container font-medium px-6 py-2 rounded-lg hover:bg-primary transition-colors">
+                    Log maintenance
+                </button>
+</div>
+</aside>
+</div>
+<style>
+        /* Custom Scrollbar for Drawer */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(81, 69, 54, 0.3); /* outline-variant */
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(81, 69, 54, 0.5);
+        }
+    </style>
+</body></html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FAHD Gym - Staff Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#dfa0ad",
+                        "secondary-fixed-dim": "#b5ccba",
+                        "outline": "#9e8e7c",
+                        "on-surface-variant": "#d6c4b0",
+                        "surface-container-high": "#2b2a27",
+                        "on-primary": "#462b00",
+                        "surface-bright": "#3b3936",
+                        "surface": "#141311",
+                        "on-secondary-fixed": "#0c1f14",
+                        "surface-container-lowest": "#0f0e0c",
+                        "on-primary-fixed-variant": "#643f00",
+                        "tertiary": "#fdbbc8",
+                        "primary-fixed": "#ffddb5",
+                        "on-secondary": "#213528",
+                        "primary": "#ffc16c",
+                        "inverse-primary": "#835400",
+                        "secondary-fixed": "#d1e8d6",
+                        "background": "#12110F",
+                        "tertiary-fixed": "#ffd9e0",
+                        "surface-container-highest": "#363432",
+                        "surface-container-low": "#1d1b19",
+                        "on-tertiary-container": "#653541",
+                        "on-secondary-container": "#a7bead",
+                        "surface-dim": "#141311",
+                        "on-surface": "#e6e2de",
+                        "surface-container": "#211f1d",
+                        "primary-container": "#e8a33d",
+                        "inverse-surface": "#e6e2de",
+                        "tertiary-fixed-dim": "#f7b5c3",
+                        "secondary-container": "#394e40",
+                        "surface-variant": "#363432",
+                        "on-tertiary": "#4e232e",
+                        "primary-fixed-dim": "#ffb956",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed-variant": "#374b3e",
+                        "on-tertiary-fixed-variant": "#683844",
+                        "on-tertiary-fixed": "#340e1a",
+                        "inverse-on-surface": "#32302e",
+                        "on-primary-fixed": "#2a1800",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "outline-variant": "#514536",
+                        "secondary": "#b5ccba",
+                        "on-primary-container": "#5f3c00",
+                        "surface-tint": "#ffb956",
+                        "on-background": "#e6e2de"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "form": "12px",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "sans": ["IBM Plex Sans", "sans-serif"],
+                        "headline-sm": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background-color: #12110F;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .form-input:focus {
+            border-color: #e8a33d !important;
+            box-shadow: 0 0 0 1px #e8a33d !important;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- Top Right Language Toggle -->
+<header class="flex justify-end p-6">
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-surface-container-high px-4 cursor-pointer hover:bg-surface-variant transition-colors">
+<p class="text-white text-sm font-medium leading-normal">EN / ع</p>
+</div>
+</header>
+<!-- Main Content Container -->
+<main class="flex-1 flex flex-col items-center justify-center px-6 pb-20">
+<div class="w-full max-w-[400px] flex flex-col items-center">
+<!-- Branding -->
+<div class="flex flex-col items-center mb-8">
+<!-- Cheetah Mark -->
+<div class="mb-2 text-primary-container" data-icon="cheetah">
+<span class="material-symbols-outlined text-4xl">question_mark</span>
+</div>
+<!-- Wordmark -->
+<h1 class="text-4xl font-bold tracking-tighter text-white uppercase italic">FAHD</h1>
+<p class="text-on-surface-variant text-base font-medium leading-normal mt-2">Speed is strength.</p>
+</div>
+<!-- Login Form -->
+<form class="w-full space-y-4" onsubmit="return false;">
+<!-- Username -->
+<div class="flex flex-col w-full">
+<p class="text-on-surface text-sm font-medium leading-normal pb-2">Username</p>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-form text-white focus:outline-0 focus:ring-0 border border-outline-variant bg-surface-container h-14 placeholder:text-on-surface-variant/40 px-[15px] text-base font-normal leading-normal transition-all" placeholder="Enter your username" type="text"/>
+</div>
+<!-- Password -->
+<div class="flex flex-col w-full">
+<p class="text-on-surface text-sm font-medium leading-normal pb-2">Password</p>
+<div class="flex w-full flex-1 items-stretch">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-form rounded-r-none border-r-0 text-white focus:outline-0 focus:ring-0 border border-outline-variant bg-surface-container h-14 placeholder:text-on-surface-variant/40 px-[15px] text-base font-normal leading-normal transition-all" id="password-input" placeholder="Enter your password" type="password"/>
+<button class="text-on-surface-variant flex border border-outline-variant bg-surface-container items-center justify-center pr-[15px] rounded-form rounded-l-none border-l-0 hover:text-primary transition-colors" data-icon="visibility" data-size="24px" onclick="togglePassword()" type="button">
+<span class="material-symbols-outlined" id="eye-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center gap-2 py-2">
+<input class="w-5 h-5 rounded border-outline-variant bg-surface-container text-primary-container focus:ring-primary-container focus:ring-offset-background cursor-pointer" id="remember" type="checkbox"/>
+<label class="text-on-surface-variant text-sm cursor-pointer select-none" for="remember">Remember me</label>
+</div>
+<!-- Sign In Button -->
+<button class="w-full h-14 bg-primary-container hover:bg-primary text-on-primary-container font-semibold text-lg rounded-form transition-all active:scale-[0.98] mt-2" type="submit">
+                    Sign in
+                </button>
+<!-- Forgot Password -->
+<div class="w-full text-center mt-4">
+<a class="text-on-surface-variant text-sm hover:text-primary transition-colors" href="#">Forgot password?</a>
+</div>
+</form>
+</div>
+</main>
+<!-- Simple Atmospheric Visual (Optional, very subtle) -->
+<div class="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary-container/20 to-transparent"></div>
+<script>
+        function togglePassword() {
+            const input = document.getElementById('password-input');
+            const icon = document.getElementById('eye-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerText = 'visibility_off';
+            } else {
+                input.type = 'password';
+                icon.innerText = 'visibility';
+            }
+        }
+
+        // Simple button interaction feedback
+        const btn = document.querySelector('button[type="submit"]');
+        btn.addEventListener('click', () => {
+            btn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg class="animate-spin h-5 w-5 text-on-primary-container" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Authenticating...</span>';
+            setTimeout(() => {
+                btn.innerHTML = 'Sign in';
+            }, 2000);
+        });
+    </script>
+</body></html>

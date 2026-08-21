@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FAHD - OCR Intake</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "inverse-surface": "#e6e2de",
+                            "tertiary-fixed-dim": "#f7b5c3",
+                            "inverse-on-surface": "#32302e",
+                            "inverse-primary": "#835400",
+                            "tertiary": "#fdbbc8",
+                            "surface-container": "#211f1d",
+                            "secondary": "#b5ccba",
+                            "outline": "#9e8e7c",
+                            "on-primary-container": "#5f3c00",
+                            "on-primary-fixed-variant": "#643f00",
+                            "on-secondary-container": "#a7bead",
+                            "primary": "#ffc16c",
+                            "on-background": "#e6e2de",
+                            "on-tertiary-fixed-variant": "#683844",
+                            "on-secondary-fixed": "#0c1f14",
+                            "surface-container-lowest": "#0f0e0c",
+                            "on-tertiary": "#4e232e",
+                            "on-secondary": "#213528",
+                            "primary-fixed": "#ffddb5",
+                            "error": "#ffb4ab",
+                            "on-primary-fixed": "#2a1800",
+                            "background": "#141311",
+                            "primary-container": "#e8a33d",
+                            "surface-container-low": "#1d1b19",
+                            "secondary-fixed-dim": "#b5ccba",
+                            "on-secondary-fixed-variant": "#374b3e",
+                            "on-error": "#690005",
+                            "tertiary-fixed": "#ffd9e0",
+                            "tertiary-container": "#dfa0ad",
+                            "surface-container-highest": "#363432",
+                            "surface-bright": "#3b3936",
+                            "primary-fixed-dim": "#ffb956",
+                            "on-tertiary-container": "#653541",
+                            "surface-container-high": "#2b2a27",
+                            "outline-variant": "#514536",
+                            "surface": "#141311",
+                            "on-tertiary-fixed": "#340e1a",
+                            "secondary-container": "#394e40",
+                            "on-surface": "#e6e2de",
+                            "surface-variant": "#363432",
+                            "secondary-fixed": "#d1e8d6",
+                            "on-primary": "#462b00",
+                            "on-surface-variant": "#d6c4b0",
+                            "surface-tint": "#ffb956",
+                            "error-container": "#93000a",
+                            "on-error-container": "#ffdad6",
+                            "surface-dim": "#141311"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "margin-desktop": "40px",
+                            "unit": "4px",
+                            "margin-mobile": "16px",
+                            "gutter": "24px",
+                            "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                            "headline-lg": [
+                                    "IBM Plex Sans"
+                            ],
+                            "data-mono": [
+                                    "IBM Plex Sans"
+                            ],
+                            "body-md": [
+                                    "IBM Plex Sans"
+                            ],
+                            "body-lg": [
+                                    "IBM Plex Sans"
+                            ],
+                            "label-caps": [
+                                    "IBM Plex Sans"
+                            ],
+                            "headline-sm": [
+                                    "IBM Plex Sans"
+                            ],
+                            "headline-md": [
+                                    "IBM Plex Sans"
+                            ]
+                    },
+                    "fontSize": {
+                            "headline-lg": [
+                                    "32px",
+                                    {
+                                            "lineHeight": "40px",
+                                            "letterSpacing": "-0.02em",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "data-mono": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "20px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "body-md": [
+                                    "14px",
+                                    {
+                                            "lineHeight": "20px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "body-lg": [
+                                    "16px",
+                                    {
+                                            "lineHeight": "24px",
+                                            "fontWeight": "400"
+                                    }
+                            ],
+                            "label-caps": [
+                                    "11px",
+                                    {
+                                            "lineHeight": "16px",
+                                            "letterSpacing": "0.08em",
+                                            "fontWeight": "600"
+                                    }
+                            ],
+                            "headline-sm": [
+                                    "20px",
+                                    {
+                                            "lineHeight": "28px",
+                                            "fontWeight": "500"
+                                    }
+                            ],
+                            "headline-md": [
+                                    "24px",
+                                    {
+                                            "lineHeight": "32px",
+                                            "letterSpacing": "-0.01em",
+                                            "fontWeight": "600"
+                                    }
+                            ]
+                    }
+            },
+                },
+            }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Texture overlay for empty state/header vibes */
+        .cheetah-texture {
+            mask-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c2-2 5-2 7 0s2 5 0 7-5 2-7 0-2-5 0-7zm20 30c3-1 6 1 7 4s-1 6-4 7-6-1-7-4 1-6 4-7zm40-20c2-3 6-3 8 0s2 6 0 8-6 3-8 0-2-6 0-8zm-30 40c4 0 7 3 7 7s-3 7-7 7-7-3-7-7 3-7 7-7zm50 10c1-3 5-4 8-2s4 5 2 8-5 4-8 2-4-5-2-8z' fill='%23000' fill-rule='evenodd' opacity='0.5'/%3E%3C/svg%3E");
+            mask-repeat: repeat;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex antialiased">
+<!-- SideNavBar -->
+<nav class="bg-surface-container dark:bg-surface-container h-screen w-64 fixed left-0 top-0 border-r border-outline-variant/10 flex flex-col py-margin-desktop h-full z-50">
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface border border-outline-variant/10 flex items-center justify-center overflow-hidden">
+<img alt="Staff Profile" class="w-full h-full object-cover" data-alt="A detailed headshot of a professional fitness gym administrator in a modern, dark-themed office setting with warm lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4oOBI2Bnwaf3qIswr_J6gOlCXlH0PVzGg0mh_q82rT8pAWud0jDP6471qZ6m9uPNinPCNCBz10zQeuuq_b0C9Xzp0lJ9-wM2jVXj_BqjfzgPe0g-Qw6g1l4UFfWQsByZnGxskmDZox5ExfOi04vwY1v3iqXiiYA2wieygDAs3xhGxK3Bsjw6R21YDfvG6EuXB80bF9zgt84ThhsJaY7X9EMv1VVaAmJNGr1k8aEnbQEg7P2KWHkaE"/>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary tracking-tight">FAHD Admin</h1>
+<p class="font-data-mono text-data-mono text-on-surface-variant text-xs mt-1">Premium Management</p>
+</div>
+</div>
+<div class="flex-1 px-4 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-on-surface/[0.02] transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-on-surface/[0.02] transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span>Members</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-on-surface/[0.02] transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span>Classes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant font-medium hover:bg-on-surface/[0.02] transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="fact_check">fact_check</span>
+<span>Check-in</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-r-2 border-primary bg-on-surface/[0.02] hover:bg-on-surface/[0.04] transition-colors active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="document_scanner" data-weight="fill">document_scanner</span>
+<span>OCR Intake</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface docked full-width top-0 sticky z-40 border-b border-outline-variant/5 flex justify-between items-center h-16 px-margin-desktop">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="search">search</span>
+<input class="bg-transparent border-none text-on-background focus:ring-0 placeholder:text-on-surface-variant/50 w-64 font-body-md" placeholder="Search members, classes..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-primary transition-all cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-all cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- OCR Workspace -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Left 40%: Scan Viewer -->
+<div class="w-[40%] bg-surface-container-low border-r border-outline-variant/10 relative flex flex-col">
+<div class="p-4 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container z-10">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Source Document</h2>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded bg-surface border border-outline-variant/10 flex items-center justify-center hover:border-primary/50 transition-colors text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-sm" data-icon="zoom_out">zoom_out</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface border border-outline-variant/10 flex items-center justify-center hover:border-primary/50 transition-colors text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined text-sm" data-icon="zoom_in">zoom_in</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface border border-outline-variant/10 flex items-center justify-center hover:border-primary/50 transition-colors text-on-surface-variant hover:text-primary ml-2">
+<span class="material-symbols-outlined text-sm" data-icon="pan_tool">pan_tool</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-auto relative p-6 bg-[#0a0a09] flex items-center justify-center">
+<div class="relative max-w-full shadow-2xl">
+<!-- The underlying scanned image -->
+<img alt="Scanned Sign-up Sheet" class="max-w-full h-auto rounded-sm opacity-90" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmPOK945znQpY8SqBjUH2xHvvHUljLabv7SkNnsBHNR_v1pZLWD5bdRxzTDWiRt0vlbCRBnDN4UpBuKifvhAeSCrn2MlKgJf55laF6--JpGqEs3EmLmABH8iP0zOggW3ZHSD9aZEQu44epsUtfyuIdpCKBPHz7Tk90vLoCZtZCqMn_3v_DK7kZXDct2mty6Us4hgqkt_DJHbdLVfRStCmskFQ86OlEVwnB464BRVgg0MGj3GWYeWwB"/>
+<!-- Simulated bounding boxes (overlay) -->
+<div class="absolute inset-0 pointer-events-none">
+<!-- Alex Thompson Row -->
+<div class="absolute border-2 border-primary/60 bg-primary/10" style="top: 25%; left: 10%; width: 80%; height: 6%;"></div>
+<!-- Sarah Jenkins Row -->
+<div class="absolute border-2 border-primary/60 bg-primary/10" style="top: 31%; left: 10%; width: 80%; height: 6%;"></div>
+<!-- Mike O'Brien Row -->
+<div class="absolute border-2 border-primary/60 bg-primary/10" style="top: 37%; left: 10%; width: 80%; height: 6%;"></div>
+<!-- Chloe Davis Row -->
+<div class="absolute border-2 border-primary/60 bg-primary/10" style="top: 43%; left: 10%; width: 80%; height: 6%;"></div>
+<!-- Ben Carter Row -->
+<div class="absolute border-2 border-primary/60 bg-primary/10" style="top: 49%; left: 10%; width: 80%; height: 6%;"></div>
+<!-- Jessica Lee Row -->
+<div class="absolute border-2 border-primary/60 bg-primary/10" style="top: 55%; left: 10%; width: 80%; height: 6%;"></div>
+<!-- David Smith Row -->
+<div class="absolute border-2 border-primary/60 bg-primary/10" style="top: 61%; left: 10%; width: 80%; height: 6%;"></div>
+<!-- Emily Watson Row -->
+<div class="absolute border-2 border-primary/60 bg-primary/10" style="top: 67%; left: 10%; width: 80%; height: 6%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right 60%: Validation Table -->
+<div class="w-[60%] flex flex-col bg-surface">
+<div class="p-6 border-b border-outline-variant/10">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-1">Batch Validation</h2>
+<p class="text-on-surface-variant font-body-md text-sm">Review parsed data before import. Resolve warnings.</p>
+</div>
+<div class="flex-1 overflow-auto p-6">
+<div class="bg-surface-container rounded-xl border border-outline-variant/10 overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/10 bg-surface-container-low">
+<th class="font-label-caps text-label-caps text-on-surface-variant py-3 px-4 w-12">#</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-3 px-4">Name</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-3 px-4">Phone</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-3 px-4">Start Date</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-3 px-4">End Date</th>
+<th class="font-label-caps text-label-caps text-on-surface-variant py-3 px-4">Plan</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono">
+<!-- Row 1: Confident -->
+<tr class="border-b border-outline-variant/5 hover:bg-[#F5F1EA]/[0.02] transition-colors group">
+<td class="py-3 px-4 text-on-surface-variant/50">1</td>
+<td class="py-3 px-4">Alex Thompson</td>
+<td class="py-3 px-4">555-0192</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 1, 2023</td>
+<td class="py-3 px-4 text-on-surface-variant">Oct 31, 2024</td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Annual</span></td>
+</tr>
+<!-- Row 2: Low confidence Name -->
+<tr class="border-b border-outline-variant/5 hover:bg-[#F5F1EA]/[0.02] transition-colors bg-primary/5">
+<td class="py-3 px-4 text-on-surface-variant/50">2</td>
+<td class="py-3 px-4 border-l-2 border-primary relative">
+<div class="flex items-center gap-2">
+<input class="bg-surface border border-outline-variant/20 rounded px-2 py-1 text-sm w-full focus:border-primary focus:ring-0 text-on-surface" type="text" value="Sarah Jenkins"/>
+<span class="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(232,163,61,0.5)]"></span>
+</div>
+</td>
+<td class="py-3 px-4">555-0271</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 1, 2023</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 30, 2023</td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Monthly</span></td>
+</tr>
+<!-- Row 3: Confident -->
+<tr class="border-b border-outline-variant/5 hover:bg-[#F5F1EA]/[0.02] transition-colors">
+<td class="py-3 px-4 text-on-surface-variant/50">3</td>
+<td class="py-3 px-4">Mike O'Brien</td>
+<td class="py-3 px-4">555-0134</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 5, 2023</td>
+<td class="py-3 px-4 text-on-surface-variant">Dec 5, 2023</td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Trial</span></td>
+</tr>
+<!-- Row 4: Duplicate Phone -->
+<tr class="border-b border-outline-variant/5 hover:bg-[#F5F1EA]/[0.02] transition-colors bg-error/5">
+<td class="py-3 px-4 text-on-surface-variant/50">4</td>
+<td class="py-3 px-4">Chloe Davis</td>
+<td class="py-3 px-4">
+<div class="flex flex-col gap-1">
+<span class="text-error font-medium border-l-2 border-error pl-2">555-0889</span>
+<div class="flex items-center gap-2 pl-2">
+<span class="text-[10px] text-error uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="warning">warning</span> Duplicate</span>
+<button class="text-[10px] text-primary hover:underline uppercase tracking-wider">Merge</button>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 1, 2023</td>
+<td class="py-3 px-4 text-on-surface-variant">Oct 31, 2024</td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Annual</span></td>
+</tr>
+<!-- Row 5: Confident -->
+<tr class="border-b border-outline-variant/5 hover:bg-[#F5F1EA]/[0.02] transition-colors">
+<td class="py-3 px-4 text-on-surface-variant/50">5</td>
+<td class="py-3 px-4">Ben Carter</td>
+<td class="py-3 px-4">555-0653</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 1, 2023</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 30, 2023</td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Monthly</span></td>
+</tr>
+<!-- Row 6: Low confidence Plan -->
+<tr class="border-b border-outline-variant/5 hover:bg-[#F5F1EA]/[0.02] transition-colors bg-primary/5">
+<td class="py-3 px-4 text-on-surface-variant/50">6</td>
+<td class="py-3 px-4">Jessica Lee</td>
+<td class="py-3 px-4">555-0710</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 2, 2023</td>
+<td class="py-3 px-4 text-on-surface-variant">Dec 2, 2023</td>
+<td class="py-3 px-4 border-l-2 border-primary relative">
+<div class="flex items-center gap-2">
+<select class="bg-surface border border-outline-variant/20 rounded px-2 py-1 text-sm focus:border-primary focus:ring-0 text-on-surface w-full">
+<option>Trial</option>
+<option>Monthly</option>
+<option>Annual</option>
+</select>
+</div>
+</td>
+</tr>
+<!-- Row 7: Confident -->
+<tr class="border-b border-outline-variant/5 hover:bg-[#F5F1EA]/[0.02] transition-colors">
+<td class="py-3 px-4 text-on-surface-variant/50">7</td>
+<td class="py-3 px-4">David Smith</td>
+<td class="py-3 px-4">555-0422</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 1, 2023</td>
+<td class="py-3 px-4 text-on-surface-variant">Oct 31, 2024</td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Annual</span></td>
+</tr>
+<!-- Row 8: Confident -->
+<tr class="border-b-0 hover:bg-[#F5F1EA]/[0.02] transition-colors">
+<td class="py-3 px-4 text-on-surface-variant/50">8</td>
+<td class="py-3 px-4">Emily Watson</td>
+<td class="py-3 px-4">555-0991</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 1, 2023</td>
+<td class="py-3 px-4 text-on-surface-variant">Nov 30, 2023</td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Monthly</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Sticky Footer Bar -->
+<div class="p-6 border-t border-outline-variant/10 bg-surface flex justify-between items-center mt-auto">
+<div class="text-on-surface-variant font-body-md text-sm">
+<span class="text-primary font-medium">6 of 8</span> rows ready for import
+                    </div>
+<div class="flex gap-4">
+<button class="px-6 py-2.5 rounded-lg border border-outline-variant/30 text-on-surface-variant font-medium hover:bg-on-surface/5 transition-colors">
+                            Discard batch
+                        </button>
+<button class="px-6 py-2.5 rounded-lg bg-primary-container text-on-primary-container font-medium hover:bg-primary transition-colors shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="upload">upload</span>
+                            Import 6 members
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FAHD - Case File: Mariam Fouad</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-container": "#394e40",
+                        "primary-fixed": "#ffddb5",
+                        "on-primary-fixed": "#2a1800",
+                        "surface": "#141311",
+                        "on-surface-variant": "#d6c4b0",
+                        "on-surface": "#e6e2de",
+                        "tertiary-container": "#dfa0ad",
+                        "secondary-fixed": "#d1e8d6",
+                        "on-background": "#e6e2de",
+                        "surface-container-high": "#2b2a27",
+                        "tertiary-fixed": "#ffd9e0",
+                        "surface-container-lowest": "#0f0e0c",
+                        "on-tertiary-fixed": "#340e1a",
+                        "on-secondary-fixed": "#0c1f14",
+                        "on-secondary-container": "#a7bead",
+                        "tertiary-fixed-dim": "#f7b5c3",
+                        "outline-variant": "#514536",
+                        "surface-dim": "#141311",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "secondary": "#b5ccba",
+                        "surface-variant": "#363432",
+                        "inverse-surface": "#e6e2de",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "surface-tint": "#ffb956",
+                        "surface-container-low": "#1d1b19",
+                        "on-secondary": "#213528",
+                        "on-secondary-fixed-variant": "#374b3e",
+                        "inverse-primary": "#835400",
+                        "surface-container": "#211f1d",
+                        "on-tertiary-container": "#653541",
+                        "on-primary-container": "#5f3c00",
+                        "on-primary": "#462b00",
+                        "primary-fixed-dim": "#ffb956",
+                        "primary": "#ffc16c",
+                        "primary-container": "#e8a33d",
+                        "on-tertiary": "#4e232e",
+                        "surface-container-highest": "#363432",
+                        "inverse-on-surface": "#32302e",
+                        "outline": "#9e8e7c",
+                        "surface-bright": "#3b3936",
+                        "on-primary-fixed-variant": "#643f00",
+                        "on-tertiary-fixed-variant": "#683844",
+                        "background": "#141311",
+                        "tertiary": "#fdbbc8",
+                        "secondary-fixed-dim": "#b5ccba",
+                        "sage": "#7A9080",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "margin-desktop": "40px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "gutter": "24px"
+                    },
+                    fontFamily: {
+                        "headline-md": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "data-mono": ["IBM Plex Sans"],
+                        "headline-lg": ["IBM Plex Sans"],
+                        "body-md": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "headline-sm": ["IBM Plex Sans"]
+                    },
+                    fontSize: {
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .texture-bg {
+            position: relative;
+        }
+        .texture-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background-image: radial-gradient(#F5F1EA 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.05;
+            pointer-events: none;
+            mask-image: linear-gradient(to bottom, black, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-screen z-40 flex flex-col bg-surface border-r border-outline-variant/10 w-64">
+<div class="h-16 flex items-center px-4 border-b border-outline-variant/10">
+<div class="w-8 h-8 rounded-full bg-sage flex items-center justify-center mr-3">
+<span class="font-headline-sm text-surface font-bold text-sm">F</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-bold text-on-surface leading-tight">FAHD</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Management Portal</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-4 px-2 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 cursor-pointer active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 cursor-pointer active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">Members</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 cursor-pointer active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-md text-body-md">Subscriptions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 cursor-pointer active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-body-md text-body-md">Intake</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 cursor-pointer active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined">event_note</span>
+<span class="font-body-md text-body-md">Classes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">self_care</span>
+<span class="font-body-md text-body-md font-medium">Recovery</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 cursor-pointer active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-body-md text-body-md">Equipment</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 cursor-pointer active:scale-95 rounded-lg" href="#">
+<span class="material-symbols-outlined">campaign</span>
+<span class="font-body-md text-body-md">Announcements</span>
+</a>
+</div>
+</nav>
+<!-- TopAppBar -->
+<header class="fixed top-0 right-0 left-64 h-16 flex items-center justify-between px-margin-desktop z-30 bg-surface border-b border-outline-variant/10">
+<div class="flex-1"></div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-sage transition-colors duration-200 cursor-pointer">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-sage transition-colors duration-200 cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant/20">
+<img class="w-full h-full object-cover" data-alt="Professional headshot of a fitness staff member against a neutral dark grey studio background. Warm, subtle lighting highlighting a friendly but focused expression. Monochromatic and sophisticated style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbTv-efNIjZ0TMYOIfUl8PjJTDMWI-YE2cd7vS4MhkLx0KAdJN92KSKE59u5u-LrJVPT9lh68fptNyfAjovlF_1EuL5JuLopfxXCE1NEM_JwUNnxlgRdzJmbACKWVRSnHkAMbFfou0gFQrxa66HoaXk1hZ1-sHS3Qwfp0j7LJLXnZFiz3lMZ6p0Ms3DaeKjTpNeff5y4Ub2mLCICUcXXKL7vr07msxor1q8606KCU_VV75Rfvogbzm"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 pt-16 min-h-screen flex flex-col">
+<!-- Restricted Banner -->
+<div class="bg-sage/10 border-b border-sage/20 py-2 px-margin-desktop flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sage text-sm">lock</span>
+<span class="font-body-md text-body-md text-sage font-medium">Restricted record — therapist and owner access only</span>
+</div>
+<div class="flex-1 px-margin-desktop py-8 texture-bg">
+<!-- Page Header -->
+<div class="flex items-start justify-between mb-8">
+<div class="flex items-center gap-6">
+<div class="w-20 h-20 rounded-full border border-outline-variant/20 overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover" data-alt="Professional portrait of Mariam Fouad, a middle-eastern woman in her late 30s. Warm, dramatic lighting against a dark charcoal background. High resolution, crisp details, professional corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxcwIP4MMchBPZUIPyxyWIhibTzoTu3wSKpBTHtE9b0Fu3pB19r3-rJY36We0nu5ca0tRtL4jJqkJPXwMdWvRvgzQWfQUMilNJbrG_lPEE4-9iWKZNpku_jOYvb149E1gb8rO_HNIfd4jEaFScUSRUa3BzfmCszyMFIZ3FwhnQZN7DGgakeOHxDzRpOSEgGH8QmonCKJ_MUsgSc2C69Rb1XcKe9CSdr9daaGZSgJcd1X4CmHM4eX-S"/>
+</div>
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Mariam Fouad</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-sage/15 text-sage font-label-caps text-label-caps border border-sage/20">Active</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface-variant mb-2">Right shoulder impingement</p>
+<p class="font-body-md text-body-md text-outline">Case opened 3 Jun 2026 · Therapist: Dr. Youssef · Referred by Dr. Amira Saleh</p>
+</div>
+</div>
+<button class="px-4 py-2 rounded border border-outline-variant text-on-surface-variant hover:text-on-surface hover:border-on-surface transition-colors font-body-md text-body-md">
+                    Close case
+                </button>
+</div>
+<!-- Three Column Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Left Column (Intake) -->
+<div class="col-span-12 lg:col-span-3 space-y-6">
+<div class="bg-surface rounded-xl border border-outline-variant/10 p-6">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 uppercase tracking-widest">Intake</h3>
+<div class="space-y-4">
+<div>
+<span class="font-body-md text-body-md text-outline block mb-1">Onset</span>
+<span class="font-body-md text-body-md text-on-surface">Late May 2026</span>
+</div>
+<div>
+<span class="font-body-md text-body-md text-outline block mb-1">Mechanism</span>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">Gradual onset during overhead tennis serves. Sharp pain anterior shoulder, worsened by reaching overhead or behind back. No acute trauma reported.</p>
+</div>
+</div>
+</div>
+<div class="bg-error/5 rounded-xl border border-error/30 p-6">
+<h3 class="font-label-caps text-label-caps text-error mb-2 uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">warning</span>
+                            Contraindications
+                        </h3>
+<p class="font-body-md text-body-md text-on-surface">No overhead pressing. No barbell bench.</p>
+</div>
+</div>
+<!-- Centre Column (Sessions) -->
+<div class="col-span-12 lg:col-span-6">
+<div class="bg-surface rounded-xl border border-outline-variant/10 p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Sessions</h3>
+<button class="bg-sage text-surface px-4 py-2 rounded hover:bg-sage/90 transition-colors font-body-md text-body-md font-medium">
+                                + Log session
+                            </button>
+</div>
+<div class="relative border-l-2 border-outline-variant/10 ml-4 space-y-8 pb-4">
+<!-- Card 1 -->
+<div class="relative pl-6">
+<div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-sage border-4 border-surface"></div>
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/10 p-4 hover:border-sage/30 transition-colors">
+<div class="flex justify-between items-start mb-2">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface block">10 Aug</span>
+<span class="font-body-md text-body-md text-outline">Dr. Youssef · 45m</span>
+</div>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-surface-variant rounded text-on-surface-variant font-label-caps text-[10px]">Manual therapy</span>
+<span class="px-2 py-1 bg-surface-variant rounded text-on-surface-variant font-label-caps text-[10px]">Exercise</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-3">Pain reported at 3/10 today. Tolerated manual release of pecs and lats well. Progressed to light banded external rotations.</p>
+<a class="font-body-md text-body-md text-sage hover:underline" href="#">Read more</a>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="relative pl-6">
+<div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-outline-variant/40 border-4 border-surface"></div>
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/10 p-4 hover:border-sage/30 transition-colors">
+<div class="flex justify-between items-start mb-2">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface block">03 Aug</span>
+<span class="font-body-md text-body-md text-outline">Dr. Youssef · 45m</span>
+</div>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-surface-variant rounded text-on-surface-variant font-label-caps text-[10px]">Dry needling</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-3">Dry needling to infraspinatus and upper trap. Patient reported immediate relief of tightness. Assigned home stretching protocol.</p>
+<a class="font-body-md text-body-md text-sage hover:underline" href="#">Read more</a>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="relative pl-6">
+<div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-outline-variant/40 border-4 border-surface"></div>
+<div class="bg-surface-container-lowest rounded-lg border border-outline-variant/10 p-4 hover:border-sage/30 transition-colors">
+<div class="flex justify-between items-start mb-2">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface block">27 Jul</span>
+<span class="font-body-md text-body-md text-outline">Dr. Youssef · 60m</span>
+</div>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-surface-variant rounded text-on-surface-variant font-label-caps text-[10px]">Ultrasound</span>
+<span class="px-2 py-1 bg-surface-variant rounded text-on-surface-variant font-label-caps text-[10px]">Manual therapy</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 mb-3">Ultrasound on anterior shoulder. Deep tissue work on subscapularis. Pain at 5/10 during active flexion.</p>
+<a class="font-body-md text-body-md text-sage hover:underline" href="#">Read more</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column (Cards) -->
+<div class="col-span-12 lg:col-span-3 space-y-6">
+<!-- Next Appt -->
+<div class="bg-surface rounded-xl border border-outline-variant/10 p-6">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 uppercase tracking-widest">Next Appointment</h3>
+<div class="flex items-center gap-4 mb-4">
+<div class="w-12 h-12 rounded bg-surface-container-high flex flex-col items-center justify-center border border-outline-variant/20">
+<span class="font-label-caps text-label-caps text-sage">AUG</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-none">16</span>
+</div>
+<div>
+<span class="font-body-md text-body-md text-on-surface block font-medium">Sunday, 11:00</span>
+<span class="font-body-md text-body-md text-outline">Room 2</span>
+</div>
+</div>
+<button class="w-full py-2 rounded border border-outline-variant text-on-surface-variant hover:text-on-surface hover:border-on-surface transition-colors font-body-md text-body-md">
+                            Reschedule
+                        </button>
+</div>
+<!-- Progress -->
+<div class="bg-surface rounded-xl border border-outline-variant/10 p-6">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 uppercase tracking-widest">Progress</h3>
+<div class="mb-6">
+<div class="flex justify-between items-end mb-2">
+<span class="font-body-md text-body-md text-outline">Pain Score</span>
+<span class="font-body-md text-body-md text-on-surface"><span class="text-error">7</span> → <span class="text-sage">3</span></span>
+</div>
+<div class="h-8 w-full border-b border-l border-outline-variant/30 flex items-end relative overflow-hidden">
+<!-- Fake sparkline -->
+<svg class="absolute inset-0 w-full h-full text-sage" preserveaspectratio="none" viewbox="0 0 100 100">
+<polyline fill="none" points="0,20 20,40 40,30 60,60 80,75 100,85" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"></polyline>
+</svg>
+</div>
+<span class="font-label-caps text-[10px] text-outline mt-1 block text-right">8 weeks</span>
+</div>
+<div>
+<span class="font-body-md text-body-md text-outline block mb-1">Shoulder Flexion</span>
+<div class="flex items-center gap-3">
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">115°</span>
+<span class="material-symbols-outlined text-sage text-sm">arrow_forward</span>
+<span class="font-headline-sm text-headline-sm text-sage font-medium">158°</span>
+</div>
+</div>
+</div>
+<!-- Files -->
+<div class="bg-surface rounded-xl border border-outline-variant/10 p-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Files</h3>
+<button class="text-sage hover:text-sage/80">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-2 rounded bg-surface-container-lowest border border-outline-variant/10 hover:border-outline-variant/30 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-outline">description</span>
+<span class="font-body-md text-body-md text-on-surface truncate flex-1">MRI_Report.pdf</span>
+</div>
+<div class="flex items-center gap-3 p-2 rounded bg-surface-container-lowest border border-outline-variant/10 hover:border-outline-variant/30 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-outline">image</span>
+<span class="font-body-md text-body-md text-on-surface truncate flex-1">X-ray_Anterior.jpg</span>
+</div>
+<div class="flex items-center gap-3 p-2 rounded bg-surface-container-lowest border border-outline-variant/10 hover:border-outline-variant/30 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-outline">description</span>
+<span class="font-body-md text-body-md text-on-surface truncate flex-1">Referral_DrSaleh.pdf</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

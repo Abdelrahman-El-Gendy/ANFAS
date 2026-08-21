@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Strive Staff - Check-in Log</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#b5ccba",
+                      "inverse-surface": "#e6e2de",
+                      "on-tertiary-fixed-variant": "#683844",
+                      "on-tertiary-fixed": "#340e1a",
+                      "tertiary-fixed-dim": "#f7b5c3",
+                      "surface-container-highest": "#363432",
+                      "inverse-on-surface": "#32302e",
+                      "on-secondary-fixed": "#0c1f14",
+                      "on-secondary": "#213528",
+                      "surface-container-lowest": "#0f0e0c",
+                      "on-primary-container": "#5f3c00",
+                      "surface-tint": "#ffb956",
+                      "secondary": "#b5ccba",
+                      "primary": "#ffc16c",
+                      "outline-variant": "#514536",
+                      "on-secondary-container": "#a7bead",
+                      "primary-container": "#e8a33d",
+                      "surface-bright": "#3b3936",
+                      "on-secondary-fixed-variant": "#374b3e",
+                      "on-tertiary-container": "#653541",
+                      "secondary-fixed": "#d1e8d6",
+                      "inverse-primary": "#835400",
+                      "outline": "#9e8e7c",
+                      "on-surface-variant": "#d6c4b0",
+                      "on-background": "#e6e2de",
+                      "surface-dim": "#141311",
+                      "primary-fixed-dim": "#ffb956",
+                      "on-primary-fixed": "#2a1800",
+                      "on-tertiary": "#4e232e",
+                      "on-error": "#690005",
+                      "surface-container-low": "#1d1b19",
+                      "background": "#141311",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#211f1d",
+                      "on-primary-fixed-variant": "#643f00",
+                      "surface-variant": "#363432",
+                      "error-container": "#93000a",
+                      "surface": "#141311",
+                      "primary-fixed": "#ffddb5",
+                      "tertiary": "#fdbbc8",
+                      "on-surface": "#e6e2de",
+                      "error": "#ffb4ab",
+                      "on-primary": "#462b00",
+                      "secondary-container": "#394e40",
+                      "surface-container-high": "#2b2a27",
+                      "tertiary-fixed": "#ffd9e0",
+                      "tertiary-container": "#dfa0ad"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "gutter": "24px",
+                      "margin-desktop": "40px",
+                      "container-max": "1440px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "IBM Plex Sans"
+                      ],
+                      "data-mono": [
+                              "IBM Plex Sans"
+                      ],
+                      "label-caps": [
+                              "IBM Plex Sans"
+                      ],
+                      "headline-lg": [
+                              "IBM Plex Sans"
+                      ],
+                      "body-md": [
+                              "IBM Plex Sans"
+                      ],
+                      "headline-md": [
+                              "IBM Plex Sans"
+                      ],
+                      "headline-sm": [
+                              "IBM Plex Sans"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "data-mono": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "11px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.08em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+            },
+          }
+        }
+      </script>
+<style>
+        .cheetah-texture {
+            background-image: radial-gradient(circle at center, rgba(230, 226, 222, 0.15) 0%, transparent 8%),
+                              radial-gradient(circle at center, rgba(230, 226, 222, 0.1) 0%, transparent 12%);
+            background-size: 30px 30px, 45px 45px;
+            background-position: 0 0, 15px 15px;
+            opacity: 0.05;
+            mix-blend-mode: multiply;
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-16 pb-20 md:pb-0">
+<!-- TopAppBar -->
+<header class="fixed w-full top-0 z-50 bg-surface dark:bg-surface border-b border-white/10 flat no shadows flex justify-between items-center px-margin-mobile h-16 transition-colors duration-200">
+<div class="flex items-center gap-4">
+<div class="h-8 w-8 rounded-full overflow-hidden border border-white/10">
+<img alt="Staff Profile Picture" class="object-cover w-full h-full" data-alt="A close-up, professional portrait of a fitness staff member. Warm studio lighting against a dark charcoal background. The person looks approachable yet serious, matching a premium, modern minimalist fitness club aesthetic. Shallow depth of field." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg1LyikjxIwjDL7qpzF-eOmHg0L8LHvLGUNIR10oxPFRM3g4p1VgOiVBvPQmbsXG42FHqGvlYxk0SVrsJpSPh-9DwBmw7PncxrhsQUjzNZs6YPEiASTdW0WEeiya1PRCgMIDmvUjU46YDsPEPFPW6yL27NwbSsaMPOD9sv-CpMsX1L74XNLCzhekA3U46wnsKRe1EbL-2uahdLfYIK4jcBCHEJ6u0ru4k-lXRo2q0xW-oN5Q10jCL7"/>
+</div>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">STRIVE STAFF</span>
+</div>
+<button class="text-on-surface-variant hover:bg-white/5 p-2 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<main class="flex-grow container mx-auto max-w-container-max px-margin-mobile md:px-gutter py-8 md:py-margin-desktop">
+<!-- Header Section -->
+<div class="mb-8 relative rounded-xl overflow-hidden bg-surface-container-low border border-white/10 p-6 md:p-8">
+<div class="absolute inset-x-0 top-0 h-[120px] cheetah-texture pointer-events-none"></div>
+<div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg mb-2">Check-in Log</h1>
+<p class="text-on-surface-variant font-body-lg text-body-lg">Real-time facility access tracking for FAHD.</p>
+</div>
+<div class="flex gap-3 w-full md:w-auto">
+<div class="relative w-full md:w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="w-full bg-background border border-white/10 rounded-xl py-2 pl-10 pr-4 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-md text-body-md placeholder-on-surface-variant/50" placeholder="Search members..." type="text"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Metric Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface border border-white/10 rounded-xl p-4 md:p-6">
+<div class="text-on-surface-variant font-label-caps text-label-caps mb-2">Total Today</div>
+<div class="font-headline-md text-headline-md text-primary">142</div>
+</div>
+<div class="bg-surface border border-white/10 rounded-xl p-4 md:p-6">
+<div class="text-on-surface-variant font-label-caps text-label-caps mb-2">Peak Hour</div>
+<div class="font-headline-md text-headline-md">17:00</div>
+</div>
+<div class="bg-surface border border-white/10 rounded-xl p-4 md:p-6">
+<div class="text-on-surface-variant font-label-caps text-label-caps mb-2">Failed Tries</div>
+<div class="font-headline-md text-headline-md text-error">3</div>
+</div>
+<div class="bg-surface border border-white/10 rounded-xl p-4 md:p-6">
+<div class="text-on-surface-variant font-label-caps text-label-caps mb-2">Current Capacity</div>
+<div class="font-headline-md text-headline-md">45%</div>
+</div>
+</div>
+<!-- Log Content -->
+<div class="bg-surface border border-white/10 rounded-xl overflow-hidden">
+<!-- Filter Bar -->
+<div class="border-b border-white/10 p-4 flex gap-4 overflow-x-auto no-scrollbar">
+<button class="bg-surface-container border border-white/10 hover:border-white/20 text-on-surface px-4 py-1.5 rounded-full font-label-caps text-label-caps whitespace-nowrap transition-colors">All Entries</button>
+<button class="bg-primary-container/10 border border-primary text-primary px-4 py-1.5 rounded-full font-label-caps text-label-caps whitespace-nowrap">Successful</button>
+<button class="bg-surface-container border border-white/10 hover:border-white/20 text-on-surface px-4 py-1.5 rounded-full font-label-caps text-label-caps whitespace-nowrap transition-colors">Denied</button>
+</div>
+<!-- List -->
+<div class="divide-y divide-white/5">
+<!-- Entry 1 -->
+<div class="p-4 hover:bg-white/[0.02] transition-colors flex items-center justify-between gap-4">
+<div class="flex items-center gap-4 flex-grow">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary border border-primary/20">
+<span class="material-symbols-outlined text-xl">check_circle</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm mb-0.5">Marcus Johnson</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-data-mono text-data-mono">
+<span>#MEM-8492</span>
+<span>•</span>
+<span>Pro Plan</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-data-mono text-data-mono text-on-surface">14:22:05</div>
+<div class="font-label-caps text-label-caps text-primary mt-1">SUCCESS</div>
+</div>
+</div>
+<!-- Entry 2 -->
+<div class="p-4 hover:bg-white/[0.02] transition-colors flex items-center justify-between gap-4">
+<div class="flex items-center gap-4 flex-grow">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary border border-primary/20">
+<span class="material-symbols-outlined text-xl">check_circle</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm mb-0.5">Sarah Chen</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-data-mono text-data-mono">
+<span>#MEM-9103</span>
+<span>•</span>
+<span>Basic Plan</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-data-mono text-data-mono text-on-surface">14:18:30</div>
+<div class="font-label-caps text-label-caps text-primary mt-1">SUCCESS</div>
+</div>
+</div>
+<!-- Entry 3 (Failed) -->
+<div class="p-4 hover:bg-white/[0.02] transition-colors flex items-center justify-between gap-4 bg-error-container/5">
+<div class="flex items-center gap-4 flex-grow">
+<div class="w-10 h-10 rounded-full bg-error-container/20 flex items-center justify-center flex-shrink-0 text-error border border-error/20">
+<span class="material-symbols-outlined text-xl">cancel</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm mb-0.5">Unknown ID</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-data-mono text-data-mono">
+<span>Scan Failed</span>
+<span>•</span>
+<span class="text-error">Invalid Tag</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-data-mono text-data-mono text-on-surface">14:15:12</div>
+<div class="font-label-caps text-label-caps text-error mt-1">DENIED</div>
+</div>
+</div>
+<!-- Entry 4 -->
+<div class="p-4 hover:bg-white/[0.02] transition-colors flex items-center justify-between gap-4">
+<div class="flex items-center gap-4 flex-grow">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary border border-primary/20">
+<span class="material-symbols-outlined text-xl">check_circle</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm mb-0.5">David Miller</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-data-mono text-data-mono">
+<span>#MEM-7341</span>
+<span>•</span>
+<span>Pro Plan</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-data-mono text-data-mono text-on-surface">14:02:45</div>
+<div class="font-label-caps text-label-caps text-primary mt-1">SUCCESS</div>
+</div>
+</div>
+<!-- Entry 5 -->
+<div class="p-4 hover:bg-white/[0.02] transition-colors flex items-center justify-between gap-4">
+<div class="flex items-center gap-4 flex-grow">
+<div class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center flex-shrink-0 text-primary border border-primary/20">
+<span class="material-symbols-outlined text-xl">check_circle</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm mb-0.5">Elena Rodriguez</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-data-mono text-data-mono">
+<span>#MEM-5520</span>
+<span>•</span>
+<span>Guest Pass</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-data-mono text-data-mono text-on-surface">13:58:10</div>
+<div class="font-label-caps text-label-caps text-primary mt-1">SUCCESS</div>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-white/10 text-center">
+<button class="text-primary hover:text-primary-container transition-colors font-label-caps text-label-caps uppercase">Load More</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface-container dark:bg-surface-container border-t border-white/10 flat no shadows md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary active:scale-95 transition-transform w-16" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary active:scale-95 transition-transform w-16" href="#">
+<span class="material-symbols-outlined mb-1">group</span>
+<span class="font-label-caps text-label-caps">Members</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary active:scale-95 transition-transform w-16" href="#">
+<span class="material-symbols-outlined mb-1">calendar_today</span>
+<span class="font-label-caps text-label-caps">Schedule</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-primary-container/20 rounded-xl py-1 active:scale-95 transition-transform w-16" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">login</span>
+<span class="font-label-caps text-label-caps">Check-in</span>
+</a>
+</nav>
+<!-- Desktop Nav Cluster (Hidden on mobile, visible on desktop within TopAppBar visually, but placed here for structural separation in this simplified layout if needed, though TopAppBar handles top structural nav. In this specific prompt, TopAppBar doesn't have middle nav items, but let's adhere to the responsive pivot rule by ensuring mobile has bottom nav and desktop hides it.) -->
+<style>
+        @media (min-width: 768px) {
+            body { pb-0; }
+        }
+    </style>
+</body></html>

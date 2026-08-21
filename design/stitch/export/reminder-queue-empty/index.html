@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Failed Reminders - Subscriptions</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#363432",
+                        "outline-variant": "#514536",
+                        "on-tertiary-container": "#653541",
+                        "surface-bright": "#3b3936",
+                        "on-background": "#e6e2de",
+                        "primary-fixed-dim": "#ffb956",
+                        "on-tertiary-fixed": "#340e1a",
+                        "tertiary-fixed": "#ffd9e0",
+                        "tertiary-container": "#dfa0ad",
+                        "on-primary": "#462b00",
+                        "tertiary": "#fdbbc8",
+                        "surface-dim": "#141311",
+                        "secondary": "#b5ccba",
+                        "outline": "#9e8e7c",
+                        "primary-container": "#e8a33d",
+                        "on-secondary": "#213528",
+                        "on-surface-variant": "#d6c4b0",
+                        "on-surface": "#e6e2de",
+                        "on-primary-fixed-variant": "#643f00",
+                        "on-primary-fixed": "#2a1800",
+                        "inverse-surface": "#e6e2de",
+                        "inverse-primary": "#835400",
+                        "secondary-fixed": "#d1e8d6",
+                        "on-secondary-container": "#a7bead",
+                        "tertiary-fixed-dim": "#f7b5c3",
+                        "surface-container-lowest": "#0f0e0c",
+                        "surface-container-high": "#2b2a27",
+                        "surface-container": "#211f1d",
+                        "background": "#141311",
+                        "error": "#ffb4ab",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#141311",
+                        "on-tertiary": "#4e232e",
+                        "on-secondary-fixed-variant": "#374b3e",
+                        "primary": "#ffc16c",
+                        "inverse-on-surface": "#32302e",
+                        "surface-container-low": "#1d1b19",
+                        "secondary-container": "#394e40",
+                        "on-secondary-fixed": "#0c1f14",
+                        "secondary-fixed-dim": "#b5ccba",
+                        "on-tertiary-fixed-variant": "#683844",
+                        "on-error": "#690005",
+                        "surface-tint": "#ffb956",
+                        "primary-fixed": "#ffddb5",
+                        "error-container": "#93000a",
+                        "surface-variant": "#363432",
+                        "on-primary-container": "#5f3c00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["IBM Plex Sans"],
+                        "data-mono": ["IBM Plex Sans"],
+                        "headline-sm": ["IBM Plex Sans"],
+                        "headline-lg": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans', sans-serif; background-color: #12110F; color: #e6e2de; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .fill-icon { font-variation-settings: 'FILL' 1; }
+        
+        .cheetah-texture {
+            position: absolute;
+            inset: 0;
+            opacity: 0.05;
+            background-image: radial-gradient(#F5F1EA 1px, transparent 1px), radial-gradient(#F5F1EA 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            pointer-events: none;
+            mask-image: linear-gradient(to bottom, black 0%, transparent 120px);
+            -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 120px);
+        }
+        
+        .empty-state-texture {
+            position: absolute;
+            inset: 0;
+            opacity: 0.03;
+            background-image: radial-gradient(#F5F1EA 1.5px, transparent 1.5px);
+            background-size: 16px 16px;
+            pointer-events: none;
+            mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
+            -webkit-mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
+        }
+
+        /* 1px outline layer definition */
+        .layer-1-outline {
+            border: 1px solid rgba(245, 241, 234, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background flex h-screen overflow-hidden text-on-surface">
+<!-- SideNavBar -->
+<aside class="bg-surface-container flex flex-col h-full py-6 px-4 docked left-0 h-full w-64 border-r border-outline-variant/10 transition-all duration-150 z-20 shrink-0 hidden md:flex">
+<!-- Header -->
+<div class="flex items-center gap-4 mb-10 px-2">
+<div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container-high layer-1-outline flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="fitness_center">fitness_center</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Titan Gym</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Staff Portal</p>
+</div>
+</div>
+<!-- CTA -->
+<button class="bg-primary-container text-background w-full py-3 rounded-lg font-label-caps text-label-caps uppercase tracking-wider mb-8 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+            New Entry
+        </button>
+<!-- Navigation Tabs -->
+<nav class="flex-1 flex flex-col gap-1 overflow-y-auto">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps uppercase" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps uppercase" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Members
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps uppercase" href="#">
+<span class="material-symbols-outlined" data-icon="fitness_center">fitness_center</span>
+                Classes
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-primary border-r-2 border-primary bg-primary/5 transition-colors duration-150 font-label-caps text-label-caps uppercase" href="#">
+<span class="material-symbols-outlined" data-icon="card_membership">card_membership</span>
+                Subscriptions
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps uppercase" href="#">
+<span class="material-symbols-outlined" data-icon="document_scanner">document_scanner</span>
+                OCR Intake
+            </a>
+</nav>
+<!-- Footer Tabs -->
+<div class="mt-auto pt-6 flex flex-col gap-1 border-t border-outline-variant/10">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps uppercase" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-colors duration-150 font-label-caps text-label-caps uppercase" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Support
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col relative overflow-hidden bg-background">
+<!-- Structural Texture -->
+<div class="cheetah-texture"></div>
+<!-- Page Header -->
+<header class="px-margin-desktop pt-10 pb-6 shrink-0 relative z-10 flex flex-col gap-6">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-md text-body-md">
+<span>Subscriptions</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-on-surface">Reminder Queue</span>
+</div>
+<div class="flex justify-between items-end">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Automated Reminders</h2>
+<div class="flex gap-4">
+<button class="px-4 py-2 layer-1-outline rounded font-body-md text-body-md text-on-surface hover:bg-on-surface/5 flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+                        Filter
+                    </button>
+<button class="px-4 py-2 border border-primary text-primary rounded font-body-md text-body-md hover:bg-primary/5 flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="play_arrow">play_arrow</span>
+                        Run Queue
+                    </button>
+</div>
+</div>
+<!-- Tab Navigation (Content Level) -->
+<div class="flex gap-8 border-b border-outline-variant/10 w-full mt-4">
+<a class="pb-3 text-on-surface-variant font-label-caps text-label-caps hover:text-on-surface transition-colors" href="#">Pending (24)</a>
+<a class="pb-3 text-on-surface-variant font-label-caps text-label-caps hover:text-on-surface transition-colors" href="#">Sent</a>
+<a class="pb-3 text-primary border-b-2 border-primary font-label-caps text-label-caps" href="#">Failed</a>
+<a class="pb-3 text-on-surface-variant font-label-caps text-label-caps hover:text-on-surface transition-colors" href="#">Archived</a>
+</div>
+</header>
+<!-- Empty State Container -->
+<div class="flex-1 px-margin-desktop pb-margin-desktop overflow-y-auto relative z-10 flex items-center justify-center">
+<!-- Bento Box Empty State -->
+<div class="w-full max-w-2xl bg-surface layer-1-outline rounded-xl p-12 relative overflow-hidden flex flex-col items-center justify-center min-h-[400px]">
+<div class="empty-state-texture"></div>
+<div class="relative z-10 flex flex-col items-center text-center">
+<!-- Positive Feedback Sage Check Icon -->
+<div class="w-16 h-16 rounded-full bg-secondary-container/30 border border-secondary/20 flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(181,204,186,0.1)]">
+<span class="material-symbols-outlined fill-icon text-[32px] text-secondary" data-icon="check_circle">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-3">No failed reminders</h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md">
+                        System health is optimal. The queue is clear and running smoothly without interruptions.
+                    </p>
+<!-- Data Point Subtext -->
+<div class="mt-8 flex items-center gap-2 px-4 py-2 bg-secondary-container/20 border border-secondary/10 rounded-full">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-data-mono text-data-mono text-secondary">Last 1,240 messages delivered</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

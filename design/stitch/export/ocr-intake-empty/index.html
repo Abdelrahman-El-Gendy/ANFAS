@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OCR Intake - Empty State</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-highest": "#363432",
+                        "outline-variant": "#514536",
+                        "on-tertiary-container": "#653541",
+                        "surface-bright": "#3b3936",
+                        "on-background": "#e6e2de",
+                        "primary-fixed-dim": "#ffb956",
+                        "on-tertiary-fixed": "#340e1a",
+                        "tertiary-fixed": "#ffd9e0",
+                        "tertiary-container": "#dfa0ad",
+                        "on-primary": "#462b00",
+                        "tertiary": "#fdbbc8",
+                        "surface-dim": "#141311",
+                        "secondary": "#b5ccba",
+                        "outline": "#9e8e7c",
+                        "primary-container": "#e8a33d",
+                        "on-secondary": "#213528",
+                        "on-surface-variant": "#d6c4b0",
+                        "on-surface": "#e6e2de",
+                        "on-primary-fixed-variant": "#643f00",
+                        "on-primary-fixed": "#2a1800",
+                        "inverse-surface": "#e6e2de",
+                        "inverse-primary": "#835400",
+                        "secondary-fixed": "#d1e8d6",
+                        "on-secondary-container": "#a7bead",
+                        "tertiary-fixed-dim": "#f7b5c3",
+                        "surface-container-lowest": "#0f0e0c",
+                        "surface-container-high": "#2b2a27",
+                        "surface-container": "#211f1d",
+                        "background": "#141311",
+                        "error": "#ffb4ab",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#141311",
+                        "on-tertiary": "#4e232e",
+                        "on-secondary-fixed-variant": "#374b3e",
+                        "primary": "#ffc16c",
+                        "inverse-on-surface": "#32302e",
+                        "surface-container-low": "#1d1b19",
+                        "secondary-container": "#394e40",
+                        "on-secondary-fixed": "#0c1f14",
+                        "secondary-fixed-dim": "#b5ccba",
+                        "on-tertiary-fixed-variant": "#683844",
+                        "on-error": "#690005",
+                        "surface-tint": "#ffb956",
+                        "primary-fixed": "#ffddb5",
+                        "error-container": "#93000a",
+                        "surface-variant": "#363432",
+                        "on-primary-container": "#5f3c00"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px"
+                    },
+                    fontFamily: {
+                        "body-md": ["IBM Plex Sans"],
+                        "data-mono": ["IBM Plex Sans"],
+                        "headline-sm": ["IBM Plex Sans"],
+                        "headline-lg": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"]
+                    },
+                    fontSize: {
+                        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "data-mono": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "500" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        "label-caps": ["11px", { lineHeight: "16px", letterSpacing: "0.08em", fontWeight: "600" }],
+                        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "headline-md": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #141311;
+            color: #e6e2de;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Subtle texture for empty state header area */
+        .texture-layer {
+            background-image: radial-gradient(circle at center, #F5F1EA 1px, transparent 1.5px);
+            background-size: 24px 24px;
+            opacity: 0.03;
+            mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased">
+<!-- SideNavBar (Desktop Shell) -->
+<nav class="hidden md:flex flex-col h-full py-6 px-4 bg-surface-container dark:bg-surface-container docked left-0 w-64 border-r border-outline-variant/10 shrink-0">
+<!-- Header -->
+<div class="flex items-center gap-3 mb-8 px-2">
+<div class="w-10 h-10 rounded bg-surface border border-outline-variant/10 flex items-center justify-center shrink-0">
+<img alt="Gym Logo" class="w-6 h-6 object-contain" data-alt="A minimalist, geometric gym logo in amber on a dark charcoal background. High contrast, sharp edges, modern corporate aesthetic. 80 words." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTUOhHyAayUutHHr9tFY5lITY_saBno-DE8FMzUoGPafLnrQiEt8XkB7NIamSlGfvcC8KxjBZjq95tFRS53I0DkZ2HXGVypvLXe1Z70zzQ8Pb6asKXm7GBmrVAKNvEg1I-0M8tfjHNObshe_rroce0PwbyBZ2zA3Z4J9v1SxkQ2vTozNBRCZCoFj1uR7z3-cKKmhbvYdsH2jMmx2KUlM7PGpflvtZHINz2fnT-3RsBndVxHvpVFR49"/>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Titan Gym</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Staff Portal</span>
+</div>
+</div>
+<!-- CTA -->
+<button class="mb-6 mx-2 py-3 px-4 rounded-lg bg-surface border border-outline-variant/10 flex items-center justify-center gap-2 hover:bg-on-surface/5 transition-colors">
+<span class="material-symbols-outlined text-primary text-xl">add</span>
+<span class="font-headline-sm text-headline-sm text-primary text-[16px]">New Entry</span>
+</button>
+<!-- Main Tabs -->
+<div class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">Members</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="font-body-md text-body-md">Classes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined">card_membership</span>
+<span class="font-body-md text-body-md">Subscriptions</span>
+</a>
+<!-- Active Tab -->
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-primary border-r-2 border-primary bg-primary/5 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">document_scanner</span>
+<span class="font-body-md text-body-md font-medium">OCR Intake</span>
+</a>
+</div>
+<!-- Footer Tabs -->
+<div class="flex flex-col gap-1 mt-auto pt-4 border-t border-outline-variant/10">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150" href="#">
+<span class="material-symbols-outlined">contact_support</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-background">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-margin-desktop h-16 bg-surface dark:bg-surface border-b border-outline-variant/10 shrink-0 z-10 relative">
+<div class="flex items-center gap-6">
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary">Apex Fitness</h1>
+<!-- Search on_left -->
+<div class="relative hidden lg:block w-64 ml-4">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="w-full bg-surface-dim border border-outline-variant/10 rounded-full py-1.5 pl-10 pr-4 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-0 transition-colors placeholder:text-outline-variant" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full text-on-surface-variant hover:bg-on-surface/5 transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:bg-on-surface/5 transition-colors duration-200 ease-in-out">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant/20 overflow-hidden ml-2 cursor-pointer hover:border-primary-container transition-colors duration-200">
+<img alt="Staff Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a gym staff member, wearing a dark charcoal polo shirt. Soft cinematic lighting, shallow depth of field, warm color grading. 80 words." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkhSnOx4k71QqL74MtjgG9uGjwauCfbbMnANqYopH0d2YrlM1juOrpqRdLUlh7zKt09pjk-dPvqkXf0U0z2pNnBOD04y3Rb5484CbOuI0AECrYjtsNbaB7uX1xe1BnR_cR9Zgc3GbTo0o_6g8d5SBKF9hBtj8N2Z_5qn1r9828_oSfuu8OwIuAt70n9_gHnfk0SoWBhXTwh4ehWXxaEx0WER_TrYF7ymQayLCGbh3Mp38BaflZ1mpY"/>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="flex-1 overflow-y-auto p-margin-desktop flex items-center justify-center">
+<!-- Empty State Container (Surface Layer 1) -->
+<div class="w-full max-w-2xl bg-surface border border-outline-variant/10 rounded-xl relative overflow-hidden flex flex-col items-center justify-center py-24 px-8 text-center">
+<!-- Texture Overlay (Top 120px rough simulation) -->
+<div class="absolute top-0 left-0 w-full h-32 texture-layer"></div>
+<!-- Graphic/Icon -->
+<div class="w-20 h-20 rounded-2xl bg-surface-container-high border border-outline-variant/10 flex items-center justify-center mb-8 relative z-10">
+<span class="material-symbols-outlined text-4xl text-outline" style="font-variation-settings: 'wght' 200;">document_scanner</span>
+</div>
+<!-- Text Content -->
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-3 relative z-10">No scans yet</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto mb-10 relative z-10">
+                    Photograph a paper sign-up sheet to import members in bulk
+                </p>
+<!-- Primary CTA -->
+<button class="bg-primary-container text-surface font-headline-sm text-[16px] px-8 py-3.5 rounded-lg flex items-center gap-2 hover:bg-primary-fixed transition-colors active:scale-[0.98] relative z-10">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">add_a_photo</span>
+                    New scan
+                </button>
+</div>
+</div>
+</main>
+</body></html>

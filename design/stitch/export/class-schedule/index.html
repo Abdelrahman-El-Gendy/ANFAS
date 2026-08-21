@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Class Schedule - FAHD Staff</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "secondary-fixed-dim": "#b5ccba",
+                "inverse-surface": "#e6e2de",
+                "on-tertiary-fixed-variant": "#683844",
+                "on-tertiary-fixed": "#340e1a",
+                "tertiary-fixed-dim": "#f7b5c3",
+                "surface-container-highest": "#363432",
+                "inverse-on-surface": "#32302e",
+                "on-secondary-fixed": "#0c1f14",
+                "on-secondary": "#213528",
+                "surface-container-lowest": "#0f0e0c",
+                "on-primary-container": "#5f3c00",
+                "surface-tint": "#ffb956",
+                "secondary": "#b5ccba",
+                "primary": "#ffc16c",
+                "outline-variant": "#514536",
+                "on-secondary-container": "#a7bead",
+                "primary-container": "#e8a33d",
+                "surface-bright": "#3b3936",
+                "on-secondary-fixed-variant": "#374b3e",
+                "on-tertiary-container": "#653541",
+                "secondary-fixed": "#d1e8d6",
+                "inverse-primary": "#835400",
+                "outline": "#9e8e7c",
+                "on-surface-variant": "#d6c4b0",
+                "on-background": "#e6e2de",
+                "surface-dim": "#141311",
+                "primary-fixed-dim": "#ffb956",
+                "on-primary-fixed": "#2a1800",
+                "on-tertiary": "#4e232e",
+                "on-error": "#690005",
+                "surface-container-low": "#1d1b19",
+                "background": "#141311",
+                "on-error-container": "#ffdad6",
+                "surface-container": "#211f1d",
+                "on-primary-fixed-variant": "#643f00",
+                "surface-variant": "#363432",
+                "error-container": "#93000a",
+                "surface": "#141311",
+                "primary-fixed": "#ffddb5",
+                "tertiary": "#fdbbc8",
+                "on-surface": "#e6e2de",
+                "error": "#ffb4ab",
+                "on-primary": "#462b00",
+                "secondary-container": "#394e40",
+                "surface-container-high": "#2b2a27",
+                "tertiary-fixed": "#ffd9e0",
+                "tertiary-container": "#dfa0ad",
+                
+                "brand-rose": "#B87D8A",
+                "brand-sage": "#7A9080",
+                "brand-charcoal": "#1C1A17",
+                "brand-amber": "#E8A33D"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "unit": "4px",
+                "gutter": "24px",
+                "margin-desktop": "40px",
+                "container-max": "1440px",
+                "margin-mobile": "16px"
+        },
+        "fontFamily": {
+                "body-lg": [
+                        "IBM Plex Sans"
+                ],
+                "data-mono": [
+                        "IBM Plex Sans"
+                ],
+                "label-caps": [
+                        "IBM Plex Sans"
+                ],
+                "headline-lg": [
+                        "IBM Plex Sans"
+                ],
+                "body-md": [
+                        "IBM Plex Sans"
+                ],
+                "headline-md": [
+                        "IBM Plex Sans"
+                ],
+                "headline-sm": [
+                        "IBM Plex Sans"
+                ]
+        },
+        "fontSize": {
+                "body-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "data-mono": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-caps": [
+                        "11px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.08em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-md": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "500"
+                        }
+                ]
+        }
+    }
+  }
+</script>
+<style>
+    body {
+        background-color: #12110F;
+        color: #e6e2de;
+    }
+    
+    .texture-mask {
+        mask-image: radial-gradient(circle at center, black, transparent 80%);
+        opacity: 0.05;
+        mix-blend-mode: multiply;
+        pointer-events: none;
+    }
+
+    .border-subtle {
+        border: 1px solid rgba(245, 241, 234, 0.1);
+    }
+    
+    .border-b-subtle {
+        border-bottom: 1px solid rgba(245, 241, 234, 0.05);
+    }
+
+    /* Custom Scrollbar for data density */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(245, 241, 234, 0.1);
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(245, 241, 234, 0.2);
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md antialiased min-h-screen flex flex-col md:flex-row">
+<!-- Mobile Top Bar Shell -->
+<header class="bg-surface dark:bg-surface w-full top-0 border-b border-white/10 md:hidden flex justify-between items-center px-margin-mobile h-16 shrink-0 z-40 sticky">
+<div class="flex items-center gap-3">
+<img class="w-8 h-8 rounded-full object-cover border-subtle" data-alt="A professional headshot of a fitness staff member, dramatic lighting, serious expression, wearing dark premium athletic wear, set against a dark charcoal background. The mood is authoritative and calm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5A8hxvyckPBlmoOA7BiGsXA8WshhqeUpSr2bFfPQNO0jZo98OlxWZlvYXfQ7Par4_1FngRMPAeBoavBs638ZnARpF9m1sGOacB6JA6LIke-m3HeR1FbzyyhfAdCV4P6jq2RgrzvPGRBT4Lhu66ubadJ6L4SNGFQ1CHkpeKPiiOumieT06-BPiWXQhbKkMICXfZvq5NeApgWSMaKtXhSo3tUWQUPR0N8fAE0ff-2oRnL2J-JfBowoG"/>
+</div>
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tight">STRIVE STAFF</div>
+<button class="w-10 h-10 flex items-center justify-center text-primary transition-colors duration-200 hover:bg-white/5 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</header>
+<!-- Desktop Side Navigation Shell (Hidden on mobile) -->
+<nav class="hidden md:flex flex-col w-64 h-screen border-r border-white/10 bg-surface dark:bg-surface shrink-0 sticky top-0 p-6">
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tight mb-12">STRIVE STAFF</div>
+<div class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-colors duration-200 font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-colors duration-200 font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">group</span>
+                Members
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary bg-primary-container/10 border-subtle transition-colors duration-200 font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+                Schedule
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-colors duration-200 font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined">login</span>
+                Check-in
+            </a>
+</div>
+<div class="mt-auto pt-6 border-t border-white/10 flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover border-subtle" data-alt="A professional headshot of a fitness staff member, dramatic lighting, serious expression, wearing dark premium athletic wear, set against a dark charcoal background. The mood is authoritative and calm." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjyHLU64Bkct3FQki4OhFPIzOBjThYHTnnZYmB5dBsgsGCA_A1VDCwugMUfh5VNz16jS6n1OZ8wjgtO42SdDK1yHEQTZB-qGOxLCrhfBPk2fzpijbP6f3uG44THiy2GhYo2LMMfQPzqoZjjRTlsx9v7TjW8NSsXK-GilOM0wJIs53VNoEvDaGg7EfFQYVfmdJtssE18MiGLdDwwbpeI-A7rg0cMY6l_-ah2t6mIudFhtVkZq9_7kMY"/>
+<div>
+<div class="font-body-md text-body-md font-medium text-on-surface">Alex R.</div>
+<div class="font-data-mono text-data-mono text-on-surface-variant text-xs">Duty Manager</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col h-full md:h-screen overflow-hidden bg-background">
+<!-- Page Header -->
+<div class="px-margin-mobile md:px-margin-desktop py-6 md:py-8 shrink-0 relative overflow-hidden">
+<!-- Subliminal Texture -->
+<div class="absolute inset-0 texture-mask" style="background-image: url('data:image/svg+xml,%3Csvg width=\'20\' height=\'20\' viewBox=\'0 0 20 20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Ccircle cx=\'2\' cy=\'2\' r=\'1\' fill=\'%23FFFFFF\'/%3E%3C/svg%3E');"></div>
+<div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-1">Today's Schedule</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Thursday, October 24</p>
+</div>
+<div class="flex gap-3 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-4 py-2 rounded-lg border-subtle bg-surface hover:bg-white/5 text-on-surface transition-colors font-label-caps text-label-caps flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                         Filter
+                     </button>
+<button class="flex-1 md:flex-none px-6 py-2 rounded-lg bg-primary-container text-background font-label-caps text-label-caps hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                         New Class
+                     </button>
+</div>
+</div>
+</div>
+<!-- Data Canvas -->
+<div class="flex-grow overflow-auto px-margin-mobile md:px-margin-desktop pb-24 md:pb-8">
+<div class="bg-brand-charcoal rounded-xl border-subtle overflow-hidden flex flex-col h-full">
+<!-- Table Header -->
+<div class="grid grid-cols-12 gap-4 p-4 border-b-subtle bg-surface-container-low font-label-caps text-label-caps text-on-surface-variant shrink-0">
+<div class="col-span-2">Time</div>
+<div class="col-span-4">Class</div>
+<div class="col-span-3">Instructor</div>
+<div class="col-span-2">Studio</div>
+<div class="col-span-1 text-right">Capacity</div>
+</div>
+<!-- Table Body -->
+<div class="flex-grow overflow-auto">
+<!-- Row 1: Standard -->
+<div class="grid grid-cols-12 gap-4 px-4 py-3 border-b-subtle hover:bg-white/[0.02] transition-colors items-center group cursor-pointer">
+<div class="col-span-2 font-data-mono text-data-mono text-on-surface">06:00 AM</div>
+<div class="col-span-4 flex items-center gap-3">
+<div class="w-1.5 h-8 bg-brand-amber rounded-full"></div>
+<div>
+<div class="font-body-md text-body-md font-medium text-on-surface">HIIT Foundation</div>
+<div class="font-label-caps text-[10px] text-on-surface-variant mt-0.5">Conditioning</div>
+</div>
+</div>
+<div class="col-span-3 flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover border-subtle" data-alt="Small circular portrait of a male fitness instructor, athletic, wearing black, dark atmospheric gym background, modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZzC-8GxG9Z9EHGP5VqT-qBRMTlwkLte4MUBBNDXOCU57wQJD8uZD-OjbIhtN0kNLig8e2LqCZFrdJgNUrpAHZJpKC-5QK0dFWOqo2Rw0wJ5k9kGr7gnGyjaYhXm2XU8F5tCEcTrMfmq6YoihPrfXGmUMw5lBtNWW0zw26i6WhmUk99JDqejI3Ss00K9LcohgDq605kDlfIGRRM4OzHpxZDIzTqSUnxhlx-wxQMi5dBgmR2qoTHVWI"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-on-surface transition-colors">Marcus T.</span>
+</div>
+<div class="col-span-2 font-data-mono text-data-mono text-on-surface-variant">Studio A</div>
+<div class="col-span-1 text-right font-data-mono text-data-mono text-primary">24/30</div>
+</div>
+<!-- Row 2: Women's Strength (Rose) -->
+<div class="grid grid-cols-12 gap-4 px-4 py-3 border-b-subtle hover:bg-white/[0.02] transition-colors items-center group cursor-pointer">
+<div class="col-span-2 font-data-mono text-data-mono text-on-surface">07:30 AM</div>
+<div class="col-span-4 flex items-center gap-3">
+<div class="w-1.5 h-8 bg-brand-rose rounded-full"></div>
+<div>
+<div class="font-body-md text-body-md font-medium text-on-surface">Women's Barbell</div>
+<div class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-label-caps uppercase bg-brand-rose/15 text-brand-rose">Women's Strength</div>
+</div>
+</div>
+<div class="col-span-3 flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover border-subtle" data-alt="Small circular portrait of a female fitness instructor, intense look, dark grey background, premium modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFpeaCZfK2Y7pHk9elJ-w6kbgxRh7m6LHsgcNpRHoBODcsQ7X1Fl7vfKLBSjX-D25o-KETO8oLO42lqEnqUV54D5AI72k50FD_JKxpvoI7gbBpvOqrqpdMCy0wqBMABbbUCTcmazx56vanT-yuwcWCNCLZp3K4RjneBMvO0x5nFu_QFUN_LqXj83KsuajAXiHcIT5uQA5-vnxKO4RbcXceKsvqyQvsK9tW2TfDYQNg6PCQpHrnZSe9"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-on-surface transition-colors">Sarah K.</span>
+</div>
+<div class="col-span-2 font-data-mono text-data-mono text-on-surface-variant">Weight Room</div>
+<div class="col-span-1 text-right font-data-mono text-data-mono text-on-surface">12/12</div>
+</div>
+<!-- Row 3: Recovery (Sage) -->
+<div class="grid grid-cols-12 gap-4 px-4 py-3 border-b-subtle hover:bg-white/[0.02] transition-colors items-center group cursor-pointer">
+<div class="col-span-2 font-data-mono text-data-mono text-on-surface">09:00 AM</div>
+<div class="col-span-4 flex items-center gap-3">
+<div class="w-1.5 h-8 bg-brand-sage rounded-full"></div>
+<div>
+<div class="font-body-md text-body-md font-medium text-on-surface">Mobility Flow</div>
+<div class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-label-caps uppercase bg-brand-sage/15 text-brand-sage">Recovery &amp; Yoga</div>
+</div>
+</div>
+<div class="col-span-3 flex items-center gap-2">
+<img class="w-6 h-6 rounded-full object-cover border-subtle" data-alt="Small circular portrait of a male yoga instructor, calm expression, minimal dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBD75if5ruONte-oGrgaV5cXUaLyHxW3zVCs7qNi2N1EnOzJVTGhGQbMj7Sm4BDg3qHPHWcads2JM7SIpcgCMB4XJsE0FzmyXleQrcSnE3GXpiWzYSIgL9dqCT25cY8IISuz7lJ8rqqKhoJe0grg6ApNUF6TgatMJrxkkecmw3lISLRMW9k_D_J2dIQnI8Q4f9utB3kgDx0FGJqtowA3hB-XD4-mWLwdVMQu2TtN1bmmiyHw969kJfy"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-on-surface transition-colors">David L.</span>
+</div>
+<div class="col-span-2 font-data-mono text-data-mono text-on-surface-variant">Zen Studio</div>
+<div class="col-span-1 text-right font-data-mono text-data-mono text-on-surface-variant">8/20</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile Bottom Nav Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 border-t border-white/10 bg-surface-container dark:bg-surface-container">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-transform active:scale-95 font-label-caps text-label-caps w-16" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="truncate w-full text-center">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-transform active:scale-95 font-label-caps text-label-caps w-16" href="#">
+<span class="material-symbols-outlined mb-1">group</span>
+<span class="truncate w-full text-center">Members</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-primary-container/20 rounded-xl py-1 transition-transform active:scale-95 font-label-caps text-label-caps w-16" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+<span class="truncate w-full text-center">Schedule</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-transform active:scale-95 font-label-caps text-label-caps w-16" href="#">
+<span class="material-symbols-outlined mb-1">login</span>
+<span class="truncate w-full text-center">Check-in</span>
+</a>
+</nav>
+</body></html>

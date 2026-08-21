@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Renewal Bottom Sheet</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#d6c4b0",
+                        "on-primary-container": "#5f3c00",
+                        "surface-container-low": "#1d1b19",
+                        "surface-bright": "#3b3936",
+                        "primary-fixed": "#ffddb5",
+                        "background": "#141311",
+                        "primary-fixed-dim": "#ffb956",
+                        "surface-container": "#211f1d",
+                        "outline-variant": "#514536",
+                        "secondary-fixed": "#d1e8d6",
+                        "tertiary-fixed": "#ffd9e0",
+                        "surface-container-high": "#2b2a27",
+                        "tertiary": "#fdbbc8",
+                        "on-secondary": "#213528",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#b5ccba",
+                        "primary": "#ffc16c",
+                        "surface-variant": "#363432",
+                        "on-tertiary": "#4e232e",
+                        "on-secondary-fixed": "#0c1f14",
+                        "primary-container": "#e8a33d",
+                        "tertiary-container": "#dfa0ad",
+                        "tertiary-fixed-dim": "#f7b5c3",
+                        "on-primary-fixed-variant": "#643f00",
+                        "outline": "#9e8e7c",
+                        "surface-container-highest": "#363432",
+                        "on-background": "#e6e2de",
+                        "inverse-on-surface": "#32302e",
+                        "surface-tint": "#ffb956",
+                        "secondary-fixed-dim": "#b5ccba",
+                        "on-tertiary-fixed": "#340e1a",
+                        "on-secondary-fixed-variant": "#374b3e",
+                        "inverse-primary": "#835400",
+                        "surface-container-lowest": "#0f0e0c",
+                        "on-tertiary-fixed-variant": "#683844",
+                        "on-surface": "#e6e2de",
+                        "secondary-container": "#394e40",
+                        "on-primary": "#462b00",
+                        "on-error": "#690005",
+                        "surface-dim": "#141311",
+                        "on-tertiary-container": "#653541",
+                        "surface": "#141311",
+                        "on-secondary-container": "#a7bead",
+                        "on-primary-fixed": "#2a1800",
+                        "inverse-surface": "#e6e2de",
+                        "error-container": "#93000a",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"],
+                        "headline-lg": ["IBM Plex Sans"],
+                        "body-md": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "headline-sm": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .custom-radio:checked {
+            background-color: theme('colors.primary-container');
+            border-color: theme('colors.primary-container');
+            box-shadow: inset 0 0 0 3px theme('colors.surface-container');
+        }
+        .custom-checkbox:checked {
+            background-color: theme('colors.primary-container');
+            border-color: theme('colors.primary-container');
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex items-center justify-center p-4">
+<!-- Mobile Device Simulator Container -->
+<div class="relative w-full max-w-[400px] h-[850px] bg-background overflow-hidden border border-white/10 rounded-[40px] shadow-2xl flex flex-col">
+<!-- Background Screen Content (Dimmed) -->
+<div class="absolute inset-0 z-0">
+<!-- Using an image placeholder to represent the underlying profile screen -->
+<img alt="Background Profile Screen" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqryhFlUNoCHPNCk9CPNxjaDsofhG6TxaAM-cJFSFkuvHf8Co9DjkPuSx8pus-XJ7yLGLFXvoKI5rYECVWIREjAS5UMNVMQuqUTedQ0-t5W6L1PUOrCwBgVboRmxZCiiByYNcZw-joAFGXKd731B7fRMJ5_a49iV_GBrwJ4hEZqne3nxUDIBQy7x9QDW34noZ7HqGhQwJEMOIGt003ft7bSfhidsHiqwheQRSVFMEnBwgvMmdfNIxu"/>
+<!-- Overlay to dim the background -->
+<div class="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+</div>
+<!-- Bottom Sheet -->
+<div class="absolute bottom-0 left-0 w-full bg-surface-container z-10 flex flex-col shadow-[0_-20px_40px_rgba(0,0,0,0.6)]" style="border-top-left-radius: 24px; border-top-right-radius: 24px; max-height: 92%;">
+<!-- Drag Handle -->
+<div class="w-12 h-[4px] bg-white/20 rounded-full mx-auto mt-4 mb-2 flex-shrink-0"></div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto px-margin-mobile pt-2 pb-[140px]">
+<!-- Header -->
+<div class="flex items-center gap-4 mb-8">
+<img class="w-12 h-12 rounded-full object-cover border border-white/10" data-alt="A small circular profile picture of a young Middle Eastern man with a neat beard, warm studio lighting, professional and approachable fitness context, high quality, dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcfPzdtcrgduBRVkJjWoYZdpzuVJj3Zd6nt5Ajxg3zoGTpFa72CNYa00zwT6Dua8-tNysTu1ZGODQBCkB_xU-_r4z_LMjMeBFKNibWRii5VlkFuiWUkJdZZLod3J5zjRF-dj3HsmuSjMutAhhrov4y_BqadSMmZnbXhYve1QQbZ1TmyQRahj9SCo1VWNDOyYqIDHcl0FcxXrAkprKrlOYGVJyAlAMi74-AAK_oM0DICm56qSgg2gv-"/>
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight">Omar Khaled</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Current plan ends 12 Aug 2026</p>
+</div>
+</div>
+<!-- Plan Picker -->
+<div class="space-y-3 mb-8">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-3 uppercase">Select Duration</h3>
+<!-- Monthly Option -->
+<label class="flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface cursor-pointer hover:bg-white/5 transition-colors">
+<div class="flex items-center gap-4">
+<input class="custom-radio appearance-none w-5 h-5 rounded-full border border-outline-variant bg-transparent transition-all" name="plan" type="radio"/>
+<div>
+<div class="font-body-lg text-body-lg font-medium text-on-surface">Monthly</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Full access</div>
+</div>
+</div>
+<div class="font-body-lg text-body-lg font-medium">600 EGP</div>
+</label>
+<!-- Quarterly Option (Selected) -->
+<label class="flex items-center justify-between p-4 rounded-xl border border-primary-container bg-primary-container/5 cursor-pointer">
+<div class="flex items-center gap-4">
+<input checked="" class="custom-radio appearance-none w-5 h-5 rounded-full border border-primary-container bg-transparent transition-all" name="plan" type="radio"/>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-body-lg text-body-lg font-medium text-on-surface">Quarterly</span>
+<span class="font-label-caps text-label-caps bg-primary-container/20 text-primary-container px-2 py-0.5 rounded uppercase">Save 8%</span>
+</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Full access</div>
+</div>
+</div>
+<div class="font-body-lg text-body-lg font-medium">1,650 EGP</div>
+</label>
+<!-- Annual Option -->
+<label class="flex items-center justify-between p-4 rounded-xl border border-outline-variant bg-surface cursor-pointer hover:bg-white/5 transition-colors">
+<div class="flex items-center gap-4">
+<input class="custom-radio appearance-none w-5 h-5 rounded-full border border-outline-variant bg-transparent transition-all" name="plan" type="radio"/>
+<div>
+<div class="font-body-lg text-body-lg font-medium text-on-surface">Annual</div>
+<div class="font-body-md text-body-md text-on-surface-variant">Full access + 2 guest passes</div>
+</div>
+</div>
+<div class="font-body-lg text-body-lg font-medium">5,800 EGP</div>
+</label>
+</div>
+<!-- Start Date Selection -->
+<div class="mb-8">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-3 uppercase">Start Date</h3>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-lg border border-outline-variant bg-surface font-body-md text-body-md text-on-surface-variant hover:text-on-surface transition-colors">
+                            Start today
+                        </button>
+<button class="px-4 py-2 rounded-lg border border-primary-container bg-primary-container/10 font-body-md text-body-md text-primary-container">
+                            Start when current ends
+                        </button>
+</div>
+</div>
+<!-- Payment Method -->
+<div class="mb-8">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-3 uppercase">Payment Method</h3>
+<div class="flex gap-2 overflow-x-auto pb-2 snap-x -mx-margin-mobile px-margin-mobile no-scrollbar">
+<!-- Selected: Cash -->
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-primary-container bg-surface-variant snap-start whitespace-nowrap flex-shrink-0">
+<span class="material-symbols-outlined text-primary-container text-[18px]" data-icon="payments">payments</span>
+<span class="font-body-md text-body-md text-primary-container font-medium">Cash</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-outline-variant bg-surface snap-start whitespace-nowrap flex-shrink-0 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="credit_card">credit_card</span>
+<span class="font-body-md text-body-md">Card</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-outline-variant bg-surface snap-start whitespace-nowrap flex-shrink-0 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="send">send</span>
+<span class="font-body-md text-body-md">InstaPay</span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-outline-variant bg-surface snap-start whitespace-nowrap flex-shrink-0 text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="smartphone">smartphone</span>
+<span class="font-body-md text-body-md">Vodafone Cash</span>
+</button>
+</div>
+</div>
+<!-- Summary Block -->
+<div class="bg-surface-container-high rounded-xl p-4 border border-white/5">
+<div class="flex justify-between items-center mb-2">
+<span class="font-body-md text-body-md text-on-surface-variant">Quarterly plan</span>
+<span class="font-body-md text-body-md text-on-surface">1,650 EGP</span>
+</div>
+<div class="flex justify-between items-center mb-4">
+<span class="font-body-md text-body-md text-on-surface-variant">Discount</span>
+<span class="font-body-md text-body-md text-secondary">−140 EGP</span>
+</div>
+<div class="border-t border-white/10 my-3"></div>
+<div class="flex justify-between items-end mb-1">
+<span class="font-body-md text-body-md text-on-surface-variant pb-1">Total</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">1,510 EGP</span>
+</div>
+<div class="flex justify-end">
+<span class="font-body-md text-body-md text-on-surface-variant">New end date: 12 Nov 2026</span>
+</div>
+</div>
+</div>
+<!-- Sticky Footer -->
+<div class="absolute bottom-0 left-0 w-full bg-surface-container/95 backdrop-blur-md border-t border-white/10 px-margin-mobile py-4 z-20">
+<label class="flex items-center gap-3 mb-4 cursor-pointer w-fit">
+<input checked="" class="custom-checkbox appearance-none w-4 h-4 rounded-[4px] border border-outline-variant bg-transparent transition-colors cursor-pointer" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant select-none">Send WhatsApp confirmation</span>
+</label>
+<div class="flex gap-3">
+<button class="flex-1 py-3 px-4 rounded-xl border border-outline-variant text-on-surface font-body-lg text-body-lg font-medium hover:bg-white/5 transition-colors">
+                        Cancel
+                    </button>
+<button class="flex-[2] py-3 px-4 rounded-xl bg-primary-container text-on-primary-container font-body-lg text-body-lg font-bold hover:bg-primary transition-colors active:scale-[0.98]">
+                        Confirm renewal
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

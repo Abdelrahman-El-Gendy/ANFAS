@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sync Conflict Resolution</title>
+<!-- Google Fonts: IBM Plex Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#363432",
+                        "outline-variant": "#514536",
+                        "on-tertiary-container": "#653541",
+                        "surface-bright": "#3b3936",
+                        "on-background": "#e6e2de",
+                        "primary-fixed-dim": "#ffb956",
+                        "on-tertiary-fixed": "#340e1a",
+                        "tertiary-fixed": "#ffd9e0",
+                        "tertiary-container": "#dfa0ad",
+                        "on-primary": "#462b00",
+                        "tertiary": "#fdbbc8",
+                        "surface-dim": "#141311",
+                        "secondary": "#b5ccba",
+                        "outline": "#9e8e7c",
+                        "primary-container": "#e8a33d",
+                        "on-secondary": "#213528",
+                        "on-surface-variant": "#d6c4b0",
+                        "on-surface": "#e6e2de",
+                        "on-primary-fixed-variant": "#643f00",
+                        "on-primary-fixed": "#2a1800",
+                        "inverse-surface": "#e6e2de",
+                        "inverse-primary": "#835400",
+                        "secondary-fixed": "#d1e8d6",
+                        "on-secondary-container": "#a7bead",
+                        "tertiary-fixed-dim": "#f7b5c3",
+                        "surface-container-lowest": "#0f0e0c",
+                        "surface-container-high": "#2b2a27",
+                        "surface-container": "#211f1d",
+                        "background": "#141311",
+                        "error": "#ffb4ab",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#141311",
+                        "on-tertiary": "#4e232e",
+                        "on-secondary-fixed-variant": "#374b3e",
+                        "primary": "#ffc16c",
+                        "inverse-on-surface": "#32302e",
+                        "surface-container-low": "#1d1b19",
+                        "secondary-container": "#394e40",
+                        "on-secondary-fixed": "#0c1f14",
+                        "secondary-fixed-dim": "#b5ccba",
+                        "on-tertiary-fixed-variant": "#683844",
+                        "on-error": "#690005",
+                        "surface-tint": "#ffb956",
+                        "primary-fixed": "#ffddb5",
+                        "error-container": "#93000a",
+                        "surface-variant": "#363432",
+                        "on-primary-container": "#5f3c00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["IBM Plex Sans"],
+                        "data-mono": ["IBM Plex Sans"],
+                        "headline-sm": ["IBM Plex Sans"],
+                        "headline-lg": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Cheetah spot texture for subtle background usage */
+        .bg-texture-spots {
+            background-image: radial-gradient(circle, rgba(230,226,222,0.05) 1px, transparent 1px);
+            background-size: 8px 8px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface h-screen w-full overflow-hidden font-body-md antialiased flex flex-col relative">
+<!-- Simulated App Background (Blurred) -->
+<div class="absolute inset-0 z-0 flex flex-col opacity-30 pointer-events-none">
+<header class="h-16 border-b border-on-surface/10 flex items-center px-8 bg-surface">
+<div class="w-32 h-6 bg-surface-variant rounded"></div>
+</header>
+<main class="flex-1 p-8 grid grid-cols-12 gap-gutter">
+<div class="col-span-3 bg-surface border border-on-surface/10 rounded-lg h-[600px]"></div>
+<div class="col-span-9 bg-surface border border-on-surface/10 rounded-lg h-[600px]"></div>
+</main>
+</div>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 bg-[#0f0e0c]/80 backdrop-blur-md flex items-center justify-center z-50 p-4 sm:p-8">
+<!-- Modal Container (Layer 2) -->
+<div class="bg-surface-container-high rounded-xl w-full max-w-5xl shadow-[0_8px_24px_rgba(0,0,0,0.4)] border border-on-surface/10 flex flex-col max-h-full overflow-hidden">
+<!-- Modal Header -->
+<div class="relative px-8 py-6 border-b border-on-surface/10 bg-surface-container-highest overflow-hidden">
+<!-- Subtle Texture in Header -->
+<div class="absolute top-0 left-0 right-0 h-[120px] bg-texture-spots pointer-events-none opacity-50 mix-blend-overlay"></div>
+<div class="relative z-10 flex items-start justify-between">
+<div class="flex items-center gap-4">
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-surface border border-primary-container/30 text-primary-container shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">cloud_sync</span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">Sync Conflict Detected</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 flex items-center gap-2">
+                                Member Record: <span class="font-medium text-on-surface">Elias Thorne</span>
+<span class="text-outline-variant">•</span>
+                                ID: <span class="font-data-mono text-data-mono text-on-surface-variant">#MEM-8842</span>
+</p>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors p-2 -mr-2 rounded-md hover:bg-white/5">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<!-- Modal Body (Comparison Grid) -->
+<div class="flex-1 overflow-y-auto bg-surface-container p-8">
+<!-- Table Headers -->
+<div class="grid grid-cols-[1.5fr_2fr_2fr] gap-6 mb-4 px-4 items-end">
+<div class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Data Field</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-[18px]">smartphone</span>
+<span class="font-headline-sm text-headline-sm">On this device</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface px-2 py-1 rounded inline-block w-fit border border-on-surface/5">Modified: 2 mins ago</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-[18px]">cloud</span>
+<span class="font-headline-sm text-headline-sm">On the server</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface px-2 py-1 rounded inline-block w-fit border border-on-surface/5">Modified: 1 hr ago</span>
+</div>
+</div>
+<!-- Data Rows Container -->
+<div class="flex flex-col gap-3">
+<!-- Row: Matching Data -->
+<div class="grid grid-cols-[1.5fr_2fr_2fr] gap-6 items-center p-4 rounded-lg border border-transparent hover:bg-surface-container-high/50 transition-colors">
+<div class="font-body-md text-body-md text-on-surface-variant pl-4">Full Name</div>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container-highest/50 px-4 py-3 rounded-lg border border-on-surface/5">Elias Thorne</div>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container-highest/50 px-4 py-3 rounded-lg border border-on-surface/5 text-on-surface/70">Elias Thorne</div>
+</div>
+<!-- Row: Conflict (Highlight) -->
+<div class="grid grid-cols-[1.5fr_2fr_2fr] gap-6 items-center p-4 rounded-lg bg-surface border border-primary-container/20 relative shadow-sm">
+<!-- Structural Indicator -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container rounded-l-lg shadow-[0_0_8px_rgba(232,163,61,0.4)]"></div>
+<div class="font-body-md text-body-md text-primary-fixed-dim font-medium pl-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">warning</span> Phone Number
+                        </div>
+<!-- Device Value (Selected implicitly as focus, or just showing distinct visual weight) -->
+<div class="font-data-mono text-data-mono text-on-surface bg-surface-container px-4 py-3 rounded-lg border border-primary-container/40 ring-1 ring-primary-container/20 relative">
+                            +1 (555) 019-8234
+                            <div class="absolute -top-2.5 right-3 bg-surface-container px-1">
+<span class="font-label-caps text-label-caps text-primary-container">Differing</span>
+</div>
+</div>
+<!-- Server Value -->
+<div class="font-data-mono text-data-mono text-on-surface-variant bg-surface-container/50 px-4 py-3 rounded-lg border border-error/20 relative">
+                             +1 (555) 019-0000
+                        </div>
+</div>
+<!-- Row: Matching Data -->
+<div class="grid grid-cols-[1.5fr_2fr_2fr] gap-6 items-center p-4 rounded-lg border border-transparent hover:bg-surface-container-high/50 transition-colors">
+<div class="font-body-md text-body-md text-on-surface-variant pl-4">Membership Tier</div>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container-highest/50 px-4 py-3 rounded-lg border border-on-surface/5">Elite Pro (Monthly)</div>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container-highest/50 px-4 py-3 rounded-lg border border-on-surface/5 text-on-surface/70">Elite Pro (Monthly)</div>
+</div>
+<!-- Row: Conflict (Status Chip) -->
+<div class="grid grid-cols-[1.5fr_2fr_2fr] gap-6 items-center p-4 rounded-lg bg-surface border border-primary-container/20 relative shadow-sm">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container rounded-l-lg shadow-[0_0_8px_rgba(232,163,61,0.4)]"></div>
+<div class="font-body-md text-body-md text-primary-fixed-dim font-medium pl-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">warning</span> Status
+                        </div>
+<div class="font-body-md text-body-md bg-surface-container px-4 py-3 rounded-lg border border-primary-container/40 ring-1 ring-primary-container/20 flex items-center">
+<span class="bg-[#7A9080]/15 text-[#7A9080] font-label-caps text-label-caps px-2.5 py-1 rounded-sm uppercase tracking-wider">Active</span>
+</div>
+<div class="font-body-md text-body-md bg-surface-container/50 px-4 py-3 rounded-lg border border-error/20 flex items-center opacity-80">
+<span class="bg-error-container text-on-error-container font-label-caps text-label-caps px-2.5 py-1 rounded-sm uppercase tracking-wider">Suspended</span>
+</div>
+</div>
+<!-- Row: Conflict (Text block) -->
+<div class="grid grid-cols-[1.5fr_2fr_2fr] gap-6 items-start p-4 rounded-lg bg-surface border border-primary-container/20 relative shadow-sm mt-2">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container rounded-l-lg shadow-[0_0_8px_rgba(232,163,61,0.4)]"></div>
+<div class="font-body-md text-body-md text-primary-fixed-dim font-medium pl-4 pt-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">warning</span> Staff Notes
+                        </div>
+<div class="font-body-md text-body-md text-on-surface bg-surface-container p-4 rounded-lg border border-primary-container/40 ring-1 ring-primary-container/20 min-h-[80px]">
+                            Member requested schedule change for upcoming PT sessions due to travel. Assigned to Coach Miller.
+                        </div>
+<div class="font-body-md text-body-md text-on-surface-variant bg-surface-container/50 p-4 rounded-lg border border-error/20 min-h-[80px] italic">
+                            (Empty)
+                        </div>
+</div>
+</div>
+</div>
+<!-- Modal Footer (Actions) -->
+<div class="px-8 py-5 border-t border-on-surface/10 bg-surface-container-highest flex justify-between items-center">
+<button class="font-body-md text-body-md font-medium text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/5">
+<span class="material-symbols-outlined text-[20px]">manage_search</span> 
+                    Review fields individually
+                </button>
+<div class="flex items-center gap-4">
+<!-- Secondary Button (1px border) -->
+<button class="px-6 py-2.5 rounded-lg border border-primary-container text-primary-container font-body-md text-body-md font-medium hover:bg-primary-container/10 transition-colors focus:ring-2 focus:ring-primary-container/50 focus:outline-none">
+                        Keep Server
+                    </button>
+<!-- Primary Button (Solid, Dark Text) -->
+<button class="px-6 py-2.5 rounded-lg bg-primary-container text-[#12110F] font-body-md text-body-md font-semibold hover:bg-primary-container/90 transition-colors shadow-sm focus:ring-2 focus:ring-primary-container focus:ring-offset-2 focus:ring-offset-surface-container-highest focus:outline-none flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">save_as</span>
+                        Keep Mine
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

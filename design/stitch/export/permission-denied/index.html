@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Permission Denied - Apex Fitness</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#363432",
+                        "outline-variant": "#514536",
+                        "on-tertiary-container": "#653541",
+                        "surface-bright": "#3b3936",
+                        "on-background": "#e6e2de",
+                        "primary-fixed-dim": "#ffb956",
+                        "on-tertiary-fixed": "#340e1a",
+                        "tertiary-fixed": "#ffd9e0",
+                        "tertiary-container": "#dfa0ad",
+                        "on-primary": "#462b00",
+                        "tertiary": "#fdbbc8",
+                        "surface-dim": "#141311",
+                        "secondary": "#b5ccba",
+                        "outline": "#9e8e7c",
+                        "primary-container": "#e8a33d",
+                        "on-secondary": "#213528",
+                        "on-surface-variant": "#d6c4b0",
+                        "on-surface": "#e6e2de",
+                        "on-primary-fixed-variant": "#643f00",
+                        "on-primary-fixed": "#2a1800",
+                        "inverse-surface": "#e6e2de",
+                        "inverse-primary": "#835400",
+                        "secondary-fixed": "#d1e8d6",
+                        "on-secondary-container": "#a7bead",
+                        "tertiary-fixed-dim": "#f7b5c3",
+                        "surface-container-lowest": "#0f0e0c",
+                        "surface-container-high": "#2b2a27",
+                        "surface-container": "#211f1d",
+                        "background": "#141311",
+                        "error": "#ffb4ab",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#141311",
+                        "on-tertiary": "#4e232e",
+                        "on-secondary-fixed-variant": "#374b3e",
+                        "primary": "#ffc16c",
+                        "inverse-on-surface": "#32302e",
+                        "surface-container-low": "#1d1b19",
+                        "secondary-container": "#394e40",
+                        "on-secondary-fixed": "#0c1f14",
+                        "secondary-fixed-dim": "#b5ccba",
+                        "on-tertiary-fixed-variant": "#683844",
+                        "on-error": "#690005",
+                        "surface-tint": "#ffb956",
+                        "primary-fixed": "#ffddb5",
+                        "error-container": "#93000a",
+                        "surface-variant": "#363432",
+                        "on-primary-container": "#5f3c00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["IBM Plex Sans"],
+                        "data-mono": ["IBM Plex Sans"],
+                        "headline-sm": ["IBM Plex Sans"],
+                        "headline-lg": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "headline-md": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #12110F;
+            color: #e6e2de;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .cheetah-texture {
+            mask-image: url('data:image/svg+xml;utf8,<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="2" fill="black"/><circle cx="80" cy="50" r="3" fill="black"/><circle cx="150" cy="30" r="1.5" fill="black"/><circle cx="40" cy="120" r="2.5" fill="black"/><circle cx="120" cy="150" r="2" fill="black"/><circle cx="180" cy="100" r="1" fill="black"/><circle cx="90" cy="180" r="3" fill="black"/></svg>');
+            mask-size: 200px 200px;
+            background-color: #F5F1EA;
+            opacity: 0.05;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background relative">
+<!-- Suppressed TopNavBar/SideNavBar as this is a linear/dead-end error state screen based on guidelines -->
+<!-- Main Content Canvas -->
+<main class="flex-grow flex items-center justify-center p-margin-desktop relative z-10">
+<!-- Error Surface -->
+<div class="bg-surface border border-outline-variant/10 rounded-xl max-w-md w-full p-10 flex flex-col items-center text-center relative overflow-hidden">
+<!-- Texture Header area constraint -->
+<div class="absolute top-0 left-0 right-0 h-[120px] cheetah-texture pointer-events-none"></div>
+<!-- Lock Icon -->
+<div class="mb-6 relative z-10">
+<div class="w-16 h-16 rounded-full bg-error-container/20 flex items-center justify-center border border-error-container/30">
+<span class="material-symbols-outlined text-error font-[300]" data-icon="lock" data-weight="fill" style="font-size: 32px;">lock</span>
+</div>
+</div>
+<!-- Headlines -->
+<h1 class="font-headline-md text-headline-md text-on-surface mb-3 relative z-10">
+                You don’t have access to Recovery
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8 relative z-10">
+                Ask the gym owner to update your role
+            </p>
+<!-- Action -->
+<button class="relative z-10 w-full py-3 px-6 rounded-lg border border-primary-container text-primary-container font-body-md text-body-md font-medium hover:bg-primary-container/10 transition-colors duration-200">
+                Back to dashboard
+            </button>
+</div>
+</main>
+</body></html>

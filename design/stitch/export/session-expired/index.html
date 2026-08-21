@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Session Expired</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#363432",
+                    "outline-variant": "#514536",
+                    "on-tertiary-container": "#653541",
+                    "surface-bright": "#3b3936",
+                    "on-background": "#e6e2de",
+                    "primary-fixed-dim": "#ffb956",
+                    "on-tertiary-fixed": "#340e1a",
+                    "tertiary-fixed": "#ffd9e0",
+                    "tertiary-container": "#dfa0ad",
+                    "on-primary": "#462b00",
+                    "tertiary": "#fdbbc8",
+                    "surface-dim": "#141311",
+                    "secondary": "#b5ccba",
+                    "outline": "#9e8e7c",
+                    "primary-container": "#e8a33d",
+                    "on-secondary": "#213528",
+                    "on-surface-variant": "#d6c4b0",
+                    "on-surface": "#e6e2de",
+                    "on-primary-fixed-variant": "#643f00",
+                    "on-primary-fixed": "#2a1800",
+                    "inverse-surface": "#e6e2de",
+                    "inverse-primary": "#835400",
+                    "secondary-fixed": "#d1e8d6",
+                    "on-secondary-container": "#a7bead",
+                    "tertiary-fixed-dim": "#f7b5c3",
+                    "surface-container-lowest": "#0f0e0c",
+                    "surface-container-high": "#2b2a27",
+                    "surface-container": "#211f1d",
+                    "background": "#141311",
+                    "error": "#ffb4ab",
+                    "on-error-container": "#ffdad6",
+                    "surface": "#141311",
+                    "on-tertiary": "#4e232e",
+                    "on-secondary-fixed-variant": "#374b3e",
+                    "primary": "#ffc16c",
+                    "inverse-on-surface": "#32302e",
+                    "surface-container-low": "#1d1b19",
+                    "secondary-container": "#394e40",
+                    "on-secondary-fixed": "#0c1f14",
+                    "secondary-fixed-dim": "#b5ccba",
+                    "on-tertiary-fixed-variant": "#683844",
+                    "on-error": "#690005",
+                    "surface-tint": "#ffb956",
+                    "primary-fixed": "#ffddb5",
+                    "error-container": "#93000a",
+                    "surface-variant": "#363432",
+                    "on-primary-container": "#5f3c00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "40px",
+                    "gutter": "24px",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "container-max": "1440px"
+            },
+            "fontFamily": {
+                    "body-md": ["IBM Plex Sans", "sans-serif"],
+                    "data-mono": ["IBM Plex Sans", "monospace"],
+                    "headline-sm": ["IBM Plex Sans", "sans-serif"],
+                    "headline-lg": ["IBM Plex Sans", "sans-serif"],
+                    "label-caps": ["IBM Plex Sans", "sans-serif"],
+                    "body-lg": ["IBM Plex Sans", "sans-serif"],
+                    "headline-md": ["IBM Plex Sans", "sans-serif"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Import IBM Plex Sans */
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+        
+        /* Subtle texture for background context */
+        .bg-texture {
+            background-image: radial-gradient(circle at center, rgba(230, 226, 222, 0.03) 0%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen flex items-center justify-center relative overflow-hidden bg-texture">
+<!-- Blurred Background Context (Simulating the underlying app) -->
+<div class="absolute inset-0 z-0 flex flex-col p-margin-desktop opacity-20 filter blur-sm pointer-events-none">
+<div class="h-16 w-full border-b border-on-background/10 mb-8 flex justify-between items-center">
+<div class="w-32 h-6 bg-surface-container-high rounded-DEFAULT"></div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-surface-container-high"></div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high"></div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-gutter flex-1">
+<div class="col-span-3 h-full bg-surface-container rounded-xl border border-on-background/10"></div>
+<div class="col-span-9 flex flex-col gap-gutter">
+<div class="h-48 w-full bg-surface-container rounded-xl border border-on-background/10"></div>
+<div class="h-full w-full bg-surface-container rounded-xl border border-on-background/10"></div>
+</div>
+</div>
+</div>
+<!-- Dark Overlay -->
+<div class="absolute inset-0 bg-background/60 backdrop-blur-sm z-10"></div>
+<!-- Modal Dialog -->
+<main class="relative z-20 w-full max-w-[400px] mx-margin-mobile">
+<div class="bg-surface-container-high border border-on-background/10 rounded-xl p-8 flex flex-col items-center text-center shadow-[0_8px_24px_rgba(0,0,0,0.4)]">
+<!-- Icon -->
+<div class="w-16 h-16 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary-container text-3xl" style="font-variation-settings: 'FILL' 1;">
+                    lock_clock
+                </span>
+</div>
+<!-- Content -->
+<h1 class="font-headline-md text-headline-md text-on-surface mb-2">
+                Your session ended
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8">
+                Sign in again to continue
+            </p>
+<!-- Action -->
+<button class="w-full bg-primary-container text-background font-body-md text-body-md font-medium rounded-lg py-3 px-6 hover:bg-primary-container/90 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-container/50 focus:ring-offset-2 focus:ring-offset-surface-container-high" type="button">
+                Sign in
+            </button>
+</div>
+</main>
+</body></html>

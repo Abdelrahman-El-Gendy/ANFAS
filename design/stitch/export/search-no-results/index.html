@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Search Results - Titan Gym</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#363432",
+                        "outline-variant": "#514536",
+                        "on-tertiary-container": "#653541",
+                        "surface-bright": "#3b3936",
+                        "on-background": "#e6e2de",
+                        "primary-fixed-dim": "#ffb956",
+                        "on-tertiary-fixed": "#340e1a",
+                        "tertiary-fixed": "#ffd9e0",
+                        "tertiary-container": "#dfa0ad",
+                        "on-primary": "#462b00",
+                        "tertiary": "#fdbbc8",
+                        "surface-dim": "#141311",
+                        "secondary": "#b5ccba",
+                        "outline": "#9e8e7c",
+                        "primary-container": "#e8a33d",
+                        "on-secondary": "#213528",
+                        "on-surface-variant": "#d6c4b0",
+                        "on-surface": "#e6e2de",
+                        "on-primary-fixed-variant": "#643f00",
+                        "on-primary-fixed": "#2a1800",
+                        "inverse-surface": "#e6e2de",
+                        "inverse-primary": "#835400",
+                        "secondary-fixed": "#d1e8d6",
+                        "on-secondary-container": "#a7bead",
+                        "tertiary-fixed-dim": "#f7b5c3",
+                        "surface-container-lowest": "#0f0e0c",
+                        "surface-container-high": "#2b2a27",
+                        "surface-container": "#211f1d",
+                        "background": "#141311",
+                        "error": "#ffb4ab",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#141311",
+                        "on-tertiary": "#4e232e",
+                        "on-secondary-fixed-variant": "#374b3e",
+                        "primary": "#ffc16c",
+                        "inverse-on-surface": "#32302e",
+                        "surface-container-low": "#1d1b19",
+                        "secondary-container": "#394e40",
+                        "on-secondary-fixed": "#0c1f14",
+                        "secondary-fixed-dim": "#b5ccba",
+                        "on-tertiary-fixed-variant": "#683844",
+                        "on-error": "#690005",
+                        "surface-tint": "#ffb956",
+                        "primary-fixed": "#ffddb5",
+                        "error-container": "#93000a",
+                        "surface-variant": "#363432",
+                        "on-primary-container": "#5f3c00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["IBM Plex Sans", "sans-serif"],
+                        "data-mono": ["IBM Plex Sans", "sans-serif"],
+                        "headline-sm": ["IBM Plex Sans", "sans-serif"],
+                        "headline-lg": ["IBM Plex Sans", "sans-serif"],
+                        "label-caps": ["IBM Plex Sans", "sans-serif"],
+                        "body-lg": ["IBM Plex Sans", "sans-serif"],
+                        "headline-md": ["IBM Plex Sans", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Subtle texture for empty state backdrop to match design system warmth */
+        .bg-texture-dots {
+            background-image: radial-gradient(circle at center, rgba(245, 241, 234, 0.05) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md h-screen w-full flex overflow-hidden antialiased selection:bg-primary-container/30">
+<!-- Desktop Side Navigation (Shared Component) -->
+<aside class="hidden md:flex flex-col h-full w-64 shrink-0 bg-surface-container border-r border-outline-variant/10 py-6 px-4 z-20">
+<!-- Header -->
+<div class="mb-8 px-2">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-8 h-8 rounded-DEFAULT bg-primary/10 flex items-center justify-center border border-primary/20">
+<span class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Titan Gym</h1>
+</div>
+<p class="font-label-caps text-label-caps text-outline uppercase pl-11">Staff Portal</p>
+</div>
+<!-- Primary CTA -->
+<button class="mb-6 w-full bg-primary-container text-background py-2.5 px-4 rounded-DEFAULT font-body-md text-body-md font-medium hover:bg-primary transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">add</span>
+            New Entry
+        </button>
+<!-- Navigation Links -->
+<nav class="flex-1 flex flex-col gap-1 overflow-y-auto pr-2 custom-scrollbar">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface transition-colors">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<!-- Active State Navigation -->
+<a class="flex items-center gap-3 px-3 py-2.5 text-primary border-r-2 border-primary bg-primary/5 transition-all duration-150 relative" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-body-md text-body-md font-medium">Members</span>
+<!-- Internal subtle highlight for depth -->
+<div class="absolute inset-0 bg-gradient-to-r from-transparent to-primary/5 pointer-events-none"></div>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface transition-colors">fitness_center</span>
+<span class="font-body-md text-body-md">Classes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface transition-colors">card_membership</span>
+<span class="font-body-md text-body-md">Subscriptions</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface transition-colors">document_scanner</span>
+<span class="font-body-md text-body-md">OCR Intake</span>
+</a>
+</nav>
+<!-- Footer Navigation -->
+<div class="mt-auto pt-4 border-t border-outline-variant/10 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface transition-colors">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-DEFAULT text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-all duration-150 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-on-surface transition-colors">contact_support</span>
+<span class="font-body-md text-body-md">Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface relative z-10">
+<!-- Top Application Bar / Search Context -->
+<header class="h-16 px-margin-desktop border-b border-outline-variant/10 flex items-center justify-between shrink-0 bg-surface/80 backdrop-blur-sm z-20">
+<!-- Search Input Mirror -->
+<div class="flex-1 max-w-xl">
+<div class="relative flex items-center w-full h-10 bg-background border border-primary/50 rounded-DEFAULT overflow-hidden transition-colors ring-1 ring-primary/20">
+<div class="pl-3 pr-2 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="flex-1 h-full bg-transparent border-none outline-none text-on-surface font-body-md px-2 focus:ring-0 w-full" readonly="" type="text" value="khaled"/>
+<button class="px-3 flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" title="Clear input">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- Trailing Actions (Standard structural elements) -->
+<div class="flex items-center gap-4 pl-4">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-on-surface/5 hover:text-on-surface transition-colors relative">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary-container rounded-full"></span>
+</button>
+<div class="w-px h-6 bg-outline-variant/20"></div>
+<button class="w-8 h-8 rounded-full bg-surface-container border border-outline-variant/20 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-outline text-[20px]">person</span>
+</button>
+</div>
+</header>
+<!-- Empty State Container -->
+<div class="flex-1 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+<!-- Subtle architectural texture in the background top (per design system warmth) -->
+<div class="absolute top-0 inset-x-0 h-[300px] bg-texture-dots opacity-30 pointer-events-none mask-image-b"></div>
+<!-- Content Container -->
+<div class="max-w-md w-full text-center flex flex-col items-center z-10">
+<!-- Icon container acting as structural anchor without being an illustration -->
+<div class="w-16 h-16 rounded-full bg-surface-container border border-outline-variant/10 flex items-center justify-center mb-6 shadow-sm shadow-black/20">
+<span class="material-symbols-outlined text-[32px] text-outline">person_search</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-3 tracking-tight">
+                    No members match "khaled"
+                </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8 max-w-sm mx-auto leading-relaxed">
+                    We couldn't find any member profiles matching this search query. Try adjusting your spelling or searching by member ID.
+                </p>
+<!-- Ghost Button Action -->
+<button class="font-body-md text-body-md text-on-surface-variant hover:text-on-surface hover:bg-on-surface/5 px-6 py-2.5 rounded-DEFAULT transition-all duration-200 border border-transparent flex items-center gap-2 group">
+<span class="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    Clear search
+                </button>
+</div>
+</div>
+</main>
+<!-- Utility for masking the background pattern smoothly -->
+<style>
+        .mask-image-b {
+            -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+        }
+    </style>
+</body></html>

@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Weekly Class Schedule - Elite Gym Staff</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-container": "#211f1d",
+                "error-container": "#93000a",
+                "on-secondary-container": "#a7bead",
+                "on-secondary-fixed-variant": "#374b3e",
+                "on-error-container": "#ffdad6",
+                "inverse-primary": "#835400",
+                "surface-container-high": "#2b2a27",
+                "surface": "#141311",
+                "tertiary-fixed-dim": "#f7b5c3",
+                "surface-container-lowest": "#0f0e0c",
+                "secondary-fixed-dim": "#b5ccba",
+                "primary-fixed-dim": "#ffb956",
+                "on-secondary-fixed": "#0c1f14",
+                "on-primary-container": "#5f3c00",
+                "tertiary-container": "#dfa0ad",
+                "primary-container": "#e8a33d",
+                "on-tertiary-fixed-variant": "#683844",
+                "on-tertiary": "#4e232e",
+                "surface-bright": "#3b3936",
+                "on-surface-variant": "#d6c4b0",
+                "surface-container-highest": "#363432",
+                "on-surface": "#e6e2de",
+                "on-primary-fixed-variant": "#643f00",
+                "tertiary": "#fdbbc8",
+                "error": "#ffb4ab",
+                "background": "#141311",
+                "secondary-fixed": "#d1e8d6",
+                "primary": "#ffc16c",
+                "inverse-on-surface": "#32302e",
+                "secondary": "#b5ccba",
+                "on-tertiary-fixed": "#340e1a",
+                "primary-fixed": "#ffddb5",
+                "on-tertiary-container": "#653541",
+                "outline": "#9e8e7c",
+                "secondary-container": "#394e40",
+                "outline-variant": "#514536",
+                "on-error": "#690005",
+                "on-background": "#e6e2de",
+                "on-secondary": "#213528",
+                "surface-variant": "#363432",
+                "surface-tint": "#ffb956",
+                "tertiary-fixed": "#ffd9e0",
+                "surface-dim": "#141311",
+                "surface-container-low": "#1d1b19",
+                "on-primary-fixed": "#2a1800",
+                "on-primary": "#462b00",
+                "inverse-surface": "#e6e2de",
+                "brand-sage": "#7A9080",
+                "brand-rose": "#B87D8A"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "margin-desktop": "40px",
+                "gutter": "24px",
+                "container-max": "1440px",
+                "unit": "4px",
+                "margin-mobile": "16px"
+        },
+        "fontFamily": {
+                "body-md": [
+                        "IBM Plex Sans"
+                ],
+                "label-caps": [
+                        "IBM Plex Sans"
+                ],
+                "headline-md": [
+                        "IBM Plex Sans"
+                ],
+                "headline-sm": [
+                        "IBM Plex Sans"
+                ],
+                "data-mono": [
+                        "IBM Plex Sans"
+                ],
+                "body-lg": [
+                        "IBM Plex Sans"
+                ],
+                "headline-lg": [
+                        "IBM Plex Sans"
+                ]
+        },
+        "fontSize": {
+                "body-md": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-caps": [
+                        "11px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.08em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-sm": [
+                        "20px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "500"
+                        }
+                ],
+                "data-mono": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "600"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+    body {
+        background-color: #12110F;
+        color: #e6e2de;
+        font-family: 'IBM Plex Sans', sans-serif;
+    }
+    
+    /* Cheetah texture for empty states/headers */
+    .texture-cheetah {
+        position: relative;
+    }
+    .texture-cheetah::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 120px;
+        background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10c2-3 5-1 7 2s-1 5-4 4-4-5-3-6zm20 30c-2 3-5 1-7-2s1-5 4-4 4 5 3 6zm40-10c2-3 5-1 7 2s-1 5-4 4-4-5-3-6zm-10 40c-2 3-5 1-7-2s1-5 4-4 4 5 3 6zm30-20c2-3 5-1 7 2s-1 5-4 4-4-5-3-6z' fill='%23F5F1EA' fill-opacity='0.1'/%3E%3C/svg%3E");
+        opacity: 0.05;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #141311;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #363432;
+        border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #514536;
+    }
+
+    /* Grid layout */
+    .schedule-grid {
+        display: grid;
+        grid-template-columns: 60px repeat(7, 1fr);
+        grid-template-rows: 40px repeat(17, 80px); /* 17 hours from 06:00 to 22:00 */
+        border-top: 1px solid rgba(245, 241, 234, 0.05);
+        position: relative;
+    }
+
+    .time-row {
+        grid-column: 1 / -1;
+        border-bottom: 1px solid rgba(245, 241, 234, 0.05);
+        pointer-events: none;
+    }
+
+    .time-label {
+        position: relative;
+        top: -10px;
+        font-family: 'IBM Plex Sans', monospace;
+        font-size: 12px;
+        color: #d6c4b0;
+        text-align: right;
+        padding-right: 12px;
+    }
+
+    .day-col {
+        border-right: 1px solid rgba(245, 241, 234, 0.05);
+        position: relative;
+    }
+    
+    .day-col.today {
+        background-color: rgba(245, 241, 234, 0.02);
+    }
+    
+    .day-header {
+        border-bottom: 1px solid rgba(245, 241, 234, 0.1);
+        text-align: center;
+        padding-top: 12px;
+    }
+    
+    .day-header.today {
+        color: #e8a33d;
+    }
+
+    /* Class Block Styling */
+    .class-block {
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        border-radius: 8px;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        border: 1px solid rgba(245, 241, 234, 0.1);
+        transition: transform 0.1s ease, border-color 0.1s ease;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    .class-block:hover {
+        transform: translateY(-2px);
+        border-color: rgba(245, 241, 234, 0.3);
+    }
+
+    .class-general {
+        background-color: rgba(232, 163, 61, 0.1); /* Amber 10% */
+        border-left: 3px solid #e8a33d;
+    }
+    .class-general .class-title { color: #e8a33d; }
+    
+    .class-womens {
+        background-color: rgba(184, 125, 138, 0.15); /* Rose 15% */
+        border-left: 3px solid #b87d8a;
+    }
+    .class-womens .class-title { color: #b87d8a; }
+    
+    .class-recovery {
+        background-color: rgba(122, 144, 128, 0.15); /* Sage 15% */
+        border-left: 3px solid #7a9080;
+    }
+    .class-recovery .class-title { color: #7a9080; }
+
+    .capacity-bar-container {
+        height: 2px;
+        width: 100%;
+        background-color: rgba(245, 241, 234, 0.1);
+        margin-top: auto;
+        border-radius: 1px;
+    }
+
+    .capacity-bar-fill {
+        height: 100%;
+        border-radius: 1px;
+    }
+    .class-general .capacity-bar-fill { background-color: #e8a33d; }
+    .class-womens .capacity-bar-fill { background-color: #b87d8a; }
+    .class-recovery .capacity-bar-fill { background-color: #7a9080; }
+    
+    .capacity-full {
+        background-color: #93000a !important; /* Error color for full capacity */
+    }
+
+    /* Half width for overlapping */
+    .half-width-left { right: 50%; margin-right: 2px; }
+    .half-width-right { left: 50%; margin-left: 2px; }
+
+</style>
+</head>
+<body class="flex bg-background min-h-screen font-body-md text-on-surface overflow-hidden">
+<!-- SideNavBar -->
+<nav class="bg-surface dark:bg-surface border-r border-on-surface/10 flex flex-col h-screen py-6 px-4 fixed left-0 w-64 z-50">
+<!-- Brand Logo -->
+<div class="mb-10 px-4">
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary tracking-tight">Staff Portal</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-1">Elite Management</p>
+</div>
+<!-- Main Navigation Tabs -->
+<div class="flex-1 overflow-y-auto space-y-1">
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-variant/50 transition-colors scale-95 active:scale-90 transition-transform group" href="#">
+<span class="material-symbols-outlined mr-4 group-hover:text-primary transition-colors">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-variant/50 transition-colors scale-95 active:scale-90 transition-transform group" href="#">
+<span class="material-symbols-outlined mr-4 group-hover:text-primary transition-colors">group</span>
+                Members
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-variant/50 transition-colors scale-95 active:scale-90 transition-transform group" href="#">
+<span class="material-symbols-outlined mr-4 group-hover:text-primary transition-colors">payments</span>
+                Subscriptions
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-variant/50 transition-colors scale-95 active:scale-90 transition-transform group" href="#">
+<span class="material-symbols-outlined mr-4 group-hover:text-primary transition-colors">assignment</span>
+                Intake
+            </a>
+<!-- Active Tab -->
+<a class="flex items-center px-4 py-3 rounded-lg bg-surface-variant/30 text-primary font-bold border-r-2 border-primary scale-95 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined mr-4" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+                Classes
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-variant/50 transition-colors scale-95 active:scale-90 transition-transform group" href="#">
+<span class="material-symbols-outlined mr-4 group-hover:text-primary transition-colors">self_care</span>
+                Recovery
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-variant/50 transition-colors scale-95 active:scale-90 transition-transform group" href="#">
+<span class="material-symbols-outlined mr-4 group-hover:text-primary transition-colors">fitness_center</span>
+                Equipment
+            </a>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant font-body-md hover:bg-surface-variant/50 transition-colors scale-95 active:scale-90 transition-transform group" href="#">
+<span class="material-symbols-outlined mr-4 group-hover:text-primary transition-colors">campaign</span>
+                Announcements
+            </a>
+</div>
+<!-- Footer Actions -->
+<div class="mt-auto pt-6 border-t border-on-surface/10 space-y-4">
+<button class="w-full bg-primary-container text-on-primary-container font-headline-sm text-headline-sm py-3 rounded-xl hover:bg-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined mr-2">add</span>
+                New Check-in
+            </button>
+<div class="space-y-1">
+<a class="flex items-center px-4 py-2 text-sm text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px] mr-3">settings</span>
+                    Settings
+                </a>
+<a class="flex items-center px-4 py-2 text-sm text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px] mr-3">help</span>
+                    Support
+                </a>
+</div>
+<!-- User Profile Snippet -->
+<div class="flex items-center px-4 pt-2">
+<img alt="Staff Member Profile" class="w-8 h-8 rounded-full border border-outline/30" data-alt="A small circular avatar of a professional gym staff member, professional lighting, modern minimalist style, sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhB8P_5wTvZtorhYa189GEbrOzupB3uz1IZR_02mcFCnhPbUI7g-4e_-d6qiWEP9Jm-rHkpvwm4bGts2bH04axk3q3qpXP87QlT3zuAQ6fA62n4Ig1aTL__LyK8pRs4bM8USQrx4OWU5ZqHXvFwB-n4kfb8Sfbvk7VhCcSp_TYS0yPxNmvrq_c5Hncx4hs36IKCR7utotQRRztlwy95MU0wD2HOn1kUYlEmYR8f3ehgi0IszkP7FcR"/>
+<div class="ml-3">
+<p class="text-sm font-semibold text-on-surface">Alex Mercer</p>
+<p class="text-xs text-on-surface-variant">Head Coach</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-64 flex flex-col h-screen overflow-hidden bg-background">
+<!-- TopNavBar -->
+<header class="bg-surface-container dark:bg-surface-container border-b border-on-surface/10 flex justify-between items-center h-16 px-margin-desktop w-full z-40 shrink-0">
+<div class="flex items-center">
+<h2 class="font-headline-md text-headline-md font-semibold text-on-surface mr-6">Elite Gym Staff</h2>
+</div>
+<div class="flex items-center space-x-6">
+<!-- Search Bar (on_left configuration usually implies left of actions) -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="bg-background border border-on-surface/10 rounded-xl pl-10 pr-4 py-2 text-sm text-on-surface focus:border-primary focus:ring-0 w-64 transition-colors placeholder:text-on-surface-variant/50" placeholder="Search classes, members..." type="text"/>
+</div>
+<div class="flex items-center space-x-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors opacity-80 active:opacity-100">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors opacity-80 active:opacity-100">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Page Header & Filters -->
+<div class="px-margin-desktop py-6 shrink-0 texture-cheetah bg-surface relative z-10 border-b border-on-surface/10">
+<div class="flex justify-between items-end relative z-10">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-4">Weekly Schedule</h1>
+<div class="flex items-center space-x-4">
+<!-- Date Navigator -->
+<div class="flex items-center bg-surface-container rounded-xl border border-on-surface/10 p-1">
+<button class="p-1 rounded-lg hover:bg-surface-variant/50 text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<span class="font-headline-sm text-headline-sm px-4 text-on-surface">10 – 16 Aug 2026</span>
+<button class="p-1 rounded-lg hover:bg-surface-variant/50 text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<!-- Today Chip -->
+<button class="px-4 py-2 rounded-xl bg-surface-container border border-on-surface/10 text-sm font-semibold hover:border-primary/50 hover:text-primary transition-colors">
+                            Today
+                        </button>
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<!-- Filters -->
+<div class="flex space-x-3">
+<div class="relative">
+<select class="appearance-none bg-surface border border-on-surface/10 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-on-surface focus:border-primary focus:ring-0 cursor-pointer hover:border-on-surface/30 transition-colors">
+<option value="">All Coaches</option>
+<option value="tarek">Coach Tarek</option>
+<option value="omar">Coach Omar</option>
+<option value="nour">Coach Nour</option>
+<option value="sarah">Coach Sarah</option>
+<option value="hana">Coach Hana</option>
+<option value="zeyad">Coach Zeyad</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">arrow_drop_down</span>
+</div>
+<div class="relative">
+<select class="appearance-none bg-surface border border-on-surface/10 rounded-xl pl-4 pr-10 py-2.5 text-sm font-medium text-on-surface focus:border-primary focus:ring-0 cursor-pointer hover:border-on-surface/30 transition-colors">
+<option value="">All Rooms</option>
+<option value="studio1">Studio 1 (HIIT)</option>
+<option value="studio2">Studio 2 (Mind/Body)</option>
+<option value="weights">Weight Floor</option>
+<option value="recovery">Recovery Zone</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">arrow_drop_down</span>
+</div>
+</div>
+<!-- Primary CTA -->
+<button class="bg-primary text-surface-container-lowest font-headline-sm text-headline-sm px-6 py-2.5 rounded-xl hover:bg-primary-container transition-colors flex items-center font-semibold">
+<span class="material-symbols-outlined mr-2">add</span>
+                        Add class
+                    </button>
+</div>
+</div>
+</div>
+<!-- Schedule Canvas -->
+<div class="flex-1 overflow-y-auto overflow-x-hidden relative bg-surface-container-low">
+<div class="schedule-grid min-w-[1000px] h-[1400px]"> <!-- 17 hours * 80px + header -->
+<!-- Day Headers (Row 1) -->
+<div class="col-start-1 row-start-1 border-b border-r border-on-surface/10"></div>
+<div class="day-col col-start-2 row-start-1 day-header font-label-caps text-label-caps text-on-surface-variant">SAT 10</div>
+<div class="day-col col-start-3 row-start-1 day-header font-label-caps text-label-caps text-on-surface-variant">SUN 11</div>
+<div class="day-col col-start-4 row-start-1 day-header font-label-caps text-label-caps text-on-surface-variant">MON 12</div>
+<div class="day-col col-start-5 row-start-1 day-header today font-label-caps text-label-caps font-bold">TUE 13 (TODAY)</div>
+<div class="day-col col-start-6 row-start-1 day-header font-label-caps text-label-caps text-on-surface-variant">WED 14</div>
+<div class="day-col col-start-7 row-start-1 day-header font-label-caps text-label-caps text-on-surface-variant">THU 15</div>
+<div class="day-col col-start-8 row-start-1 day-header font-label-caps text-label-caps text-on-surface-variant border-r-0">FRI 16</div>
+<!-- Time Grid Lines (Rows 2-18) -->
+<!-- Generate 17 time rows -->
+<div class="time-row row-start-2"><div class="time-label">06:00</div></div>
+<div class="time-row row-start-3"><div class="time-label">07:00</div></div>
+<div class="time-row row-start-4"><div class="time-label">08:00</div></div>
+<div class="time-row row-start-5"><div class="time-label">09:00</div></div>
+<div class="time-row row-start-6"><div class="time-label">10:00</div></div>
+<div class="time-row row-start-7"><div class="time-label">11:00</div></div>
+<div class="time-row row-start-8"><div class="time-label">12:00</div></div>
+<div class="time-row row-start-9"><div class="time-label">13:00</div></div>
+<div class="time-row row-start-10"><div class="time-label">14:00</div></div>
+<div class="time-row row-start-11"><div class="time-label">15:00</div></div>
+<div class="time-row row-start-12"><div class="time-label">16:00</div></div>
+<div class="time-row row-start-13"><div class="time-label">17:00</div></div>
+<div class="time-row row-start-14"><div class="time-label">18:00</div></div>
+<div class="time-row row-start-15"><div class="time-label">19:00</div></div>
+<div class="time-row row-start-16"><div class="time-label">20:00</div></div>
+<div class="time-row row-start-17"><div class="time-label">21:00</div></div>
+<div class="time-row row-start-18"><div class="time-label">22:00</div></div>
+<!-- Day Columns Backgrounds (for borders and 'today' highlight) -->
+<div class="day-col col-start-2 row-start-2 row-span-17"></div>
+<div class="day-col col-start-3 row-start-2 row-span-17"></div>
+<div class="day-col col-start-4 row-start-2 row-span-17"></div>
+<div class="day-col col-start-5 row-start-2 row-span-17 today"></div>
+<div class="day-col col-start-6 row-start-2 row-span-17"></div>
+<div class="day-col col-start-7 row-start-2 row-span-17"></div>
+<div class="day-col col-start-8 row-start-2 row-span-17 border-r-0"></div>
+<!-- Current Time Indicator Line (Assuming 10:30 on Tuesday) -->
+<div class="absolute left-0 right-0 h-px bg-primary z-20 pointer-events-none" style="top: 400px;"> <!-- 40px header + 4.5 hours * 80px -->
+<div class="absolute left-0 -top-1.5 w-3 h-3 rounded-full bg-primary"></div>
+</div>
+<!-- CLASS BLOCKS -->
+<!-- Saturday (Col 2) -->
+<!-- 08:00 - 09:00 -->
+<div class="class-block class-general col-start-2" style="top: 200px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">HIIT</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Tarek</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">14/20</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 70%;"></div>
+</div>
+</div>
+</div>
+<!-- 10:00 - 11:30 (1.5 hrs) -->
+<div class="class-block class-womens col-start-2" style="top: 360px; height: 120px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">Yoga (Women)</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Sarah</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">8/12</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 66%;"></div>
+</div>
+</div>
+</div>
+<!-- Sunday (Col 3) -->
+<!-- 07:00 - 08:00 -->
+<div class="class-block class-recovery col-start-3" style="top: 120px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">Mobility &amp; Recovery</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Hana</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">5/10</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 50%;"></div>
+</div>
+</div>
+</div>
+<!-- 18:00 - 19:00 OVERLAPPING -->
+<div class="class-block class-general col-start-3 half-width-left" style="top: 1000px; height: 80px;">
+<div>
+<div class="font-headline-sm text-xs font-semibold class-title leading-tight truncate">Power Lifting</div>
+<div class="text-[10px] text-on-surface-variant mt-1 truncate">Coach Omar</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">18/20</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 90%;"></div>
+</div>
+</div>
+</div>
+<div class="class-block class-womens col-start-3 half-width-right" style="top: 1000px; height: 80px;">
+<div>
+<div class="font-headline-sm text-xs font-semibold class-title leading-tight truncate">Pilates (W)</div>
+<div class="text-[10px] text-on-surface-variant mt-1 truncate">Coach Nour</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-error mb-1 font-data-mono font-bold">12/12</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill capacity-full" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+<!-- Monday (Col 4) -->
+<!-- 06:00 - 07:00 -->
+<div class="class-block class-general col-start-4" style="top: 40px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">HIIT</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Tarek</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">19/20</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 95%;"></div>
+</div>
+</div>
+</div>
+<!-- 17:00 - 18:00 -->
+<div class="class-block class-recovery col-start-4" style="top: 920px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">Ice Bath Prep</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Zeyad</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">3/6</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 50%;"></div>
+</div>
+</div>
+</div>
+<!-- Tuesday (TODAY) (Col 5) -->
+<!-- 09:00 - 10:00 (Past class) -->
+<div class="class-block class-womens col-start-5 opacity-60" style="top: 280px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">Pilates (Women)</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Nour</div>
+<div class="text-[10px] text-brand-rose mt-1 font-semibold flex items-center"><span class="material-symbols-outlined text-[12px] mr-1">group_add</span> Waitlist: 3</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">12/12</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill capacity-full" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+<!-- 12:00 - 13:00 -->
+<div class="class-block class-general col-start-5" style="top: 520px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">Power Lifting</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Omar</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">10/20</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 50%;"></div>
+</div>
+</div>
+</div>
+<!-- 18:30 - 19:30 -->
+<div class="class-block class-general col-start-5" style="top: 1040px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">HIIT</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Tarek</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">15/20</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 75%;"></div>
+</div>
+</div>
+</div>
+<!-- Wednesday (Col 6) -->
+<!-- 07:00 - 08:00 -->
+<div class="class-block class-recovery col-start-6" style="top: 120px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">Mobility &amp; Recovery</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Hana</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">8/10</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 80%;"></div>
+</div>
+</div>
+</div>
+<!-- 19:00 - 20:00 -->
+<div class="class-block class-womens col-start-6" style="top: 1080px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">Yoga (Women)</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Sarah</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">4/12</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 33%;"></div>
+</div>
+</div>
+</div>
+<!-- Thursday (Col 7) -->
+<!-- 06:00 - 07:00 -->
+<div class="class-block class-general col-start-7" style="top: 40px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">Power Lifting</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Omar</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">12/20</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill" style="width: 60%;"></div>
+</div>
+</div>
+</div>
+<!-- 17:30 - 18:30 -->
+<div class="class-block class-recovery col-start-7" style="top: 960px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">Ice Bath Prep</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Zeyad</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">6/6</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill capacity-full" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+<!-- Friday (Col 8) -->
+<!-- 10:00 - 11:00 -->
+<div class="class-block class-general col-start-8" style="top: 360px; height: 80px;">
+<div>
+<div class="font-headline-sm text-sm font-semibold class-title leading-tight">HIIT Special</div>
+<div class="text-xs text-on-surface-variant mt-1">Coach Tarek</div>
+</div>
+<div>
+<div class="text-[10px] text-right text-on-surface-variant mb-1 font-data-mono">20/20</div>
+<div class="capacity-bar-container">
+<div class="capacity-bar-fill capacity-full" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Legend (Fixed to bottom left of scroll area) -->
+<div class="sticky bottom-6 left-6 inline-flex bg-surface-container-high border border-on-surface/10 rounded-xl px-4 py-3 shadow-lg z-30 mt-8 mb-6 ml-6">
+<div class="flex space-x-6">
+<div class="flex items-center">
+<div class="w-3 h-3 rounded-full bg-primary mr-2"></div>
+<span class="text-xs text-on-surface-variant font-medium">General</span>
+</div>
+<div class="flex items-center">
+<div class="w-3 h-3 rounded-full bg-brand-rose mr-2"></div>
+<span class="text-xs text-on-surface-variant font-medium">Women's Only</span>
+</div>
+<div class="flex items-center">
+<div class="w-3 h-3 rounded-full bg-brand-sage mr-2"></div>
+<span class="text-xs text-on-surface-variant font-medium">Recovery</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
