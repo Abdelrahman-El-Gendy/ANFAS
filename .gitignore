@@ -17,3 +17,40 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+
+# --- Signing material: never commit -----------------------------------------------
+# Added before any keystore or certificate exists, so there is no window in which
+# signing material could be committed by accident.
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.p8
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.provisionprofile
+keystore.properties
+signing.properties
+!keystore.properties.template
+
+# --- Local, machine-specific config ------------------------------------------------
+app/iosApp/Configuration/Local.xcconfig
+!app/iosApp/Configuration/Local.xcconfig.template
+.env
+.env.*
+!.env.template
+
+# --- Release outputs: archive as CI artifacts, never commit ------------------------
+# mapping.txt in particular must be retained per release, but out of git.
+**/outputs/mapping/
+
+# --- OpenWolf transient state ------------------------------------------------------
+# The knowledge files (cerebrum, anatomy, buglog, memory) ARE tracked — they are
+# project knowledge. These four are per-run state and would churn every session.
+.wolf/token-ledger.json
+.wolf/cron-state.json
+.wolf/designqc-report.json
+.wolf/suggestions.json
+.wolf/designqc-captures/
