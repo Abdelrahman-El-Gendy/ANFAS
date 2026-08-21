@@ -5,10 +5,10 @@ import androidx.room3.ConstructedBy
 import androidx.room3.Database
 import androidx.room3.RoomDatabase
 import androidx.room3.RoomDatabaseConstructor
+import com.anfas.core.database.migrations.DropPlaceholderTable
 
 @Database(
     entities = [
-        PlaceholderEntity::class,
         MemberEntity::class,
         ReminderEntity::class,
         SubscriptionPlanEntity::class,
@@ -16,7 +16,7 @@ import androidx.room3.RoomDatabaseConstructor
         IntakeBatchEntity::class,
         IntakeRowEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
     // v2 adds the `members` table. Adding a table needs no hand-written logic, but the
     // migration is declared rather than falling back to a destructive recreate — the
@@ -32,12 +32,14 @@ import androidx.room3.RoomDatabaseConstructor
         // carries a CASCADE foreign key, so its creation order matters and Room handles that
         // only because the parent is declared in the same migration.
         AutoMigration(from = 3, to = 4),
+        // v5 drops `placeholder`, which only ever existed to prove KSP codegen worked on every
+        // target. @DeleteTable needs the spec below because Room cannot tell a dropped table
+        // from a renamed one.
+        AutoMigration(from = 4, to = 5, spec = DropPlaceholderTable::class),
     ],
 )
 @ConstructedBy(AnfasDatabaseConstructor::class)
 abstract class AnfasDatabase : RoomDatabase() {
-    abstract fun placeholderDao(): PlaceholderDao
-
     abstract fun memberDao(): MemberDao
 
     abstract fun reminderDao(): ReminderDao
