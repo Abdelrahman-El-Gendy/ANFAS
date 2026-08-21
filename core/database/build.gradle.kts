@@ -9,7 +9,14 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:model"))
             implementation(project(":core:common"))
-            implementation(libs.bundles.room)
+
+            // `api`, not `implementation`: AnfasDatabase extends RoomDatabase and
+            // DatabaseBuilderFactory returns RoomDatabase.Builder, so room3-runtime is part
+            // of this module's ABI — :core:data cannot compile against it otherwise.
+            // Features never see any of this; anfas.kmp.feature withholds :core:database.
+            api(libs.androidx.room3.runtime)
+            // The driver is an implementation detail of buildDatabase().
+            implementation(libs.androidx.sqlite.bundled)
         }
         androidMain.dependencies {
             implementation(libs.androidx.room3.sqliteWrapper)

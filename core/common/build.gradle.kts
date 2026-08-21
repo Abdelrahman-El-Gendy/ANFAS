@@ -8,6 +8,10 @@ kotlin {
             api(project(":core:model"))
             // `api`, because AppDispatchers exposes CoroutineDispatcher in its own signature.
             api(libs.kotlinx.coroutines.core)
+            // Likewise: RelativeTime.format takes a TimeZone. Declared directly rather than
+            // leaned on transitively through :core:model — commonMain metadata compilation
+            // does not resolve it that way, and an ABI dependency should be explicit anyway.
+            api(libs.kotlinx.datetime)
             implementation(libs.kermit)
         }
     }

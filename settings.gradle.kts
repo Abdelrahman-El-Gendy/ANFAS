@@ -48,6 +48,7 @@ include(":core:model")
 include(":core:common")
 include(":core:designsystem")
 include(":core:database")
+include(":core:data")
 include(":core:network")
 include(":core:auth")
 

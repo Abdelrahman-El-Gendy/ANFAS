@@ -1,0 +1,326 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "98717a8b44525e997d86e41359a58abc",
+    "entities": [
+      {
+        "tableName": "placeholder",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `label` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "label",
+            "columnName": "label",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "members",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `fullName` TEXT NOT NULL, `membership_number` TEXT NOT NULL, `status` TEXT NOT NULL, `lastCheckInAtEpochMs` INTEGER, `avatarUrl` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fullName",
+            "columnName": "fullName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "membershipNumber",
+            "columnName": "membership_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastCheckInAtEpochMs",
+            "columnName": "lastCheckInAtEpochMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "avatarUrl",
+            "columnName": "avatarUrl",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_members_membership_number",
+            "unique": true,
+            "columnNames": [
+              "membership_number"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_members_membership_number` ON `${TABLE_NAME}` (`membership_number`)"
+          }
+        ]
+      },
+      {
+        "tableName": "reminders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `member_id` TEXT NOT NULL, `member_name` TEXT NOT NULL, `phone` TEXT NOT NULL, `template` TEXT NOT NULL, `scheduled_at_epoch_ms` INTEGER NOT NULL, `attempts` INTEGER NOT NULL, `status` TEXT NOT NULL, `failure_reason` TEXT, `failure_provider_code` INTEGER, `failure_last_attempt_epoch_ms` INTEGER, `failure_detail` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "memberId",
+            "columnName": "member_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "memberName",
+            "columnName": "member_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "template",
+            "columnName": "template",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduledAtEpochMs",
+            "columnName": "scheduled_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attempts",
+            "columnName": "attempts",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "failureReason",
+            "columnName": "failure_reason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "failureProviderCode",
+            "columnName": "failure_provider_code",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "failureLastAttemptEpochMs",
+            "columnName": "failure_last_attempt_epoch_ms",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "failureDetail",
+            "columnName": "failure_detail",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_reminders_status_scheduled_at_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "status",
+              "scheduled_at_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_reminders_status_scheduled_at_epoch_ms` ON `${TABLE_NAME}` (`status`, `scheduled_at_epoch_ms`)"
+          },
+          {
+            "name": "index_reminders_member_id",
+            "unique": false,
+            "columnNames": [
+              "member_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_reminders_member_id` ON `${TABLE_NAME}` (`member_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "subscription_plans",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `tier` TEXT NOT NULL, `price_minor_units` INTEGER NOT NULL, `currency` TEXT NOT NULL, `perks` TEXT NOT NULL, `savings_percent` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tier",
+            "columnName": "tier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceMinorUnits",
+            "columnName": "price_minor_units",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currency",
+            "columnName": "currency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "perks",
+            "columnName": "perks",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savingsPercent",
+            "columnName": "savings_percent",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "subscriptions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `member_id` TEXT NOT NULL, `plan_id` TEXT NOT NULL, `tier` TEXT NOT NULL, `starts_on_epoch_day` INTEGER NOT NULL, `ends_on_epoch_day` INTEGER NOT NULL, `payment_method` TEXT NOT NULL, `paid_minor_units` INTEGER NOT NULL, `currency` TEXT NOT NULL, `created_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "memberId",
+            "columnName": "member_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "planId",
+            "columnName": "plan_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tier",
+            "columnName": "tier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startsOnEpochDay",
+            "columnName": "starts_on_epoch_day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endsOnEpochDay",
+            "columnName": "ends_on_epoch_day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paymentMethod",
+            "columnName": "payment_method",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paidMinorUnits",
+            "columnName": "paid_minor_units",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currency",
+            "columnName": "currency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMs",
+            "columnName": "created_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_subscriptions_member_id_ends_on_epoch_day",
+            "unique": false,
+            "columnNames": [
+              "member_id",
+              "ends_on_epoch_day"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_subscriptions_member_id_ends_on_epoch_day` ON `${TABLE_NAME}` (`member_id`, `ends_on_epoch_day`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '98717a8b44525e997d86e41359a58abc')"
+    ]
+  }
+}

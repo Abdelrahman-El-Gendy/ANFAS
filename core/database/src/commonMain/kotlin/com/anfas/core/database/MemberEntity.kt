@@ -1,0 +1,83 @@
+package com.anfas.core.database
+
+import androidx.room3.Dao
+import androidx.room3.Entity
+import androidx.room3.Index
+import androidx.room3.PrimaryKey
+import androidx.room3.Query
+import androidx.room3.Upsert
+import kotlinx.coroutines.flow.Flow
+
+/**
+ * Storage shape for a member. Kept flat and primitive on purpose: no domain enums or
+ * value classes cross into Room, so a rename in the domain never forces a migration.
+ * [status] holds [com.anfas.core.model.MembershipStatus] by name.
+ *
+ * [lastCheckInAtEpochMs] is nullable — a member who has never checked in has no timestamp,
+ * which is different from checking in at epoch zero.
+ */
+@Entity(
+    tableName = "members",
+    indices = [
+        Index(value = ["membership_number"], unique = true),
+        // Not unique: a family can legitimately share a landline, and OCR intake reports
+        // duplicates for a human to resolve rather than having the database reject them.
+        Index(value = ["phone_normalised"]),
+    ],
+)
+data class MemberEntity(
+    @PrimaryKey val id: String,
+    val fullName: String,
+    @androidx.room3.ColumnInfo(name = "membership_number") val membershipNumber: String,
+    val phone: String?,
+    /**
+     * Digits-only form of [phone], written by the mapper. Stored rather than computed so
+     * duplicate lookups are an indexed equality test instead of a full scan with string
+     * munging in SQL.
+     */
+    @androidx.room3.ColumnInfo(name = "phone_normalised") val phoneNormalised: String?,
+    val status: String,
+    val lastCheckInAtEpochMs: Long?,
+    val avatarUrl: String?,
+)
+
+@Dao
+interface MemberDao {
+    /**
+     * Ordered by name because the directory is browsed alphabetically, not by insertion.
+     * Returns a Flow so the list screen updates itself after a check-in or a renewal.
+     */
+    @Query("SELECT * FROM members ORDER BY fullName COLLATE NOCASE ASC")
+    fun observeAll(): Flow<List<MemberEntity>>
+
+    /**
+     * Every phone number already on the books, for OCR intake's duplicate check. Returns just
+     * the column rather than whole rows — a sheet is validated against the entire membership,
+     * and loading every member to read one field each would not scale.
+     */
+    @Query("SELECT phone_normalised FROM members WHERE phone_normalised IS NOT NULL")
+    fun observeNormalisedPhones(): Flow<List<String>>
+
+    /**
+     * Matches name or membership number. `search-no-results` renders the raw query back to
+     * the user, so the caller keeps the term; this only reports matches.
+     */
+    @Query(
+        """
+        SELECT * FROM members
+        WHERE fullName LIKE '%' || :query || '%' COLLATE NOCASE
+           OR membership_number LIKE '%' || :query || '%' COLLATE NOCASE
+        ORDER BY fullName COLLATE NOCASE ASC
+        """,
+    )
+    fun observeMatching(query: String): Flow<List<MemberEntity>>
+
+    @Query("SELECT * FROM members WHERE id = :id")
+    fun observeById(id: String): Flow<MemberEntity?>
+
+    @Upsert
+    suspend fun upsertAll(members: List<MemberEntity>)
+
+    @Query("DELETE FROM members WHERE id = :id")
+    suspend fun deleteById(id: String)
+}
