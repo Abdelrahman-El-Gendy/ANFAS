@@ -2,6 +2,7 @@ package com.anfas.feature.subscriptions
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,10 +51,7 @@ import kotlinx.datetime.LocalDate
  * from. Wire it to whatever decides it (promo code, staff override) when that exists.
  */
 @Composable
-fun RenewalSheetScreen(
-    component: RenewalSheetComponent,
-    modifier: Modifier = Modifier,
-) {
+fun RenewalSheetScreen(component: RenewalSheetComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
     val scheme = MaterialTheme.colorScheme
 

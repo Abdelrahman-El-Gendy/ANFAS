@@ -42,10 +42,7 @@ data class ReminderEntity(
 )
 
 /** Projection for the tab badges. */
-data class ReminderStatusCount(
-    val status: String,
-    val count: Int,
-)
+data class ReminderStatusCount(val status: String, val count: Int)
 
 @Dao
 interface ReminderDao {

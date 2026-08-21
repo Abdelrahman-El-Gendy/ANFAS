@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.anfas.app.navigation.RootComponent
 import com.anfas.app.navigation.topLevel
@@ -24,7 +25,6 @@ import com.anfas.feature.subscriptions.ReminderQueueScreen
 import com.anfas.feature.subscriptions.RenewalSheetScreen
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import androidx.compose.runtime.getValue
 
 /**
  * App shell: theme, the navigation host, and the top-level nav chrome.

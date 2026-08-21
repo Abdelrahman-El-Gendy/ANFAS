@@ -119,11 +119,7 @@ class MembersListComponentTest {
         return component
     }
 
-    private fun member(
-        id: String,
-        name: String,
-        number: String = "#$id",
-    ) = Member(
+    private fun member(id: String, name: String, number: String = "#$id") = Member(
         id = MemberId(id),
         fullName = name,
         membershipNumber = number,

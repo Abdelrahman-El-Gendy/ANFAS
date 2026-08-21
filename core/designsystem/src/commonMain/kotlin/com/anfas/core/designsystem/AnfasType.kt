@@ -49,32 +49,50 @@ data class AnfasTextStyles(
 @Composable
 internal fun anfasTextStyles(family: FontFamily): AnfasTextStyles = AnfasTextStyles(
     headlineLarge = TextStyle(
-        fontFamily = family, fontSize = 32.sp, lineHeight = 40.sp,
-        fontWeight = FontWeight.SemiBold, letterSpacing = (-0.02).em,
+        fontFamily = family,
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = (-0.02).em,
     ),
     headlineMedium = TextStyle(
-        fontFamily = family, fontSize = 24.sp, lineHeight = 32.sp,
-        fontWeight = FontWeight.SemiBold, letterSpacing = (-0.01).em,
+        fontFamily = family,
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = (-0.01).em,
     ),
     headlineSmall = TextStyle(
-        fontFamily = family, fontSize = 20.sp, lineHeight = 28.sp,
+        fontFamily = family,
+        fontSize = 20.sp,
+        lineHeight = 28.sp,
         fontWeight = FontWeight.Medium,
     ),
     bodyLarge = TextStyle(
-        fontFamily = family, fontSize = 16.sp, lineHeight = 24.sp,
+        fontFamily = family,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
         fontWeight = FontWeight.Normal,
     ),
     bodyMedium = TextStyle(
-        fontFamily = family, fontSize = 14.sp, lineHeight = 20.sp,
+        fontFamily = family,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
         fontWeight = FontWeight.Normal,
     ),
     labelCaps = TextStyle(
-        fontFamily = family, fontSize = 11.sp, lineHeight = 16.sp,
-        fontWeight = FontWeight.SemiBold, letterSpacing = 0.08.em,
+        fontFamily = family,
+        fontSize = 11.sp,
+        lineHeight = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = 0.08.em,
     ),
     dataMono = TextStyle(
-        fontFamily = family, fontSize = 14.sp, lineHeight = 20.sp,
-        fontWeight = FontWeight.Normal, fontFeatureSettings = "tnum",
+        fontFamily = family,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.Normal,
+        fontFeatureSettings = "tnum",
     ),
 )
 

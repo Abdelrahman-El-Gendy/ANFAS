@@ -76,11 +76,7 @@ data class ReminderFailure(
  * off. The rest need a human to change something — an opt-in, a phone number, or a template
  * approval — so retrying would waste an attempt.
  */
-enum class FailureReason(
-    val title: String,
-    val explanation: String,
-    val isRetryable: Boolean,
-) {
+enum class FailureReason(val title: String, val explanation: String, val isRetryable: Boolean) {
     NOT_OPTED_IN(
         title = "Recipient has not opted in",
         explanation = "Meta requires members to opt in before receiving template messages. " +

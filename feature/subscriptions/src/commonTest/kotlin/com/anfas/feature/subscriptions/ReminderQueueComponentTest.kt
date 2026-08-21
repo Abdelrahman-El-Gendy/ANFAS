@@ -1,5 +1,6 @@
 package com.anfas.feature.subscriptions
 
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
@@ -178,7 +179,7 @@ class ReminderQueueComponentTest {
         }
     }
 
-    private suspend fun app.cash.turbine.TurbineTestContext<ReminderQueueState>.awaitItemWithNotice(): String {
+    private suspend fun TurbineTestContext<ReminderQueueState>.awaitItemWithNotice(): String {
         repeat(6) {
             val next = awaitItem()
             next.notice?.let { return it }

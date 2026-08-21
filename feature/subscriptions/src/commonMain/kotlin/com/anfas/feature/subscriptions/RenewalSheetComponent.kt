@@ -22,10 +22,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
-import kotlin.uuid.Uuid
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 /**
  * Renewing one member's subscription.
@@ -124,6 +124,7 @@ class RenewalSheetComponent(
                 is AppResult.Failure -> choices.update {
                     it.copy(isConfirming = false, error = result.error.message)
                 }
+
                 is AppResult.Success -> {
                     choices.update { it.copy(isConfirming = false) }
                     // Sending the WhatsApp confirmation is not wired up — there is no send

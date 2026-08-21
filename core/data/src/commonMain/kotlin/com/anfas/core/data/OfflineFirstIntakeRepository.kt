@@ -36,27 +36,25 @@ internal class OfflineFirstIntakeRepository(
     private val clock: Clock = Clock.System,
 ) : IntakeRepository {
 
-    override fun observeBatches(): Flow<AppResult<List<IntakeBatch>>> =
-        intakeDao.observeBatches()
-            .asAppResult("Could not load scanned sheets") { batches ->
-                // Summaries only — rows are loaded when a sheet is opened. A list screen does
-                // not need eight rows per batch, and validating all of them would be wasteful.
-                batches.map { it.toDomain(rows = emptyList()) }
-            }
+    override fun observeBatches(): Flow<AppResult<List<IntakeBatch>>> = intakeDao.observeBatches()
+        .asAppResult("Could not load scanned sheets") { batches ->
+            // Summaries only — rows are loaded when a sheet is opened. A list screen does
+            // not need eight rows per batch, and validating all of them would be wasteful.
+            batches.map { it.toDomain(rows = emptyList()) }
+        }
 
-    override fun observeBatch(id: IntakeBatchId): Flow<AppResult<IntakeBatch?>> =
-        combine(
-            intakeDao.observeBatch(id.value),
-            intakeDao.observeRows(id.value),
-            memberDao.observeNormalisedPhones(),
-        ) { batch, rows, existingPhones ->
-            batch?.toDomain(
-                rows = IntakeValidator.validate(
-                    rows = rows.map { it.toDomain() },
-                    existingPhones = existingPhones.toSet(),
-                ),
-            )
-        }.asAppResult("Could not load sheet ${id.value}") { it }
+    override fun observeBatch(id: IntakeBatchId): Flow<AppResult<IntakeBatch?>> = combine(
+        intakeDao.observeBatch(id.value),
+        intakeDao.observeRows(id.value),
+        memberDao.observeNormalisedPhones(),
+    ) { batch, rows, existingPhones ->
+        batch?.toDomain(
+            rows = IntakeValidator.validate(
+                rows = rows.map { it.toDomain() },
+                existingPhones = existingPhones.toSet(),
+            ),
+        )
+    }.asAppResult("Could not load sheet ${id.value}") { it }
 
     override suspend fun createBatch(batch: IntakeBatch): AppResult<Unit> =
         runStorage("Could not save the scanned sheet") {

@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
@@ -25,11 +26,7 @@ import androidx.compose.ui.unit.dp
  * the badge with the error colour, which the export uses to make a non-zero failure count
  * impossible to miss.
  */
-data class Tab(
-    val label: String,
-    val count: Int? = null,
-    val emphasiseCount: Boolean = false,
-)
+data class Tab(val label: String, val count: Int? = null, val emphasiseCount: Boolean = false)
 
 @Composable
 fun AnfasTabs(
@@ -67,7 +64,7 @@ fun AnfasTabs(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(2.dp)
-                            .background(if (selected) scheme.primary else androidx.compose.ui.graphics.Color.Transparent),
+                            .background(if (selected) scheme.primary else Color.Transparent),
                     )
                 }
             }

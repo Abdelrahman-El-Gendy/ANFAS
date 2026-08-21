@@ -11,9 +11,7 @@ import kotlinx.coroutines.flow.map
  * In-memory ReminderDao whose filtering and requeue semantics mirror the real SQL, so a
  * repository test cannot pass for the wrong reason.
  */
-internal class FakeReminderDao(
-    initial: List<ReminderEntity> = emptyList(),
-) : ReminderDao {
+internal class FakeReminderDao(initial: List<ReminderEntity> = emptyList()) : ReminderDao {
 
     private val rows = MutableStateFlow(initial)
 
@@ -29,9 +27,11 @@ internal class FakeReminderDao(
         failure?.let { throw it }
         list.filter { row ->
             row.status == status &&
-                (query.isEmpty() ||
-                    row.memberName.contains(query, ignoreCase = true) ||
-                    row.phone.contains(query)) &&
+                (
+                    query.isEmpty() ||
+                        row.memberName.contains(query, ignoreCase = true) ||
+                        row.phone.contains(query)
+                    ) &&
                 (template == null || row.template == template)
         }.sortedByDescending { it.scheduledAtEpochMs }
     }

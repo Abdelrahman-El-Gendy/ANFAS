@@ -10,9 +10,8 @@ import com.anfas.core.model.SubscriptionPlan
 import com.anfas.core.model.SubscriptionTerm
 import kotlinx.coroutines.flow.Flow
 
-internal class OfflineFirstSubscriptionRepository(
-    private val dao: SubscriptionDao,
-) : SubscriptionRepository {
+internal class OfflineFirstSubscriptionRepository(private val dao: SubscriptionDao) :
+    SubscriptionRepository {
 
     override fun observePlans(): Flow<AppResult<List<SubscriptionPlan>>> =
         dao.observePlans().asAppResult("Could not load plans") { rows ->

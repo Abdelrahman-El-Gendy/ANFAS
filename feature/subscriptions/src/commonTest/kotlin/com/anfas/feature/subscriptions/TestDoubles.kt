@@ -52,9 +52,11 @@ internal class FakeReminderRepository(
         forcedQueueResult ?: AppResult.Success(
             list.filter {
                 it.status == status &&
-                    (query.isBlank() ||
-                        it.memberName.contains(query, true) ||
-                        it.phone.contains(query)) &&
+                    (
+                        query.isBlank() ||
+                            it.memberName.contains(query, true) ||
+                            it.phone.contains(query)
+                        ) &&
                     (template == null || it.template == template)
             },
         )

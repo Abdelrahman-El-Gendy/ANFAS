@@ -109,7 +109,12 @@ class OfflineFirstReminderRepositoryTest {
             listOf(
                 reminderEntity("1", status = "FAILED", template = "REMINDER_AR"),
                 reminderEntity("2", status = "FAILED", template = "PAYMENT_DUE"),
-                reminderEntity("3", status = "QUEUED", template = "REMINDER_AR", failureReason = null),
+                reminderEntity(
+                    "3",
+                    status = "QUEUED",
+                    template = "REMINDER_AR",
+                    failureReason = null,
+                ),
             ),
         )
         val repo = OfflineFirstReminderRepository(dao)

@@ -24,8 +24,10 @@ internal val anfasShapes = Shapes(
 object AnfasShapes {
     /** Cards, inputs, buttons, tags. */
     val base = RoundedCornerShape(12.dp)
+
     /** Checkboxes and radios. */
     val selection = RoundedCornerShape(4.dp)
+
     /** Status chips only — pill shape distinguishes them from actionable buttons. */
     val chip = RoundedCornerShape(percent = 50)
 }

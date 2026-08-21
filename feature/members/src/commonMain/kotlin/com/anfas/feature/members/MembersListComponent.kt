@@ -83,11 +83,14 @@ private fun AppResult<List<com.anfas.core.model.Member>>.toContent(
     query: String,
 ): MembersListContent = when (this) {
     is AppResult.Failure -> MembersListContent.Failed(error.message)
+
     is AppResult.Success -> when {
         value.isNotEmpty() -> MembersListContent.Loaded(value)
+
         // A blank query returning nothing means the directory itself is empty; a non-blank
         // one means this search found nothing. The design draws those differently.
         query.isBlank() -> MembersListContent.DirectoryEmpty
+
         else -> MembersListContent.NoMatches(query)
     }
 }

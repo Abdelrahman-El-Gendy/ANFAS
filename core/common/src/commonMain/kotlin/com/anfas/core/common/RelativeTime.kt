@@ -1,9 +1,9 @@
 package com.anfas.core.common
 
-import kotlin.time.Instant
 import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 /**
  * Relative timestamp labels shared by every staff worklist — the members directory's
@@ -42,8 +42,11 @@ object RelativeTime {
             // A future stamp means clock skew between the device and the server. Showing
             // "-1 days ago" would just look broken to staff.
             daysAgo <= 0L -> "Today$separator$time"
+
             daysAgo == 1L -> "Yesterday$separator$time"
+
             daysAgo < 7L -> "$daysAgo days ago"
+
             else -> "${then.date.month.shortName()} ${then.date.day}, ${then.date.year}"
         }
     }

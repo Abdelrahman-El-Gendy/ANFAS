@@ -1,14 +1,14 @@
 package com.anfas.core.data
 
+import com.anfas.core.common.AppDispatchers
 import com.anfas.core.database.AnfasDatabase
 import com.anfas.core.database.buildDatabase
-import com.anfas.core.common.AppDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlin.uuid.Uuid
 import org.koin.core.module.Module
 import org.koin.dsl.module
+import kotlin.uuid.Uuid
 
 /**
  * Wiring for the data layer. Everything is a `single`: the database holds an open connection

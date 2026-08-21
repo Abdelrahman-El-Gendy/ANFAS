@@ -2,8 +2,8 @@ package com.anfas.feature.members
 
 import com.anfas.core.common.RelativeTime
 import com.anfas.core.model.Member
-import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
+import kotlin.time.Clock
 
 /**
  * The directory's "Last check-in" cell. The formatting rules live in

@@ -13,20 +13,16 @@ import kotlinx.coroutines.flow.map
  * Cancellation is rethrown rather than folded into a Failure: swallowing it would leave a
  * cancelled coroutine reporting a fake storage error and quietly break structured concurrency.
  */
-internal inline fun <T> runStorage(message: String, block: () -> T): AppResult<T> =
-    try {
-        AppResult.Success(block())
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Throwable) {
-        AppResult.Failure(e.asStorageError(message))
-    }
+internal inline fun <T> runStorage(message: String, block: () -> T): AppResult<T> = try {
+    AppResult.Success(block())
+} catch (e: CancellationException) {
+    throw e
+} catch (e: Throwable) {
+    AppResult.Failure(e.asStorageError(message))
+}
 
 /** Wraps a read Flow so downstream never sees a Room exception. */
-internal fun <T, R> Flow<T>.asAppResult(
-    message: String,
-    transform: (T) -> R,
-): Flow<AppResult<R>> =
+internal fun <T, R> Flow<T>.asAppResult(message: String, transform: (T) -> R): Flow<AppResult<R>> =
     map { AppResult.Success(transform(it)) as AppResult<R> }
         .catch { emit(AppResult.Failure(it.asStorageError(message))) }
 

@@ -50,7 +50,10 @@ class IntakeReviewComponent(
         repository.observeBatches().flatMapLatest { batchesResult ->
             when (batchesResult) {
                 is AppResult.Failure ->
-                    MutableStateFlow<AppResult<IntakeBatch?>>(AppResult.Failure(batchesResult.error))
+                    MutableStateFlow<AppResult<IntakeBatch?>>(
+                        AppResult.Failure(batchesResult.error),
+                    )
+
                 is AppResult.Success -> {
                     val next = batchesResult.value
                         .filter { it.status == IntakeBatchStatus.REVIEWING }
@@ -94,7 +97,9 @@ class IntakeReviewComponent(
 
     fun onZoomOut() = ui.update { it.copy(zoom = it.zoom.stepZoom(1f / ZOOM_STEP)) }
 
-    fun onPan(dx: Float, dy: Float) = ui.update { it.copy(panX = it.panX + dx, panY = it.panY + dy) }
+    fun onPan(dx: Float, dy: Float) = ui.update {
+        it.copy(panX = it.panX + dx, panY = it.panY + dy)
+    }
 
     fun onResetView() = ui.update { it.copy(zoom = 1f, panX = 0f, panY = 0f) }
 
@@ -122,6 +127,7 @@ class IntakeReviewComponent(
             is AppResult.Failure -> ui.update {
                 it.copy(isImporting = false, notice = result.error.message)
             }
+
             is AppResult.Success -> {
                 val outcome = result.value
                 ui.update {
@@ -169,7 +175,9 @@ class IntakeReviewComponent(
 
 private fun AppResult<IntakeBatch?>.toContent(): IntakeReviewContent = when (this) {
     is AppResult.Failure -> IntakeReviewContent.Failed(error.message)
-    is AppResult.Success -> value
-        ?.let { IntakeReviewContent.Loaded(it) }
-        ?: IntakeReviewContent.NoBatches
+
+    is AppResult.Success ->
+        value
+            ?.let { IntakeReviewContent.Loaded(it) }
+            ?: IntakeReviewContent.NoBatches
 }

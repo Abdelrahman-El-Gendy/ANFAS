@@ -78,17 +78,12 @@ data class IntakeRow(
  * [confidence] is the engine's own score, 0..1. [wasEdited] outranks it: once a human has
  * typed a value, the machine's doubt is no longer interesting and the review marker clears.
  */
-data class IntakeField(
-    val value: String,
-    val confidence: Float,
-    val wasEdited: Boolean = false,
-) {
+data class IntakeField(val value: String, val confidence: Float, val wasEdited: Boolean = false) {
     val isBlank: Boolean get() = value.isBlank()
 
     val needsReview: Boolean get() = !wasEdited && confidence < REVIEW_THRESHOLD
 
-    fun editedTo(newValue: String): IntakeField =
-        copy(value = newValue, wasEdited = true)
+    fun editedTo(newValue: String): IntakeField = copy(value = newValue, wasEdited = true)
 
     companion object {
         /**
@@ -125,12 +120,7 @@ enum class IntakeIssue(val label: String, val isBlocking: Boolean) {
  * Normalised rectangle on the source image, 0..1 on both axes, so the overlay survives any
  * zoom level or render size without carrying pixel dimensions around.
  */
-data class OcrBounds(
-    val left: Float,
-    val top: Float,
-    val right: Float,
-    val bottom: Float,
-) {
+data class OcrBounds(val left: Float, val top: Float, val right: Float, val bottom: Float) {
     init {
         require(left in 0f..1f && right in 0f..1f && top in 0f..1f && bottom in 0f..1f) {
             "OcrBounds must be normalised to 0..1, got ($left, $top, $right, $bottom)"

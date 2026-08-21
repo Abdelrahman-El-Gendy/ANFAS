@@ -14,20 +14,17 @@ import kotlinx.coroutines.flow.first
  * Room-backed reminder queue. The daily send job is not implemented here — when it lands it
  * writes through [upsert] and no screen changes.
  */
-internal class OfflineFirstReminderRepository(
-    private val dao: ReminderDao,
-) : ReminderRepository {
+internal class OfflineFirstReminderRepository(private val dao: ReminderDao) : ReminderRepository {
 
     override fun observeQueue(
         status: ReminderStatus,
         query: String,
         template: ReminderTemplate?,
-    ): Flow<AppResult<List<Reminder>>> =
-        dao.observeByStatus(
-            status = status.name,
-            query = query.trim(),
-            template = template?.name,
-        ).asAppResult("Could not load the reminder queue") { rows -> rows.map { it.toDomain() } }
+    ): Flow<AppResult<List<Reminder>>> = dao.observeByStatus(
+        status = status.name,
+        query = query.trim(),
+        template = template?.name,
+    ).asAppResult("Could not load the reminder queue") { rows -> rows.map { it.toDomain() } }
 
     override fun observeCounts(): Flow<AppResult<ReminderCounts>> =
         dao.observeStatusCounts().asAppResult("Could not count reminders") { it.toCounts() }

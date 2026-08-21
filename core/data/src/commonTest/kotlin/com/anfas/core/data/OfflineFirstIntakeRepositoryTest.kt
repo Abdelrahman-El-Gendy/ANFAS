@@ -37,7 +37,8 @@ class OfflineFirstIntakeRepositoryTest {
     @Test
     fun `a phone becoming a duplicate after the scan is caught on the next read`() = runTest {
         val members = FakeMemberDao()
-        val fixture = fixture(rows = listOf(rowEntity("r1", phone = "555-0192")), memberDao = members)
+        val fixture =
+            fixture(rows = listOf(rowEntity("r1", phone = "555-0192")), memberDao = members)
 
         fixture.repository.observeBatch(IntakeBatchId("b1")).test {
             assertEquals(1, assertNotNullBatch(awaitItem()).importableRows.size)
@@ -141,8 +142,13 @@ class OfflineFirstIntakeRepositoryTest {
     fun `a batch marks itself imported so it cannot be imported twice`() = runTest {
         val fixture = fixture(rows = listOf(rowEntity("r1", phone = "555-0192")))
 
-        assertIs<AppResult.Success<ImportOutcome>>(fixture.repository.importBatch(IntakeBatchId("b1")))
-        assertEquals(IntakeBatchStatus.IMPORTED.name, fixture.intakeDao.currentBatches.single().status)
+        assertIs<AppResult.Success<ImportOutcome>>(
+            fixture.repository.importBatch(IntakeBatchId("b1")),
+        )
+        assertEquals(
+            IntakeBatchStatus.IMPORTED.name,
+            fixture.intakeDao.currentBatches.single().status,
+        )
 
         // Second attempt is refused rather than duplicating everybody.
         assertIs<AppResult.Failure>(fixture.repository.importBatch(IntakeBatchId("b1")))
@@ -168,11 +174,15 @@ class OfflineFirstIntakeRepositoryTest {
     @Test
     fun `discarding a batch leaves the membership alone`() = runTest {
         val members = FakeMemberDao()
-        val fixture = fixture(rows = listOf(rowEntity("r1", phone = "555-0192")), memberDao = members)
+        val fixture =
+            fixture(rows = listOf(rowEntity("r1", phone = "555-0192")), memberDao = members)
 
         assertIs<AppResult.Success<Unit>>(fixture.repository.discardBatch(IntakeBatchId("b1")))
 
-        assertEquals(IntakeBatchStatus.DISCARDED.name, fixture.intakeDao.currentBatches.single().status)
+        assertEquals(
+            IntakeBatchStatus.DISCARDED.name,
+            fixture.intakeDao.currentBatches.single().status,
+        )
         assertTrue(members.current.isEmpty())
     }
 
@@ -212,10 +222,7 @@ class OfflineFirstIntakeRepositoryTest {
 
     // --- helpers --------------------------------------------------------------------------
 
-    private class Fixture(
-        val repository: IntakeRepository,
-        val intakeDao: FakeIntakeDao,
-    )
+    private class Fixture(val repository: IntakeRepository, val intakeDao: FakeIntakeDao)
 
     private fun fixture(
         rows: List<com.anfas.core.database.IntakeRowEntity>,

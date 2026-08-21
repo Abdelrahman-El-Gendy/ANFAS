@@ -16,10 +16,7 @@ enum class IntakeFieldKey { NAME, PHONE, START_DATE, END_DATE, PLAN }
  * to know: a sheet of eight can import six and leave two behind, and a silent "done" would
  * hide the two that still need attention.
  */
-data class ImportOutcome(
-    val imported: Int,
-    val skipped: Int,
-)
+data class ImportOutcome(val imported: Int, val skipped: Int)
 
 /**
  * OCR intake batches.

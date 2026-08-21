@@ -11,9 +11,7 @@ import kotlinx.coroutines.flow.map
  * substring match on name or membership number, name-ordered — so a repository test that
  * passes here is not passing for the wrong reason.
  */
-internal class FakeMemberDao(
-    initial: List<MemberEntity> = emptyList(),
-) : MemberDao {
+internal class FakeMemberDao(initial: List<MemberEntity> = emptyList()) : MemberDao {
 
     private val rows = MutableStateFlow(initial)
 
@@ -48,7 +46,8 @@ internal class FakeMemberDao(
 
     override suspend fun upsertAll(members: List<MemberEntity>) {
         failure?.let { throw it }
-        rows.value = (rows.value.associateBy { it.id } + members.associateBy { it.id }).values.toList()
+        rows.value =
+            (rows.value.associateBy { it.id } + members.associateBy { it.id }).values.toList()
     }
 
     override suspend fun deleteById(id: String) {

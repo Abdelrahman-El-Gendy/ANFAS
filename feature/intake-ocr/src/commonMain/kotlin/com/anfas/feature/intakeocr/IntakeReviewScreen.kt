@@ -69,10 +69,7 @@ import com.anfas.core.model.IntakeRow
  *    placeholder. See the note on `IntakeRepository.createBatch`.
  */
 @Composable
-fun IntakeReviewScreen(
-    component: IntakeReviewComponent,
-    modifier: Modifier = Modifier,
-) {
+fun IntakeReviewScreen(component: IntakeReviewComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
 
     Column(
@@ -135,13 +132,13 @@ private fun ReviewBody(
                     batch = batch,
                     state = state,
                     component = component,
-                    modifier = Modifier.weight(SourcePaneWeight).fillMaxHeight(),
+                    modifier = Modifier.weight(SOURCE_PANE_WEIGHT).fillMaxHeight(),
                 )
                 ValidationPane(
                     batch = batch,
                     state = state,
                     component = component,
-                    modifier = Modifier.weight(TablePaneWeight).fillMaxHeight(),
+                    modifier = Modifier.weight(TABLE_PANE_WEIGHT).fillMaxHeight(),
                 )
             }
         } else {
@@ -208,7 +205,9 @@ private fun SourceDocumentPane(
                 .pointerInput(Unit) {
                     detectTransformGestures { _, panChange, zoomChange, _ ->
                         component.onPan(panChange.x, panChange.y)
-                        if (zoomChange > 1f) component.onZoomIn() else if (zoomChange < 1f) {
+                        if (zoomChange > 1f) {
+                            component.onZoomIn()
+                        } else if (zoomChange < 1f) {
                             component.onZoomOut()
                         }
                     }
@@ -273,11 +272,11 @@ private fun ValidationPane(
     AnfasCard(modifier = modifier) {
         AnfasTableHeaderRow {
             AnfasTableHeaderCell("#", Modifier.width(OrdinalWidth))
-            AnfasTableHeaderCell("NAME", Modifier.weight(WeightName))
-            AnfasTableHeaderCell("PHONE", Modifier.weight(WeightPhone))
-            AnfasTableHeaderCell("START", Modifier.weight(WeightDate))
-            AnfasTableHeaderCell("END", Modifier.weight(WeightDate))
-            AnfasTableHeaderCell("PLAN", Modifier.weight(WeightPlan))
+            AnfasTableHeaderCell("NAME", Modifier.weight(WEIGHT_NAME))
+            AnfasTableHeaderCell("PHONE", Modifier.weight(WEIGHT_PHONE))
+            AnfasTableHeaderCell("START", Modifier.weight(WEIGHT_DATE))
+            AnfasTableHeaderCell("END", Modifier.weight(WEIGHT_DATE))
+            AnfasTableHeaderCell("PLAN", Modifier.weight(WEIGHT_PLAN))
         }
         LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
             items(items = batch.rows, key = { it.id.value }) { row ->
@@ -342,35 +341,35 @@ private fun IntakeRowCells(
             onValueChange = { onEdit(IntakeFieldKey.NAME, it) },
             needsReview = row.name.needsReview,
             error = row.errorFor(IntakeFieldKey.NAME),
-            modifier = Modifier.weight(WeightName),
+            modifier = Modifier.weight(WEIGHT_NAME),
         )
         AnfasInlineEditField(
             value = row.phone.value,
             onValueChange = { onEdit(IntakeFieldKey.PHONE, it) },
             needsReview = row.phone.needsReview,
             error = row.errorFor(IntakeFieldKey.PHONE),
-            modifier = Modifier.weight(WeightPhone),
+            modifier = Modifier.weight(WEIGHT_PHONE),
         )
         AnfasInlineEditField(
             value = row.startDate.value,
             onValueChange = { onEdit(IntakeFieldKey.START_DATE, it) },
             needsReview = row.startDate.needsReview,
             error = row.errorFor(IntakeFieldKey.START_DATE),
-            modifier = Modifier.weight(WeightDate),
+            modifier = Modifier.weight(WEIGHT_DATE),
         )
         AnfasInlineEditField(
             value = row.endDate.value,
             onValueChange = { onEdit(IntakeFieldKey.END_DATE, it) },
             needsReview = row.endDate.needsReview,
             error = row.errorFor(IntakeFieldKey.END_DATE),
-            modifier = Modifier.weight(WeightDate),
+            modifier = Modifier.weight(WEIGHT_DATE),
         )
         AnfasInlineEditField(
             value = row.plan.value,
             onValueChange = { onEdit(IntakeFieldKey.PLAN, it) },
             needsReview = row.plan.needsReview,
             error = row.errorFor(IntakeFieldKey.PLAN),
-            modifier = Modifier.weight(WeightPlan),
+            modifier = Modifier.weight(WEIGHT_PLAN),
         )
     }
 }
@@ -382,12 +381,15 @@ private fun IntakeRowCells(
 private fun IntakeRow.errorFor(field: IntakeFieldKey): String? {
     val relevant = when (field) {
         IntakeFieldKey.NAME -> setOf(IntakeIssue.MISSING_NAME)
+
         IntakeFieldKey.PHONE -> setOf(
             IntakeIssue.MISSING_PHONE,
             IntakeIssue.DUPLICATE_PHONE,
             IntakeIssue.DUPLICATE_IN_BATCH,
         )
+
         IntakeFieldKey.START_DATE, IntakeFieldKey.END_DATE -> setOf(IntakeIssue.END_BEFORE_START)
+
         IntakeFieldKey.PLAN -> emptySet()
     }
     return issues.firstOrNull { it in relevant && it.isBlocking }?.label
@@ -420,10 +422,10 @@ private fun NoticeBar(text: String, onDismiss: () -> Unit) {
     }
 }
 
-private const val SourcePaneWeight = 0.4f
-private const val TablePaneWeight = 0.6f
-private const val WeightName = 2f
-private const val WeightPhone = 1.6f
-private const val WeightDate = 1.3f
-private const val WeightPlan = 1.2f
+private const val SOURCE_PANE_WEIGHT = 0.4f
+private const val TABLE_PANE_WEIGHT = 0.6f
+private const val WEIGHT_NAME = 2f
+private const val WEIGHT_PHONE = 1.6f
+private const val WEIGHT_DATE = 1.3f
+private const val WEIGHT_PLAN = 1.2f
 private val OrdinalWidth = 28.dp

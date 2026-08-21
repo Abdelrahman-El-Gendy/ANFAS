@@ -24,11 +24,7 @@ import androidx.compose.ui.unit.dp
 enum class ChipTone { Positive, Critical, Neutral, Recovery, ClassType }
 
 @Composable
-fun AnfasStatusChip(
-    label: String,
-    tone: ChipTone,
-    modifier: Modifier = Modifier,
-) {
+fun AnfasStatusChip(label: String, tone: ChipTone, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme
     val brand = AnfasTheme.colors
     val (container, content) = when (tone) {

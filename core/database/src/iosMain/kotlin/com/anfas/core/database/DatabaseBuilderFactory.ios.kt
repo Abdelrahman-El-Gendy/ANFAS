@@ -10,10 +10,9 @@ import platform.Foundation.NSUserDomainMask
 
 actual class DatabaseBuilderFactory {
     @OptIn(ExperimentalForeignApi::class)
-    actual fun create(): RoomDatabase.Builder<AnfasDatabase> =
-        Room.databaseBuilder<AnfasDatabase>(
-            name = "${documentDirectory()}/${AnfasDatabase.FILE_NAME}",
-        )
+    actual fun create(): RoomDatabase.Builder<AnfasDatabase> = Room.databaseBuilder<AnfasDatabase>(
+        name = "${documentDirectory()}/${AnfasDatabase.FILE_NAME}",
+    )
 
     @OptIn(ExperimentalForeignApi::class)
     private fun documentDirectory(): String {

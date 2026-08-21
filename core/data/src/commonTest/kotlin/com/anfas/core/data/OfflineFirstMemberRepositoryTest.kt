@@ -23,6 +23,7 @@ class OfflineFirstMemberRepositoryTest {
 
         repo.observeMembers("").test {
             val result = assertIs<AppResult.Success<*>>(awaitItem())
+
             @Suppress("UNCHECKED_CAST")
             val names = (result.value as List<com.anfas.core.model.Member>).map { it.fullName }
             assertEquals(listOf("Ali Hassan", "Zara Ahmed"), names)
@@ -38,6 +39,7 @@ class OfflineFirstMemberRepositoryTest {
 
         repo.observeMembers("88392").test {
             val result = assertIs<AppResult.Success<*>>(awaitItem())
+
             @Suppress("UNCHECKED_CAST")
             val members = result.value as List<com.anfas.core.model.Member>
             assertEquals(listOf("Ali Hassan"), members.map { it.fullName })
@@ -50,6 +52,7 @@ class OfflineFirstMemberRepositoryTest {
 
         repo.observeMembers().test {
             val result = assertIs<AppResult.Success<*>>(awaitItem())
+
             @Suppress("UNCHECKED_CAST")
             val members = result.value as List<com.anfas.core.model.Member>
             assertEquals(MembershipStatus.PAUSED, members.single().status)
@@ -85,8 +88,11 @@ class OfflineFirstMemberRepositoryTest {
 
         repo.observeMembers().test {
             val result = assertIs<AppResult.Success<*>>(awaitItem())
+
             @Suppress("UNCHECKED_CAST")
-            val members = (result.value as List<com.anfas.core.model.Member>).associateBy { it.id.value }
+            val members = (result.value as List<com.anfas.core.model.Member>).associateBy {
+                it.id.value
+            }
             assertEquals(checkedIn, members.getValue("1").lastCheckInAt)
             assertNull(members.getValue("2").lastCheckInAt)
         }
@@ -94,13 +100,15 @@ class OfflineFirstMemberRepositoryTest {
 
     @Test
     fun `delete removes only the requested member`() = runTest {
-        val dao = FakeMemberDao(listOf(memberEntity("1", "Ali Hassan"), memberEntity("2", "Zara Ahmed")))
+        val dao =
+            FakeMemberDao(listOf(memberEntity("1", "Ali Hassan"), memberEntity("2", "Zara Ahmed")))
         val repo = OfflineFirstMemberRepository(dao)
 
         assertIs<AppResult.Success<Unit>>(repo.delete(MemberId("1")))
 
         repo.observeMembers().test {
             val result = assertIs<AppResult.Success<*>>(awaitItem())
+
             @Suppress("UNCHECKED_CAST")
             val members = result.value as List<com.anfas.core.model.Member>
             assertEquals(listOf("Zara Ahmed"), members.map { it.fullName })
@@ -110,17 +118,14 @@ class OfflineFirstMemberRepositoryTest {
     private fun repository(vararg rows: com.anfas.core.database.MemberEntity) =
         OfflineFirstMemberRepository(FakeMemberDao(rows.toList()))
 
-    private fun member(
-        id: String,
-        name: String,
-        lastCheckInAt: Instant?,
-    ) = com.anfas.core.model.Member(
-        id = MemberId(id),
-        fullName = name,
-        membershipNumber = "#$id",
-        phone = null,
-        status = MembershipStatus.ACTIVE,
-        lastCheckInAt = lastCheckInAt,
-        avatarUrl = null,
-    )
+    private fun member(id: String, name: String, lastCheckInAt: Instant?) =
+        com.anfas.core.model.Member(
+            id = MemberId(id),
+            fullName = name,
+            membershipNumber = "#$id",
+            phone = null,
+            status = MembershipStatus.ACTIVE,
+            lastCheckInAt = lastCheckInAt,
+            avatarUrl = null,
+        )
 }

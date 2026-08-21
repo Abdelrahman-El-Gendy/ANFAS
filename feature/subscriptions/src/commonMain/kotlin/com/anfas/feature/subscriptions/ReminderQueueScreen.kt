@@ -1,6 +1,7 @@
 package com.anfas.feature.subscriptions
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,10 +21,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.anfas.core.designsystem.AnfasBulkActionBar
 import com.anfas.core.designsystem.AnfasCard
 import com.anfas.core.designsystem.AnfasCheckbox
 import com.anfas.core.designsystem.AnfasChoiceChip
@@ -39,15 +41,14 @@ import com.anfas.core.designsystem.AnfasTableFooter
 import com.anfas.core.designsystem.AnfasTableHeaderCell
 import com.anfas.core.designsystem.AnfasTableHeaderRow
 import com.anfas.core.designsystem.AnfasTableRow
+import com.anfas.core.designsystem.AnfasTabs
 import com.anfas.core.designsystem.AnfasTextAction
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.AnfasTriStateCheckbox
-import com.anfas.core.designsystem.AnfasBulkActionBar
 import com.anfas.core.designsystem.EmptyStateAction
 import com.anfas.core.designsystem.Tab
 import com.anfas.core.designsystem.TextActionEmphasis
 import com.anfas.core.designsystem.Tone
-import com.anfas.core.designsystem.AnfasTabs
 import com.anfas.core.model.Reminder
 import com.anfas.core.model.ReminderStatus
 import com.anfas.core.model.ReminderTemplate
@@ -64,10 +65,7 @@ import com.anfas.core.model.ReminderTemplate
  * component in the design system yet and five chips read fine at both form factors.
  */
 @Composable
-fun ReminderQueueScreen(
-    component: ReminderQueueComponent,
-    modifier: Modifier = Modifier,
-) {
+fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -218,17 +216,19 @@ private fun QueueEmptyState(
             icon = AnfasIcons.CheckCircle,
             title = "No failed reminders",
             message = if (sentCount > 0) {
-                "The queue is clear. Last ${sentCount} messages delivered."
+                "The queue is clear. Last $sentCount messages delivered."
             } else {
                 "The queue is clear and running without interruptions."
             },
             tone = Tone.Informational,
         )
+
         ReminderStatus.QUEUED -> AnfasEmptyState(
             icon = AnfasIcons.Schedule,
             title = "Nothing queued",
             message = "Reminders appear here once the daily job schedules them.",
         )
+
         ReminderStatus.SENT -> AnfasEmptyState(
             icon = AnfasIcons.Send,
             title = "Nothing sent yet",
@@ -283,11 +283,11 @@ private fun ReminderTable(
                     )
                 }
             }
-            AnfasTableHeaderCell("MEMBER", Modifier.weight(WeightMember))
-            AnfasTableHeaderCell("PHONE", Modifier.weight(WeightPhone))
-            AnfasTableHeaderCell("TEMPLATE", Modifier.weight(WeightTemplate))
-            AnfasTableHeaderCell("SCHEDULED", Modifier.weight(WeightScheduled))
-            AnfasTableHeaderCell("STATUS", Modifier.weight(WeightStatus))
+            AnfasTableHeaderCell("MEMBER", Modifier.weight(WEIGHT_MEMBER))
+            AnfasTableHeaderCell("PHONE", Modifier.weight(WEIGHT_PHONE))
+            AnfasTableHeaderCell("TEMPLATE", Modifier.weight(WEIGHT_TEMPLATE))
+            AnfasTableHeaderCell("SCHEDULED", Modifier.weight(WEIGHT_SCHEDULED))
+            AnfasTableHeaderCell("STATUS", Modifier.weight(WEIGHT_STATUS))
             AnfasTableHeaderCell(
                 text = "ACTIONS",
                 modifier = Modifier.width(ActionsColumnWidth),
@@ -341,7 +341,7 @@ private fun ReminderRow(
                     if (reminder.status == ReminderStatus.FAILED) {
                         scheme.error
                     } else {
-                        androidx.compose.ui.graphics.Color.Transparent
+                        Color.Transparent
                     },
                 ),
         )
@@ -361,14 +361,14 @@ private fun ReminderRow(
                     color = scheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(WeightMember),
+                    modifier = Modifier.weight(WEIGHT_MEMBER),
                 )
                 Text(
                     text = reminder.phone,
                     style = AnfasTheme.textStyles.dataMono,
                     color = scheme.onSurfaceVariant,
                     maxLines = 1,
-                    modifier = Modifier.weight(WeightPhone),
+                    modifier = Modifier.weight(WEIGHT_PHONE),
                 )
                 Text(
                     text = reminder.template.label,
@@ -376,17 +376,17 @@ private fun ReminderRow(
                     color = scheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(WeightTemplate),
+                    modifier = Modifier.weight(WEIGHT_TEMPLATE),
                 )
                 Text(
                     text = reminder.scheduledLabel(),
                     style = AnfasTheme.textStyles.dataMono,
                     color = scheme.onSurfaceVariant,
                     maxLines = 1,
-                    modifier = Modifier.weight(WeightScheduled),
+                    modifier = Modifier.weight(WEIGHT_SCHEDULED),
                 )
                 Column(
-                    modifier = Modifier.weight(WeightStatus),
+                    modifier = Modifier.weight(WEIGHT_STATUS),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     AnfasStatusChip(
@@ -429,10 +429,10 @@ private val StatusTabs = listOf(
     ReminderStatus.FAILED,
 )
 
-private const val WeightMember = 2f
-private const val WeightPhone = 2f
-private const val WeightTemplate = 1.6f
-private const val WeightScheduled = 1.4f
-private const val WeightStatus = 2f
+private const val WEIGHT_MEMBER = 2f
+private const val WEIGHT_PHONE = 2f
+private const val WEIGHT_TEMPLATE = 1.6f
+private const val WEIGHT_SCHEDULED = 1.4f
+private const val WEIGHT_STATUS = 2f
 private val SelectionColumnWidth = 40.dp
 private val ActionsColumnWidth = 96.dp

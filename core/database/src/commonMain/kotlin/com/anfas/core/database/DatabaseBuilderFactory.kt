@@ -20,8 +20,7 @@ expect class DatabaseBuilderFactory {
 fun buildDatabase(
     factory: DatabaseBuilderFactory,
     dispatchers: AppDispatchers = DefaultAppDispatchers,
-): AnfasDatabase =
-    factory.create()
-        .setDriver(BundledSQLiteDriver())
-        .setQueryCoroutineContext(dispatchers.io)
-        .build()
+): AnfasDatabase = factory.create()
+    .setDriver(BundledSQLiteDriver())
+    .setQueryCoroutineContext(dispatchers.io)
+    .build()

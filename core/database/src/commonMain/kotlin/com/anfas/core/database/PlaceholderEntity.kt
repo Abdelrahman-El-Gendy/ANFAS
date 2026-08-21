@@ -11,10 +11,7 @@ import androidx.room3.Query
  * target. The real schema is a separate task — do not model domain tables here.
  */
 @Entity(tableName = "placeholder")
-data class PlaceholderEntity(
-    @PrimaryKey val id: Long,
-    val label: String,
-)
+data class PlaceholderEntity(@PrimaryKey val id: Long, val label: String)
 
 @Dao
 interface PlaceholderDao {

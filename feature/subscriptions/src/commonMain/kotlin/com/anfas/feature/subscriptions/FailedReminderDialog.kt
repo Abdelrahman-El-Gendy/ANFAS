@@ -174,7 +174,6 @@ private fun technicalSummary(reminder: Reminder): String {
 }
 
 /** Same two-initials rule the members avatar uses. */
-private fun String.initials(): String =
-    trim().split(' ').filter { it.isNotBlank() }.take(2)
-        .map { it.first().uppercaseChar() }
-        .joinToString("")
+private fun String.initials(): String = trim().split(' ').filter { it.isNotBlank() }.take(2)
+    .map { it.first().uppercaseChar() }
+    .joinToString("")

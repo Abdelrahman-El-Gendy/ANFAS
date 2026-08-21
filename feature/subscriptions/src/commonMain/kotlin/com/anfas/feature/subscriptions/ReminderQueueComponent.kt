@@ -122,6 +122,7 @@ class ReminderQueueComponent(
             val requested = ids.size
             when (val result = repository.retry(ids)) {
                 is AppResult.Failure -> ui.update { it.copy(notice = result.error.message) }
+
                 is AppResult.Success -> ui.update {
                     it.copy(
                         selectedIds = emptySet(),
@@ -170,8 +171,10 @@ private data class QueueQuery(
 private fun AppResult<List<Reminder>>.toContent(query: QueueQuery): ReminderQueueContent =
     when (this) {
         is AppResult.Failure -> ReminderQueueContent.Failed(error.message)
+
         is AppResult.Success -> when {
             value.isNotEmpty() -> ReminderQueueContent.Loaded(value)
+
             else -> ReminderQueueContent.Empty(
                 status = query.status,
                 isFiltered = query.query.isNotBlank() || query.template != null,

@@ -90,9 +90,8 @@ private fun IntakeRowEntity.toBounds(): OcrBounds? {
     return runCatching { OcrBounds(l, t, r, b) }.getOrNull()
 }
 
-private fun decodeIssues(encoded: String): Set<IntakeIssue> =
-    encoded.split(ISSUE_SEPARATOR)
-        .mapNotNull { name -> IntakeIssue.entries.firstOrNull { it.name == name.trim() } }
-        .toSet()
+private fun decodeIssues(encoded: String): Set<IntakeIssue> = encoded.split(ISSUE_SEPARATOR)
+    .mapNotNull { name -> IntakeIssue.entries.firstOrNull { it.name == name.trim() } }
+    .toSet()
 
 private const val ISSUE_SEPARATOR = ","

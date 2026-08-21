@@ -1,5 +1,6 @@
 package com.anfas.feature.intakeocr
 
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppError
@@ -148,7 +149,9 @@ class IntakeReviewComponentTest {
     @Test
     fun `a clean import reads in the singular`() = runTest {
         val repo = FakeIntakeRepository(
-            listOf(batch("b1", rows = listOf(row("a", name = "Alex Thompson", phone = "555-0192")))),
+            listOf(
+                batch("b1", rows = listOf(row("a", name = "Alex Thompson", phone = "555-0192"))),
+            ),
         )
         val component = component(repo)
 
@@ -179,7 +182,9 @@ class IntakeReviewComponentTest {
     @Test
     fun `importing reports the count to the caller so it can navigate`() = runTest {
         val repo = FakeIntakeRepository(
-            listOf(batch("b1", rows = listOf(row("a", name = "Alex Thompson", phone = "555-0192")))),
+            listOf(
+                batch("b1", rows = listOf(row("a", name = "Alex Thompson", phone = "555-0192"))),
+            ),
         )
         var reported: Int? = null
         val component = component(repo, onImported = { reported = it })
@@ -196,7 +201,9 @@ class IntakeReviewComponentTest {
     @Test
     fun `a failed import surfaces the message and stops the spinner`() = runTest {
         val repo = FakeIntakeRepository(
-            listOf(batch("b1", rows = listOf(row("a", name = "Alex Thompson", phone = "555-0192")))),
+            listOf(
+                batch("b1", rows = listOf(row("a", name = "Alex Thompson", phone = "555-0192"))),
+            ),
             importResult = AppResult.Failure(AppError.Storage("database is locked")),
         )
         val component = component(repo)
@@ -241,7 +248,7 @@ class IntakeReviewComponentTest {
 
     // --- helpers --------------------------------------------------------------------------
 
-    private suspend fun app.cash.turbine.TurbineTestContext<IntakeReviewState>.awaitNotice(): String {
+    private suspend fun TurbineTestContext<IntakeReviewState>.awaitNotice(): String {
         repeat(8) {
             awaitItem().notice?.let { return it }
         }
@@ -276,21 +283,18 @@ class IntakeReviewComponentTest {
         rows = rows,
     )
 
-    private fun row(
-        id: String,
-        name: String = "Alex Thompson",
-        phone: String = "555-0192",
-    ) = IntakeRow(
-        id = IntakeRowId(id),
-        ordinal = 1,
-        name = IntakeField(name, 0.99f),
-        phone = IntakeField(phone, 0.99f),
-        startDate = IntakeField("Nov 1, 2023", 0.99f),
-        endDate = IntakeField("Oct 31, 2024", 0.99f),
-        plan = IntakeField("Annual", 0.99f),
-        issues = emptySet(),
-        bounds = null,
-    )
+    private fun row(id: String, name: String = "Alex Thompson", phone: String = "555-0192") =
+        IntakeRow(
+            id = IntakeRowId(id),
+            ordinal = 1,
+            name = IntakeField(name, 0.99f),
+            phone = IntakeField(phone, 0.99f),
+            startDate = IntakeField("Nov 1, 2023", 0.99f),
+            endDate = IntakeField("Oct 31, 2024", 0.99f),
+            plan = IntakeField("Annual", 0.99f),
+            issues = emptySet(),
+            bounds = null,
+        )
 }
 
 private class TestDispatchers(private val dispatcher: CoroutineDispatcher) : AppDispatchers {
@@ -342,11 +346,15 @@ private class FakeIntakeRepository(
                     } else {
                         when (field) {
                             IntakeFieldKey.NAME -> row.copy(name = row.name.editedTo(value))
+
                             IntakeFieldKey.PHONE -> row.copy(phone = row.phone.editedTo(value))
+
                             IntakeFieldKey.START_DATE ->
                                 row.copy(startDate = row.startDate.editedTo(value))
+
                             IntakeFieldKey.END_DATE ->
                                 row.copy(endDate = row.endDate.editedTo(value))
+
                             IntakeFieldKey.PLAN -> row.copy(plan = row.plan.editedTo(value))
                         }
                     }

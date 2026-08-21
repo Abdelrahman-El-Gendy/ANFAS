@@ -29,6 +29,7 @@ internal fun ReminderEntity.toDomain(): Reminder {
             lastAttemptAt = failureLastAttemptEpochMs?.let(Instant::fromEpochMilliseconds),
             detail = failureDetail,
         )
+
         else -> null
     }
     return Reminder(

@@ -8,11 +8,7 @@ import com.anfas.core.model.ReminderTemplate
 import kotlinx.coroutines.flow.Flow
 
 /** How many reminders sit in each tab — drives the queue's badge counts. */
-data class ReminderCounts(
-    val queued: Int = 0,
-    val sent: Int = 0,
-    val failed: Int = 0,
-) {
+data class ReminderCounts(val queued: Int = 0, val sent: Int = 0, val failed: Int = 0) {
     operator fun get(status: ReminderStatus): Int = when (status) {
         ReminderStatus.QUEUED -> queued
         ReminderStatus.SENT -> sent

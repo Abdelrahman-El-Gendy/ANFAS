@@ -56,10 +56,7 @@ import com.anfas.core.model.MembershipStatus
  *    none.
  */
 @Composable
-fun MembersListScreen(
-    component: MembersListComponent,
-    modifier: Modifier = Modifier,
-) {
+fun MembersListScreen(component: MembersListComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
 
     Column(
@@ -146,9 +143,9 @@ private fun MembersTable(
 ) {
     AnfasCard(modifier = Modifier.fillMaxWidth()) {
         AnfasTableHeaderRow {
-            AnfasTableHeaderCell("MEMBER", Modifier.weight(ColumnWeightMember))
-            AnfasTableHeaderCell("STATUS", Modifier.weight(ColumnWeightStatus))
-            AnfasTableHeaderCell("LAST CHECK-IN", Modifier.weight(ColumnWeightCheckIn))
+            AnfasTableHeaderCell("MEMBER", Modifier.weight(COLUMN_WEIGHT_MEMBER))
+            AnfasTableHeaderCell("STATUS", Modifier.weight(COLUMN_WEIGHT_STATUS))
+            AnfasTableHeaderCell("LAST CHECK-IN", Modifier.weight(COLUMN_WEIGHT_CHECK_IN))
             AnfasTableHeaderCell(
                 text = "ACTIONS",
                 modifier = Modifier.width(ActionsColumnWidth),
@@ -166,7 +163,13 @@ private fun MembersTable(
         }
         AnfasTableFooter {
             Text(
-                text = if (members.size == 1) "Showing 1 member" else "Showing ${members.size} members",
+                text = if (members.size ==
+                    1
+                ) {
+                    "Showing 1 member"
+                } else {
+                    "Showing ${members.size} members"
+                },
                 style = AnfasTheme.textStyles.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -182,7 +185,7 @@ private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
 
     AnfasTableRow(onClick = onClick, showDivider = !isLast) {
         Row(
-            modifier = Modifier.weight(ColumnWeightMember),
+            modifier = Modifier.weight(COLUMN_WEIGHT_MEMBER),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -203,7 +206,7 @@ private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
                 )
             }
         }
-        Box(Modifier.weight(ColumnWeightStatus)) {
+        Box(Modifier.weight(COLUMN_WEIGHT_STATUS)) {
             AnfasStatusChip(label = member.status.label, tone = member.status.chipTone)
         }
         Text(
@@ -211,7 +214,7 @@ private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
             style = AnfasTheme.textStyles.dataMono,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
-            modifier = Modifier.weight(ColumnWeightCheckIn),
+            modifier = Modifier.weight(COLUMN_WEIGHT_CHECK_IN),
         )
         Box(Modifier.width(ActionsColumnWidth), contentAlignment = Alignment.CenterEnd) {
             AnfasIconButton(
@@ -241,7 +244,7 @@ private fun MemberAvatar(member: Member) {
     }
 }
 
-private const val ColumnWeightMember = 3f
-private const val ColumnWeightStatus = 1.3f
-private const val ColumnWeightCheckIn = 1.6f
+private const val COLUMN_WEIGHT_MEMBER = 3f
+private const val COLUMN_WEIGHT_STATUS = 1.3f
+private const val COLUMN_WEIGHT_CHECK_IN = 1.6f
 private val ActionsColumnWidth = 40.dp

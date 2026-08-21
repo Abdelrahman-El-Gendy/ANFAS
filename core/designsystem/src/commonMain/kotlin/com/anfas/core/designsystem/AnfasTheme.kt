@@ -40,14 +40,18 @@ fun AnfasTheme(content: @Composable () -> Unit) {
 /** Accessors for the parts of the design system M3 cannot hold. */
 object AnfasTheme {
     val colors: AnfasExtendedColors
-        @Composable @ReadOnlyComposable get() = LocalAnfasExtendedColors.current
+        @Composable @ReadOnlyComposable
+        get() = LocalAnfasExtendedColors.current
 
     val textStyles: AnfasTextStyles
-        @Composable @ReadOnlyComposable get() = LocalAnfasTextStyles.current
+        @Composable @ReadOnlyComposable
+        get() = LocalAnfasTextStyles.current
 
     val spacing: AnfasSpacing
-        @Composable @ReadOnlyComposable get() = LocalAnfasSpacing.current
+        @Composable @ReadOnlyComposable
+        get() = LocalAnfasSpacing.current
 
     val alphas: AnfasAlphas
-        @Composable @ReadOnlyComposable get() = LocalAnfasAlphas.current
+        @Composable @ReadOnlyComposable
+        get() = LocalAnfasAlphas.current
 }

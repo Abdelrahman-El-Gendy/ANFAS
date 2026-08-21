@@ -83,7 +83,9 @@ fun AnfasSelectableRow(
         modifier = modifier
             .fillMaxWidth()
             .clip(AnfasShapes.base)
-            .background(if (selected) scheme.primaryContainer.copy(alpha = 0.08f) else Color.Transparent)
+            .background(
+                if (selected) scheme.primaryContainer.copy(alpha = 0.08f) else Color.Transparent,
+            )
             .border(
                 width = 1.dp,
                 color = if (selected) scheme.primaryContainer else scheme.outlineVariant,

@@ -8,10 +8,7 @@ package com.anfas.core.model
  * override, so a stray string interpolation of a price is obvious in review rather than
  * silently rendering "Money(minorUnits=165000)".
  */
-data class Money(
-    val minorUnits: Long,
-    val currency: Currency = Currency.EGP,
-) : Comparable<Money> {
+data class Money(val minorUnits: Long, val currency: Currency = Currency.EGP) : Comparable<Money> {
 
     operator fun plus(other: Money): Money {
         requireSameCurrency(other)
@@ -30,10 +27,9 @@ data class Money(
 
     val isZero: Boolean get() = minorUnits == 0L
 
-    private fun requireSameCurrency(other: Money) =
-        require(currency == other.currency) {
-            "Cannot combine ${currency.code} with ${other.currency.code}"
-        }
+    private fun requireSameCurrency(other: Money) = require(currency == other.currency) {
+        "Cannot combine ${currency.code} with ${other.currency.code}"
+    }
 
     companion object {
         fun zero(currency: Currency = Currency.EGP) = Money(0, currency)

@@ -33,6 +33,7 @@ object RenewalCalculator {
 
         val startsOn = when (start) {
             RenewalStart.TODAY -> today
+
             // Falling back to today when there is no current term is the only sane reading:
             // "when current ends" is meaningless for a member with nothing to extend. Also
             // guards an expired term — never backdate a new term into the past.

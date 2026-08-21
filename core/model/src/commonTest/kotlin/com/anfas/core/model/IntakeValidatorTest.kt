@@ -10,7 +10,8 @@ class IntakeValidatorTest {
 
     @Test
     fun `a clean row has no issues and is importable`() {
-        val rows = validate(row(1, "Alex Thompson", "555-0192", "Nov 1, 2023", "Oct 31, 2024", "Annual"))
+        val rows =
+            validate(row(1, "Alex Thompson", "555-0192", "Nov 1, 2023", "Oct 31, 2024", "Annual"))
         assertEquals(emptySet(), rows.single().issues)
         assertTrue(rows.single().isImportable)
     }
@@ -51,14 +52,16 @@ class IntakeValidatorTest {
 
     @Test
     fun `an end date before the start date blocks the row`() {
-        val rows = validate(row(1, "Alex Thompson", "555-0192", "Nov 30, 2023", "Nov 1, 2023", "Monthly"))
+        val rows =
+            validate(row(1, "Alex Thompson", "555-0192", "Nov 30, 2023", "Nov 1, 2023", "Monthly"))
         assertTrue(IntakeIssue.END_BEFORE_START in rows.single().issues)
         assertTrue(!rows.single().isImportable)
     }
 
     @Test
     fun `an unreadable date is advisory and does not block`() {
-        val rows = validate(row(1, "Alex Thompson", "555-0192", "Nov ?, 2O23", "Nov 30, 2023", "Monthly"))
+        val rows =
+            validate(row(1, "Alex Thompson", "555-0192", "Nov ?, 2O23", "Nov 30, 2023", "Monthly"))
         val single = rows.single()
         assertTrue(IntakeIssue.UNREADABLE_DATE in single.issues)
         assertTrue(single.isImportable)
@@ -67,14 +70,16 @@ class IntakeValidatorTest {
 
     @Test
     fun `an unrecognised plan is advisory and does not block`() {
-        val rows = validate(row(1, "Alex Thompson", "555-0192", "Nov 1, 2023", "Nov 30, 2023", "Platnum"))
+        val rows =
+            validate(row(1, "Alex Thompson", "555-0192", "Nov 1, 2023", "Nov 30, 2023", "Platnum"))
         assertTrue(IntakeIssue.UNKNOWN_PLAN in rows.single().issues)
         assertTrue(rows.single().isImportable)
     }
 
     @Test
     fun `Trial is accepted even though it is not a purchasable tier`() {
-        val rows = validate(row(1, "Mike O'Brien", "555-0134", "Nov 5, 2023", "Dec 5, 2023", "Trial"))
+        val rows =
+            validate(row(1, "Mike O'Brien", "555-0134", "Nov 5, 2023", "Dec 5, 2023", "Trial"))
         assertTrue(IntakeIssue.UNKNOWN_PLAN !in rows.single().issues)
         assertEquals("Trial", IntakeValidator.parsePlanLabel("trial"))
     }

@@ -4,13 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
@@ -91,7 +92,13 @@ private fun CheckboxBox(state: ToggleableState, enabled: Boolean) {
         modifier = Modifier
             .size(18.dp)
             .background(
-                if (selected) scheme.primaryContainer.copy(alpha = alpha) else androidx.compose.ui.graphics.Color.Transparent,
+                if (selected) {
+                    scheme.primaryContainer.copy(
+                        alpha = alpha,
+                    )
+                } else {
+                    Color.Transparent
+                },
                 AnfasShapes.selection,
             )
             .border(
@@ -112,11 +119,13 @@ private fun CheckboxBox(state: ToggleableState, enabled: Boolean) {
                 tint = scheme.background,
                 modifier = Modifier.size(13.dp),
             )
+
             ToggleableState.Indeterminate -> Box(
                 modifier = Modifier
                     .size(width = 10.dp, height = 2.dp)
                     .background(scheme.background),
             )
+
             ToggleableState.Off -> Unit
         }
     }

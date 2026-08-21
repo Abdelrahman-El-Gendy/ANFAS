@@ -17,9 +17,7 @@ import kotlinx.coroutines.flow.Flow
  * Error handling comes from [runStorage] / [asAppResult] in StorageBoundary.kt, shared with
  * every other repository here so the boundary behaves identically across the module.
  */
-internal class OfflineFirstMemberRepository(
-    private val dao: MemberDao,
-) : MemberRepository {
+internal class OfflineFirstMemberRepository(private val dao: MemberDao) : MemberRepository {
 
     override fun observeMembers(query: String): Flow<AppResult<List<Member>>> {
         val rows = if (query.isBlank()) dao.observeAll() else dao.observeMatching(query.trim())
@@ -28,9 +26,8 @@ internal class OfflineFirstMemberRepository(
         }
     }
 
-    override fun observeMember(id: MemberId): Flow<AppResult<Member?>> =
-        dao.observeById(id.value)
-            .asAppResult("Could not load member ${id.value}") { it?.toDomain() }
+    override fun observeMember(id: MemberId): Flow<AppResult<Member?>> = dao.observeById(id.value)
+        .asAppResult("Could not load member ${id.value}") { it?.toDomain() }
 
     override suspend fun upsert(members: List<Member>): AppResult<Unit> =
         runStorage("Could not save members") { dao.upsertAll(members.map { it.toEntity() }) }

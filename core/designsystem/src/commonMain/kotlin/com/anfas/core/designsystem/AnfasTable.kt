@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
@@ -79,12 +80,14 @@ fun AnfasTableRow(
             .hoverable(interaction)
             .then(
                 if (onClick != null) {
-                    Modifier.clickable(interactionSource = interaction, indication = null) { onClick() }
+                    Modifier.clickable(interactionSource = interaction, indication = null) {
+                        onClick()
+                    }
                 } else {
                     Modifier
                 },
             )
-            .background(if (hovered) hoverTint else androidx.compose.ui.graphics.Color.Transparent)
+            .background(if (hovered) hoverTint else Color.Transparent)
             .heightIn(min = 56.dp)
             .padding(horizontal = CellPaddingHorizontal, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

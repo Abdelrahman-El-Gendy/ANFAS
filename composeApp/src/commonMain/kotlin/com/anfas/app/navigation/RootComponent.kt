@@ -35,9 +35,9 @@ import org.koin.core.component.inject
  * untouched. This is the one place a service-locator lookup is acceptable — it is app-shell
  * glue. Features themselves take constructor dependencies and are testable without Koin.
  */
-class RootComponent(
-    componentContext: ComponentContext,
-) : ComponentContext by componentContext, KoinComponent {
+class RootComponent(componentContext: ComponentContext) :
+    ComponentContext by componentContext,
+    KoinComponent {
 
     private val membersListFactory: MembersListComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
@@ -64,45 +64,44 @@ class RootComponent(
         )
     }
 
-    private fun createChild(config: Config, context: ComponentContext): Child =
-        when (config) {
-            Config.MembersList -> Child.MembersList(
-                membersListFactory.create(
-                    componentContext = context,
-                    // The member profile screen exists in the design but not yet in the app,
-                    // so tapping a row opens the renewal sheet — the primary thing staff do
-                    // with a member. When the profile lands, this becomes the profile route
-                    // and renewal moves behind the row's overflow menu.
-                    onMemberClicked = { id -> navigation.push(Config.Renewal(id.value)) },
-                    onAddMemberClicked = {},
-                    onScanSheetClicked = {},
-                ),
-            )
+    private fun createChild(config: Config, context: ComponentContext): Child = when (config) {
+        Config.MembersList -> Child.MembersList(
+            membersListFactory.create(
+                componentContext = context,
+                // The member profile screen exists in the design but not yet in the app,
+                // so tapping a row opens the renewal sheet — the primary thing staff do
+                // with a member. When the profile lands, this becomes the profile route
+                // and renewal moves behind the row's overflow menu.
+                onMemberClicked = { id -> navigation.push(Config.Renewal(id.value)) },
+                onAddMemberClicked = {},
+                onScanSheetClicked = {},
+            ),
+        )
 
-            Config.ReminderQueue -> Child.ReminderQueue(
-                reminderQueueFactory.create(
-                    componentContext = context,
-                    onOpenMemberClicked = { id -> navigation.push(Config.Renewal(id.value)) },
-                ),
-            )
+        Config.ReminderQueue -> Child.ReminderQueue(
+            reminderQueueFactory.create(
+                componentContext = context,
+                onOpenMemberClicked = { id -> navigation.push(Config.Renewal(id.value)) },
+            ),
+        )
 
-            Config.IntakeReview -> Child.IntakeReview(
-                intakeReviewFactory.create(
-                    componentContext = context,
-                    // Imported members land in the directory, so that is where to look next.
-                    onImported = { navigation.replaceAll(Config.MembersList) },
-                ),
-            )
+        Config.IntakeReview -> Child.IntakeReview(
+            intakeReviewFactory.create(
+                componentContext = context,
+                // Imported members land in the directory, so that is where to look next.
+                onImported = { navigation.replaceAll(Config.MembersList) },
+            ),
+        )
 
-            is Config.Renewal -> Child.Renewal(
-                renewalSheetFactory.create(
-                    componentContext = context,
-                    memberId = MemberId(config.memberId),
-                    onRenewed = { navigation.pop() },
-                    onCancelled = { navigation.pop() },
-                ),
-            )
-        }
+        is Config.Renewal -> Child.Renewal(
+            renewalSheetFactory.create(
+                componentContext = context,
+                memberId = MemberId(config.memberId),
+                onRenewed = { navigation.pop() },
+                onCancelled = { navigation.pop() },
+            ),
+        )
+    }
 
     /** Route definitions. One entry per destination. */
     @Serializable

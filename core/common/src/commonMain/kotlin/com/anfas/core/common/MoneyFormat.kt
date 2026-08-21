@@ -36,8 +36,7 @@ object MoneyFormat {
     }
 
     /** Explicitly signed, for a discount line that must read as a reduction. */
-    fun formatNegated(money: Money): String =
-        format(Money(-money.minorUnits, money.currency))
+    fun formatNegated(money: Money): String = format(Money(-money.minorUnits, money.currency))
 
     private fun group(value: Long): String {
         val s = value.toString()

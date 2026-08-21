@@ -8,8 +8,8 @@ import androidx.compose.ui.graphics.Color
  * export instead. Nothing outside this file should contain a hex literal.
  */
 internal object AnfasPalette {
-    val Background = Color(0xFF141311)  // 22/23 screens — see TOKENS.md
-    val Error = Color(0xFFFFB4AB)  // 22/23 screens — see TOKENS.md
+    val Background = Color(0xFF141311) // 22/23 screens — see TOKENS.md
+    val Error = Color(0xFFFFB4AB) // 22/23 screens — see TOKENS.md
     val ErrorContainer = Color(0xFF93000A)
     val InverseOnSurface = Color(0xFF32302E)
     val InversePrimary = Color(0xFF835400)
@@ -58,8 +58,8 @@ internal object AnfasPalette {
 
     // Brand accents. Not Tailwind tokens — these appear as raw hex in the markup,
     // and design.md's prose is their only specification. See TOKENS.md.
-    val BrandOffWhite = Color(0xFFF5F1EA)  // borders @10%, table rules @5%, hover @2%
-    val BrandSage = Color(0xFF7A9080)  // recovery / therapy / wellness
-    val BrandRose = Color(0xFFB87D8A)  // group classes / women's programming
-    val BrandCharcoal = Color(0xFF1C1A17)  // card surface in the prose palette
+    val BrandOffWhite = Color(0xFFF5F1EA) // borders @10%, table rules @5%, hover @2%
+    val BrandSage = Color(0xFF7A9080) // recovery / therapy / wellness
+    val BrandRose = Color(0xFFB87D8A) // group classes / women's programming
+    val BrandCharcoal = Color(0xFF1C1A17) // card surface in the prose palette
 }
