@@ -133,8 +133,9 @@ class ReminderQueueComponentTest {
             awaitItem()
             component.onRetrySelected()
 
-            val notice = awaitItemWithNotice()
-            assertEquals("1 of 3 requeued; the rest need action first.", notice)
+            // Asserting on the typed notice rather than English prose: the component no longer
+            // formats sentences, and this is a stronger assertion than a string compare.
+            assertEquals(QueueNotice.Requeued(requeued = 1, requested = 3), awaitItemWithNotice())
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -146,10 +147,7 @@ class ReminderQueueComponentTest {
         component.state.test {
             awaitItem()
             component.onRetry(ReminderId("1"))
-            assertEquals(
-                "Nothing to retry — these failures need action before they can be resent.",
-                awaitItemWithNotice(),
-            )
+            assertEquals(QueueNotice.NothingRetryable, awaitItemWithNotice())
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -161,7 +159,7 @@ class ReminderQueueComponentTest {
         component.state.test {
             awaitItem()
             component.onRetry(ReminderId("1"))
-            assertEquals("Message requeued.", awaitItemWithNotice())
+            assertEquals(QueueNotice.Requeued(requeued = 1, requested = 1), awaitItemWithNotice())
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -179,7 +177,7 @@ class ReminderQueueComponentTest {
         }
     }
 
-    private suspend fun TurbineTestContext<ReminderQueueState>.awaitItemWithNotice(): String {
+    private suspend fun TurbineTestContext<ReminderQueueState>.awaitItemWithNotice(): QueueNotice {
         repeat(6) {
             val next = awaitItem()
             next.notice?.let { return it }

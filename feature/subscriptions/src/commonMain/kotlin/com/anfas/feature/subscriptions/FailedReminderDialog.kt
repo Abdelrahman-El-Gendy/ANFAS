@@ -30,10 +30,12 @@ import com.anfas.core.designsystem.AnfasShapes
 import com.anfas.core.designsystem.AnfasTextAction
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.TextActionEmphasis
+import com.anfas.core.i18n.AppStrings
+import com.anfas.core.i18n.strings
 import com.anfas.core.model.Reminder
 
 /**
- * "Message not delivered" — why one reminder failed and what can be done about it.
+ * s.reminders.failureDialogTitle — why one reminder failed and what can be done about it.
  *
  * The Retry button is disabled for failures a retry cannot fix (opt-in, bad number, paused
  * template) and the reason is stated inline rather than in a hover tooltip: the export uses a
@@ -48,26 +50,28 @@ internal fun FailedReminderDialog(
 ) {
     val failure = reminder.failure ?: return
     val scheme = MaterialTheme.colorScheme
+    val s = strings
 
     AnfasDialog(
-        title = "Message not delivered",
+        title = s.reminders.failureDialogTitle,
+        closeContentDescription = s.common.close,
         icon = AnfasIcons.ErrorOutline,
         iconTint = scheme.error,
         onDismissRequest = onDismiss,
         footer = {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 AnfasTextAction(
-                    text = "Open member",
+                    text = s.common.openMember,
                     icon = AnfasIcons.Chat,
                     onClick = onOpenMember,
                 )
             }
             if (reminder.canRetry) {
-                AnfasPrimaryButton(text = "RETRY NOW", onClick = onRetry)
+                AnfasPrimaryButton(text = s.reminders.retryNow, onClick = onRetry)
             } else {
                 // Explaining the block beats a disabled control with no reason given.
                 Text(
-                    text = "Retry unavailable",
+                    text = s.reminders.retryUnavailable,
                     style = AnfasTheme.textStyles.labelCaps,
                     color = scheme.onSurfaceVariant,
                 )
@@ -106,8 +110,8 @@ internal fun FailedReminderDialog(
         }
 
         AnfasCallout(
-            title = failure.reason.title,
-            message = failure.reason.explanation,
+            title = failure.reason.title(s),
+            message = failure.reason.explanation(s),
         )
 
         TechnicalDetails(reminder)
@@ -122,7 +126,11 @@ internal fun FailedReminderDialog(
 private fun TechnicalDetails(reminder: Reminder) {
     var expanded by remember { mutableStateOf(false) }
     val scheme = MaterialTheme.colorScheme
+    val s = strings
     val failure = reminder.failure ?: return
+    // Composed here, where strings and the scheduled label are both available; the helper below
+    // stays a pure function so it is readable and testable.
+    val summary = technicalSummary(reminder, s, reminder.scheduledLabel())
 
     Column(
         modifier = Modifier
@@ -139,19 +147,19 @@ private fun TechnicalDetails(reminder: Reminder) {
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "Technical details",
+                text = s.reminders.technicalDetails,
                 style = AnfasTheme.textStyles.bodyMedium,
                 color = scheme.onSurface,
             )
             AnfasTextAction(
-                text = if (expanded) "Hide" else "Show",
+                text = if (expanded) s.reminders.hideDetails else s.reminders.showDetails,
                 onClick = { expanded = !expanded },
                 emphasis = TextActionEmphasis.Muted,
             )
         }
         if (expanded) {
             Text(
-                text = technicalSummary(reminder),
+                text = summary,
                 style = AnfasTheme.textStyles.dataMono,
                 color = scheme.error.copy(alpha = 0.80f),
                 modifier = Modifier
@@ -163,13 +171,17 @@ private fun TechnicalDetails(reminder: Reminder) {
     }
 }
 
-private fun technicalSummary(reminder: Reminder): String {
+/**
+ * Pure: takes the already-resolved strings and scheduled label rather than calling composables,
+ * so it can be read and tested on its own.
+ */
+private fun technicalSummary(reminder: Reminder, s: AppStrings, scheduled: String): String {
     val failure = reminder.failure ?: return ""
     return buildList {
-        failure.providerCode?.let { add("Error code: $it") }
-        add("${reminder.attempts} attempt${if (reminder.attempts == 1) "" else "s"}")
-        failure.lastAttemptAt?.let { add("last ${reminder.scheduledLabel()}") }
-        failure.detail?.takeIf { it != failure.reason.title }?.let { add(it) }
+        failure.providerCode?.let { add(s.reminders.errorCode(it)) }
+        add(s.reminders.attempts(reminder.attempts))
+        failure.lastAttemptAt?.let { add(scheduled) }
+        failure.detail?.takeIf { it != failure.reason.title(s) }?.let { add(it) }
     }.joinToString(" · ")
 }
 

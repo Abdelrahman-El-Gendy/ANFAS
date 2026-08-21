@@ -27,6 +27,11 @@ sealed interface ReminderQueueContent {
  * [notice] is transient feedback for an action whose result is otherwise invisible — retrying
  * a selection where nothing was actually retryable produces no list change at all, and silence
  * would read as a broken button.
+ *
+ * It is a **typed** value, not a formatted sentence. A Decompose component cannot read Compose
+ * state, so building prose here would either hardcode English or need a string lookup that
+ * ignores the language toggle. The UI renders it. Tests assert on the type, which is also a
+ * better test than comparing English.
  */
 data class ReminderQueueState(
     val selectedStatus: ReminderStatus = ReminderStatus.FAILED,
@@ -36,7 +41,7 @@ data class ReminderQueueState(
     val content: ReminderQueueContent = ReminderQueueContent.Loading,
     val selectedIds: Set<ReminderId> = emptySet(),
     val openedFailure: Reminder? = null,
-    val notice: String? = null,
+    val notice: QueueNotice? = null,
 ) {
     val visibleReminders: List<Reminder>
         get() = (content as? ReminderQueueContent.Loaded)?.reminders ?: emptyList()
@@ -45,4 +50,12 @@ data class ReminderQueueState(
     val supportsSelection: Boolean get() = selectedStatus == ReminderStatus.FAILED
 
     val isFiltered: Boolean get() = query.isNotBlank() || templateFilter != null
+}
+
+/** The result of an action, as structure. Rendered by the screen. */
+sealed interface QueueNotice {
+    /** [requeued] of [requested] actually went; the rest could not be retried. */
+    data class Requeued(val requeued: Int, val requested: Int) : QueueNotice
+    data object NothingRetryable : QueueNotice
+    data class Failed(val message: String) : QueueNotice
 }

@@ -22,6 +22,7 @@ kotlin {
             api(project(":core:model"))
             api(project(":core:common"))
             api(project(":core:designsystem"))
+            api(project(":core:i18n"))
 
             // The app shell owns DI wiring, so it is the one place that legitimately sees
             // every core module and every feature module.

@@ -13,15 +13,19 @@ import androidx.compose.runtime.ReadOnlyComposable
  * the extracted values and the conflicts that were resolved to get them. Change a token in
  * Stitch and re-export first; never edit the Kotlin to win an argument with the design.
  *
+ * [script] selects the font family and the type-ramp adjustments Arabic needs. It is an
+ * [AnfasScript] rather than a language, so this module stays free of any dependency on
+ * localisation or the domain — the app shell maps its language onto it.
+ *
  * The design has one colour mode (dark), so there is no `darkTheme` parameter to pass.
  * What M3 has no slot for is reachable through [AnfasTheme]: [AnfasTheme.colors] for the
  * brand accents and fixed roles, [AnfasTheme.textStyles] for `labelCaps`/`dataMono`,
  * [AnfasTheme.spacing] and [AnfasTheme.alphas] for layout and border opacities.
  */
 @Composable
-fun AnfasTheme(content: @Composable () -> Unit) {
-    val family = anfasFontFamily()
-    val textStyles = anfasTextStyles(family)
+fun AnfasTheme(script: AnfasScript = AnfasScript.Latin, content: @Composable () -> Unit) {
+    val family = anfasFontFamily(script)
+    val textStyles = anfasTextStyles(family, script)
     CompositionLocalProvider(
         LocalAnfasExtendedColors provides anfasExtendedColors,
         LocalAnfasTextStyles provides textStyles,

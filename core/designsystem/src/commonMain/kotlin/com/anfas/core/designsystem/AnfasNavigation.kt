@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,7 +39,11 @@ data class NavItem(
 )
 
 @Composable
-fun AnfasBottomNav(items: List<NavItem>, modifier: Modifier = Modifier) {
+fun AnfasBottomNav(
+    items: List<NavItem>,
+    modifier: Modifier = Modifier,
+    trailing: @Composable (() -> Unit)? = null,
+) {
     val scheme = MaterialTheme.colorScheme
     Column(modifier = modifier.fillMaxWidth()) {
         AnfasTableDivider()
@@ -84,6 +89,7 @@ fun AnfasBottomNav(items: List<NavItem>, modifier: Modifier = Modifier) {
                     )
                 }
             }
+            trailing?.invoke()
         }
     }
 }
@@ -94,6 +100,7 @@ fun AnfasNavRail(
     modifier: Modifier = Modifier,
     title: String? = null,
     subtitle: String? = null,
+    footer: @Composable (() -> Unit)? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
     Row(modifier = modifier.fillMaxHeight()) {
@@ -154,6 +161,10 @@ fun AnfasNavRail(
                         color = if (item.selected) scheme.primary else scheme.onSurface,
                     )
                 }
+            }
+            if (footer != null) {
+                Spacer(Modifier.weight(1f))
+                footer()
             }
         }
         AnfasVerticalDivider()

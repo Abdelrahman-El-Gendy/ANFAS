@@ -50,9 +50,9 @@ enum class ReminderTemplate(val templateName: String, val language: TemplateLang
     MARKETING_PROMO("marketing_promo", TemplateLanguage.ENGLISH),
 }
 
-enum class TemplateLanguage(val label: String) {
-    ARABIC("Arabic"),
-    ENGLISH("English"),
+enum class TemplateLanguage {
+    ARABIC,
+    ENGLISH,
 }
 
 /**
@@ -71,6 +71,9 @@ data class ReminderFailure(
 
 /**
  * Every failure the export shows, with whether retrying can possibly help.
+ *
+ * Title and explanation live in AppStrings, not here: they are UI copy and must be translatable.
+ * Storage is unaffected — persistence writes .name, verified in ReminderMappers.
  *
  * [RATE_LIMITED] is the only retryable one: it is transient and the queue is already backing
  * off. The rest need a human to change something — an opt-in, a phone number, or a template

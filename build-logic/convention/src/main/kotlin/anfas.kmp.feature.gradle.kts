@@ -23,6 +23,10 @@ kotlin {
             api(project(":core:model"))
             api(project(":core:common"))
             api(project(":core:designsystem"))
+            // Localisation is universal to every feature, in exactly the way the design
+            // system is. Contrast :core:ocr, which only intake will need and which must NOT
+            // be granted here.
+            api(project(":core:i18n"))
             api(project(":core:data"))
 
             implementation(libs.bundle("koin"))

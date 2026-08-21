@@ -49,6 +49,8 @@ import com.anfas.core.designsystem.EmptyStateAction
 import com.anfas.core.designsystem.Tab
 import com.anfas.core.designsystem.TextActionEmphasis
 import com.anfas.core.designsystem.Tone
+import com.anfas.core.i18n.AppStrings
+import com.anfas.core.i18n.strings
 import com.anfas.core.model.Reminder
 import com.anfas.core.model.ReminderStatus
 import com.anfas.core.model.ReminderTemplate
@@ -67,6 +69,7 @@ import com.anfas.core.model.ReminderTemplate
 @Composable
 fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
+    val s = strings
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
@@ -77,14 +80,14 @@ fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = 
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             AnfasScreenHeader(
-                title = "Reminders",
-                subtitle = "Subscription reminders sent over WhatsApp.",
+                title = s.reminders.title,
+                subtitle = s.reminders.subtitle,
             )
 
             AnfasTabs(
                 tabs = StatusTabs.map { status ->
                     Tab(
-                        label = status.label,
+                        label = status.label(s),
                         count = state.counts[status],
                         emphasiseCount = status == ReminderStatus.FAILED &&
                             state.counts.failed > 0,
@@ -97,7 +100,8 @@ fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = 
             AnfasSearchField(
                 value = state.query,
                 onValueChange = component::onQueryChanged,
-                placeholder = "Search name or phone",
+                placeholder = s.reminders.searchPlaceholder,
+                clearContentDescription = s.common.clearSearch,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -107,7 +111,7 @@ fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = 
             )
 
             state.notice?.let { notice ->
-                NoticeBar(text = notice, onDismiss = component::onNoticeShown)
+                NoticeBar(text = notice.render(s), onDismiss = component::onNoticeShown)
             }
 
             when (val content = state.content) {
@@ -115,7 +119,7 @@ fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = 
 
                 is ReminderQueueContent.Failed -> AnfasEmptyState(
                     icon = AnfasIcons.ErrorOutline,
-                    title = "Couldn't load the queue",
+                    title = s.reminders.loadFailedTitle,
                     message = content.message,
                 )
 
@@ -139,17 +143,18 @@ fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = 
         if (state.supportsSelection && state.selectedIds.isNotEmpty()) {
             AnfasBulkActionBar(
                 selectedCount = state.selectedIds.size,
+                label = s.common.selected,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(24.dp),
             ) {
                 AnfasTextAction(
-                    text = "Dismiss",
+                    text = s.common.dismiss,
                     onClick = component::onClearSelection,
                     emphasis = TextActionEmphasis.Muted,
                 )
                 AnfasPrimaryButton(
-                    text = "RETRY ${state.selectedIds.size}",
+                    text = s.reminders.retrySelected(state.selectedIds.size),
                     onClick = component::onRetrySelected,
                 )
             }
@@ -171,12 +176,13 @@ private fun TemplateFilterRow(
     selected: ReminderTemplate?,
     onSelected: (ReminderTemplate?) -> Unit,
 ) {
+    val s = strings
     Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         AnfasChoiceChip(
-            label = "All templates",
+            label = s.reminders.allTemplates,
             selected = selected == null,
             onClick = { onSelected(null) },
         )
@@ -196,15 +202,16 @@ private fun QueueEmptyState(
     sentCount: Int,
     onClearFilters: () -> Unit,
 ) {
+    val s = strings
     // A filtered empty tab is a different situation from a genuinely clear queue: one is
     // "your filters match nothing", the other is "the system is healthy".
     if (content.isFiltered) {
         AnfasEmptyState(
             icon = AnfasIcons.FilterList,
-            title = "No reminders match these filters",
-            message = "Try a different template, or clear the search.",
+            title = s.reminders.filteredEmptyTitle,
+            message = s.reminders.filteredEmptyMessage,
             primaryAction = EmptyStateAction(
-                label = "CLEAR FILTERS",
+                label = s.reminders.clearFilters,
                 onClick = onClearFilters,
                 icon = AnfasIcons.Close,
             ),
@@ -214,31 +221,32 @@ private fun QueueEmptyState(
     when (content.status) {
         ReminderStatus.FAILED -> AnfasEmptyState(
             icon = AnfasIcons.CheckCircle,
-            title = "No failed reminders",
+            title = s.reminders.noFailedTitle,
             message = if (sentCount > 0) {
-                "The queue is clear. Last $sentCount messages delivered."
+                s.reminders.noFailedMessageWithCount(sentCount)
             } else {
-                "The queue is clear and running without interruptions."
+                s.reminders.noFailedMessage
             },
             tone = Tone.Informational,
         )
 
         ReminderStatus.QUEUED -> AnfasEmptyState(
             icon = AnfasIcons.Schedule,
-            title = "Nothing queued",
-            message = "Reminders appear here once the daily job schedules them.",
+            title = s.reminders.nothingQueuedTitle,
+            message = s.reminders.nothingQueuedMessage,
         )
 
         ReminderStatus.SENT -> AnfasEmptyState(
             icon = AnfasIcons.Send,
-            title = "Nothing sent yet",
-            message = "Delivered reminders will be listed here.",
+            title = s.reminders.nothingSentTitle,
+            message = s.reminders.nothingSentMessage,
         )
     }
 }
 
 @Composable
 private fun NoticeBar(text: String, onDismiss: () -> Unit) {
+    val s = strings
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -256,7 +264,11 @@ private fun NoticeBar(text: String, onDismiss: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f),
         )
-        AnfasTextAction(text = "Dismiss", onClick = onDismiss, emphasis = TextActionEmphasis.Muted)
+        AnfasTextAction(
+            text = s.common.dismiss,
+            onClick = onDismiss,
+            emphasis = TextActionEmphasis.Muted,
+        )
     }
 }
 
@@ -266,6 +278,7 @@ private fun ReminderTable(
     state: ReminderQueueState,
     component: ReminderQueueComponent,
 ) {
+    val s = strings
     val allVisibleSelected = reminders.isNotEmpty() &&
         state.selectedIds.containsAll(reminders.map { it.id })
 
@@ -283,13 +296,13 @@ private fun ReminderTable(
                     )
                 }
             }
-            AnfasTableHeaderCell("MEMBER", Modifier.weight(WEIGHT_MEMBER))
-            AnfasTableHeaderCell("PHONE", Modifier.weight(WEIGHT_PHONE))
-            AnfasTableHeaderCell("TEMPLATE", Modifier.weight(WEIGHT_TEMPLATE))
-            AnfasTableHeaderCell("SCHEDULED", Modifier.weight(WEIGHT_SCHEDULED))
-            AnfasTableHeaderCell("STATUS", Modifier.weight(WEIGHT_STATUS))
+            AnfasTableHeaderCell(s.reminders.columnMember, Modifier.weight(WEIGHT_MEMBER))
+            AnfasTableHeaderCell(s.reminders.columnPhone, Modifier.weight(WEIGHT_PHONE))
+            AnfasTableHeaderCell(s.reminders.columnTemplate, Modifier.weight(WEIGHT_TEMPLATE))
+            AnfasTableHeaderCell(s.reminders.columnScheduled, Modifier.weight(WEIGHT_SCHEDULED))
+            AnfasTableHeaderCell(s.reminders.columnStatus, Modifier.weight(WEIGHT_STATUS))
             AnfasTableHeaderCell(
-                text = "ACTIONS",
+                text = s.reminders.columnActions,
                 modifier = Modifier.width(ActionsColumnWidth),
                 textAlign = TextAlign.End,
             )
@@ -310,8 +323,10 @@ private fun ReminderTable(
         }
         AnfasTableFooter {
             Text(
-                text = "Showing ${reminders.size} ${state.selectedStatus.label.lowercase()}" +
-                    if (reminders.size == 1) " message" else " messages",
+                text = s.reminders.showingMessages(
+                    count = reminders.size,
+                    status = state.selectedStatus.label(s).lowercase(),
+                ),
                 style = AnfasTheme.textStyles.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -331,6 +346,7 @@ private fun ReminderRow(
     onOpenMember: () -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val s = strings
     Row(modifier = Modifier.fillMaxWidth()) {
         // The export marks failed rows with a 4px error stripe on the leading edge.
         Box(
@@ -390,10 +406,10 @@ private fun ReminderRow(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     AnfasStatusChip(
-                        label = reminder.status.label,
+                        label = reminder.status.label(s),
                         tone = reminder.status.chipTone,
                     )
-                    reminder.failureSummary?.let { summary ->
+                    reminder.failureSummary(s)?.let { summary ->
                         Text(
                             text = summary,
                             style = AnfasTheme.textStyles.labelCaps,
@@ -408,10 +424,10 @@ private fun ReminderRow(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     if (reminder.canRetry) {
-                        AnfasTextAction(text = "Retry", onClick = onRetry)
+                        AnfasTextAction(text = s.common.retry, onClick = onRetry)
                     } else {
                         AnfasTextAction(
-                            text = "Open",
+                            text = s.common.open,
                             onClick = onOpenMember,
                             emphasis = TextActionEmphasis.Muted,
                         )
@@ -436,3 +452,17 @@ private const val WEIGHT_SCHEDULED = 1.4f
 private const val WEIGHT_STATUS = 2f
 private val SelectionColumnWidth = 40.dp
 private val ActionsColumnWidth = 96.dp
+
+/** Typed notice -> sentence. The component deliberately does not do this itself. */
+private fun QueueNotice.render(s: AppStrings): String = when (this) {
+    is QueueNotice.Requeued ->
+        if (requeued == requested) {
+            s.reminders.requeuedAll(requeued)
+        } else {
+            s.reminders.requeuedPartial(requeued, requested)
+        }
+
+    QueueNotice.NothingRetryable -> s.reminders.requeuedNone
+
+    is QueueNotice.Failed -> message
+}

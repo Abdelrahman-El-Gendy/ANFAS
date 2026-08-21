@@ -34,6 +34,7 @@ import androidx.compose.ui.window.Dialog
 @Composable
 fun AnfasDialog(
     title: String,
+    closeContentDescription: String,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
@@ -78,7 +79,7 @@ fun AnfasDialog(
                 }
                 AnfasIconButton(
                     icon = AnfasIcons.Close,
-                    contentDescription = "Close",
+                    contentDescription = closeContentDescription,
                     onClick = onDismissRequest,
                 )
             }

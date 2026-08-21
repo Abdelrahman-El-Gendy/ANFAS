@@ -123,29 +123,25 @@ class ReminderQueueComponent(
         scope.launch {
             val requested = ids.size
             when (val result = repository.retry(ids)) {
-                is AppResult.Failure -> ui.update { it.copy(notice = result.error.message) }
+                is AppResult.Failure -> ui.update {
+                    it.copy(notice = QueueNotice.Failed(result.error.message))
+                }
 
                 is AppResult.Success -> ui.update {
                     it.copy(
                         selectedIds = emptySet(),
                         openedId = null,
-                        notice = retryNotice(requeued = result.value, requested = requested),
+                        // Typed, not prose: a Decompose component cannot read Compose state, so
+                        // formatting here would hardcode English. The screen renders it.
+                        notice = if (result.value == 0) {
+                            QueueNotice.NothingRetryable
+                        } else {
+                            QueueNotice.Requeued(requeued = result.value, requested = requested)
+                        },
                     )
                 }
             }
         }
-    }
-
-    /**
-     * Says what actually happened. A partial result is the interesting case: staff selected
-     * four failures, only one was rate-limited, and the other three need a human — telling
-     * them "1 of 4" is the difference between a working button and a broken-looking one.
-     */
-    private fun retryNotice(requeued: Int, requested: Int): String = when {
-        requeued == 0 -> "Nothing to retry — these failures need action before they can be resent."
-        requeued == requested && requested == 1 -> "Message requeued."
-        requeued == requested -> "$requeued messages requeued."
-        else -> "$requeued of $requested requeued; the rest need action first."
     }
 
     private data class UiSelections(
@@ -154,7 +150,7 @@ class ReminderQueueComponent(
         val template: ReminderTemplate? = null,
         val selectedIds: Set<ReminderId> = emptySet(),
         val openedId: ReminderId? = null,
-        val notice: String? = null,
+        val notice: QueueNotice? = null,
     )
 
     private companion object {

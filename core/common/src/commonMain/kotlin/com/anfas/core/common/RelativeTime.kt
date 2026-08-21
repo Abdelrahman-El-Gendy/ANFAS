@@ -1,62 +1,52 @@
 package com.anfas.core.common
 
-import kotlinx.datetime.Month
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Instant
 
 /**
- * Relative timestamp labels shared by every staff worklist — the members directory's
- * "Last check-in" and the reminder queue's "Scheduled" column read the same way:
- * "Today 08:15", "Yesterday 17:30", "2 days ago", then an absolute date once it is a week old.
+ * How long ago a timestamp was, as *structure* rather than text.
  *
- * This lives in :core:common rather than in a feature because two features need it and
- * features must never depend on each other.
+ * This used to return a formatted English string ("Today, 08:15", "2 days ago"), which made every
+ * staff worklist untranslatable and baked a month-name array into a module that has no business
+ * knowing about language. Rendering now happens in `:core:i18n`; this module only classifies.
  *
- * [now] and [zone] are parameters, not read from the environment, so callers are testable
- * without a globally installed clock and a test cannot pass merely because it runs in the
- * author's timezone.
+ * The tests are better for it too — they assert on cases instead of on prose.
  */
+sealed interface RelativeStamp {
+    data class Today(val hour: Int, val minute: Int) : RelativeStamp
+    data class Yesterday(val hour: Int, val minute: Int) : RelativeStamp
+    data class DaysAgo(val days: Int) : RelativeStamp
+    data class On(val date: LocalDate) : RelativeStamp
+
+    /** No timestamp at all, which is different from a timestamp of zero. */
+    data object None : RelativeStamp
+}
+
 object RelativeTime {
 
     /**
-     * @param separator between the day word and the time. The export uses ", " in the members
-     *   table and " " in the reminder queue, so it is a parameter rather than a silent choice.
-     * @param nullPlaceholder what to render when there is no timestamp at all — which is
-     *   different from a timestamp of zero.
+     * [now] and [zone] are parameters, not read from the environment, so callers are testable
+     * without a globally installed clock and a test cannot pass merely because it happens to run
+     * in the author's timezone.
      */
-    fun format(
-        instant: Instant?,
-        now: Instant,
-        zone: TimeZone,
-        separator: String = ", ",
-        nullPlaceholder: String = "—",
-    ): String {
-        if (instant == null) return nullPlaceholder
+    fun classify(instant: Instant?, now: Instant, zone: TimeZone): RelativeStamp {
+        if (instant == null) return RelativeStamp.None
 
         val then = instant.toLocalDateTime(zone)
         val daysAgo = now.toLocalDateTime(zone).date.toEpochDays() - then.date.toEpochDays()
-        val time = "${then.hour.pad2()}:${then.minute.pad2()}"
 
         return when {
-            // A future stamp means clock skew between the device and the server. Showing
-            // "-1 days ago" would just look broken to staff.
-            daysAgo <= 0L -> "Today$separator$time"
+            // A future stamp means clock skew between device and server. "-1 days ago" would just
+            // look broken to staff.
+            daysAgo <= 0L -> RelativeStamp.Today(then.hour, then.minute)
 
-            daysAgo == 1L -> "Yesterday$separator$time"
+            daysAgo == 1L -> RelativeStamp.Yesterday(then.hour, then.minute)
 
-            daysAgo < 7L -> "$daysAgo days ago"
+            daysAgo < 7L -> RelativeStamp.DaysAgo(daysAgo.toInt())
 
-            else -> "${then.date.month.shortName()} ${then.date.day}, ${then.date.year}"
+            else -> RelativeStamp.On(then.date)
         }
     }
 }
-
-private fun Int.pad2(): String = if (this < 10) "0$this" else toString()
-
-/** Indexed by [Enum.ordinal]; the enum is declared January..December in order. */
-private val MonthAbbreviations = arrayOf(
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-)
-
-private fun Month.shortName(): String = MonthAbbreviations[ordinal]

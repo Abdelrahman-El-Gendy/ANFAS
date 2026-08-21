@@ -141,7 +141,9 @@ class IntakeReviewComponentTest {
         component.state.test {
             awaitItem()
             component.onImport()
-            assertEquals("1 imported; 1 still need fixing.", awaitNotice())
+            // Typed, not prose. The counts are what matters, and naming the leftovers is the
+            // behaviour under test.
+            assertEquals(IntakeNotice.Imported(imported = 1, skipped = 1), awaitNotice())
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -158,7 +160,7 @@ class IntakeReviewComponentTest {
         component.state.test {
             awaitItem()
             component.onImport()
-            assertEquals("1 member imported.", awaitNotice())
+            assertEquals(IntakeNotice.Imported(imported = 1, skipped = 0), awaitNotice())
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -211,7 +213,7 @@ class IntakeReviewComponentTest {
         component.state.test {
             awaitItem()
             component.onImport()
-            assertEquals("database is locked", awaitNotice())
+            assertEquals(IntakeNotice.Failed("database is locked"), awaitNotice())
             assertTrue(!component.state.value.isImporting)
             cancelAndIgnoreRemainingEvents()
         }
@@ -241,14 +243,14 @@ class IntakeReviewComponentTest {
         component.state.test {
             awaitItem()
             component.onDiscard()
-            assertEquals("Sheet discarded.", awaitNotice())
+            assertEquals(IntakeNotice.Discarded, awaitNotice())
             cancelAndIgnoreRemainingEvents()
         }
     }
 
     // --- helpers --------------------------------------------------------------------------
 
-    private suspend fun TurbineTestContext<IntakeReviewState>.awaitNotice(): String {
+    private suspend fun TurbineTestContext<IntakeReviewState>.awaitNotice(): IntakeNotice {
         repeat(8) {
             awaitItem().notice?.let { return it }
         }

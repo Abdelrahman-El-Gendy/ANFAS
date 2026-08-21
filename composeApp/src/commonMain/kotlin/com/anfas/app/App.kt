@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.anfas.app.navigation.RootComponent
@@ -16,15 +17,22 @@ import com.anfas.app.navigation.topLevel
 import com.anfas.core.designsystem.AnfasBottomNav
 import com.anfas.core.designsystem.AnfasBreakpoints
 import com.anfas.core.designsystem.AnfasIcons
+import com.anfas.core.designsystem.AnfasLanguageToggle
 import com.anfas.core.designsystem.AnfasNavRail
+import com.anfas.core.designsystem.AnfasScript
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.NavItem
+import com.anfas.core.i18n.AppLanguage
+import com.anfas.core.i18n.LanguageController
+import com.anfas.core.i18n.ProvideLocalization
+import com.anfas.core.i18n.strings
 import com.anfas.feature.intakeocr.IntakeReviewScreen
 import com.anfas.feature.members.MembersListScreen
 import com.anfas.feature.subscriptions.ReminderQueueScreen
 import com.anfas.feature.subscriptions.RenewalSheetScreen
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import org.koin.compose.koinInject
 
 /**
  * App shell: theme, the navigation host, and the top-level nav chrome.
@@ -38,48 +46,65 @@ import com.arkivanov.decompose.extensions.compose.subscribeAsState
  */
 @Composable
 fun App(root: RootComponent) {
-    AnfasTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-            val stack by root.stack.subscribeAsState()
-            val active = stack.active.configuration.topLevel
-            val items = listOf(
-                NavItem(
-                    label = "Members",
-                    icon = AnfasIcons.Person,
-                    selected = active == RootComponent.TopLevel.MEMBERS,
-                    onClick = { root.onTopLevelSelected(RootComponent.TopLevel.MEMBERS) },
-                ),
-                NavItem(
-                    label = "Reminders",
-                    icon = AnfasIcons.Payments,
-                    selected = active == RootComponent.TopLevel.REMINDERS,
-                    onClick = { root.onTopLevelSelected(RootComponent.TopLevel.REMINDERS) },
-                ),
-                NavItem(
-                    label = "Intake",
-                    icon = AnfasIcons.DocumentScanner,
-                    selected = active == RootComponent.TopLevel.INTAKE,
-                    onClick = { root.onTopLevelSelected(RootComponent.TopLevel.INTAKE) },
-                ),
-            )
+    val languageController: LanguageController = koinInject()
+    val language by languageController.language.collectAsState()
 
-            BoxWithConstraints(modifier = Modifier.fillMaxSize().safeContentPadding()) {
-                val wide = maxWidth >= AnfasBreakpoints.tabletMax
-                if (wide) {
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        if (active != null) {
-                            AnfasNavRail(
-                                items = items,
-                                title = "ANFAS",
-                                subtitle = "GYM MANAGEMENT",
-                            )
+    // Because `language` is snapshot state, switching it is an ordinary recomposition -- instant,
+    // on all three platforms, with no restart. ProvideLocalization also sets LocalLayoutDirection,
+    // so strings and mirroring can never disagree.
+    ProvideLocalization(language) {
+        AnfasTheme(script = language.toScript()) {
+            Surface(modifier = Modifier.fillMaxSize()) {
+                val stack by root.stack.subscribeAsState()
+                val active = stack.active.configuration.topLevel
+                val s = strings
+                val languages = AppLanguage.entries
+                val toggle: @Composable () -> Unit = {
+                    AnfasLanguageToggle(
+                        options = languages.map { it.endonym },
+                        selectedIndex = languages.indexOf(language),
+                        onSelect = { languageController.select(languages[it]) },
+                    )
+                }
+                val items = listOf(
+                    NavItem(
+                        label = s.members.title,
+                        icon = AnfasIcons.Person,
+                        selected = active == RootComponent.TopLevel.MEMBERS,
+                        onClick = { root.onTopLevelSelected(RootComponent.TopLevel.MEMBERS) },
+                    ),
+                    NavItem(
+                        label = s.reminders.title,
+                        icon = AnfasIcons.Payments,
+                        selected = active == RootComponent.TopLevel.REMINDERS,
+                        onClick = { root.onTopLevelSelected(RootComponent.TopLevel.REMINDERS) },
+                    ),
+                    NavItem(
+                        label = s.intake.title,
+                        icon = AnfasIcons.DocumentScanner,
+                        selected = active == RootComponent.TopLevel.INTAKE,
+                        onClick = { root.onTopLevelSelected(RootComponent.TopLevel.INTAKE) },
+                    ),
+                )
+
+                BoxWithConstraints(modifier = Modifier.fillMaxSize().safeContentPadding()) {
+                    val wide = maxWidth >= AnfasBreakpoints.tabletMax
+                    if (wide) {
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            if (active != null) {
+                                AnfasNavRail(
+                                    items = items,
+                                    title = s.common.appName,
+                                    subtitle = s.common.appTagline,
+                                )
+                            }
+                            Host(root, Modifier.fillMaxSize())
                         }
-                        Host(root, Modifier.fillMaxSize())
-                    }
-                } else {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Host(root, Modifier.fillMaxWidth().weight(1f))
-                        if (active != null) AnfasBottomNav(items)
+                    } else {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Host(root, Modifier.fillMaxWidth().weight(1f))
+                            if (active != null) AnfasBottomNav(items, trailing = toggle)
+                        }
                     }
                 }
             }
@@ -106,4 +131,13 @@ private fun Host(root: RootComponent, modifier: Modifier) {
             }
         }
     }
+}
+
+/**
+ * The one place language and script meet. :core:designsystem deliberately knows nothing about
+ * AppLanguage, and :core:i18n knows nothing about the type ramp, so the shell joins them.
+ */
+private fun AppLanguage.toScript(): AnfasScript = when (this) {
+    AppLanguage.EN -> AnfasScript.Latin
+    AppLanguage.AR -> AnfasScript.Arabic
 }

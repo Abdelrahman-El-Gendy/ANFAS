@@ -41,6 +41,7 @@ import com.anfas.core.designsystem.AnfasTableRow
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.EmptyStateAction
 import com.anfas.core.designsystem.Tone
+import com.anfas.core.i18n.strings
 import com.anfas.core.model.Member
 import com.anfas.core.model.MembershipStatus
 
@@ -58,6 +59,7 @@ import com.anfas.core.model.MembershipStatus
 @Composable
 fun MembersListScreen(component: MembersListComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
+    val s = strings
 
     Column(
         modifier = modifier
@@ -67,8 +69,8 @@ fun MembersListScreen(component: MembersListComponent, modifier: Modifier = Modi
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         AnfasScreenHeader(
-            title = "Members",
-            subtitle = "Manage and track membership status.",
+            title = s.members.title,
+            subtitle = s.members.subtitle,
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -79,11 +81,12 @@ fun MembersListScreen(component: MembersListComponent, modifier: Modifier = Modi
                 value = state.query,
                 onValueChange = component::onQueryChanged,
                 onClear = component::onClearSearch,
-                placeholder = "Search members",
+                placeholder = s.members.searchPlaceholder,
+                clearContentDescription = s.common.clearSearch,
                 modifier = Modifier.weight(1f),
             )
             AnfasPrimaryButton(
-                text = "ADD MEMBER",
+                text = s.members.addMember,
                 icon = AnfasIcons.PersonAdd,
                 onClick = component::onAddMember,
             )
@@ -94,35 +97,34 @@ fun MembersListScreen(component: MembersListComponent, modifier: Modifier = Modi
 
             is MembersListContent.Failed -> AnfasEmptyState(
                 icon = AnfasIcons.Close,
-                title = "Couldn't load members",
+                title = s.members.loadFailedTitle,
                 message = content.message,
                 tone = Tone.Informational,
             )
 
             MembersListContent.DirectoryEmpty -> AnfasEmptyState(
                 icon = AnfasIcons.PersonAdd,
-                title = "No members yet",
-                message = "Add one manually or scan a sign-up sheet to get started.",
+                title = s.members.emptyTitle,
+                message = s.members.emptyMessage,
                 tone = Tone.Invitation,
                 secondaryAction = EmptyStateAction(
-                    label = "ADD MEMBER",
+                    label = s.members.addMember,
                     onClick = component::onAddMember,
                     icon = AnfasIcons.PersonAdd,
                 ),
                 primaryAction = EmptyStateAction(
-                    label = "SCAN SHEET",
+                    label = s.members.scanSheet,
                     onClick = component::onScanSheet,
                 ),
             )
 
             is MembersListContent.NoMatches -> AnfasEmptyState(
                 icon = AnfasIcons.PersonSearch,
-                title = "No members match \"${content.query}\"",
-                message = "We couldn't find any member profiles matching this search query. " +
-                    "Try adjusting your spelling or search by membership number.",
+                title = s.members.noMatchesTitle(content.query),
+                message = s.members.noMatchesMessage,
                 tone = Tone.Informational,
                 primaryAction = EmptyStateAction(
-                    label = "CLEAR SEARCH",
+                    label = s.members.clearSearchAction,
                     onClick = component::onClearSearch,
                     icon = AnfasIcons.ArrowBack,
                 ),
@@ -141,13 +143,17 @@ private fun MembersTable(
     members: List<Member>,
     onMemberClicked: (com.anfas.core.model.MemberId) -> Unit,
 ) {
+    val s = strings
     AnfasCard(modifier = Modifier.fillMaxWidth()) {
         AnfasTableHeaderRow {
-            AnfasTableHeaderCell("MEMBER", Modifier.weight(COLUMN_WEIGHT_MEMBER))
-            AnfasTableHeaderCell("STATUS", Modifier.weight(COLUMN_WEIGHT_STATUS))
-            AnfasTableHeaderCell("LAST CHECK-IN", Modifier.weight(COLUMN_WEIGHT_CHECK_IN))
+            AnfasTableHeaderCell(s.members.columnMember, Modifier.weight(COLUMN_WEIGHT_MEMBER))
+            AnfasTableHeaderCell(s.members.columnStatus, Modifier.weight(COLUMN_WEIGHT_STATUS))
             AnfasTableHeaderCell(
-                text = "ACTIONS",
+                s.members.columnLastCheckIn,
+                Modifier.weight(COLUMN_WEIGHT_CHECK_IN),
+            )
+            AnfasTableHeaderCell(
+                text = s.members.columnActions,
                 modifier = Modifier.width(ActionsColumnWidth),
                 textAlign = TextAlign.End,
             )
@@ -179,6 +185,7 @@ private fun MembersTable(
 
 @Composable
 private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
+    val s = strings
     // The export dims expired members' names to 70% rather than recolouring them — the status
     // chip is what carries the meaning.
     val nameAlpha = if (member.status == MembershipStatus.EXPIRED) 0.70f else 1f
@@ -199,7 +206,7 @@ private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = "ID: ${member.membershipNumber}",
+                    text = s.members.idPrefix(member.membershipNumber),
                     style = AnfasTheme.textStyles.dataMono,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -207,7 +214,7 @@ private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
             }
         }
         Box(Modifier.weight(COLUMN_WEIGHT_STATUS)) {
-            AnfasStatusChip(label = member.status.label, tone = member.status.chipTone)
+            AnfasStatusChip(label = member.status.label(), tone = member.status.chipTone)
         }
         Text(
             text = member.lastCheckInLabel(),
@@ -219,7 +226,7 @@ private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
         Box(Modifier.width(ActionsColumnWidth), contentAlignment = Alignment.CenterEnd) {
             AnfasIconButton(
                 icon = AnfasIcons.MoreVert,
-                contentDescription = "Actions for ${member.fullName}",
+                contentDescription = s.members.actionsFor(member.fullName),
                 onClick = onClick,
             )
         }

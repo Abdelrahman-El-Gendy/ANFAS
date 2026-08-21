@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.anfas.core.common.MoneyFormat
 import com.anfas.core.designsystem.AnfasCheckbox
 import com.anfas.core.designsystem.AnfasChoiceChip
 import com.anfas.core.designsystem.AnfasIcons
@@ -35,6 +34,14 @@ import com.anfas.core.designsystem.AnfasStatusChip
 import com.anfas.core.designsystem.AnfasTableDivider
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.ChipTone
+import com.anfas.core.i18n.AppStrings
+import com.anfas.core.i18n.LocalAppLanguage
+import com.anfas.core.i18n.MoneyStyle
+import com.anfas.core.i18n.formatLong
+import com.anfas.core.i18n.formatMoney
+import com.anfas.core.i18n.formatMoneyNegated
+import com.anfas.core.i18n.moneyStyle
+import com.anfas.core.i18n.strings
 import com.anfas.core.model.PaymentMethod
 import com.anfas.core.model.RenewalQuote
 import com.anfas.core.model.RenewalStart
@@ -54,6 +61,8 @@ import kotlinx.datetime.LocalDate
 fun RenewalSheetScreen(component: RenewalSheetComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
     val scheme = MaterialTheme.colorScheme
+    val s = strings
+    val money = LocalAppLanguage.current.moneyStyle()
 
     Column(modifier = modifier.fillMaxWidth()) {
         Column(
@@ -71,8 +80,9 @@ fun RenewalSheetScreen(component: RenewalSheetComponent, modifier: Modifier = Mo
                     color = scheme.onSurface,
                 )
                 Text(
-                    text = state.currentTermEndsOn?.let { "Current plan ends ${it.formatLong()}" }
-                        ?: "No active plan",
+                    text = state.currentTermEndsOn
+                        ?.let { s.renewal.currentPlanEnds(s.formatLong(it)) }
+                        ?: s.renewal.noActivePlan,
                     style = AnfasTheme.textStyles.bodyMedium,
                     color = scheme.onSurfaceVariant,
                 )
@@ -86,7 +96,7 @@ fun RenewalSheetScreen(component: RenewalSheetComponent, modifier: Modifier = Mo
                 )
             }
 
-            Section("SELECT DURATION") {
+            Section(s.renewal.selectDuration) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     state.plans.forEach { plan ->
                         PlanRow(
@@ -98,29 +108,29 @@ fun RenewalSheetScreen(component: RenewalSheetComponent, modifier: Modifier = Mo
                 }
             }
 
-            Section("START DATE") {
+            Section(s.renewal.startDate) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     AnfasChoiceChip(
-                        label = "Start today",
+                        label = s.renewal.startToday,
                         selected = state.start == RenewalStart.TODAY,
                         onClick = { component.onStartSelected(RenewalStart.TODAY) },
                     )
                     AnfasChoiceChip(
-                        label = "Start when current ends",
+                        label = s.renewal.startWhenCurrentEnds,
                         selected = state.start == RenewalStart.WHEN_CURRENT_ENDS,
                         onClick = { component.onStartSelected(RenewalStart.WHEN_CURRENT_ENDS) },
                     )
                 }
             }
 
-            Section("PAYMENT METHOD") {
+            Section(s.renewal.paymentMethod) {
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     PaymentMethod.entries.forEach { method ->
                         AnfasChoiceChip(
-                            label = method.label,
+                            label = method.label(s),
                             icon = method.icon,
                             selected = state.paymentMethod == method,
                             onClick = { component.onPaymentMethodSelected(method) },
@@ -146,19 +156,19 @@ fun RenewalSheetScreen(component: RenewalSheetComponent, modifier: Modifier = Mo
                     onCheckedChange = component::onSendWhatsAppChanged,
                 )
                 Text(
-                    text = "Send WhatsApp confirmation",
+                    text = s.renewal.sendWhatsAppConfirmation,
                     style = AnfasTheme.textStyles.bodyMedium,
                     color = scheme.onSurfaceVariant,
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 AnfasSecondaryButton(
-                    text = "CANCEL",
+                    text = s.common.cancel,
                     onClick = component::onCancel,
                     modifier = Modifier.weight(1f),
                 )
                 AnfasPrimaryButton(
-                    text = if (state.isConfirming) "CONFIRMING…" else "CONFIRM RENEWAL",
+                    text = if (state.isConfirming) s.renewal.confirming else s.renewal.confirm,
                     onClick = component::onConfirm,
                     enabled = state.canConfirm,
                     modifier = Modifier.weight(2f),
@@ -183,6 +193,8 @@ private fun Section(title: String, content: @Composable () -> Unit) {
 @Composable
 private fun PlanRow(plan: SubscriptionPlan, selected: Boolean, onClick: () -> Unit) {
     val scheme = MaterialTheme.colorScheme
+    val s = strings
+    val money = LocalAppLanguage.current.moneyStyle()
     AnfasSelectableRow(selected = selected, onClick = onClick) {
         Column(modifier = Modifier.weight(1f)) {
             Row(
@@ -190,12 +202,15 @@ private fun PlanRow(plan: SubscriptionPlan, selected: Boolean, onClick: () -> Un
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = plan.tier.label,
+                    text = plan.tier.label(s),
                     style = AnfasTheme.textStyles.bodyLarge,
                     color = scheme.onSurface,
                 )
                 plan.savingsPercent?.let { percent ->
-                    AnfasStatusChip(label = "Save $percent%", tone = ChipTone.Positive)
+                    AnfasStatusChip(
+                        label = s.renewal.savePercent(percent),
+                        tone = ChipTone.Positive,
+                    )
                 }
             }
             Text(
@@ -205,7 +220,7 @@ private fun PlanRow(plan: SubscriptionPlan, selected: Boolean, onClick: () -> Un
             )
         }
         Text(
-            text = MoneyFormat.format(plan.price),
+            text = formatMoney(plan.price, money),
             style = AnfasTheme.textStyles.bodyLarge,
             color = scheme.onSurface,
         )
@@ -215,6 +230,8 @@ private fun PlanRow(plan: SubscriptionPlan, selected: Boolean, onClick: () -> Un
 @Composable
 private fun QuoteSummary(quote: RenewalQuote) {
     val scheme = MaterialTheme.colorScheme
+    val s = strings
+    val money = LocalAppLanguage.current.moneyStyle()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -225,13 +242,13 @@ private fun QuoteSummary(quote: RenewalQuote) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         SummaryLine(
-            label = "${quote.plan.tier.label} plan",
-            value = MoneyFormat.format(quote.plan.price),
+            label = s.renewal.planLine(quote.plan.tier.label(s)),
+            value = formatMoney(quote.plan.price, money),
         )
         if (!quote.discount.isZero) {
             SummaryLine(
-                label = "Discount",
-                value = MoneyFormat.formatNegated(quote.discount),
+                label = s.renewal.discount,
+                value = formatMoneyNegated(quote.discount, money),
                 valueColor = scheme.secondary,
             )
         }
@@ -242,18 +259,18 @@ private fun QuoteSummary(quote: RenewalQuote) {
             verticalAlignment = Alignment.Bottom,
         ) {
             Text(
-                text = "Total",
+                text = s.common.total,
                 style = AnfasTheme.textStyles.bodyMedium,
                 color = scheme.onSurfaceVariant,
             )
             Text(
-                text = MoneyFormat.format(quote.total),
+                text = formatMoney(quote.total, money),
                 style = AnfasTheme.textStyles.headlineMedium,
                 color = scheme.onSurface,
             )
         }
         Text(
-            text = "New end date: ${quote.endsOn.formatLong()}",
+            text = s.renewal.newEndDate(s.formatLong(quote.endsOn)),
             style = AnfasTheme.textStyles.bodyMedium,
             color = scheme.onSurfaceVariant,
             textAlign = TextAlign.End,
@@ -281,20 +298,18 @@ private fun SummaryLine(
     }
 }
 
-private val com.anfas.core.model.PlanTier.label: String
-    get() = when (this) {
-        com.anfas.core.model.PlanTier.MONTHLY -> "Monthly"
-        com.anfas.core.model.PlanTier.QUARTERLY -> "Quarterly"
-        com.anfas.core.model.PlanTier.ANNUAL -> "Annual"
-    }
+private fun com.anfas.core.model.PlanTier.label(s: AppStrings): String = when (this) {
+    com.anfas.core.model.PlanTier.MONTHLY -> s.renewal.tierMonthly
+    com.anfas.core.model.PlanTier.QUARTERLY -> s.renewal.tierQuarterly
+    com.anfas.core.model.PlanTier.ANNUAL -> s.renewal.tierAnnual
+}
 
-private val PaymentMethod.label: String
-    get() = when (this) {
-        PaymentMethod.CASH -> "Cash"
-        PaymentMethod.CARD -> "Card"
-        PaymentMethod.INSTAPAY -> "InstaPay"
-        PaymentMethod.VODAFONE_CASH -> "Vodafone Cash"
-    }
+private fun PaymentMethod.label(s: AppStrings): String = when (this) {
+    PaymentMethod.CASH -> s.renewal.paymentCash
+    PaymentMethod.CARD -> s.renewal.paymentCard
+    PaymentMethod.INSTAPAY -> s.renewal.paymentInstapay
+    PaymentMethod.VODAFONE_CASH -> s.renewal.paymentVodafoneCash
+}
 
 private val PaymentMethod.icon
     get() = when (this) {
@@ -303,11 +318,3 @@ private val PaymentMethod.icon
         PaymentMethod.INSTAPAY -> AnfasIcons.Send
         PaymentMethod.VODAFONE_CASH -> AnfasIcons.Smartphone
     }
-
-/** "12 Aug 2026" — the export's date style on this screen. */
-private fun LocalDate.formatLong(): String {
-    val months = arrayOf(
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    )
-    return "$day ${months[month.ordinal]} $year"
-}

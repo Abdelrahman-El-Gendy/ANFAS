@@ -32,13 +32,18 @@ import androidx.compose.ui.unit.dp
  *
  * A trailing clear affordance appears only when there is something to clear, which is what
  * `search-no-results` shows.
+ *
+ * [placeholder] and [clearContentDescription] are required, not defaulted to English: this module
+ * must not depend on :core:i18n (the design system knows nothing about language or the domain),
+ * so callers supply localised text.
  */
 @Composable
 fun AnfasSearchField(
     value: String,
     onValueChange: (String) -> Unit,
+    placeholder: String,
+    clearContentDescription: String,
     modifier: Modifier = Modifier,
-    placeholder: String = "Search",
     onClear: () -> Unit = { onValueChange("") },
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -84,7 +89,7 @@ fun AnfasSearchField(
         if (value.isNotEmpty()) {
             AnfasIconButton(
                 icon = AnfasIcons.Close,
-                contentDescription = "Clear search",
+                contentDescription = clearContentDescription,
                 onClick = onClear,
                 size = 18.dp,
             )

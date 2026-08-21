@@ -89,7 +89,10 @@ class IntakeReviewComponent(
     fun onFieldEdited(rowId: IntakeRowId, field: IntakeFieldKey, value: String) {
         scope.launch {
             when (val result = repository.editField(rowId, field, value)) {
-                is AppResult.Failure -> ui.update { it.copy(notice = result.error.message) }
+                is AppResult.Failure -> ui.update {
+                    it.copy(notice = IntakeNotice.Failed(result.error.message))
+                }
+
                 is AppResult.Success -> Unit // The revalidated read is the feedback.
             }
         }
@@ -116,8 +119,11 @@ class IntakeReviewComponent(
         val batchId = state.value.batch?.id ?: return
         scope.launch {
             when (val result = repository.discardBatch(batchId)) {
-                is AppResult.Failure -> ui.update { it.copy(notice = result.error.message) }
-                is AppResult.Success -> ui.update { UiState(notice = "Sheet discarded.") }
+                is AppResult.Failure -> ui.update {
+                    it.copy(notice = IntakeNotice.Failed(result.error.message))
+                }
+
+                is AppResult.Success -> ui.update { UiState(notice = IntakeNotice.Discarded) }
             }
         }
     }
@@ -127,7 +133,7 @@ class IntakeReviewComponent(
     private suspend fun performImport(batchId: IntakeBatchId) {
         when (val result = repository.importBatch(batchId)) {
             is AppResult.Failure -> ui.update {
-                it.copy(isImporting = false, notice = result.error.message)
+                it.copy(isImporting = false, notice = IntakeNotice.Failed(result.error.message))
             }
 
             is AppResult.Success -> {
@@ -137,24 +143,12 @@ class IntakeReviewComponent(
                     // inheriting the previous one's zoom and pan would be disorienting.
                     UiState(
                         outcome = outcome,
-                        notice = importNotice(outcome.imported, outcome.skipped),
+                        notice = IntakeNotice.Imported(outcome.imported, outcome.skipped),
                     )
                 }
                 onImported(outcome.imported)
             }
         }
-    }
-
-    /**
-     * Names the leftovers explicitly. "Imported 6" alone would let staff walk away believing
-     * the sheet was fully processed when two people are still not registered.
-     */
-    private fun importNotice(imported: Int, skipped: Int): String = when {
-        imported == 0 && skipped == 0 -> "Nothing on this sheet to import."
-        imported == 0 -> "Nothing imported — all $skipped rows still need fixing."
-        skipped == 0 && imported == 1 -> "1 member imported."
-        skipped == 0 -> "$imported members imported."
-        else -> "$imported imported; $skipped still need fixing."
     }
 
     private fun Float.stepZoom(factor: Float): Float =
@@ -166,7 +160,7 @@ class IntakeReviewComponent(
         val panY: Float = 0f,
         val isImporting: Boolean = false,
         val outcome: com.anfas.core.data.ImportOutcome? = null,
-        val notice: String? = null,
+        val notice: IntakeNotice? = null,
     )
 
     private companion object {

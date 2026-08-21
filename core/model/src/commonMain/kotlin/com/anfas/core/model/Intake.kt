@@ -101,19 +101,23 @@ data class IntakeField(val value: String, val confidence: Float, val wasEdited: 
 /**
  * Everything that can be wrong with a row.
  *
+ * Carries no display text: UI copy has no place in a pure domain enum, and these are rendered
+ * through AppStrings by whichever screen shows them. Storage is unaffected — persistence writes
+ * .name, verified in IntakeMappers.
+ *
  * [isBlocking] is the important property. The export shows 8 rows with "6 of 8 rows ready for
  * import": a duplicate phone and a missing required field stop a row, while a low-confidence
  * cell only asks for a look.
  */
-enum class IntakeIssue(val label: String, val isBlocking: Boolean) {
-    MISSING_NAME("Name missing", isBlocking = true),
-    MISSING_PHONE("Phone missing", isBlocking = true),
-    DUPLICATE_PHONE("Duplicate", isBlocking = true),
-    DUPLICATE_IN_BATCH("Duplicate in this sheet", isBlocking = true),
-    UNREADABLE_DATE("Date unreadable", isBlocking = false),
-    END_BEFORE_START("End date before start", isBlocking = true),
-    UNKNOWN_PLAN("Plan not recognised", isBlocking = false),
-    LOW_CONFIDENCE("Check this row", isBlocking = false),
+enum class IntakeIssue(val isBlocking: Boolean) {
+    MISSING_NAME(isBlocking = true),
+    MISSING_PHONE(isBlocking = true),
+    DUPLICATE_PHONE(isBlocking = true),
+    DUPLICATE_IN_BATCH(isBlocking = true),
+    UNREADABLE_DATE(isBlocking = false),
+    END_BEFORE_START(isBlocking = true),
+    UNKNOWN_PLAN(isBlocking = false),
+    LOW_CONFIDENCE(isBlocking = false),
 }
 
 /**

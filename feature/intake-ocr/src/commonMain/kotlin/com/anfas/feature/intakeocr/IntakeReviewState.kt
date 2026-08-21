@@ -27,6 +27,9 @@ sealed interface IntakeReviewContent {
  *
  * [outcome] is set once an import completes, so the screen can report what happened before the
  * batch disappears from the review list.
+ *
+ * [notice] is typed rather than a formatted sentence: a Decompose component cannot read Compose
+ * state, so building prose here would hardcode English regardless of the language toggle.
  */
 data class IntakeReviewState(
     val content: IntakeReviewContent = IntakeReviewContent.Loading,
@@ -35,7 +38,7 @@ data class IntakeReviewState(
     val panY: Float = 0f,
     val isImporting: Boolean = false,
     val outcome: ImportOutcome? = null,
-    val notice: String? = null,
+    val notice: IntakeNotice? = null,
 ) {
     val batch: IntakeBatch? get() = (content as? IntakeReviewContent.Loaded)?.batch
 
@@ -48,4 +51,12 @@ data class IntakeReviewState(
         const val MIN_ZOOM = 0.5f
         const val MAX_ZOOM = 4f
     }
+}
+
+/** The result of an action, as structure. Rendered by the screen. */
+sealed interface IntakeNotice {
+    /** Both counts, because naming the leftovers is the whole point. */
+    data class Imported(val imported: Int, val skipped: Int) : IntakeNotice
+    data object Discarded : IntakeNotice
+    data class Failed(val message: String) : IntakeNotice
 }

@@ -49,6 +49,8 @@ import com.anfas.core.designsystem.AnfasTableRow
 import com.anfas.core.designsystem.AnfasTextAction
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.TextActionEmphasis
+import com.anfas.core.i18n.AppStrings
+import com.anfas.core.i18n.strings
 import com.anfas.core.model.IntakeBatch
 import com.anfas.core.model.IntakeIssue
 import com.anfas.core.model.IntakeRow
@@ -71,6 +73,7 @@ import com.anfas.core.model.IntakeRow
 @Composable
 fun IntakeReviewScreen(component: IntakeReviewComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
+    val s = strings
 
     Column(
         modifier = modifier
@@ -80,12 +83,12 @@ fun IntakeReviewScreen(component: IntakeReviewComponent, modifier: Modifier = Mo
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         AnfasScreenHeader(
-            title = "Intake",
-            subtitle = "Review parsed data before import. Resolve warnings.",
+            title = s.intake.title,
+            subtitle = s.intake.subtitle,
         )
 
         state.notice?.let { notice ->
-            NoticeBar(notice, component::onNoticeShown)
+            NoticeBar(notice.render(s), component::onNoticeShown)
         }
 
         when (val content = state.content) {
@@ -93,17 +96,16 @@ fun IntakeReviewScreen(component: IntakeReviewComponent, modifier: Modifier = Mo
 
             is IntakeReviewContent.Failed -> AnfasEmptyState(
                 icon = AnfasIcons.ErrorOutline,
-                title = "Couldn't load the sheet",
+                title = s.intake.loadFailedTitle,
                 message = content.message,
             )
 
             IntakeReviewContent.NoBatches -> AnfasEmptyState(
                 icon = AnfasIcons.DocumentScanner,
-                title = "No scans yet",
+                title = s.intake.emptyTitle,
                 // The export offers a "New scan" button here. Capture is not implemented, and
                 // a button that does nothing is worse than none — see the class comment.
-                message = "Photograph a paper sign-up sheet to import members in bulk. " +
-                    "Capture is not available yet.",
+                message = s.intake.emptyMessage,
             )
 
             is IntakeReviewContent.Loaded -> ReviewBody(
@@ -171,6 +173,7 @@ private fun SourceDocumentPane(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val s = strings
     AnfasCard(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
@@ -178,20 +181,20 @@ private fun SourceDocumentPane(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "Source document",
+                text = s.intake.sourceDocument,
                 style = AnfasTheme.textStyles.headlineSmall,
                 color = scheme.onSurface,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 AnfasIconButton(
                     icon = AnfasIcons.ZoomOut,
-                    contentDescription = "Zoom out",
+                    contentDescription = s.common.zoomOut,
                     onClick = component::onZoomOut,
                     enabled = state.zoom > IntakeReviewState.MIN_ZOOM,
                 )
                 AnfasIconButton(
                     icon = AnfasIcons.ZoomIn,
-                    contentDescription = "Zoom in",
+                    contentDescription = s.common.zoomIn,
                     onClick = component::onZoomIn,
                     enabled = state.zoom < IntakeReviewState.MAX_ZOOM,
                 )
@@ -233,8 +236,9 @@ private fun SourceDocumentPane(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = batch.sourceImageUri?.let { "Source image not rendered" }
-                            ?: "No source image",
+                        text = batch.sourceImageUri
+                            ?.let { s.intake.sourceImageNotRendered }
+                            ?: s.intake.noSourceImage,
                         style = AnfasTheme.textStyles.bodyMedium,
                         color = scheme.onSurfaceVariant,
                     )
@@ -269,14 +273,15 @@ private fun ValidationPane(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val s = strings
     AnfasCard(modifier = modifier) {
         AnfasTableHeaderRow {
-            AnfasTableHeaderCell("#", Modifier.width(OrdinalWidth))
-            AnfasTableHeaderCell("NAME", Modifier.weight(WEIGHT_NAME))
-            AnfasTableHeaderCell("PHONE", Modifier.weight(WEIGHT_PHONE))
-            AnfasTableHeaderCell("START", Modifier.weight(WEIGHT_DATE))
-            AnfasTableHeaderCell("END", Modifier.weight(WEIGHT_DATE))
-            AnfasTableHeaderCell("PLAN", Modifier.weight(WEIGHT_PLAN))
+            AnfasTableHeaderCell(s.intake.columnOrdinal, Modifier.width(OrdinalWidth))
+            AnfasTableHeaderCell(s.intake.columnName, Modifier.weight(WEIGHT_NAME))
+            AnfasTableHeaderCell(s.intake.columnPhone, Modifier.weight(WEIGHT_PHONE))
+            AnfasTableHeaderCell(s.intake.columnStart, Modifier.weight(WEIGHT_DATE))
+            AnfasTableHeaderCell(s.intake.columnEnd, Modifier.weight(WEIGHT_DATE))
+            AnfasTableHeaderCell(s.intake.columnPlan, Modifier.weight(WEIGHT_PLAN))
         }
         LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
             items(items = batch.rows, key = { it.id.value }) { row ->
@@ -294,22 +299,17 @@ private fun ValidationPane(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = buildString {
-                        append(state.readyCount)
-                        append(" of ")
-                        append(state.totalCount)
-                        append(" rows ready for import")
-                    },
+                    text = s.intake.rowsReady(state.readyCount, state.totalCount),
                     style = AnfasTheme.textStyles.bodyMedium,
                     color = scheme.onSurfaceVariant,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    AnfasSecondaryButton(text = "DISCARD", onClick = component::onDiscard)
+                    AnfasSecondaryButton(text = s.common.discard, onClick = component::onDiscard)
                     AnfasPrimaryButton(
                         text = if (state.isImporting) {
-                            "IMPORTING…"
+                            s.intake.importing
                         } else {
-                            "IMPORT ${state.readyCount}"
+                            s.intake.importCount(state.readyCount)
                         },
                         icon = AnfasIcons.Upload,
                         onClick = component::onImport,
@@ -328,6 +328,7 @@ private fun IntakeRowCells(
     onEdit: (IntakeFieldKey, String) -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val s = strings
     AnfasTableRow(showDivider = !isLast) {
         Text(
             text = row.ordinal.toString(),
@@ -340,35 +341,35 @@ private fun IntakeRowCells(
             value = row.name.value,
             onValueChange = { onEdit(IntakeFieldKey.NAME, it) },
             needsReview = row.name.needsReview,
-            error = row.errorFor(IntakeFieldKey.NAME),
+            error = row.errorFor(IntakeFieldKey.NAME)?.label(s),
             modifier = Modifier.weight(WEIGHT_NAME),
         )
         AnfasInlineEditField(
             value = row.phone.value,
             onValueChange = { onEdit(IntakeFieldKey.PHONE, it) },
             needsReview = row.phone.needsReview,
-            error = row.errorFor(IntakeFieldKey.PHONE),
+            error = row.errorFor(IntakeFieldKey.PHONE)?.label(s),
             modifier = Modifier.weight(WEIGHT_PHONE),
         )
         AnfasInlineEditField(
             value = row.startDate.value,
             onValueChange = { onEdit(IntakeFieldKey.START_DATE, it) },
             needsReview = row.startDate.needsReview,
-            error = row.errorFor(IntakeFieldKey.START_DATE),
+            error = row.errorFor(IntakeFieldKey.START_DATE)?.label(s),
             modifier = Modifier.weight(WEIGHT_DATE),
         )
         AnfasInlineEditField(
             value = row.endDate.value,
             onValueChange = { onEdit(IntakeFieldKey.END_DATE, it) },
             needsReview = row.endDate.needsReview,
-            error = row.errorFor(IntakeFieldKey.END_DATE),
+            error = row.errorFor(IntakeFieldKey.END_DATE)?.label(s),
             modifier = Modifier.weight(WEIGHT_DATE),
         )
         AnfasInlineEditField(
             value = row.plan.value,
             onValueChange = { onEdit(IntakeFieldKey.PLAN, it) },
             needsReview = row.plan.needsReview,
-            error = row.errorFor(IntakeFieldKey.PLAN),
+            error = row.errorFor(IntakeFieldKey.PLAN)?.label(s),
             modifier = Modifier.weight(WEIGHT_PLAN),
         )
     }
@@ -378,7 +379,7 @@ private fun IntakeRowCells(
  * Attributes an issue to the cell that can fix it, so the message appears where the correction
  * has to be typed rather than at the end of the row.
  */
-private fun IntakeRow.errorFor(field: IntakeFieldKey): String? {
+private fun IntakeRow.errorFor(field: IntakeFieldKey): IntakeIssue? {
     val relevant = when (field) {
         IntakeFieldKey.NAME -> setOf(IntakeIssue.MISSING_NAME)
 
@@ -392,11 +393,38 @@ private fun IntakeRow.errorFor(field: IntakeFieldKey): String? {
 
         IntakeFieldKey.PLAN -> emptySet()
     }
-    return issues.firstOrNull { it in relevant && it.isBlocking }?.label
+    return issues.firstOrNull { it in relevant && it.isBlocking }
+}
+
+/** Blocking issue -> message, shown in the cell that can fix it. */
+private fun IntakeIssue.label(s: AppStrings): String = when (this) {
+    IntakeIssue.MISSING_NAME -> s.intake.issueMissingName
+    IntakeIssue.MISSING_PHONE -> s.intake.issueMissingPhone
+    IntakeIssue.DUPLICATE_PHONE -> s.intake.issueDuplicate
+    IntakeIssue.DUPLICATE_IN_BATCH -> s.intake.issueDuplicateInSheet
+    IntakeIssue.END_BEFORE_START -> s.intake.issueEndBeforeStart
+    IntakeIssue.UNREADABLE_DATE -> s.intake.issueUnreadableDate
+    IntakeIssue.UNKNOWN_PLAN -> s.intake.issueUnknownPlan
+    IntakeIssue.LOW_CONFIDENCE -> s.intake.issueLowConfidence
+}
+
+/** Typed notice -> sentence. The component deliberately does not do this itself. */
+private fun IntakeNotice.render(s: AppStrings): String = when (this) {
+    is IntakeNotice.Imported -> when {
+        imported == 0 && skipped == 0 -> s.intake.importedNothingToDo
+        imported == 0 -> s.intake.importedNoneAllBlocked(skipped)
+        skipped == 0 -> s.intake.importedAll(imported)
+        else -> s.intake.importedPartial(imported, skipped)
+    }
+
+    IntakeNotice.Discarded -> s.intake.sheetDiscarded
+
+    is IntakeNotice.Failed -> message
 }
 
 @Composable
 private fun NoticeBar(text: String, onDismiss: () -> Unit) {
+    val s = strings
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -415,7 +443,7 @@ private fun NoticeBar(text: String, onDismiss: () -> Unit) {
             modifier = Modifier.weight(1f),
         )
         AnfasTextAction(
-            text = "Dismiss",
+            text = s.common.dismiss,
             onClick = onDismiss,
             emphasis = TextActionEmphasis.Muted,
         )

@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AnfasBulkActionBar(
     selectedCount: Int,
+    label: String,
     modifier: Modifier = Modifier,
-    label: String = "selected",
     actions: @Composable RowScope.() -> Unit,
 ) {
     val scheme = MaterialTheme.colorScheme
