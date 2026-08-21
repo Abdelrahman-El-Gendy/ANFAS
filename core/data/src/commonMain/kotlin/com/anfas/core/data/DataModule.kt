@@ -1,6 +1,7 @@
 package com.anfas.core.data
 
 import com.anfas.core.common.AppDispatchers
+import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.database.AnfasDatabase
 import com.anfas.core.database.buildDatabase
 import kotlinx.coroutines.CoroutineScope
@@ -46,7 +47,9 @@ val dataModule: Module = module {
     single(createdAtStart = true) {
         val repository = get<SubscriptionRepository>()
         val dispatchers = get<AppDispatchers>()
-        CoroutineScope(dispatchers.io + SupervisorJob()).also { scope ->
+        CoroutineScope(
+            dispatchers.io + SupervisorJob() + appExceptionHandler("PlanSeed"),
+        ).also { scope ->
             scope.launch { repository.upsertPlans(SubscriptionPlanSeed.plans) }
         }
     }

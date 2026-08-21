@@ -4,6 +4,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.anfas.app.di.initKoin
 import com.anfas.app.navigation.RootComponent
+import com.anfas.core.common.configureLogging
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
@@ -13,6 +14,10 @@ import javax.swing.SwingUtilities
  * Thin launcher. All shared behaviour lives in :composeApp — do not add logic here.
  */
 fun main() {
+    // Before initKoin, so a failure during DI construction is logged rather than silent.
+    configureLogging(verbose = System.getProperty("anfas.verbose") == "true")
+    installCrashHandler()
+
     initKoin()
 
     val lifecycle = LifecycleRegistry()

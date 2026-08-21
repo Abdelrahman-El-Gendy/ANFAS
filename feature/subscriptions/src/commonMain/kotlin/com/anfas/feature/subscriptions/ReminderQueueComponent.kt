@@ -2,6 +2,7 @@ package com.anfas.feature.subscriptions
 
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
+import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.data.ReminderCounts
 import com.anfas.core.data.ReminderRepository
 import com.anfas.core.model.MemberId
@@ -42,7 +43,8 @@ class ReminderQueueComponent(
     private val onOpenMemberClicked: (MemberId) -> Unit,
 ) : ComponentContext by componentContext {
 
-    private val scope = coroutineScope(dispatchers.main + SupervisorJob())
+    private val scope =
+        coroutineScope(dispatchers.main + SupervisorJob() + appExceptionHandler("ReminderQueue"))
 
     private val ui = MutableStateFlow(UiSelections())
 

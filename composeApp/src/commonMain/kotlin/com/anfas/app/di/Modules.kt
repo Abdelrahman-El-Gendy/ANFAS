@@ -2,6 +2,7 @@ package com.anfas.app.di
 
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.DefaultAppDispatchers
+import com.anfas.core.common.logger
 import com.anfas.core.data.dataModule
 import com.anfas.feature.announcements.AnnouncementsModule
 import com.anfas.feature.classes.ClassesModule
@@ -39,6 +40,11 @@ val featureModules: List<Module> = listOf(
  * `androidContext(...)`.
  */
 fun initKoin(declaration: KoinAppDeclaration = {}): KoinApplication = startKoin {
+    // One line at startup, deliberately. It proves the logging pipeline works end to end (on
+    // desktop it is what creates the log file), and it is the first thing you want when reading
+    // a user's log. No PII: the domain is member names and phone numbers, and those must never
+    // be logged.
+    logger("Startup").i("ANFAS starting: DI graph initialising")
     declaration()
     modules(coreModule)
     modules(dataModule)

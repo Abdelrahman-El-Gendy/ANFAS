@@ -2,6 +2,7 @@ package com.anfas.feature.members
 
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
+import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.model.MemberId
 import com.arkivanov.decompose.ComponentContext
@@ -40,7 +41,8 @@ class MembersListComponent(
     private val onScanSheetClicked: () -> Unit,
 ) : ComponentContext by componentContext {
 
-    private val scope = coroutineScope(dispatchers.main + SupervisorJob())
+    private val scope =
+        coroutineScope(dispatchers.main + SupervisorJob() + appExceptionHandler("MembersList"))
 
     private val query = MutableStateFlow("")
 

@@ -2,6 +2,7 @@ package com.anfas.feature.intakeocr
 
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
+import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.data.IntakeFieldKey
 import com.anfas.core.data.IntakeRepository
 import com.anfas.core.model.IntakeBatch
@@ -41,7 +42,8 @@ class IntakeReviewComponent(
     private val onImported: (imported: Int) -> Unit,
 ) : ComponentContext by componentContext {
 
-    private val scope = coroutineScope(dispatchers.main + SupervisorJob())
+    private val scope =
+        coroutineScope(dispatchers.main + SupervisorJob() + appExceptionHandler("IntakeReview"))
 
     private val ui = MutableStateFlow(UiState())
 

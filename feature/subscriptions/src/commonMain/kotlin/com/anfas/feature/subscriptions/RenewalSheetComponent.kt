@@ -2,6 +2,7 @@ package com.anfas.feature.subscriptions
 
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
+import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.data.SubscriptionRepository
 import com.anfas.core.model.MemberId
@@ -49,7 +50,8 @@ class RenewalSheetComponent(
     private val newTermId: () -> String = { Uuid.random().toString() },
 ) : ComponentContext by componentContext {
 
-    private val scope = coroutineScope(dispatchers.main + SupervisorJob())
+    private val scope =
+        coroutineScope(dispatchers.main + SupervisorJob() + appExceptionHandler("RenewalSheet"))
 
     private val choices = MutableStateFlow(Choices())
 
