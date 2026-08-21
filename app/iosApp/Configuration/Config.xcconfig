@@ -3,5 +3,12 @@ TEAM_ID=
 PRODUCT_NAME=ANFAS
 PRODUCT_BUNDLE_IDENTIFIER=com.anfas.app.ANFAS$(TEAM_ID)
 
-CURRENT_PROJECT_VERSION=1
-MARKETING_VERSION=1.0
+// Versions come from gradle/version.properties via a generated file, so Android, iOS and
+// desktop cannot drift apart. `./gradlew check` fails if Version.xcconfig is stale.
+//
+// NOTE: PRODUCT_BUNDLE_IDENTIFIER above is still the KMP wizard's pattern and resolves to the
+// malformed "com.anfas.app.ANFAS" while TEAM_ID is blank. Fixing that, and splitting this file
+// into Base/Debug/Release with distribution signing, is Phase 4 of the hardening plan -- it
+// needs a real Apple Team ID, and the bundle id must be settled before it is registered with
+// App Store Connect.
+#include "Version.xcconfig"

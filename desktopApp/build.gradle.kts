@@ -1,3 +1,4 @@
+import com.anfas.buildlogic.appVersion
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 /**
@@ -30,7 +31,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.anfas.app"
-            packageVersion = "1.0.0"
+            packageVersion = appVersion().get().packageVersion
         }
     }
 }

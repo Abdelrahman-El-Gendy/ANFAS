@@ -1,3 +1,4 @@
+import com.anfas.buildlogic.appVersion
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /**
@@ -36,8 +37,10 @@ android {
         applicationId = "com.anfas.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        // From gradle/version.properties -- the single source of truth shared with iOS
+        // (MARKETING_VERSION / CURRENT_PROJECT_VERSION) and desktop (packageVersion).
+        versionCode = appVersion().get().versionCode
+        versionName = appVersion().get().versionName
     }
     packaging {
         resources {
