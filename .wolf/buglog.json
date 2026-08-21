@@ -422,6 +422,97 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-21T22:33:29Z"
+    },
+    {
+      "id": "bug-018",
+      "timestamp": "2026-08-21T23:07:44Z",
+      "error_message": "expected:<[01001234567]> but was:<[\u0660\u0661\u0660\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667]> -- duplicate phone detection silently failing",
+      "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/IntakeValidator.kt",
+      "root_cause": "Char.isDigit() returns TRUE for Arabic-Indic digits (U+0660..U+0669), so filter { it.isDigit() } kept them and the same phone number in Arabic numerals produced a different normalisation key. All 18 existing tests used Latin digits.",
+      "fix": "Fold Arabic-Indic and Eastern Arabic digits to ASCII BEFORE filtering (TextNormalisation.foldDigitsToAscii). Rule: never use isDigit() as a filter when non-Latin input is possible -- fold first.",
+      "tags": [
+        "i18n",
+        "arabic",
+        "unicode",
+        "duplicate-detection",
+        "silent-failure"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T23:07:44Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-08-21T23:07:44Z",
+      "error_message": "Compose MP 1.11.1 has no public API to override the Resources locale; iOS locale changes need an app relaunch",
+      "file": "core/i18n (design decision)",
+      "root_cause": "LocalComposeEnvironment is internal and ResourceEnvironment has an internal constructor. On iOS, Locale.current reads NSLocale.preferredLanguages, changeable only via NSUserDefaults AppleLanguages and effective next launch.",
+      "fix": "Do not use Compose Resources for strings when an in-app language toggle is required. A typed AppStrings interface behind a CompositionLocal makes switching an ordinary recomposition on all platforms, and makes a missing translation a compile error.",
+      "tags": [
+        "compose-multiplatform",
+        "i18n",
+        "locale",
+        "api-limitation"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T23:07:44Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-08-21T23:07:44Z",
+      "error_message": "Overlay boxes would jump to mirrored positions over a photograph in Arabic",
+      "file": "feature/intake-ocr/src/commonMain/.../IntakeReviewScreen.kt",
+      "root_cause": "Modifier.offset IS layout-direction aware (it negates x under RTL); absoluteOffset is the direction-agnostic one. The plan initially had this backwards. A photograph is not a mirrored artifact, so mirroring the overlay points staff at the wrong line.",
+      "fix": "Force LocalLayoutDirection = Ltr on the entire image pane, not absoluteOffset on one call -- that also covers future Alignment/Arrangement/gesture code. Fixed alongside a second bug in the same lines: boxes were sized against the pane rather than the rendered image rect, so letterboxing displaced every box.",
+      "tags": [
+        "compose",
+        "rtl",
+        "layout",
+        "offset"
+      ],
+      "related_bugs": [
+        "bug-021"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T23:07:44Z"
+    },
+    {
+      "id": "bug-021",
+      "timestamp": "2026-08-21T23:07:44Z",
+      "error_message": "Latin-tuned typography breaks Arabic: tofu glyphs, shattered words, unreadable labels",
+      "file": "core/designsystem/src/commonMain/.../AnfasType.kt",
+      "root_cause": "Three separate defects. (1) The bundled IBM Plex Sans has no Arabic glyphs, and FontFamily selects by weight not glyph coverage, so merging faces would not help. (2) The export's letter-spacing breaks the joins between letters in a cursive script. (3) labelCaps is 11sp uppercase, meaningless in a script with no letter case.",
+      "fix": "Bundle IBM Plex Sans Arabic and BRANCH the family by script; zero letterSpacing for Arabic; grow labelCaps 1sp and drop its tracking; add ~10% lineHeight so ascenders/harakat do not clip.",
+      "tags": [
+        "i18n",
+        "arabic",
+        "typography",
+        "compose"
+      ],
+      "related_bugs": [
+        "bug-020"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T23:07:44Z"
+    },
+    {
+      "id": "bug-022",
+      "timestamp": "2026-08-21T23:07:44Z",
+      "error_message": "Repeated self-inflicted breakage from broad python str.replace on source files",
+      "file": "multiple (ReminderQueueState.kt, AnfasType.kt)",
+      "root_cause": "Patching Kotlin with str.replace against remembered formatting: Spotless had reformatted the files, so anchors matched partially or matched text that had already been rewritten. Results included a sealed interface spliced into the middle of a data class body and a duplicated @Composable annotation.",
+      "fix": "For multi-line structural edits, replace by LINE RANGE after grepping the current structure, or rewrite the file. Always re-read after Spotless has run.",
+      "tags": [
+        "tooling",
+        "codegen",
+        "refactoring"
+      ],
+      "related_bugs": [
+        "bug-012"
+      ],
+      "occurrences": 2,
+      "last_seen": "2026-08-21T23:07:44Z"
     }
   ]
 }

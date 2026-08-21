@@ -84,3 +84,8 @@
 | 01:33 | Removed dead deps (coil, kermit x3, settings, uiToolingPreview, wizard drawable); cut :core:auth + :core:network edges | composeApp, core/* | no INTERNET perm in merged manifest | ~12k |
 | 01:33 | AppLogger seam + desktop file sink + crash handlers on 3 platforms + guarded 5 coroutine scopes | core/common, composeApp | log file verified on disk | ~28k |
 | 01:33 | Room v5 drops placeholder via @DeleteTable AutoMigrationSpec | core/database | verified on the real dev DB | ~18k |
+| 02:07 | Fixed normalisePhone Arabic-Indic bug (proved red first); widened date/plan vocabulary | core/model | 24 validator tests | ~20k |
+| 02:07 | NEW :core:i18n — typed AppStrings (EN+AR), CLDR plurals, LanguageController, formatters | core/i18n | 10 tests | ~45k |
+| 02:07 | Typed notices replace component prose; 27 English assertions became type assertions | feature/* | 120 tests green | ~25k |
+| 02:07 | Arabic typography: IBM Plex Sans Arabic bundled, tracking zeroed, labelCaps +1sp, +10% leading | core/designsystem | compiles all targets | ~18k |
+| 02:07 | RTL: intake pane pinned LTR + aspect-ratio fix, 7 cells dataMonoLtr, 5 icons autoMirror | feature/*, designsystem | verified running with ar | ~15k |
