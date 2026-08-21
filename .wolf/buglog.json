@@ -46,8 +46,8 @@
       "timestamp": "2026-08-21T09:36:19Z",
       "error_message": "e: Cannot access 'androidx.room3.RoomDatabase' which is a supertype of 'AnfasDatabase'. Check your module classpath for missing or conflicting dependencies.",
       "file": "core/database/build.gradle.kts",
-      "root_cause": ":core:database declared `implementation(libs.bundles.room)`, but AnfasDatabase extends RoomDatabase and DatabaseBuilderFactory returns RoomDatabase.Builder — room3-runtime is part of the module's ABI, so a consumer (:core:data) could not compile against it.",
-      "fix": "Split the bundle: `api(libs.androidx.room3.runtime)` because it is in the ABI, `implementation(libs.androidx.sqlite.bundled)` because the driver is internal to buildDatabase(). Features still never see Room — anfas.kmp.feature withholds :core:database.",
+      "root_cause": ":core:database declared `implementation(libs.bundles.room)`, but AnfasDatabase extends RoomDatabase and DatabaseBuilderFactory returns RoomDatabase.Builder \u2014 room3-runtime is part of the module's ABI, so a consumer (:core:data) could not compile against it.",
+      "fix": "Split the bundle: `api(libs.androidx.room3.runtime)` because it is in the ABI, `implementation(libs.androidx.sqlite.bundled)` because the driver is internal to buildDatabase(). Features still never see Room \u2014 anfas.kmp.feature withholds :core:database.",
       "tags": [
         "gradle",
         "kmp",
@@ -65,7 +65,7 @@
       "error_message": "e: Name contains illegal characters: \",\". (core/data + feature/members commonTest, only on compileTestKotlinIosSimulatorArm64)",
       "file": "core/data/src/commonTest/.../OfflineFirstMemberRepositoryTest.kt",
       "root_cause": "Backtick-quoted test function names containing a comma. The JVM target accepts them, so `:core:data:jvmTest` passed and the failure only appeared when `check` reached the Kotlin/Native test compilation.",
-      "fix": "Stripped , ; : . from all backticked test names. Lesson: run `./gradlew check` (which compiles native test targets) before believing a KMP test suite is green — a jvmTest pass proves nothing about iOS.",
+      "fix": "Stripped , ; : . from all backticked test names. Lesson: run `./gradlew check` (which compiles native test targets) before believing a KMP test suite is green \u2014 a jvmTest pass proves nothing about iOS.",
       "tags": [
         "kmp",
         "kotlin-native",
@@ -130,7 +130,7 @@
     {
       "id": "bug-008",
       "timestamp": "2026-08-21T12:13:45Z",
-      "error_message": "e: Unresolved reference 'datetime' in core/common/RelativeTime.kt — only during :core:common:compileCommonMainKotlinMetadata",
+      "error_message": "e: Unresolved reference 'datetime' in core/common/RelativeTime.kt \u2014 only during :core:common:compileCommonMainKotlinMetadata",
       "file": "core/common/build.gradle.kts",
       "root_cause": "kotlinx-datetime was reached transitively via api(project(\":core:model\")). Platform compilations (jvmTest) resolved it, but commonMain *metadata* compilation did not, so `:core:common:jvmTest` passed while `check` failed later.",
       "fix": "Declared api(libs.kotlinx.datetime) directly in :core:common. Do not rely on a transitive api dependency in commonMain metadata compilation; declare ABI deps explicitly.",
@@ -151,7 +151,7 @@
       "timestamp": "2026-08-21T12:13:45Z",
       "error_message": "app.cash.turbine.TurbineAssertionError: Unconsumed events found (3 ReminderQueueComponentTest failures)",
       "file": "feature/subscriptions/src/commonTest/.../ReminderQueueComponentTest.kt",
-      "root_cause": "A StateFlow keeps emitting after the assertion of interest — combine() re-emits when any upstream changes. Turbine treats leftover emissions at the end of a test() block as a failure.",
+      "root_cause": "A StateFlow keeps emitting after the assertion of interest \u2014 combine() re-emits when any upstream changes. Turbine treats leftover emissions at the end of a test() block as a failure.",
       "fix": "End each state.test { } block with cancelAndIgnoreRemainingEvents() once the interesting emission has been asserted.",
       "tags": [
         "tests",
@@ -183,7 +183,7 @@
       "timestamp": "2026-08-21T12:30:42.512Z",
       "error_message": "Missing error handling in unknown",
       "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/Member.kt",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
       "fix": "Added try/catch block",
       "tags": [
         "auto-detected",
@@ -216,7 +216,7 @@
       "error_message": "Significant refactor of ",
       "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
       "root_cause": "6 lines replaced/restructured",
-      "fix": "Rewrote 11→6 lines (6 removed) | Also: /** Sentinel for \"no particular batch\"; the query ; const val BATCH_ANY = \"\"",
+      "fix": "Rewrote 11\u21926 lines (6 removed) | Also: /** Sentinel for \"no particular batch\"; the query ; const val BATCH_ANY = \"\"",
       "tags": [
         "auto-detected",
         "refactor",
@@ -232,7 +232,7 @@
       "error_message": "Wrong reference: AppError should be AppResult",
       "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
       "root_cause": "Used \"AppError\" instead of \"AppResult\"",
-      "fix": "Changed AppError → AppResult",
+      "fix": "Changed AppError \u2192 AppResult",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -248,7 +248,7 @@
       "error_message": "Significant refactor of ",
       "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
       "root_cause": "28 lines replaced/restructured",
-      "fix": "Rewrote 37→17 lines (28 removed)",
+      "fix": "Rewrote 37\u219217 lines (28 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -264,7 +264,7 @@
       "error_message": "Wrong reference: width should be size",
       "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
       "root_cause": "Used \"width\" instead of \"size\"",
-      "fix": "Changed width → size",
+      "fix": "Changed width \u2192 size",
       "tags": [
         "auto-detected",
         "wrong-reference",
@@ -277,7 +277,7 @@
     {
       "id": "bug-011",
       "timestamp": "2026-08-21T13:36:02Z",
-      "error_message": "AssertionError: expected:<[#88393, #88394]> but was:<[#88394]> — only one member imported instead of two",
+      "error_message": "AssertionError: expected:<[#88393, #88394]> but was:<[#88394]> \u2014 only one member imported instead of two",
       "file": "core/data/src/commonTest/.../OfflineFirstIntakeRepositoryTest.kt",
       "root_cause": "The test fixture's newId lambda returned a constant string, so every imported row got the same member primary key and the Room upsert collapsed them into a single row. The repository was correct; the double-checked assertion caught the fixture.",
       "fix": "Made the fixture's newId a counter. Lesson: any injected id generator in a test must be unique per call, or upserts silently merge records and the test looks like a product bug.",
@@ -313,7 +313,7 @@
       "error_message": "Significant refactor of ",
       "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
       "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 3→42 lines (2 removed)",
+      "fix": "Rewrote 3\u219242 lines (2 removed)",
       "tags": [
         "auto-detected",
         "refactor",
@@ -328,7 +328,7 @@
       "timestamp": "2026-08-21T14:08:19.737Z",
       "error_message": "Missing error handling in unknown",
       "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
-      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
       "fix": "Added try/catch block",
       "tags": [
         "auto-detected",
@@ -338,6 +338,90 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-08-21T14:08:19.737Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-08-21T22:33:29Z",
+      "error_message": "Error resolving plugin [id: 'org.jetbrains.kotlin.plugin.serialization', version: '2.4.10'] > already on the classpath with an unknown version",
+      "file": "build.gradle.kts (root)",
+      "root_cause": "Applied the anfas.quality convention plugin at the ROOT project. That puts the convention project's entire runtime classpath -- including the Kotlin plugins -- on the root buildscript classpath, which every subproject inherits. Subprojects then cannot resolve their own plugin versions.",
+      "fix": "Root applies Spotless by version-catalog alias instead, with its own small spotless block for root-level .kts. Modules get formatting via their anfas.* convention plugin. Never apply a convention plugin to the root project of this build.",
+      "tags": [
+        "gradle",
+        "convention-plugins",
+        "classpath",
+        "root-project"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T22:33:29Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-08-21T22:33:29Z",
+      "error_message": "Execution failed for task ':feature:announcements:spotlessKotlin' > Could not read path '.../merged_res/androidHostTest/.../values-ne_values-ne.arsc.flat'",
+      "file": "build-logic/convention/src/main/kotlin/anfas.quality.gradle.kts",
+      "root_cause": "Spotless had targetExclude(\"**/build/**\"), which forces it to ENUMERATE build intermediates in order to exclude them. AGP deletes merged-resource files mid-build, so the enumeration hit a file that had vanished.",
+      "fix": "Dropped the targetExclude entirely. target(\"src/**/*.kt\") already cannot match build/, which is a sibling of src/. Scope targets narrowly instead of excluding broadly.",
+      "tags": [
+        "gradle",
+        "spotless",
+        "agp",
+        "file-enumeration"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T22:33:29Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-08-21T22:33:29Z",
+      "error_message": "Configuration cache problems: Task ':verifyIosVersionConfig' cannot serialize Gradle script object references",
+      "file": "build.gradle.kts (root)",
+      "root_cause": "A doLast block referenced a script-level function (renderIosVersionConfig). Task actions are serialized for the configuration cache and cannot capture script objects.",
+      "fix": "Render the expected text at CONFIGURATION time into a local String and have the task action capture only that. Also: do not declare a generated file as an input of the task that verifies it -- Gradle reports an implicit task dependency. Use outputs.upToDateWhen { false } for a verification task instead.",
+      "tags": [
+        "gradle",
+        "configuration-cache",
+        "tasks"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T22:33:29Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-08-21T22:33:29Z",
+      "error_message": "androidx.sqlite.SQLiteException: Error code: 1555, UNIQUE constraint failed: room_master_table.id (MigrationV4ToV5Test)",
+      "file": "core/database/src/jvmTest/.../MigrationV4ToV5Test.kt",
+      "root_cause": "The test hand-inserted the schema identity hash into room_master_table, but a Room schema JSON's setupQueries ALREADY contain both the CREATE TABLE and the INSERT OR REPLACE for that row.",
+      "fix": "Execute the schema's setupQueries verbatim and add no manual insert. Room will not recognise a hand-built database as being at version N without that row, so it must come from exactly one place.",
+      "tags": [
+        "room",
+        "migration",
+        "tests",
+        "schema"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T22:33:29Z"
+    },
+    {
+      "id": "bug-017",
+      "timestamp": "2026-08-21T22:33:29Z",
+      "error_message": "macOS has no `timeout` command -- a verification run silently never started ('command not found: timeout')",
+      "file": "n/a (shell)",
+      "root_cause": "Used `timeout 90 ./gradlew ...` to bound a run. GNU coreutils is not present on macOS by default, so the whole pipeline failed and the absence of the expected log file was misread as a code problem.",
+      "fix": "Background the process and poll for the expected condition with an until-loop, then pkill. Do not assume GNU coreutils on this machine.",
+      "tags": [
+        "shell",
+        "macos",
+        "tooling",
+        "false-negative"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T22:33:29Z"
     }
   ]
 }

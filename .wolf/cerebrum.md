@@ -33,6 +33,35 @@
 - **Four screens have no module in the graph:** staff-login, staff-dashboard,
   reception-dashboard, live-checkin-log. Four more (sync-conflict, offline-banner,
   session-expired, permission-denied) are cross-cutting states belonging to `:core:designsystem`.
+- **`gradle/version.properties` is the single source of truth for the app version.** Android
+  reads it via `com.anfas.buildlogic.appVersion()`, desktop uses it for `packageVersion`, and
+  iOS gets a **generated, committed** `app/iosApp/Configuration/Version.xcconfig` because Xcode
+  reads xcconfig before any build phase runs. `verifyIosVersionConfig` is wired into `check`, so
+  drift is a build failure. Regenerate with `./gradlew generateIosVersionConfig`.
+- **versionName must be semver MAJOR.MINOR.PATCH with MAJOR > 0** — jpackage rejects anything
+  else, which is why it is "1.0.0" not Android's old "1.0". Validated at configuration time.
+- **Formatting gate is Spotless + ktlint**, inherited by every module through `anfas.quality`
+  (applied from `anfas.kmp.library` and `anfas.jvm.server`). Rules live in `.editorconfig` AND
+  are duplicated as `editorConfigOverride` in the plugin, because Spotless does not reliably
+  resolve `.editorconfig` sections for the virtual paths it hands ktlint.
+- **Three ktlint rules are disabled on purpose:** `function-naming` (@Composable is PascalCase),
+  `filename` (files group related declarations here), `kdoc` (every module build file opens with
+  a `/** */` header).
+- **`const val` must be SCREAMING_SNAKE_CASE** — `kotlin.code.style=official` implies it and
+  ktlint enforces it. Compose layout weights are not an exception.
+- **Logging goes through `AppLogger` in `:core:common`**, never Kermit directly. `configureLogging`
+  exposes no Kermit type so Kermit stays `implementation`. **Never log member names or phone
+  numbers** — the whole domain is PII and the desktop sink writes plaintext to disk.
+- **Desktop needs a file log sink**; Kermit's JVM writer targets stdout and a packaged app has no
+  terminal. Path is OS-idiomatic (`~/Library/Logs/ANFAS`, `%LOCALAPPDATA%`, `XDG_STATE_HOME`) and
+  resolved by a pure, tested function.
+- **`installCrashHandler()` is called by all three launchers** before DI. Android delegates to the
+  previous handler (replacing it suppresses the system crash dialog); desktop shows the log path;
+  iOS re-terminates so the OS still records a crash report.
+- **Every component scope carries `appExceptionHandler(tag)`.** It is a net, not a fix — the
+  screen still freezes, so flow chains that can fail also need `catch` and an error state.
+- **`:core:auth` and `:core:network` are intentionally inert and NOT depended on by `:composeApp`.**
+  Each says so in its own source. Re-add the edge in the commit that first uses it.
 - **Bash cwd persists between calls in this harness.** A relative `cd` in a later call is
   resolved against the previous call's directory, not the repo root. Use absolute paths.
 - **`:core:data` is the data seam.** `anfas.kmp.feature` grants `:core:model`, `:core:common`,

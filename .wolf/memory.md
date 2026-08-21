@@ -75,3 +75,12 @@
 | 17:07 | Edited ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | expanded (+39 lines) | ~670 |
 | 17:08 | Edited ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | added error handling | ~1076 |
 | 17:11 | Created ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | — | ~5234 |
+
+## 2026-08-22
+| 01:33 | Phase 0: branched hardening/phase-0-1, committed 89 untracked files in 7 reviewable commits | repo-wide | tree clean | ~30k |
+| 01:33 | .gitignore guards keystores/certs/secrets BEFORE any signing material exists | .gitignore | verified via git check-ignore | ~4k |
+| 01:33 | Spotless+ktlint gate via anfas.quality, inherited by every module; whole-repo format | build-logic, .editorconfig | check green, gate proven to fail | ~25k |
+| 01:33 | Version SSOT in gradle/version.properties; iOS xcconfig generated + drift-verified | gradle/, build-logic, root | android 1.0.0/1, xcodebuild agrees | ~15k |
+| 01:33 | Removed dead deps (coil, kermit x3, settings, uiToolingPreview, wizard drawable); cut :core:auth + :core:network edges | composeApp, core/* | no INTERNET perm in merged manifest | ~12k |
+| 01:33 | AppLogger seam + desktop file sink + crash handlers on 3 platforms + guarded 5 coroutine scopes | core/common, composeApp | log file verified on disk | ~28k |
+| 01:33 | Room v5 drops placeholder via @DeleteTable AutoMigrationSpec | core/database | verified on the real dev DB | ~18k |
