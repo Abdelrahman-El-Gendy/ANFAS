@@ -2,6 +2,7 @@ package com.anfas.app.di
 
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.DefaultAppDispatchers
+import com.anfas.core.data.dataModule
 import com.anfas.feature.announcements.AnnouncementsModule
 import com.anfas.feature.classes.ClassesModule
 import com.anfas.feature.equipment.EquipmentModule
@@ -40,5 +41,6 @@ val featureModules: List<Module> = listOf(
 fun initKoin(declaration: KoinAppDeclaration = {}): KoinApplication = startKoin {
     declaration()
     modules(coreModule)
+    modules(dataModule)
     modules(featureModules)
 }
