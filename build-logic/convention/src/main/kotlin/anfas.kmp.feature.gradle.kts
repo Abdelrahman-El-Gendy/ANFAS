@@ -7,7 +7,8 @@ import com.anfas.buildlogic.libs
  * almost nothing of its own.
  *
  * Note what is NOT here: no :core:database and no :core:network. Features go through
- * repositories/use-cases, and adding those here would let any feature reach the DB directly.
+ * :core:data, which owns the repository interfaces; adding the lower two here would let any
+ * feature reach the DB or the HTTP client directly.
  */
 plugins {
     id("anfas.kmp.compose")
@@ -22,6 +23,7 @@ kotlin {
             api(project(":core:model"))
             api(project(":core:common"))
             api(project(":core:designsystem"))
+            api(project(":core:data"))
 
             implementation(libs.bundle("koin"))
             implementation(libs.bundle("koin-compose"))
