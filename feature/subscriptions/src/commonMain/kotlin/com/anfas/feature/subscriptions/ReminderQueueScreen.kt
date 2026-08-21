@@ -381,7 +381,7 @@ private fun ReminderRow(
                 )
                 Text(
                     text = reminder.phone,
-                    style = AnfasTheme.textStyles.dataMono,
+                    style = AnfasTheme.textStyles.dataMonoLtr,
                     color = scheme.onSurfaceVariant,
                     maxLines = 1,
                     modifier = Modifier.weight(WEIGHT_PHONE),
@@ -396,7 +396,7 @@ private fun ReminderRow(
                 )
                 Text(
                     text = reminder.scheduledLabel(),
-                    style = AnfasTheme.textStyles.dataMono,
+                    style = AnfasTheme.textStyles.dataMonoLtr,
                     color = scheme.onSurfaceVariant,
                     maxLines = 1,
                     modifier = Modifier.weight(WEIGHT_SCHEDULED),

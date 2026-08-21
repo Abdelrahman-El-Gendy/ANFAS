@@ -221,7 +221,7 @@ private fun PlanRow(plan: SubscriptionPlan, selected: Boolean, onClick: () -> Un
         }
         Text(
             text = formatMoney(plan.price, money),
-            style = AnfasTheme.textStyles.bodyLarge,
+            style = AnfasTheme.textStyles.dataMonoLtr,
             color = scheme.onSurface,
         )
     }
@@ -265,7 +265,9 @@ private fun QuoteSummary(quote: RenewalQuote) {
             )
             Text(
                 text = formatMoney(quote.total, money),
-                style = AnfasTheme.textStyles.headlineMedium,
+                style = AnfasTheme.textStyles.headlineMedium.copy(
+                    textDirection = androidx.compose.ui.text.style.TextDirection.Ltr,
+                ),
                 color = scheme.onSurface,
             )
         }
@@ -294,7 +296,9 @@ private fun SummaryLine(
             style = AnfasTheme.textStyles.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Text(text = value, style = AnfasTheme.textStyles.bodyMedium, color = valueColor)
+        // LTR: "−140 EGP" and "1,650 EGP" begin/end with direction-neutral characters, so in an
+        // RTL paragraph the minus sign and the currency code render at the wrong end.
+        Text(text = value, style = AnfasTheme.textStyles.dataMonoLtr, color = valueColor)
     }
 }
 

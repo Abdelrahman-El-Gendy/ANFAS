@@ -103,7 +103,7 @@ internal fun FailedReminderDialog(
                 )
                 Text(
                     text = reminder.phone,
-                    style = AnfasTheme.textStyles.dataMono,
+                    style = AnfasTheme.textStyles.dataMonoLtr,
                     color = scheme.onSurfaceVariant,
                 )
             }
@@ -160,7 +160,7 @@ private fun TechnicalDetails(reminder: Reminder) {
         if (expanded) {
             Text(
                 text = summary,
-                style = AnfasTheme.textStyles.dataMono,
+                style = AnfasTheme.textStyles.dataMonoLtr,
                 color = scheme.error.copy(alpha = 0.80f),
                 modifier = Modifier
                     .fillMaxWidth()

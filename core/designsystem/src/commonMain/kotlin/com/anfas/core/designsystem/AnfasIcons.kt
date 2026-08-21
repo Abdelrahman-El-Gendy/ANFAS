@@ -56,7 +56,7 @@ object AnfasIcons {
     }
 
     val ArrowBack: ImageVector by lazy {
-        stroked("ArrowBack") {
+        stroked("ArrowBack", autoMirror = true) {
             moveTo(19.5f, 12f)
             lineTo(5f, 12f)
             moveTo(11f, 6f)
@@ -66,7 +66,7 @@ object AnfasIcons {
     }
 
     val ChevronLeft: ImageVector by lazy {
-        stroked("ChevronLeft") {
+        stroked("ChevronLeft", autoMirror = true) {
             moveTo(15f, 5.5f)
             lineTo(8.5f, 12f)
             lineTo(15f, 18.5f)
@@ -74,7 +74,7 @@ object AnfasIcons {
     }
 
     val ChevronRight: ImageVector by lazy {
-        stroked("ChevronRight") {
+        stroked("ChevronRight", autoMirror = true) {
             moveTo(9f, 5.5f)
             lineTo(15.5f, 12f)
             lineTo(9f, 18.5f)
@@ -158,7 +158,7 @@ object AnfasIcons {
 
     /** `send` — send test message, InstaPay. */
     val Send: ImageVector by lazy {
-        stroked("Send") {
+        stroked("Send", autoMirror = true) {
             moveTo(3.5f, 20.5f)
             lineTo(21f, 12f)
             lineTo(3.5f, 3.5f)
@@ -256,6 +256,7 @@ object AnfasIcons {
             defaultHeight = 24.dp,
             viewportWidth = 24f,
             viewportHeight = 24f,
+            autoMirror = true,
         ).apply {
             path(fill = SolidColor(Color.Black)) {
                 moveTo(8f, 5f)
@@ -399,20 +400,29 @@ object AnfasIcons {
         arcTo(r, r, 0f, true, true, cx + r, cy)
     }
 
-    private fun stroked(name: String, block: PathBuilder.() -> Unit): ImageVector =
-        ImageVector.Builder(
-            name = name,
-            defaultWidth = 24.dp,
-            defaultHeight = 24.dp,
-            viewportWidth = 24f,
-            viewportHeight = 24f,
-        ).apply {
-            path(
-                stroke = SolidColor(Color.Black),
-                strokeLineWidth = 2f,
-                strokeLineCap = StrokeCap.Round,
-                strokeLineJoin = StrokeJoin.Round,
-                pathBuilder = block,
-            )
-        }.build()
+    /**
+     * [autoMirror] must be true for any glyph that points somewhere. Under RTL a back arrow that
+     * still points left, or a chevron that still points right, tells the user the opposite of the
+     * truth. Verified available on ImageVector.Builder at Compose 1.11.1.
+     */
+    private fun stroked(
+        name: String,
+        autoMirror: Boolean = false,
+        block: PathBuilder.() -> Unit,
+    ): ImageVector = ImageVector.Builder(
+        name = name,
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f,
+        autoMirror = autoMirror,
+    ).apply {
+        path(
+            stroke = SolidColor(Color.Black),
+            strokeLineWidth = 2f,
+            strokeLineCap = StrokeCap.Round,
+            strokeLineJoin = StrokeJoin.Round,
+            pathBuilder = block,
+        )
+    }.build()
 }

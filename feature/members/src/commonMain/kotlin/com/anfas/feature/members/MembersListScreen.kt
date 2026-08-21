@@ -207,7 +207,7 @@ private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
                 )
                 Text(
                     text = s.members.idPrefix(member.membershipNumber),
-                    style = AnfasTheme.textStyles.dataMono,
+                    style = AnfasTheme.textStyles.dataMonoLtr,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                 )
@@ -218,7 +218,7 @@ private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
         }
         Text(
             text = member.lastCheckInLabel(),
-            style = AnfasTheme.textStyles.dataMono,
+            style = AnfasTheme.textStyles.dataMonoLtr,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             modifier = Modifier.weight(COLUMN_WEIGHT_CHECK_IN),

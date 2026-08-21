@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,8 +29,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.anfas.core.data.IntakeFieldKey
 import com.anfas.core.designsystem.AnfasBreakpoints
@@ -201,64 +205,81 @@ private fun SourceDocumentPane(
             }
         }
         AnfasTableDivider()
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(scheme.surfaceContainerLowest)
-                .pointerInput(Unit) {
-                    detectTransformGestures { _, panChange, zoomChange, _ ->
-                        component.onPan(panChange.x, panChange.y)
-                        if (zoomChange > 1f) {
-                            component.onZoomIn()
-                        } else if (zoomChange < 1f) {
-                            component.onZoomOut()
-                        }
-                    }
-                },
-        ) {
-            val paneWidth = maxWidth
-            val paneHeight = maxHeight
-            Box(
+        // The whole source pane is pinned LTR. A photograph is not a mirrored artifact, and
+        // Modifier.offset IS layout-direction aware -- it negates x under RTL -- so in Arabic
+        // every overlay box would jump to the mirrored position and point staff at the wrong
+        // place on the paper. Forcing the direction here also immunises any future overlay code
+        // (Alignment, Arrangement, pan gestures) rather than patching one call site.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
-                    .graphicsLayer(
-                        scaleX = state.zoom,
-                        scaleY = state.zoom,
-                        translationX = state.panX,
-                        translationY = state.panY,
-                    ),
+                    .background(scheme.surfaceContainerLowest)
+                    .pointerInput(Unit) {
+                        detectTransformGestures { _, panChange, zoomChange, _ ->
+                            component.onPan(panChange.x, panChange.y)
+                            if (zoomChange > 1f) {
+                                component.onZoomIn()
+                            } else if (zoomChange < 1f) {
+                                component.onZoomOut()
+                            }
+                        }
+                    },
+                contentAlignment = Alignment.Center,
             ) {
+                // Boxes are positioned against the RENDERED IMAGE RECT, not the pane. Sizing them
+                // off the pane is only correct when the photo's aspect ratio equals the pane's,
+                // which it never does -- every box was previously offset by the letterboxing.
+                val imageAspect = SHEET_ASPECT_RATIO
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                        .border(1.dp, scheme.outlineVariant),
-                    contentAlignment = Alignment.Center,
+                        .aspectRatio(imageAspect)
+                        .graphicsLayer(
+                            scaleX = state.zoom,
+                            scaleY = state.zoom,
+                            translationX = state.panX,
+                            translationY = state.panY,
+                        ),
                 ) {
-                    Text(
-                        text = batch.sourceImageUri
-                            ?.let { s.intake.sourceImageNotRendered }
-                            ?: s.intake.noSourceImage,
-                        style = AnfasTheme.textStyles.bodyMedium,
-                        color = scheme.onSurfaceVariant,
-                    )
-                }
-                batch.rows.forEach { row ->
-                    val bounds = row.bounds ?: return@forEach
-                    // A blocked row's box is red, so the eye can jump from the table straight
-                    // to the place on the paper that needs re-reading.
-                    val accent =
-                        if (row.isImportable) scheme.primary else scheme.error
-                    Box(
-                        modifier = Modifier
-                            .offset(x = paneWidth * bounds.left, y = paneHeight * bounds.top)
-                            .size(
-                                width = paneWidth * bounds.width,
-                                height = paneHeight * bounds.height,
+                    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                        val imageWidth = maxWidth
+                        val imageHeight = maxHeight
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .border(1.dp, scheme.outlineVariant),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = batch.sourceImageUri
+                                    ?.let { s.intake.sourceImageNotRendered }
+                                    ?: s.intake.noSourceImage,
+                                style = AnfasTheme.textStyles.bodyMedium,
+                                color = scheme.onSurfaceVariant,
                             )
-                            .background(accent.copy(alpha = 0.10f))
-                            .border(2.dp, accent.copy(alpha = 0.60f)),
-                    )
+                        }
+
+                        batch.rows.forEach { row ->
+                            val bounds = row.bounds ?: return@forEach
+                            // A blocked row's box is red, so the eye can jump from the table
+                            // straight to the place on the paper that needs re-reading.
+                            val accent = if (row.isImportable) scheme.primary else scheme.error
+                            Box(
+                                modifier = Modifier
+                                    .offset(
+                                        x = imageWidth * bounds.left,
+                                        y = imageHeight * bounds.top,
+                                    )
+                                    .size(
+                                        width = imageWidth * bounds.width,
+                                        height = imageHeight * bounds.height,
+                                    )
+                                    .background(accent.copy(alpha = 0.10f))
+                                    .border(2.dp, accent.copy(alpha = 0.60f)),
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -332,7 +353,7 @@ private fun IntakeRowCells(
     AnfasTableRow(showDivider = !isLast) {
         Text(
             text = row.ordinal.toString(),
-            style = AnfasTheme.textStyles.dataMono,
+            style = AnfasTheme.textStyles.dataMonoLtr,
             color = scheme.onSurfaceVariant.copy(alpha = 0.5f),
             textAlign = TextAlign.End,
             modifier = Modifier.width(OrdinalWidth),
@@ -457,3 +478,9 @@ private const val WEIGHT_PHONE = 1.6f
 private const val WEIGHT_DATE = 1.3f
 private const val WEIGHT_PLAN = 1.2f
 private val OrdinalWidth = 28.dp
+
+/**
+ * Placeholder aspect ratio for the source pane until real capture lands and the image's own
+ * dimensions are known. A4 in portrait, which is what a gym sign-up sheet is.
+ */
+private const val SHEET_ASPECT_RATIO = 210f / 297f
