@@ -156,6 +156,28 @@ class IntakeValidatorTest {
     }
 
     @Test
+    fun `phone normalisation folds Arabic-Indic digits to the same number`() {
+        // Char.isDigit() is TRUE for U+0665 ARABIC-INDIC DIGIT FIVE, so a naive
+        // filter { it.isDigit() } lets those characters through and the same phone number
+        // written in Arabic numerals normalises to a different key -- which silently defeats
+        // the duplicate detection this function exists for.
+        val latin = IntakeValidator.normalisePhone("01001234567")
+        val arabicIndic = IntakeValidator.normalisePhone("٠١٠٠١٢٣٤٥٦٧")
+        val easternArabic = IntakeValidator.normalisePhone("۰۱۰۰۱۲۳۴۵۶۷")
+        assertEquals(latin, arabicIndic)
+        assertEquals(latin, easternArabic)
+    }
+
+    @Test
+    fun `an Arabic-Indic phone is detected as a duplicate of its Latin twin`() {
+        val rows = IntakeValidator.validate(
+            listOf(row(1, "Omar Khaled", "٠١٠٠١٢٣٤٥٦٧", "Nov 1, 2023", "Nov 30, 2023", "Monthly")),
+            existingPhones = setOf(IntakeValidator.normalisePhone("+20 100 123 4567")),
+        )
+        assertTrue(IntakeIssue.DUPLICATE_PHONE in rows.single().issues)
+    }
+
+    @Test
     fun `phone normalisation of an empty or symbol only value is empty`() {
         assertEquals("", IntakeValidator.normalisePhone(""))
         assertEquals("", IntakeValidator.normalisePhone("--- / ---"))
@@ -174,6 +196,34 @@ class IntakeValidatorTest {
     fun `an ambiguous numeric date is refused rather than guessed`() {
         // 01/11/2023 could be 1 Nov or 11 Jan. Guessing would put members on wrong dates.
         assertNull(IntakeValidator.parseDate("01/11/2023"))
+    }
+
+    @Test
+    fun `Egyptian Arabic month names parse`() {
+        assertEquals(LocalDate(2023, 11, 1), IntakeValidator.parseDate("1 نوفمبر 2023"))
+        assertEquals(LocalDate(2023, 1, 5), IntakeValidator.parseDate("5 يناير 2023"))
+        // Arabic-Indic digits in the day and year too.
+        assertEquals(LocalDate(2023, 11, 1), IntakeValidator.parseDate("١ نوفمبر ٢٠٢٣"))
+    }
+
+    @Test
+    fun `full English month names parse`() {
+        assertEquals(LocalDate(2023, 11, 1), IntakeValidator.parseDate("November 1, 2023"))
+    }
+
+    @Test
+    fun `year-first numeric dates are unambiguous and accepted`() {
+        assertEquals(LocalDate(2023, 11, 1), IntakeValidator.parseDate("2023/11/01"))
+    }
+
+    @Test
+    fun `Arabic plan names map onto the canonical labels`() {
+        assertEquals("Trial", IntakeValidator.parsePlanLabel("تجريبي"))
+        assertEquals("Monthly", IntakeValidator.parsePlanLabel("شهري"))
+        assertEquals("Annual", IntakeValidator.parsePlanLabel("سنوي"))
+        // "سنوي" is a substring of "ربع سنوي", so a shortest-first scan would call every
+        // quarterly sheet annual.
+        assertEquals("Quarterly", IntakeValidator.parsePlanLabel("ربع سنوي"))
     }
 
     @Test

@@ -70,7 +70,10 @@ object IntakeValidator {
      * number differently on a second sheet.
      */
     fun normalisePhone(raw: String): String {
-        val digits = raw.filter { it.isDigit() }
+        // foldDigitsToAscii FIRST. Char.isDigit() is true for Arabic-Indic digits, so filtering
+        // without folding lets them through and "٠١٠٠١٢٣٤٥٦٧" gets a different key from
+        // "01001234567" -- defeating the duplicate detection this whole function exists for.
+        val digits = raw.foldDigitsToAscii().filter { it.isDigit() }
         return when {
             digits.isEmpty() -> ""
             digits.startsWith(EGYPT_COUNTRY_CODE) -> "0" + digits.removePrefix(EGYPT_COUNTRY_CODE)
@@ -87,19 +90,30 @@ object IntakeValidator {
      * month-first, and silently guessing would put members on the wrong plan dates.
      */
     fun parseDate(raw: String): LocalDate? {
-        val text = raw.trim()
+        // Arabic sheets are exactly what OCR intake photographs, so digits are folded and
+        // tatweel/harakat stripped before anything is compared.
+        val text = raw.foldDigitsToAscii().stripArabicDecorations().trim()
         if (text.isEmpty()) return null
 
         runCatching { return LocalDate.parse(text) }
 
-        val cleaned = text.replace(",", " ").split(' ').filter { it.isNotBlank() }
+        val cleaned = text.replace(",", " ").replace("/", " ").replace("-", " ")
+            .split(' ').filter { it.isNotBlank() }
+
+        // Unambiguous year-first numeric form, e.g. 2023/11/01. Still refusing day-first vs
+        // month-first numeric dates below -- see the note on that.
+        if (cleaned.size == 3 && cleaned.all { it.all(Char::isDigit) }) {
+            val y = cleaned[0].toIntOrNull()
+            if (y != null && cleaned[0].length == 4) {
+                val m = cleaned[1].toIntOrNull() ?: return null
+                val d = cleaned[2].toIntOrNull() ?: return null
+                return runCatching { LocalDate(y, m, d) }.getOrNull()
+            }
+            return null
+        }
         if (cleaned.size != 3) return null
 
-        val monthFromName = { token: String ->
-            MONTH_NAMES.indexOfFirst { it.equals(token.take(3), ignoreCase = true) }
-                .takeIf { it >= 0 }
-                ?.plus(1)
-        }
+        val monthFromName = { token: String -> monthNumberOf(token) }
 
         // "Nov 1 2023"
         monthFromName(cleaned[0])?.let { month ->
@@ -121,8 +135,36 @@ object IntakeValidator {
      * [PlanTier] — it is not purchasable through the renewal sheet — so it is recognised here
      * as valid input without being forced into the tier enum.
      */
-    fun parsePlanLabel(raw: String): String? =
-        KNOWN_PLAN_LABELS.firstOrNull { it.equals(raw.trim(), ignoreCase = true) }
+    fun parsePlanLabel(raw: String): String? {
+        val normalised = raw.normaliseForMatching()
+        if (normalised.isEmpty()) return null
+        KNOWN_PLAN_LABELS.firstOrNull { it.lowercase() == normalised }?.let { return it }
+        // Longest first: "سنوي" (Annual) is a substring of "ربع سنوي" (Quarterly), so a
+        // shortest-first scan would label every quarterly sheet as annual.
+        return ARABIC_PLAN_SYNONYMS.entries
+            .sortedByDescending { it.key.length }
+            .firstOrNull { normalised.contains(it.key) }
+            ?.value
+    }
+
+    /**
+     * Month number for an English or Egyptian-Arabic month name, or null.
+     *
+     * All vocabularies are tried together rather than being selected by app language: one sheet
+     * can legitimately mix scripts, and the caller has no way to know which it is holding.
+     * Egyptian Arabic month names are used ("يناير"), not the Levantine "كانون الثاني" set.
+     */
+    private fun monthNumberOf(token: String): Int? {
+        val t = token.normaliseForMatching()
+        if (t.isEmpty()) return null
+        MONTH_NAMES.indexOfFirst { it.lowercase() == t.take(3) }
+            .takeIf { it >= 0 }?.let { return it + 1 }
+        MONTH_NAMES_FULL.indexOfFirst { it.lowercase() == t }
+            .takeIf { it >= 0 }?.let { return it + 1 }
+        MONTH_NAMES_ARABIC.indexOfFirst { it == t }
+            .takeIf { it >= 0 }?.let { return it + 1 }
+        return null
+    }
 
     private const val EGYPT_COUNTRY_CODE = "20"
 
@@ -135,4 +177,27 @@ object IntakeValidator {
      * `ocr-intake-review` shows it, even though no purchasable plan of that name exists yet.
      */
     val KNOWN_PLAN_LABELS = listOf("Trial", "Monthly", "Quarterly", "Annual")
+
+    /**
+     * Arabic spellings map onto the canonical English labels. KNOWN_PLAN_LABELS stays English
+     * because it is a *sheet vocabulary* identifier, not UI copy -- how a plan is displayed is
+     * the presentation layer's business, and the field deliberately keeps its raw OCR text.
+     */
+    private val ARABIC_PLAN_SYNONYMS = mapOf(
+        "تجريبي" to "Trial",
+        "شهري" to "Monthly",
+        "ربع سنوي" to "Quarterly",
+        "سنوي" to "Annual",
+    )
+
+    private val MONTH_NAMES_FULL = listOf(
+        "january", "february", "march", "april", "may", "june",
+        "july", "august", "september", "october", "november", "december",
+    )
+
+    /** Egyptian Arabic month names, which is what these sheets use. */
+    private val MONTH_NAMES_ARABIC = listOf(
+        "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+        "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
+    )
 }
