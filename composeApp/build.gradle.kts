@@ -26,8 +26,12 @@ kotlin {
             // The app shell owns DI wiring, so it is the one place that legitimately sees
             // every core module and every feature module.
             implementation(project(":core:database"))
-            implementation(project(":core:network"))
-            implementation(project(":core:auth"))
+            // :core:network and :core:auth are deliberately NOT here. Both are documented
+            // seams with no implementations and no callers yet, and an unused dependency edge
+            // still costs build time, R8 input, and -- for :core:network -- links OkHttp,
+            // Darwin and CIO into every release artifact, plus risks a transitive AAR
+            // contributing android.permission.INTERNET to the merged manifest. Re-add each the
+            // commit that first uses it.
 
             implementation(project(":feature:members"))
             implementation(project(":feature:subscriptions"))
@@ -44,8 +48,9 @@ kotlin {
             // `api`: each launcher owns its platform lifecycle and therefore constructs the
             // RootComponent itself, so Decompose is part of this module's public surface.
             api(libs.bundles.decompose)
-            implementation(libs.bundles.coil)
-            implementation(libs.kermit)
+            // Coil and Kermit were declared here and used nowhere. Kermit now lives behind
+            // the AppLogger seam in :core:common; Coil comes back with the feature that first
+            // renders a remote or file image (the intake source pane).
         }
         androidMain.dependencies {
             implementation(libs.koin.android)

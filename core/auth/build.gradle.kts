@@ -7,8 +7,6 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:model"))
             implementation(project(":core:common"))
-            implementation(libs.bundles.settings)
-            implementation(libs.kermit)
         }
     }
 }
