@@ -1,0 +1,343 @@
+{
+  "version": 1,
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-08-21T09:07:30Z",
+      "error_message": "stitch MCP: 'Failed to connect - Incompatible auth server: does not support dynamic client registration'",
+      "file": "~/.claude.json (user-scope mcpServers.stitch)",
+      "root_cause": "stitch was configured as an http server at https://stitch.googleapis.com/mcp. That endpoint requires a pre-registered OAuth client; Claude Code only performs dynamic client registration, so authentication can never succeed. Re-running the OAuth flow cannot fix it.",
+      "fix": "Replaced with the stdio proxy: claude mcp add stitch -s user -e STITCH_API_KEY=<key> -- npx -y @_davideast/stitch-mcp proxy. The proxy hard-errors without STITCH_API_KEY or STITCH_ACCESS_TOKEN.",
+      "tags": [
+        "mcp",
+        "stitch",
+        "oauth",
+        "dcr",
+        "config"
+      ],
+      "related_bugs": [
+        "bug-002"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T09:07:30Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-08-21T09:07:30Z",
+      "error_message": "mcp__stitch__download_assets returned 'Assets downloaded to <dir>' but wrote no files anywhere on disk",
+      "file": "design/stitch/export/ (expected output dir)",
+      "root_cause": "download_assets is a proxy-side convenience tool in @_davideast/stitch-mcp, not a real Stitch API call. It reports success unconditionally and silently writes nothing. Verified by searching the whole filesystem for files modified in the last 15 minutes.",
+      "fix": "Ignore the tool. Take htmlCode.downloadUrl / screenshot.downloadUrl from list_screens and curl them. The html download URL is a base64 protobuf in which only the html_<32hex> file id varies, so every screen's URL is reconstructable from a constant prefix+suffix; the URLs need no auth.",
+      "tags": [
+        "mcp",
+        "stitch",
+        "download_assets",
+        "silent-failure",
+        "false-success"
+      ],
+      "related_bugs": [
+        "bug-001"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T09:07:30Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-08-21T09:36:19Z",
+      "error_message": "e: Cannot access 'androidx.room3.RoomDatabase' which is a supertype of 'AnfasDatabase'. Check your module classpath for missing or conflicting dependencies.",
+      "file": "core/database/build.gradle.kts",
+      "root_cause": ":core:database declared `implementation(libs.bundles.room)`, but AnfasDatabase extends RoomDatabase and DatabaseBuilderFactory returns RoomDatabase.Builder — room3-runtime is part of the module's ABI, so a consumer (:core:data) could not compile against it.",
+      "fix": "Split the bundle: `api(libs.androidx.room3.runtime)` because it is in the ABI, `implementation(libs.androidx.sqlite.bundled)` because the driver is internal to buildDatabase(). Features still never see Room — anfas.kmp.feature withholds :core:database.",
+      "tags": [
+        "gradle",
+        "kmp",
+        "room",
+        "api-vs-implementation",
+        "abi"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T09:36:19Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-08-21T09:36:19Z",
+      "error_message": "e: Name contains illegal characters: \",\". (core/data + feature/members commonTest, only on compileTestKotlinIosSimulatorArm64)",
+      "file": "core/data/src/commonTest/.../OfflineFirstMemberRepositoryTest.kt",
+      "root_cause": "Backtick-quoted test function names containing a comma. The JVM target accepts them, so `:core:data:jvmTest` passed and the failure only appeared when `check` reached the Kotlin/Native test compilation.",
+      "fix": "Stripped , ; : . from all backticked test names. Lesson: run `./gradlew check` (which compiles native test targets) before believing a KMP test suite is green — a jvmTest pass proves nothing about iOS.",
+      "tags": [
+        "kmp",
+        "kotlin-native",
+        "tests",
+        "backtick-names"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T09:36:19Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-08-21T09:36:19Z",
+      "error_message": "e: Unresolved reference 'number' (kotlinx.datetime.Month.number)",
+      "file": "feature/members/src/commonMain/.../LastCheckIn.kt",
+      "root_cause": "kotlinx-datetime 0.8.0's Month has no `number` property.",
+      "fix": "Index a MonthAbbreviations array by Enum.ordinal; the enum is declared January..December in order.",
+      "tags": [
+        "kotlinx-datetime",
+        "api-change"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T09:36:19Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-08-21T12:13:45Z",
+      "error_message": "e: Overload resolution ambiguity / Conflicting overloads in OfflineFirstMemberRepository.kt (runStorage, asStorageError)",
+      "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/StorageBoundary.kt",
+      "root_cause": "Extracted the shared error-boundary helpers into StorageBoundary.kt as `internal` while OfflineFirstMemberRepository.kt still had its own `private` copies with the same names in the same package.",
+      "fix": "Deleted the private copies and rewrote the member repository to use the shared runStorage/asAppResult. Extracting a helper means removing the original, not adding a second.",
+      "tags": [
+        "kotlin",
+        "refactor",
+        "duplicate-declaration"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T12:13:45Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-08-21T12:13:45Z",
+      "error_message": "e: Cannot access class 'kotlinx.datetime.LocalDate'. Check your module classpath (from :core:data)",
+      "file": "core/model/build.gradle.kts",
+      "root_cause": "kotlinx-datetime was `implementation` in :core:model, but SubscriptionTerm.startsOn and RenewalQuote.endsOn expose LocalDate, so it is part of the module's ABI. Same class of mistake as bug-003 with room3.",
+      "fix": "Changed to `api(libs.kotlinx.datetime)`. Rule: if a type from a dependency appears in your public signatures, it is `api`.",
+      "tags": [
+        "gradle",
+        "kmp",
+        "api-vs-implementation",
+        "abi",
+        "kotlinx-datetime"
+      ],
+      "related_bugs": [
+        "bug-003"
+      ],
+      "occurrences": 2,
+      "last_seen": "2026-08-21T12:13:45Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-08-21T12:13:45Z",
+      "error_message": "e: Unresolved reference 'datetime' in core/common/RelativeTime.kt — only during :core:common:compileCommonMainKotlinMetadata",
+      "file": "core/common/build.gradle.kts",
+      "root_cause": "kotlinx-datetime was reached transitively via api(project(\":core:model\")). Platform compilations (jvmTest) resolved it, but commonMain *metadata* compilation did not, so `:core:common:jvmTest` passed while `check` failed later.",
+      "fix": "Declared api(libs.kotlinx.datetime) directly in :core:common. Do not rely on a transitive api dependency in commonMain metadata compilation; declare ABI deps explicitly.",
+      "tags": [
+        "gradle",
+        "kmp",
+        "metadata-compilation",
+        "transitive-dependency"
+      ],
+      "related_bugs": [
+        "bug-007"
+      ],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T12:13:45Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-08-21T12:13:45Z",
+      "error_message": "app.cash.turbine.TurbineAssertionError: Unconsumed events found (3 ReminderQueueComponentTest failures)",
+      "file": "feature/subscriptions/src/commonTest/.../ReminderQueueComponentTest.kt",
+      "root_cause": "A StateFlow keeps emitting after the assertion of interest — combine() re-emits when any upstream changes. Turbine treats leftover emissions at the end of a test() block as a failure.",
+      "fix": "End each state.test { } block with cancelAndIgnoreRemainingEvents() once the interesting emission has been asserted.",
+      "tags": [
+        "tests",
+        "turbine",
+        "stateflow",
+        "coroutines"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T12:13:45Z"
+    },
+    {
+      "id": "bug-010",
+      "timestamp": "2026-08-21T12:13:45Z",
+      "error_message": "e: Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch (clock.now().todayIn(zone))",
+      "file": "feature/subscriptions/src/commonMain/.../RenewalSheetComponent.kt",
+      "root_cause": "kotlinx-datetime's todayIn is an extension on Clock, not on Instant.",
+      "fix": "Call clock.todayIn(timeZone) directly.",
+      "tags": [
+        "kotlinx-datetime",
+        "api"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T12:13:45Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-08-21T12:30:42.512Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/Member.kt",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T12:30:42.512Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-08-21T12:32:43.581Z",
+      "error_message": "Null/undefined access in ",
+      "file": "core/data/src/commonTest/kotlin/com/anfas/core/data/FakeMemberDao.kt",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T12:32:43.581Z"
+    },
+    {
+      "id": "bug-013",
+      "timestamp": "2026-08-21T12:34:42.209Z",
+      "error_message": "Significant refactor of ",
+      "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
+      "root_cause": "6 lines replaced/restructured",
+      "fix": "Rewrote 11→6 lines (6 removed) | Also: /** Sentinel for \"no particular batch\"; the query ; const val BATCH_ANY = \"\"",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-08-21T12:34:56.644Z"
+    },
+    {
+      "id": "bug-014",
+      "timestamp": "2026-08-21T12:35:10.868Z",
+      "error_message": "Wrong reference: AppError should be AppResult",
+      "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
+      "root_cause": "Used \"AppError\" instead of \"AppResult\"",
+      "fix": "Changed AppError → AppResult",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T12:35:10.868Z"
+    },
+    {
+      "id": "bug-015",
+      "timestamp": "2026-08-21T13:26:43.568Z",
+      "error_message": "Significant refactor of ",
+      "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+      "root_cause": "28 lines replaced/restructured",
+      "fix": "Rewrote 37→17 lines (28 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T13:26:43.569Z"
+    },
+    {
+      "id": "bug-016",
+      "timestamp": "2026-08-21T13:26:51.572Z",
+      "error_message": "Wrong reference: width should be size",
+      "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+      "root_cause": "Used \"width\" instead of \"size\"",
+      "fix": "Changed width → size",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "kt"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T13:26:51.572Z"
+    },
+    {
+      "id": "bug-011",
+      "timestamp": "2026-08-21T13:36:02Z",
+      "error_message": "AssertionError: expected:<[#88393, #88394]> but was:<[#88394]> — only one member imported instead of two",
+      "file": "core/data/src/commonTest/.../OfflineFirstIntakeRepositoryTest.kt",
+      "root_cause": "The test fixture's newId lambda returned a constant string, so every imported row got the same member primary key and the Room upsert collapsed them into a single row. The repository was correct; the double-checked assertion caught the fixture.",
+      "fix": "Made the fixture's newId a counter. Lesson: any injected id generator in a test must be unique per call, or upserts silently merge records and the test looks like a product bug.",
+      "tags": [
+        "tests",
+        "fixtures",
+        "upsert",
+        "primary-key"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T13:36:02Z"
+    },
+    {
+      "id": "bug-012",
+      "timestamp": "2026-08-21T13:36:02Z",
+      "error_message": "e: Conflicting import: imported name 'IntakeReviewComponent' is ambiguous (RootComponent.kt)",
+      "file": "composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
+      "root_cause": "A python str.replace patch inserted the same import block twice because the anchor line appeared more than once in the file after an earlier partial edit.",
+      "fix": "Deduplicated the imports by hand. When patching source with replace(), pass a count or assert the anchor occurs exactly once first.",
+      "tags": [
+        "tooling",
+        "codegen",
+        "imports"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T13:36:02Z"
+    },
+    {
+      "id": "bug-019",
+      "timestamp": "2026-08-21T14:07:42.332Z",
+      "error_message": "Significant refactor of ",
+      "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 3→42 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T14:07:42.332Z"
+    },
+    {
+      "id": "bug-020",
+      "timestamp": "2026-08-21T14:08:19.737Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-08-21T14:08:19.737Z"
+    }
+  ]
+}
