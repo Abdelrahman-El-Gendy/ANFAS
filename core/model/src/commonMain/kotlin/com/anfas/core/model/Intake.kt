@@ -133,4 +133,19 @@ data class OcrBounds(val left: Float, val top: Float, val right: Float, val bott
 
     val width: Float get() = right - left
     val height: Float get() = bottom - top
+
+    companion object {
+        /**
+         * Clamping factory for platform OCR output. Use this, never the constructor, when the
+         * numbers come from an engine: iOS Vision reports values a hair outside 0..1 and the
+         * `init` check above would throw — a crash on a real photograph, which is the worst
+         * possible failure for this feature.
+         */
+        fun normalised(left: Float, top: Float, right: Float, bottom: Float) = OcrBounds(
+            left = left.coerceIn(0f, 1f),
+            top = top.coerceIn(0f, 1f),
+            right = right.coerceIn(0f, 1f),
+            bottom = bottom.coerceIn(0f, 1f),
+        )
+    }
 }

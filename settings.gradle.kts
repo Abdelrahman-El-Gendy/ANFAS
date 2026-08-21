@@ -51,6 +51,7 @@ include(":core:i18n")
 include(":core:database")
 include(":core:data")
 include(":core:network")
+include(":core:ocr")
 include(":core:auth")
 
 include(":feature:members")
