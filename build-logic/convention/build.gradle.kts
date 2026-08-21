@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.gradlePlugin.composeMultiplatform)
     implementation(libs.gradlePlugin.ksp)
     implementation(libs.gradlePlugin.room3)
+    implementation(libs.gradlePlugin.spotless)
 }
 
 // Plugin ids come from the precompiled script filenames in src/main/kotlin:
@@ -28,3 +29,4 @@ dependencies {
 //   anfas.kmp.feature.gradle.kts  -> id("anfas.kmp.feature")
 //   anfas.jvm.server.gradle.kts   -> id("anfas.jvm.server")
 //   anfas.layering.gradle.kts     -> id("anfas.layering")
+//   anfas.quality.gradle.kts      -> id("anfas.quality")

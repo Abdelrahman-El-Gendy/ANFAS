@@ -1,0 +1,42 @@
+# ktlint reads its configuration from here. Spotless invokes ktlint; this file is the
+# single place the rules live, so IDE formatting and the build gate agree.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{kt,kts}]
+# Matches the existing hand-wrapped style in this codebase, whose comment blocks wrap
+# at ~96 columns.
+max_line_length = 100
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+# MANDATORY, not stylistic: @Composable functions are PascalCase by Compose convention.
+# Without this, every composable in :core:designsystem and all seven feature modules is
+# a violation.
+ktlint_standard_function-naming = disabled
+
+# This codebase deliberately groups related declarations per file (AnfasButtons.kt holds
+# both button variants; Intake.kt holds the batch/row/field/issue types).
+ktlint_standard_filename = disabled
+
+# Every module build file opens with a /** ... */ header explaining the module. ktlint's
+# standard:kdoc rule rejects KDoc "inside a block" — aimed at Kotlin sources where it would not
+# render, but it also fires on build-script file headers. Disabling repo-wide rather than only
+# for .kts because Spotless hands ktlint a virtual path that does not reliably match a # Import ordering and no-wildcard-imports are enforced; both already hold throughout.
+
+[*.{yml,yaml,json}]
+indent_size = 2
+
+[*.md]
+# Markdown uses trailing whitespace for hard line breaks.
+trim_trailing_whitespace = false
+
+[*.{xml,plist,pbxproj,xcconfig}]
+indent_size = 4
