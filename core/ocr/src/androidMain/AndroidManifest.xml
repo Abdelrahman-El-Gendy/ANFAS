@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      Deliberately NO <uses-permission android:name="android.permission.CAMERA" />.
+
+      Capture goes through ActivityResultContracts.TakePicture (ACTION_IMAGE_CAPTURE), which
+      needs no permission at all *provided the app never declares CAMERA* — Android's contract
+      is that declaring it obliges you to hold it before the intent will fire. We get the OEM
+      camera UI, autofocus, flash and a full-resolution file for free.
+
+      If this ever moves to CameraX for an in-app viewfinder, CAMERA comes back with it and a
+      runtime request becomes mandatory. Don't add the permission speculatively.
+    -->
+
+    <application>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.intake.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/intake_file_paths" />
+        </provider>
+    </application>
+
+</manifest>

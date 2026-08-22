@@ -26,5 +26,14 @@ kotlin {
             implementation(project(":core:common"))
             implementation(libs.bundles.koin)
         }
+        androidMain.dependencies {
+            implementation(libs.mlkit.textRecognition)
+            // rememberLauncherForActivityResult — capture is an activity result, not a camera API.
+            implementation(libs.androidx.activity.compose)
+            // FileProvider, for handing the camera app a writable URI.
+            implementation(libs.androidx.core.ktx)
+            // androidContext() — every actual here needs a Context.
+            implementation(libs.koin.android)
+        }
     }
 }

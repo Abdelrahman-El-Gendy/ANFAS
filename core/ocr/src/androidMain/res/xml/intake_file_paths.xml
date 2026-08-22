@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sheet photographs are member PII: names, phone numbers and plan dates. They live in
+  internal cache (getCacheDir) rather than external storage so no other app can read them
+  and the OS can reclaim the space, and they are deleted as soon as a batch is imported
+  or discarded.
+-->
+<paths>
+    <cache-path
+        name="intake"
+        path="intake/" />
+</paths>
