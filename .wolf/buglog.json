@@ -820,5 +820,40 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-22T15:15:00Z"
+  },
+  {
+    "id": "bug-048",
+    "timestamp": "2026-08-22T16:00:00Z",
+    "error_message": "Denying camera access on iOS did nothing \u2014 requestCameraAccess() and openAppSettings() were built in Phase 3 and never called from anywhere",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponent.kt",
+    "root_cause": "The iOS capture path presented UIImagePickerController without first checking authorisation, so a denied camera produced a black picker and no explanation. A repo-wide grep showed both permission APIs had zero callers outside the module that declared them.",
+    "fix": "onCaptureRequested(launch) checks access before handing control to the screen's launcher, and a denial becomes sticky state showing the camera-denied empty state with an Open Settings action plus the still-valid Choose photo fallback. A `when` guard makes the denial outrank the normal empty state so 'New scan' is never offered while the OS is refusing.",
+    "tags": [
+      "ios",
+      "permissions",
+      "camera",
+      "intake",
+      "dead-code"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T16:00:00Z"
+  },
+  {
+    "id": "bug-049",
+    "timestamp": "2026-08-22T16:00:00Z",
+    "error_message": "The CameraAccess.Denied branch was untestable \u2014 no test could ever reach it",
+    "file": "core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/OcrContracts.kt",
+    "root_cause": "requestCameraAccess() and openAppSettings() were top-level `expect` functions. A top-level expect has no substitution point, so on the JVM test target it always returned NotRequired \u2014 meaning the only branch the denial UI exists for could never be exercised.",
+    "fix": "Introduced a CameraPermissions interface with PlatformCameraPermissions delegating to the expect functions, registered in ocrModule and injected into the component. Same reasoning as AppDispatchers existing rather than reaching for Dispatchers.IO. Three tests now cover denied, granted and open-settings.",
+    "tags": [
+      "testability",
+      "expect-actual",
+      "kmp",
+      "seams"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T16:00:00Z"
   }
 ]

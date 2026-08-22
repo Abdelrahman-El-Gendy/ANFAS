@@ -230,5 +230,50 @@ interface AppStrings {
         val issueUnreadableDate: String
         val issueUnknownPlan: String
         val issueLowConfidence: String
+
+        /**
+         * Camera access denied. Distinct copy from States.permissionDenied*, which is about a
+         * staff *role* — telling someone to ask the gym owner to change their role would be
+         * useless advice for an OS permission they can change themselves.
+         */
+        val cameraDeniedTitle: String
+        val cameraDeniedMessage: String
+        val cameraDeniedAction: String
+    }
+
+    /**
+     * The four cross-cutting states from the export: offline, session expired, permission denied
+     * and sync conflict. Their own section because none belongs to a feature — any screen can be
+     * interrupted by them.
+     */
+    val states: States
+
+    interface States {
+        /** Persistent banner. Says only what is true today: nothing syncs yet. */
+        val offlineTitle: String
+
+        val sessionExpiredTitle: String
+        val sessionExpiredMessage: String
+        val sessionExpiredAction: String
+
+        fun permissionDeniedTitle(area: String): String
+        val permissionDeniedMessage: String
+        val permissionDeniedAction: String
+
+        val syncConflictTitle: String
+        fun syncConflictMessage(count: Int): String
+        val syncConflictOnThisDevice: String
+        val syncConflictOnTheServer: String
+        val syncConflictField: String
+        val syncConflictKeepMine: String
+        val syncConflictKeepServer: String
+        val syncConflictDiffers: String
+        val syncConflictEmptyValue: String
+
+        /** Labels for MemberConflict's ConflictField entries. */
+        val fieldFullName: String
+        val fieldMembershipNumber: String
+        val fieldPhone: String
+        val fieldStatus: String
     }
 }

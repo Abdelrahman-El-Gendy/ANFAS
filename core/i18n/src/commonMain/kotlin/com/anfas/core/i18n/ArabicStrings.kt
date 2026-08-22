@@ -291,6 +291,11 @@ object ArabicStrings : AppStrings {
         override val issueUnreadableDate = "تاريخ غير مقروء"
         override val issueUnknownPlan = "خطة غير معروفة"
         override val issueLowConfidence = "راجع هذا الصف"
+        override val cameraDeniedTitle = "الوصول إلى الكاميرا مُعطّل"
+        override val cameraDeniedMessage =
+            "يحتاج ANFAS إلى الكاميرا لتصوير كشوف التسجيل. شغّلها من الإعدادات، " +
+                "أو اختر صورة موجودة بدلًا من ذلك."
+        override val cameraDeniedAction = "فتح الإعدادات"
     }
 
     /** Egyptian Arabic month names, matching what IntakeValidator parses off the sheets. */
@@ -298,4 +303,38 @@ object ArabicStrings : AppStrings {
         "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
         "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
     )
+
+    override val states = object : AppStrings.States {
+        override val offlineTitle = "يعمل بدون اتصال — البيانات محفوظة على هذا الجهاز"
+
+        override val sessionExpiredTitle = "انتهت الجلسة"
+        override val sessionExpiredMessage = "سجّل الدخول مرة أخرى للمتابعة."
+        override val sessionExpiredAction = "تسجيل الدخول"
+
+        override fun permissionDeniedTitle(area: String) = "لا تملك صلاحية الوصول إلى $area"
+        override val permissionDeniedMessage = "اطلب من مالك الصالة تحديث دورك."
+        override val permissionDeniedAction = "رجوع"
+
+        override val syncConflictTitle = "تعارض في المزامنة"
+        override fun syncConflictMessage(count: Int) = when (arabicPlural(count)) {
+            PluralCategory.ZERO -> "لا توجد حقول مختلفة."
+            PluralCategory.ONE -> "يوجد حقل واحد مختلف بين هذا الجهاز والسيرفر. اختر النسخة."
+            PluralCategory.TWO -> "يوجد حقلان مختلفان بين هذا الجهاز والسيرفر. اختر النسخة."
+            PluralCategory.FEW -> "توجد $count حقول مختلفة بين هذا الجهاز والسيرفر. اختر النسخة."
+            PluralCategory.MANY -> "يوجد $count حقلًا مختلفًا بين هذا الجهاز والسيرفر. اختر النسخة."
+            PluralCategory.OTHER -> "يوجد $count حقل مختلف بين هذا الجهاز والسيرفر. اختر النسخة."
+        }
+        override val syncConflictOnThisDevice = "على هذا الجهاز"
+        override val syncConflictOnTheServer = "على السيرفر"
+        override val syncConflictField = "الحقل"
+        override val syncConflictKeepMine = "احتفظ بنسختي"
+        override val syncConflictKeepServer = "احتفظ بنسخة السيرفر"
+        override val syncConflictDiffers = "مختلف"
+        override val syncConflictEmptyValue = "(فارغ)"
+
+        override val fieldFullName = "الاسم الكامل"
+        override val fieldMembershipNumber = "رقم العضوية"
+        override val fieldPhone = "رقم الهاتف"
+        override val fieldStatus = "الحالة"
+    }
 }

@@ -3,6 +3,8 @@ package com.anfas.feature.intakeocr
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
 import com.anfas.core.model.OcrLine
+import com.anfas.core.ocr.CameraAccess
+import com.anfas.core.ocr.CameraPermissions
 import com.anfas.core.ocr.CapturedImage
 import com.anfas.core.ocr.IntakeImageStore
 import com.anfas.core.ocr.TextRecogniser
@@ -41,3 +43,16 @@ internal fun capturedImage(uri: String = "file://sheet.jpg") =
 
 internal fun storageFailure(message: String = "disk full") =
     AppResult.Failure(AppError.Storage(message))
+
+/** Lets a test drive the Denied branch, which the platform expect-fun made unreachable. */
+internal class FakeCameraPermissions(private val access: CameraAccess = CameraAccess.NotRequired) :
+    CameraPermissions {
+    var settingsOpened = 0
+        private set
+
+    override suspend fun request(): CameraAccess = access
+
+    override fun openSettings() {
+        settingsOpened++
+    }
+}

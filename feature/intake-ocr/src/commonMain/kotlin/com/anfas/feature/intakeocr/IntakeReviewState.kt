@@ -39,6 +39,12 @@ data class IntakeReviewState(
     val isImporting: Boolean = false,
     /** A capture is being recognised and parsed. Separate from [isImporting]: different wait. */
     val isScanning: Boolean = false,
+    /**
+     * True once the OS has told us camera access is denied and cannot be re-asked. Sticky for the
+     * screen's lifetime rather than a transient notice: the condition does not clear until the
+     * user changes it in Settings, so a toast that disappears would leave them stuck.
+     */
+    val cameraDenied: Boolean = false,
     val outcome: ImportOutcome? = null,
     val notice: IntakeNotice? = null,
 ) {

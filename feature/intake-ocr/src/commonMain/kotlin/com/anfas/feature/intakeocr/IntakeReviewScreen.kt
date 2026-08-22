@@ -117,6 +117,25 @@ fun IntakeReviewScreen(component: IntakeReviewComponent, modifier: Modifier = Mo
                 message = content.message,
             )
 
+            // Camera denied outranks the empty state. The empty state's primary action is
+            // "New scan", and offering it while the OS is refusing is how you get someone
+            // tapping a button that silently does nothing.
+            IntakeReviewContent.NoBatches if state.cameraDenied -> AnfasEmptyState(
+                icon = AnfasIcons.Warning,
+                title = s.intake.cameraDeniedTitle,
+                message = s.intake.cameraDeniedMessage,
+                primaryAction = EmptyStateAction(
+                    label = s.intake.cameraDeniedAction,
+                    onClick = component::onOpenSettings,
+                ),
+                // Still offered: the library needs no permission, so a denial does not have to
+                // be a dead end.
+                secondaryAction = EmptyStateAction(
+                    label = s.intake.choosePhoto,
+                    onClick = imageSource::pickFromLibrary,
+                ).takeIf { ocrCapability.canPickImage },
+            )
+
             IntakeReviewContent.NoBatches -> AnfasEmptyState(
                 icon = AnfasIcons.DocumentScanner,
                 title = s.intake.emptyTitle,
@@ -130,7 +149,8 @@ fun IntakeReviewScreen(component: IntakeReviewComponent, modifier: Modifier = Mo
                 },
                 primaryAction = EmptyStateAction(
                     label = s.intake.newScan,
-                    onClick = imageSource::captureFromCamera,
+                    // Through the component, so camera access is checked first.
+                    onClick = { component.onCaptureRequested(imageSource::captureFromCamera) },
                     icon = AnfasIcons.DocumentScanner,
                 ).takeIf { ocrCapability.canCapture },
                 secondaryAction = EmptyStateAction(

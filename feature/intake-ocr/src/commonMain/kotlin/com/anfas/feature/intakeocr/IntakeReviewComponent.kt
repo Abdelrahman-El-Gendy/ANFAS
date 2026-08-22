@@ -9,6 +9,8 @@ import com.anfas.core.model.IntakeBatch
 import com.anfas.core.model.IntakeBatchId
 import com.anfas.core.model.IntakeBatchStatus
 import com.anfas.core.model.IntakeRowId
+import com.anfas.core.ocr.CameraAccess
+import com.anfas.core.ocr.CameraPermissions
 import com.anfas.core.ocr.CapturedImage
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
@@ -40,6 +42,7 @@ class IntakeReviewComponent(
     componentContext: ComponentContext,
     private val repository: IntakeRepository,
     private val ingestion: IntakeIngestion,
+    private val cameraPermissions: CameraPermissions,
     dispatchers: AppDispatchers,
     private val onImported: (imported: Int) -> Unit,
 ) : ComponentContext by componentContext {
@@ -80,6 +83,7 @@ class IntakeReviewComponent(
             panY = local.panY,
             isImporting = local.isImporting,
             isScanning = local.isScanning,
+            cameraDenied = local.cameraDenied,
             outcome = local.outcome,
             notice = local.notice,
         )
@@ -130,6 +134,34 @@ class IntakeReviewComponent(
             }
         }
     }
+
+    /**
+     * Asks for camera access, then hands control back to the screen to launch the capture.
+     *
+     * The permission check lives here and the launcher lives in the screen because Android's
+     * ActivityResultLauncher can only be registered in composition, while the check is a suspend
+     * call. Passing [launch] in keeps the platform difference in one place instead of making
+     * every caller branch.
+     *
+     * On Android this always proceeds — ACTION_IMAGE_CAPTURE needs no permission. On iOS a denial
+     * is terminal until the user changes it in Settings, which is why it becomes sticky state
+     * rather than a dismissible notice.
+     */
+    fun onCaptureRequested(launch: () -> Unit) {
+        scope.launch {
+            when (cameraPermissions.request()) {
+                CameraAccess.Granted, CameraAccess.NotRequired -> {
+                    ui.update { it.copy(cameraDenied = false) }
+                    launch()
+                }
+
+                CameraAccess.Denied -> ui.update { it.copy(cameraDenied = true) }
+            }
+        }
+    }
+
+    /** Routes to the OS settings page, the only place the user can undo a denial. */
+    fun onOpenSettings() = cameraPermissions.openSettings()
 
     /**
      * Called with whatever the platform image source produced. Capture itself lives in the
@@ -190,6 +222,7 @@ class IntakeReviewComponent(
         val panY: Float = 0f,
         val isImporting: Boolean = false,
         val isScanning: Boolean = false,
+        val cameraDenied: Boolean = false,
         val outcome: com.anfas.core.data.ImportOutcome? = null,
         val notice: IntakeNotice? = null,
     )

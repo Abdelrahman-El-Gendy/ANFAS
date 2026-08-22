@@ -2,6 +2,7 @@ package com.anfas.feature.intakeocr
 
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.data.IntakeRepository
+import com.anfas.core.ocr.CameraPermissions
 import com.arkivanov.decompose.ComponentContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -13,6 +14,7 @@ import org.koin.dsl.module
 class IntakeReviewComponentFactory internal constructor(
     private val intake: IntakeRepository,
     private val ingestion: IntakeIngestion,
+    private val cameraPermissions: CameraPermissions,
     private val dispatchers: AppDispatchers,
 ) {
     fun create(
@@ -22,6 +24,7 @@ class IntakeReviewComponentFactory internal constructor(
         componentContext = componentContext,
         repository = intake,
         ingestion = ingestion,
+        cameraPermissions = cameraPermissions,
         dispatchers = dispatchers,
         onImported = onImported,
     )
@@ -38,6 +41,7 @@ val IntakeOcrModule: Module = module {
         IntakeReviewComponentFactory(
             intake = get(),
             ingestion = get(),
+            cameraPermissions = get(),
             dispatchers = get(),
         )
     }

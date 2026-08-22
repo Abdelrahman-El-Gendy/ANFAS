@@ -54,6 +54,27 @@ enum class CameraAccess { Granted, Denied, NotRequired }
 
 expect suspend fun requestCameraAccess(): CameraAccess
 
+/**
+ * The camera-permission seam.
+ *
+ * [requestCameraAccess] and [openAppSettings] are top-level `expect` functions, which makes them
+ * unsubstitutable: a test can never exercise the Denied branch, and that branch is the whole
+ * reason the denial UI exists. Callers depend on this interface instead — the same reason
+ * `AppDispatchers` exists rather than reaching for `Dispatchers.IO` directly.
+ */
+interface CameraPermissions {
+    suspend fun request(): CameraAccess
+
+    /** The only place a user can undo a denial. No-op where there is nothing to deny. */
+    fun openSettings()
+}
+
+internal object PlatformCameraPermissions : CameraPermissions {
+    override suspend fun request(): CameraAccess = requestCameraAccess()
+
+    override fun openSettings() = openAppSettings()
+}
+
 /** Opens the OS settings page, for the Denied case the design's permission-denied screen covers. */
 expect fun openAppSettings()
 

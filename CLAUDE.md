@@ -116,6 +116,24 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - compose material3 is pinned to an **alpha** (`1.11.0-alpha07`) — the newest in the 1.11 line.
 - KSP versioning is independent of Kotlin's. There is no `2.4.10-x.y.z`.
 
+## Cross-cutting state screens
+
+The export's four interrupt states live in `:core:designsystem` as parameterised components, not
+as screens — none belongs to a feature, because any screen can be interrupted by them.
+
+| Screen | What backs it |
+|---|---|
+| `permission-denied` | **Live** for iOS camera denial via `CameraPermissions`. The design's own copy is about a staff *role*, so `States.permissionDenied*` and `Intake.cameraDenied*` are separate string sets — telling someone to ask the gym owner about an OS toggle they control is useless advice. |
+| `session-expired` | Strings only. It is `AnfasEmptyState` plus copy; `staff-login` will wire it. |
+| `sync-conflict` | `AnfasConflictRow`/`AnfasConflictHeader` plus `MemberConflict` in `:core:model` (tested). No sync exists, so no caller. |
+| `offline-banner` | `AnfasBanner`. **Not wired, deliberately** — the export says "changes will sync when you reconnect" and nothing syncs, so that banner would be a promise the app cannot keep. |
+
+- **Don't wrap `AnfasEmptyState` to make a "screen".** Two of the four are icon + title + message +
+  action, which it already is. A named wrapper adds a file and no behaviour.
+- **A platform `expect fun` is untestable by construction.** `requestCameraAccess()` could never
+  have its Denied branch exercised, which is the only branch the denial UI exists for. Callers take
+  the `CameraPermissions` interface instead — same reason `AppDispatchers` exists.
+
 ## RTL and bidi
 
 - **`dataMonoLtr` is for Latin-only runs** — phone numbers, ids, raw template names. Never put a

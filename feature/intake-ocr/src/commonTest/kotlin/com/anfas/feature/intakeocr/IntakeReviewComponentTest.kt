@@ -15,6 +15,8 @@ import com.anfas.core.model.IntakeField
 import com.anfas.core.model.IntakeRow
 import com.anfas.core.model.IntakeRowId
 import com.anfas.core.model.IntakeValidator
+import com.anfas.core.ocr.CameraAccess
+import com.anfas.core.ocr.CameraPermissions
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
@@ -28,6 +30,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.time.Instant
@@ -257,9 +260,53 @@ class IntakeReviewComponentTest {
         error("No notice was emitted")
     }
 
+    @Test
+    fun `a denied camera surfaces the denial instead of launching capture`() = runTest {
+        val component = component(
+            repository = FakeIntakeRepository(),
+            cameraPermissions = FakeCameraPermissions(CameraAccess.Denied),
+        )
+        var launched = 0
+
+        component.state.test {
+            awaitItem()
+            component.onCaptureRequested { launched++ }
+
+            assertTrue(awaitItem().cameraDenied)
+            // The whole point: a denial must not open a camera that will refuse.
+            assertEquals(0, launched)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `granted access launches capture and clears any earlier denial`() = runTest {
+        val component = component(
+            repository = FakeIntakeRepository(),
+            cameraPermissions = FakeCameraPermissions(CameraAccess.Granted),
+        )
+        var launched = 0
+
+        component.onCaptureRequested { launched++ }
+
+        assertEquals(1, launched)
+        assertFalse(component.state.value.cameraDenied)
+    }
+
+    @Test
+    fun `opening settings is delegated to the platform seam`() = runTest {
+        val permissions = FakeCameraPermissions(CameraAccess.Denied)
+        val component = component(FakeIntakeRepository(), cameraPermissions = permissions)
+
+        component.onOpenSettings()
+
+        assertEquals(1, permissions.settingsOpened)
+    }
+
     private fun TestScope.component(
         repository: IntakeRepository,
         onImported: (Int) -> Unit = {},
+        cameraPermissions: CameraPermissions = FakeCameraPermissions(),
     ): IntakeReviewComponent {
         val lifecycle = LifecycleRegistry()
         val component = IntakeReviewComponent(
@@ -270,6 +317,7 @@ class IntakeReviewComponentTest {
                 repository = repository,
                 imageStore = RecordingImageStore(),
             ),
+            cameraPermissions = cameraPermissions,
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onImported = onImported,
         )

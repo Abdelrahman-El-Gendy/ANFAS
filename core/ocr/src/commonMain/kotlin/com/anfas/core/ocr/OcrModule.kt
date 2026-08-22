@@ -8,6 +8,7 @@ import org.koin.dsl.module
  * :core:data's platformDatabaseModule, so Android's actual can use androidContext().
  */
 val ocrModule: Module = module {
+    single<CameraPermissions> { PlatformCameraPermissions }
     includes(platformOcrModule())
 }
 

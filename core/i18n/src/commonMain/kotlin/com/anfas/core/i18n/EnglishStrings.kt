@@ -231,9 +231,49 @@ object EnglishStrings : AppStrings {
         override val issueUnreadableDate = "Date unreadable"
         override val issueUnknownPlan = "Plan not recognised"
         override val issueLowConfidence = "Check this row"
+        override val cameraDeniedTitle = "Camera access is off"
+        override val cameraDeniedMessage =
+            "ANFAS needs the camera to photograph sign-up sheets. Turn it on in Settings, " +
+                "or choose an existing photo instead."
+        override val cameraDeniedAction = "Open Settings"
     }
 
     internal val MONTHS_SHORT_EN = listOf(
         "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     )
+
+    override val states = object : AppStrings.States {
+        // Deliberately not "changes will sync when you reconnect". There is no server and no
+        // sync; promising one would be a lie the app cannot keep. Say what is true: the data is
+        // on this device.
+        override val offlineTitle = "Working offline — data is stored on this device"
+
+        override val sessionExpiredTitle = "Your session ended"
+        override val sessionExpiredMessage = "Sign in again to continue."
+        override val sessionExpiredAction = "Sign in"
+
+        override fun permissionDeniedTitle(area: String) = "You don't have access to $area"
+        override val permissionDeniedMessage = "Ask the gym owner to update your role."
+        override val permissionDeniedAction = "Go back"
+
+        override val syncConflictTitle = "Sync conflict"
+        override fun syncConflictMessage(count: Int) = if (count == 1) {
+            "1 field differs between this device and the server. Choose which copy to keep."
+        } else {
+            "$count fields differ between this device and the server. " +
+                "Choose which copy to keep."
+        }
+        override val syncConflictOnThisDevice = "On this device"
+        override val syncConflictOnTheServer = "On the server"
+        override val syncConflictField = "Field"
+        override val syncConflictKeepMine = "Keep mine"
+        override val syncConflictKeepServer = "Keep server"
+        override val syncConflictDiffers = "Differs"
+        override val syncConflictEmptyValue = "(empty)"
+
+        override val fieldFullName = "Full name"
+        override val fieldMembershipNumber = "Membership number"
+        override val fieldPhone = "Phone number"
+        override val fieldStatus = "Status"
+    }
 }
