@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -64,10 +65,18 @@ fun RenewalSheetScreen(component: RenewalSheetComponent, modifier: Modifier = Mo
     val s = strings
     val money = LocalAppLanguage.current.moneyStyle()
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    // fillMaxSize, not fillMaxWidth. Height matters here: `weight` divides the *bounded* height
+    // of its parent, so with a wrap-content root the weighted child had nothing to divide and
+    // fell back to its own intrinsic height. verticalScroll then measured its content unbounded,
+    // the column grew taller than the window, and the scroll never engaged -- so in landscape
+    // the plan list was simply cut off at the top with no way to reach it. Bounding the root is
+    // what makes the scroll real.
+    Column(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .weight(1f, fill = false)
+                // fill = true, so the footer is pinned below the scroll area rather than
+                // floating directly under content that may be taller than the screen.
+                .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = AnfasTheme.spacing.marginMobile)
                 .padding(top = 8.dp, bottom = 24.dp),

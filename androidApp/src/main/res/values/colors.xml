@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Duplicated from AnfasPalette.Background (#141311) because a resource file cannot read a
+      Kotlin constant, and the launch window is drawn before any Kotlin runs. This is the only
+      hex outside :core:designsystem; if the app background ever changes, change it here too.
+    -->
+    <color name="anfas_background">#FF141311</color>
+</resources>

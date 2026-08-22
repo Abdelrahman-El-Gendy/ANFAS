@@ -5,10 +5,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -90,7 +94,19 @@ fun App(root: RootComponent) {
                     ),
                 )
 
-                BoxWithConstraints(modifier = Modifier.fillMaxSize().safeContentPadding()) {
+                // Insets are applied per-region, not wholesale. safeContentPadding() on the
+                // whole shell also inset the bottom navigation bar, leaving it hovering above a
+                // strip of empty background; the bar now consumes that inset itself so its
+                // surface reaches the screen edge. Everything else still clears the notch.
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(
+                            WindowInsets.safeDrawing.only(
+                                WindowInsetsSides.Horizontal + WindowInsetsSides.Top,
+                            ),
+                        ),
+                ) {
                     val wide = maxWidth >= AnfasBreakpoints.tabletMax
                     if (wide) {
                         Row(modifier = Modifier.fillMaxSize()) {

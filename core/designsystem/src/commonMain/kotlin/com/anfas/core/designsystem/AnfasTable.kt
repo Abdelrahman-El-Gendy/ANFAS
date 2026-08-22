@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 /**
@@ -59,6 +60,11 @@ fun RowScope.AnfasTableHeaderCell(
         style = AnfasTheme.textStyles.labelCaps,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = textAlign,
+        // A column heading is one or two words and sits above cells it has to stay aligned
+        // with. Wrapping made "ACTIONS" render as "ACTIO / NS" and pushed the header row
+        // taller than its cells; a heading that cannot fit should shorten, not reflow.
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier,
     )
 }

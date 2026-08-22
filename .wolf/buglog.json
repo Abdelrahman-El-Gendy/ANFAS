@@ -658,5 +658,96 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-22T13:00:00Z"
+  },
+  {
+    "id": "bug-039",
+    "timestamp": "2026-08-22T13:35:00Z",
+    "error_message": "iOS: white bands above the status bar and below the home indicator, framing a #141311 app",
+    "file": "app/iosApp/iosApp/ContentView.swift",
+    "root_cause": "ContentView applied .ignoresSafeArea(.keyboard) only, so SwiftUI inset the Compose view by the top and bottom safe areas and the window's own white background showed through. App.kt already applies its own safe padding, so the insets were being handled twice \u2014 once in the wrong layer.",
+    "fix": "Changed to .ignoresSafeArea() with no arguments so Compose owns every edge and paints the background full-bleed. Also set UIUserInterfaceStyle=Dark in Info.plist so the status bar draws light glyphs and system sheets arrive in dark mode.",
+    "tags": [
+      "ios",
+      "safe-area",
+      "swiftui",
+      "compose-multiplatform",
+      "theming"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T13:35:00Z"
+  },
+  {
+    "id": "bug-040",
+    "timestamp": "2026-08-22T13:35:00Z",
+    "error_message": "Android: full-screen white flash on every cold start before the dark app appeared",
+    "file": "androidApp/src/main/AndroidManifest.xml",
+    "root_cause": "The launch window used the wizard's @android:style/Theme.Material.Light.NoActionBar. That theme only paints the starting window, but that window is the first thing shown on every cold start \u2014 white, against a #141311 app.",
+    "fix": "Added Theme.Anfas (parent Theme.Material.NoActionBar) with windowBackground set to the app background and transparent system bars, and pointed the manifest at it. windowLight*Bar entries were dropped: false is already the default and windowLightNavigationBar needs API 27 against minSdk 24, which fails lint.",
+    "tags": [
+      "android",
+      "theming",
+      "launch",
+      "cold-start",
+      "lint"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T13:35:00Z"
+  },
+  {
+    "id": "bug-041",
+    "timestamp": "2026-08-22T13:35:00Z",
+    "error_message": "Renewal sheet content was cut off in landscape with no way to scroll to it",
+    "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/RenewalSheetScreen.kt",
+    "root_cause": "The root Column had only fillMaxWidth(), so its height was wrap-content. Modifier.weight divides a BOUNDED height, so the weighted child fell back to its intrinsic height, verticalScroll measured its content unbounded, and the column grew taller than the window \u2014 the scroll never engaged. In portrait the content happened to fit, which is why it looked fine.",
+    "fix": "Root is fillMaxSize() and the scroll region uses weight(1f) with fill=true, which bounds the viewport and pins the action footer below it. Verified by rotating a Pixel 9 emulator: the sheet scrolls and Confirm/Cancel stay reachable.",
+    "tags": [
+      "compose",
+      "layout",
+      "scroll",
+      "landscape",
+      "weight",
+      "rotation"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T13:35:00Z"
+  },
+  {
+    "id": "bug-042",
+    "timestamp": "2026-08-22T13:35:00Z",
+    "error_message": "Bottom navigation had unequal tap targets that moved when the language changed",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasNavigation.kt",
+    "root_cause": "Items were laid out with Arrangement.SpaceEvenly over intrinsically-sized children, so each destination's tap target was sized by its own label \u2014 'Reminders' was visibly larger than 'Intake', and every target shifted between English and Arabic. The selected state also filled the whole cell, so it changed shape per label, and there was no minimum touch target.",
+    "fix": "Rewrote as equal weight(1f) columns with a 56dp minimum height (clears Material's 48dp and Apple's 44pt), an animated pill indicator behind the icon only, 24dp icons, animated colour transitions, ripple clipped to the cell, and maxLines=1 with ellipsis on the label.",
+    "tags": [
+      "compose",
+      "designsystem",
+      "navigation",
+      "accessibility",
+      "touch-target",
+      "i18n"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T13:35:00Z"
+  },
+  {
+    "id": "bug-043",
+    "timestamp": "2026-08-22T13:35:00Z",
+    "error_message": "Table column heading rendered as 'ACTIO / NS', taller than the cells beneath it",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTable.kt",
+    "root_cause": "AnfasTableHeaderCell had no line limit, so a heading narrower than its text wrapped and pushed the header row taller than its own columns.",
+    "fix": "maxLines = 1 with TextOverflow.Ellipsis \u2014 a heading that cannot fit should shorten rather than reflow.",
+    "tags": [
+      "compose",
+      "designsystem",
+      "tables",
+      "typography"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T13:35:00Z"
   }
 ]

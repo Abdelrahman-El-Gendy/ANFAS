@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+      The platform theme, which only ever paints the launch window: Compose takes over as soon as
+      setContent runs. It still matters, because that window is the first thing a user sees on
+      every cold start.
+
+      The wizard's Theme.Material.Light.NoActionBar meant a white full-screen flash before a
+      #141311 app, on every launch. This is the Android counterpart of setting
+      UIUserInterfaceStyle=Dark in the iOS Info.plist.
+
+      windowBackground is AnfasPalette.Background, kept in sync by hand — Compose colours live in
+      Kotlin and are not reachable from a resource file. See colors.xml.
+    -->
+    <style name="Theme.Anfas" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/anfas_background</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!--
+          No windowLight*Bar entries. false is already the platform default, so declaring it
+          bought nothing, and windowLightNavigationBar needs API 27 against our minSdk of 24 —
+          lint fails the build on it. Dark bars with light glyphs are what we get anyway.
+        -->
+    </style>
+
+</resources>

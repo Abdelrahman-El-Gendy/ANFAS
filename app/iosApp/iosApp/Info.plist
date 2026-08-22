@@ -5,6 +5,16 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<!--
+	  The design is dark-only (#141311). Without this the app follows the system appearance, so
+	  on a light-mode device the status bar draws its clock and indicators in BLACK over our dark
+	  background, and every system-supplied sheet — the photo picker, the camera permission alert
+	  — arrives in light mode against a dark app.
+
+	  This is the iOS counterpart of replacing Android's Theme.Material.Light platform theme.
+	-->
+	<key>UIUserInterfaceStyle</key>
+	<string>Dark</string>
+	<!--
 	  MANDATORY on iOS, unlike Android. Without NSCameraUsageDescription the OS *terminates*
 	  the app the moment a capture is attempted, rather than merely denying it.
 

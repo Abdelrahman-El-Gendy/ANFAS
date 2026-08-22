@@ -4,9 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
  * "your query found nothing" (`search-no-results`), where there is nothing to create.
  */
 @Composable
-@OptIn(ExperimentalLayoutApi::class)
 fun AnfasEmptyState(
     icon: ImageVector,
     title: String,
@@ -87,20 +86,61 @@ fun AnfasEmptyState(
             modifier = Modifier.padding(top = 8.dp).widthIn(max = 420.dp),
         )
         if (primaryAction != null || secondaryAction != null) {
-            // FlowRow, not Row: side by side these two buttons competed for a phone's width and
-            // the loser wrapped its label onto a second line at a different height from its
-            // neighbour. Flowing lets them stack on a narrow screen and stay inline on a wide
-            // one, which is what the export shows at each form factor.
-            FlowRow(
-                modifier = Modifier.padding(top = 32.dp).widthIn(max = 420.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+            // Side by side these two buttons competed for a phone's width and the loser wrapped
+            // its label onto a second line at a different height from its neighbour. A plain
+            // FlowRow fixed the wrapping but left two stacked buttons of *different* widths,
+            // which reads as a mistake rather than a choice — so the decision is explicit:
+            // inline when they fit, full-width and stacked when they don't.
+            BoxWithConstraints(
+                modifier = Modifier.padding(top = 32.dp).widthIn(max = ACTIONS_MAX_WIDTH),
             ) {
-                secondaryAction?.let {
-                    AnfasSecondaryButton(text = it.label, onClick = it.onClick, icon = it.icon)
-                }
-                primaryAction?.let {
-                    AnfasPrimaryButton(text = it.label, onClick = it.onClick, icon = it.icon)
+                val stacked = maxWidth < ACTIONS_INLINE_MIN_WIDTH
+                if (stacked) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        // Primary first when stacked: the top button is the one a thumb reaches
+                        // and the one the empty state is inviting.
+                        primaryAction?.let {
+                            AnfasPrimaryButton(
+                                text = it.label,
+                                onClick = it.onClick,
+                                icon = it.icon,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                        secondaryAction?.let {
+                            AnfasSecondaryButton(
+                                text = it.label,
+                                onClick = it.onClick,
+                                icon = it.icon,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(
+                            16.dp,
+                            Alignment.CenterHorizontally,
+                        ),
+                    ) {
+                        secondaryAction?.let {
+                            AnfasSecondaryButton(
+                                text = it.label,
+                                onClick = it.onClick,
+                                icon = it.icon,
+                            )
+                        }
+                        primaryAction?.let {
+                            AnfasPrimaryButton(
+                                text = it.label,
+                                onClick = it.onClick,
+                                icon = it.icon,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -114,3 +154,12 @@ data class EmptyStateAction(
     val onClick: () -> Unit,
     val icon: ImageVector? = null,
 )
+
+/**
+ * Below this the two action buttons cannot sit side by side without one of them wrapping its
+ * label. Measured against the widest real pairing — "Add member" with its icon next to
+ * "Scan sheet" — which needs about 340dp plus the empty state's own 32dp padding either side.
+ */
+private val ACTIONS_INLINE_MIN_WIDTH = 404.dp
+
+private val ACTIONS_MAX_WIDTH = 420.dp
