@@ -305,3 +305,22 @@
   reverts to 1 and silently overrides `user_rotation`. Confirm via the screenshot's dimensions.
 - iOS bundle ids are registered once and never change. Settle them before the first upload; the
   KMP wizard's `com.anfas.app.ANFAS$(TEAM_ID)` pattern resolves to something malformed.
+
+## Key Learnings — 2026-08-23 (dashboards, RBAC)
+
+- **A dashboard is where a fake number does the most damage** — it will be believed and acted on.
+  Only ship tiles derived from stored data, and say in the KDoc what was left out. `staff-dashboard`
+  was declined entirely for this reason.
+- **One failing seam should fail the whole dashboard.** Omitting a tile makes the missing number
+  read as zero, and zero on a "needs chasing" tile means the opposite of the truth.
+- **Domain judgements like "expiring soon" belong in `:core:model`**, shared by every screen that
+  renders them. Two definitions is how a dashboard disagrees with the member it links to.
+- **Two permissions on one screen defeat a route guard.** Scan/Import and View/Retry both live on a
+  single route, so they must be gated in the component — and enforced there, not just hidden,
+  because a component method is callable from anywhere.
+- **Room: never alias a subquery `inner`.** The query verifier reads it as `INNER JOIN`.
+- `adb shell input text` is unreliable against Compose `BasicTextField`, especially in dialogs —
+  the IME commits autocorrect suggestions. Verify multi-field flows by test; use the device for
+  layout, navigation and RTL.
+- My own repeated mistake: heredoc Python with `\\"` inside a JSON string literal fails to parse.
+  Use plain quotes in buglog text.

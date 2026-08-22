@@ -976,5 +976,39 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-22T21:00:00Z"
+  },
+  {
+    "id": "bug-057",
+    "timestamp": "2026-08-23T00:10:00Z",
+    "error_message": "Retry on the reminder queue was not gated on Permission.RETRY_REMINDERS - the tab was, the action was not",
+    "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueComponent.kt",
+    "root_cause": "RBAC enforcement covered routes and the nav bar, but viewing the queue (VIEW_REMINDERS) and re-sending from it (RETRY_REMINDERS) are separate permissions living on the same screen. The route guard cannot distinguish them, so a coach could have re-sent WhatsApp messages on the gym's account.",
+    "fix": "The session is folded into state as mayRetry; supportsSelection requires it so bulk selection is withheld too, and retry() returns early when it is false - a permission that exists only as a hidden button is not a boundary, because a component method is callable from anywhere. Test asserts the repository is never reached.",
+    "tags": [
+      "rbac",
+      "reminders",
+      "permissions",
+      "same-screen-boundary"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-23T00:10:00Z"
+  },
+  {
+    "id": "bug-058",
+    "timestamp": "2026-08-23T00:10:00Z",
+    "error_message": "KSP: missing 'JOIN' at 'WHERE'; SQLITE_ERROR near WHERE: syntax error",
+    "file": "core/database/src/commonMain/kotlin/com/anfas/core/database/SubscriptionEntity.kt",
+    "root_cause": "A correlated subquery used `inner` as its table alias. INNER is a SQL keyword, so Room's query verifier parsed it as the beginning of an INNER JOIN.",
+    "fix": "Renamed the alias to `latest`, with a note in the KDoc so the next person does not repeat it.",
+    "tags": [
+      "room",
+      "sql",
+      "ksp",
+      "reserved-words"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-23T00:10:00Z"
   }
 ]
