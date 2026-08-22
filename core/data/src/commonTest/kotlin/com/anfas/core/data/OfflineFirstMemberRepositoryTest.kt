@@ -3,6 +3,7 @@ package com.anfas.core.data
 import app.cash.turbine.test
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
+import com.anfas.core.model.Member
 import com.anfas.core.model.MemberId
 import com.anfas.core.model.MembershipStatus
 import kotlinx.coroutines.test.runTest
@@ -63,7 +64,7 @@ class OfflineFirstMemberRepositoryTest {
     fun `a storage failure becomes AppError Storage not an exception`() = runTest {
         val dao = FakeMemberDao(listOf(memberEntity("1", "Ali Hassan")))
         dao.failure = IllegalStateException("database is locked")
-        val repo = OfflineFirstMemberRepository(dao)
+        val repo = repository(dao)
 
         repo.observeMembers().test {
             val failure = assertIs<AppResult.Failure>(awaitItem())
@@ -77,7 +78,7 @@ class OfflineFirstMemberRepositoryTest {
     @Test
     fun `round trip preserves the check-in instant and nullability`() = runTest {
         val dao = FakeMemberDao()
-        val repo = OfflineFirstMemberRepository(dao)
+        val repo = repository(dao)
         val checkedIn = Instant.fromEpochMilliseconds(1_700_000_000_000)
 
         val stored = listOf(
@@ -102,7 +103,7 @@ class OfflineFirstMemberRepositoryTest {
     fun `delete removes only the requested member`() = runTest {
         val dao =
             FakeMemberDao(listOf(memberEntity("1", "Ali Hassan"), memberEntity("2", "Zara Ahmed")))
-        val repo = OfflineFirstMemberRepository(dao)
+        val repo = repository(dao)
 
         assertIs<AppResult.Success<Unit>>(repo.delete(MemberId("1")))
 
@@ -115,8 +116,55 @@ class OfflineFirstMemberRepositoryTest {
         }
     }
 
+    @Test
+    fun `creating a member allocates the next number and stores them active`() = runTest {
+        val dao = FakeMemberDao(listOf(memberEntity("1", "Ali Hassan")))
+        val repo = repository(dao)
+
+        val created = repo.create(fullName = "  Mona Khalil  ", phone = " 01001234567 ")
+
+        val member = assertIs<AppResult.Success<Member>>(created).value
+        // Trimmed on the way in, so a stray space cannot make two members look different.
+        assertEquals("Mona Khalil", member.fullName)
+        assertEquals("01001234567", member.phone)
+        assertEquals(MembershipStatus.ACTIVE, member.status)
+        // The existing fixture member is "#1", below MembershipNumbers.FIRST, so the sequence
+        // starts rather than continuing from it — see MembershipNumbersTest.
+        assertEquals("#10000", member.membershipNumber)
+        assertEquals(2, dao.current.size)
+    }
+
+    /**
+     * A walk-in can be registered without a phone. Storing "" instead of null would be a
+     * distinct value that duplicate detection then has to special-case.
+     */
+    @Test
+    fun `a blank phone becomes null`() = runTest {
+        val repo = repository(FakeMemberDao(emptyList()))
+
+        val member = assertIs<AppResult.Success<Member>>(repo.create("Walk In", "   ")).value
+
+        assertEquals(null, member.phone)
+        assertEquals("#10000", member.membershipNumber, "the first member starts the sequence")
+    }
+
+    /** Two members created in a row must not share a number or an id. */
+    @Test
+    fun `consecutive members get distinct numbers and ids`() = runTest {
+        val dao = FakeMemberDao(emptyList())
+        val repo = repository(dao)
+
+        repo.create("First Member", null)
+        repo.create("Second Member", null)
+
+        val stored = dao.current
+        assertEquals(2, stored.size)
+        assertEquals(2, stored.map { it.membershipNumber }.distinct().size)
+        assertEquals(2, stored.map { it.id }.distinct().size)
+    }
+
     private fun repository(vararg rows: com.anfas.core.database.MemberEntity) =
-        OfflineFirstMemberRepository(FakeMemberDao(rows.toList()))
+        repository(FakeMemberDao(rows.toList()))
 
     private fun member(id: String, name: String, lastCheckInAt: Instant?) =
         com.anfas.core.model.Member(
@@ -128,4 +176,13 @@ class OfflineFirstMemberRepositoryTest {
             lastCheckInAt = lastCheckInAt,
             avatarUrl = null,
         )
+
+    /**
+     * A counter, not a constant. A constant id made Room's upsert collapse every created member
+     * into one row, which read as a product bug for a while — see MembershipNumbersTest.
+     */
+    private fun repository(dao: FakeMemberDao): MemberRepository {
+        var next = 0
+        return OfflineFirstMemberRepository(dao = dao, newId = { "m-${next++}" })
+    }
 }

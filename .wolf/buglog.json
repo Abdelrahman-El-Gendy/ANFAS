@@ -890,5 +890,91 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-22T18:20:00Z"
+  },
+  {
+    "id": "bug-052",
+    "timestamp": "2026-08-22T21:00:00Z",
+    "error_message": "The ADD MEMBER button did nothing",
+    "file": "feature/members/src/commonMain/kotlin/com/anfas/feature/members/MembersListComponent.kt",
+    "root_cause": "onAddMemberClicked was wired to an empty lambda in RootComponent because no add form existed. Both the header button and the empty state's action were dead.",
+    "fix": "Added a two-field form as component state (so a rotation does not lose a half-typed name) plus MemberRepository.create, which allocates the membership number rather than letting a form invent one. Gated on Permission.EDIT_MEMBERS and hidden rather than disabled for a role that cannot register anybody.",
+    "tags": [
+      "members",
+      "forms",
+      "dead-affordance",
+      "rbac"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T21:00:00Z"
+  },
+  {
+    "id": "bug-053",
+    "timestamp": "2026-08-22T21:00:00Z",
+    "error_message": "Start, End and Plan appeared to be missing from the intake review table on a phone, and their inline editors were unreachable",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+    "root_cause": "A six-column weighted table needs 640dp, so AnfasTableMinWidth made those three columns reachable only by scrolling sideways on a ~366dp phone. The AnfasInlineEditField editors had been wired for every cell all along; they were simply off-screen with the columns.",
+    "fix": "Narrow screens now render one card per scanned row, every field labelled and editable in place, with Start and End side by side because a wrong end date is only obvious next to its start. The table is kept above AnfasTableMinWidth.",
+    "tags": [
+      "intake",
+      "responsive",
+      "compose",
+      "editing"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T21:00:00Z"
+  },
+  {
+    "id": "bug-054",
+    "timestamp": "2026-08-22T21:00:00Z",
+    "error_message": "The validation message in an inline edit field was drawn on top of the value it was complaining about \u2014 'Duplicate' over '01001234567'",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasInlineEdit.kt",
+    "root_cause": "The value and the error were both children of a Box, which stacks its children. The component's own KDoc said the message goes 'underneath', so this was wrong from the start; the table's narrow cells made the overlap read as clutter rather than as a bug.",
+    "fix": "Changed the Box to a Column. Found immediately once the intake row cards gave the field full width.",
+    "tags": [
+      "compose",
+      "layout",
+      "designsystem",
+      "box-vs-column"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T21:00:00Z"
+  },
+  {
+    "id": "bug-055",
+    "timestamp": "2026-08-22T21:00:00Z",
+    "error_message": "Membership numbers were allocated by a rule private to the intake repository, so a member added by hand could collide with an imported one",
+    "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/MembershipNumbers.kt",
+    "root_cause": "nextMembershipNumber() and formatNumber() lived inside OfflineFirstIntakeRepository. The manual add form needed the same rule, and duplicating it would have meant two policies against one unique index.",
+    "fix": "Extracted MembershipNumbers into :core:model, pure and tested, with a nextRun() that allocates a whole import in one pass. Also fixed a real edge case found while testing: a stray number below FIRST (legacy or hand-typed) used to drag the sequence down, so one member at '#1' meant the next was '#2' rather than '#10000'.",
+    "tags": [
+      "members",
+      "intake",
+      "numbering",
+      "core-model",
+      "duplication"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T21:00:00Z"
+  },
+  {
+    "id": "bug-056",
+    "timestamp": "2026-08-22T21:00:00Z",
+    "error_message": "Adding the members notice made the search field and the ADD MEMBER button disappear",
+    "file": "feature/members/src/commonMain/kotlin/com/anfas/feature/members/MembersListScreen.kt",
+    "root_cause": "The notice was inserted inside the search Row rather than after it, and its fillMaxWidth/weight starved both siblings to zero width. Third occurrence of this exact defect: the AnfasTabs indicator and the intake footer label were the first two.",
+    "fix": "Moved it out of the Row, with a comment naming the pattern.",
+    "tags": [
+      "compose",
+      "layout",
+      "fillmaxwidth",
+      "regression-class"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T21:00:00Z"
   }
 ]

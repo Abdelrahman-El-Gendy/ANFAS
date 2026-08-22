@@ -1,6 +1,7 @@
 package com.anfas.feature.members
 
 import com.anfas.core.common.AppDispatchers
+import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.model.MemberId
 import com.arkivanov.decompose.ComponentContext
@@ -15,6 +16,7 @@ import com.arkivanov.decompose.ComponentContext
  */
 class MembersListComponentFactory internal constructor(
     private val repository: MemberRepository,
+    private val auth: AuthRepository,
     private val dispatchers: AppDispatchers,
 ) {
     fun create(
@@ -25,6 +27,7 @@ class MembersListComponentFactory internal constructor(
     ): MembersListComponent = MembersListComponent(
         componentContext = componentContext,
         repository = repository,
+        auth = auth,
         dispatchers = dispatchers,
         onMemberClicked = onMemberClicked,
         onAddMemberClicked = onAddMemberClicked,

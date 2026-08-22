@@ -23,25 +23,32 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anfas.core.designsystem.AnfasCard
+import com.anfas.core.designsystem.AnfasDialog
 import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIconButton
 import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasPrimaryButton
 import com.anfas.core.designsystem.AnfasScreenHeader
 import com.anfas.core.designsystem.AnfasSearchField
+import com.anfas.core.designsystem.AnfasSecondaryButton
 import com.anfas.core.designsystem.AnfasStatusChip
 import com.anfas.core.designsystem.AnfasTableFooter
 import com.anfas.core.designsystem.AnfasTableHeaderCell
 import com.anfas.core.designsystem.AnfasTableHeaderRow
 import com.anfas.core.designsystem.AnfasTableRow
 import com.anfas.core.designsystem.AnfasTableScroll
+import com.anfas.core.designsystem.AnfasTextAction
+import com.anfas.core.designsystem.AnfasTextField
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.EmptyStateAction
 import com.anfas.core.designsystem.Tone
+import com.anfas.core.i18n.AppStrings
 import com.anfas.core.i18n.strings
 import com.anfas.core.model.Member
 import com.anfas.core.model.MembershipStatus
@@ -86,12 +93,21 @@ fun MembersListScreen(component: MembersListComponent, modifier: Modifier = Modi
                 clearContentDescription = s.common.clearSearch,
                 modifier = Modifier.weight(1f),
             )
-            AnfasPrimaryButton(
-                text = s.members.addMember,
-                icon = AnfasIcons.PersonAdd,
-                onClick = component::onAddMember,
-            )
+            // Hidden rather than disabled for a role that cannot register anybody — a coach can
+            // look a member up, and a greyed button only advertises what they may not do.
+            if (state.mayEditMembers) {
+                AnfasPrimaryButton(
+                    text = s.members.addMember,
+                    icon = AnfasIcons.PersonAdd,
+                    onClick = component::onAddMember,
+                )
+            }
         }
+
+        // Outside the search Row, deliberately. Placed inside it, this notice's fillMaxWidth
+        // starved the search field and the button to nothing — the same defect as the tab
+        // indicator and the intake footer.
+        NoticeSlot(state = state, onDismiss = component::onNoticeShown)
 
         when (val content = state.content) {
             MembersListContent.Loading -> Box(Modifier.fillMaxSize())
@@ -136,6 +152,10 @@ fun MembersListScreen(component: MembersListComponent, modifier: Modifier = Modi
                 onMemberClicked = component::onMemberSelected,
             )
         }
+    }
+
+    state.addForm?.let { form ->
+        AddMemberDialog(form = form, component = component, s = s)
     }
 }
 
@@ -240,3 +260,89 @@ private const val COLUMN_WEIGHT_MEMBER = 3f
 private const val COLUMN_WEIGHT_STATUS = 1.3f
 private const val COLUMN_WEIGHT_CHECK_IN = 1.6f
 private val ActionsColumnWidth = 40.dp
+
+/**
+ * Confirms what happened after the form closes. Sits above the table rather than over it,
+ * because the point is to see the new member appear in the list at the same time.
+ */
+@Composable
+private fun NoticeSlot(state: MembersListState, onDismiss: () -> Unit) {
+    val notice = state.notice ?: return
+    val s = strings
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = when (notice) {
+                is MembersNotice.Added -> s.members.added(notice.name, notice.membershipNumber)
+                is MembersNotice.Failed -> notice.message
+            },
+            style = AnfasTheme.textStyles.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        AnfasTextAction(text = s.common.dismiss, onClick = onDismiss)
+    }
+}
+
+/**
+ * The manual add form. Two fields, because a member at the desk has a name and maybe a phone —
+ * the membership number is allocated, and their subscription is a separate act via Renew.
+ */
+@Composable
+private fun AddMemberDialog(form: AddMemberForm, component: MembersListComponent, s: AppStrings) {
+    AnfasDialog(
+        title = s.members.addTitle,
+        onDismissRequest = component::onAddFormDismissed,
+        closeContentDescription = s.common.close,
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(
+                text = s.members.addMessage,
+                style = AnfasTheme.textStyles.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            AnfasTextField(
+                value = form.fullName,
+                onValueChange = component::onAddNameChanged,
+                label = s.members.addFullName,
+                enabled = !form.isSubmitting,
+                errorMessage = s.members.addNameRequired.takeIf { form.nameError },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            AnfasTextField(
+                value = form.phone,
+                onValueChange = component::onAddPhoneChanged,
+                label = s.members.addPhone,
+                enabled = !form.isSubmitting,
+                // Phone keypad, and an LTR field: an Egyptian number is Latin digits and a
+                // leading "+" that must not migrate to the far end in an Arabic layout.
+                keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Done,
+                onImeAction = component::onAddSubmit,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(
+                text = s.members.addPhoneOptional,
+                style = AnfasTheme.textStyles.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
+            ) {
+                AnfasSecondaryButton(
+                    text = s.common.cancel,
+                    onClick = component::onAddFormDismissed,
+                )
+                AnfasPrimaryButton(
+                    text = if (form.isSubmitting) s.members.addSaving else s.members.addConfirm,
+                    onClick = component::onAddSubmit,
+                    enabled = form.canSubmit,
+                )
+            }
+        }
+    }
+}

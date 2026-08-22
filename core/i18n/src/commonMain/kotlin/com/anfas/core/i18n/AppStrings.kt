@@ -102,6 +102,17 @@ interface AppStrings {
 
         /** "93%" — Latin digits, like every other number staff cross-reference. */
         fun profilePercent(percent: Int): String
+
+        /** Manual add. The membership number is allocated, never typed. */
+        val addTitle: String
+        val addMessage: String
+        val addFullName: String
+        val addPhone: String
+        val addPhoneOptional: String
+        val addConfirm: String
+        val addSaving: String
+        fun added(name: String, number: String): String
+        val addNameRequired: String
     }
 
     interface Reminders {

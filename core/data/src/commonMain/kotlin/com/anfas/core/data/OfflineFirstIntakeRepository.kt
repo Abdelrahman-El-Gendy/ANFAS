@@ -11,6 +11,7 @@ import com.anfas.core.model.IntakeRowId
 import com.anfas.core.model.IntakeValidator
 import com.anfas.core.model.Member
 import com.anfas.core.model.MemberId
+import com.anfas.core.model.MembershipNumbers
 import com.anfas.core.model.MembershipStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -90,9 +91,13 @@ internal class OfflineFirstIntakeRepository(
 
             val importable = batch.importableRows
             if (importable.isNotEmpty()) {
-                var nextNumber = nextMembershipNumber()
-                val members = importable.map { row ->
-                    row.toMember(id = newId(), membershipNumber = formatNumber(nextNumber++))
+                // The whole run is allocated in one pass, so two rows cannot be handed the same
+                // number -- which happened once, and Room's upsert silently collapsed eight
+                // members into one. Shared with the manual add form: see MembershipNumbers.
+                val issued = memberDao.observeAll().first().map { it.membershipNumber }
+                val numbers = MembershipNumbers.nextRun(issued, count = importable.size)
+                val members = importable.mapIndexed { index, row ->
+                    row.toMember(id = newId(), membershipNumber = numbers[index])
                 }
                 memberDao.upsertAll(members.map { it.toEntity() })
             }
@@ -106,22 +111,6 @@ internal class OfflineFirstIntakeRepository(
             intakeDao.setStatus(id.value, IntakeBatchStatus.DISCARDED.name)
         }
 
-    /**
-     * Next free membership number, one past the highest currently issued.
-     *
-     * This is a placeholder for a real numbering policy — the export shows numbers around
-     * 88xxx with no stated scheme, and prefixes, check digits or per-branch ranges are a
-     * business decision, not something to invent here.
-     */
-    private suspend fun nextMembershipNumber(): Int {
-        val highest = memberDao.observeAll().first()
-            .mapNotNull { it.membershipNumber.filter(Char::isDigit).toIntOrNull() }
-            .maxOrNull()
-        return (highest ?: FIRST_MEMBERSHIP_NUMBER - 1) + 1
-    }
-
-    private fun formatNumber(value: Int) = "#$value"
-
     private fun IntakeRow.toMember(id: String, membershipNumber: String) = Member(
         id = MemberId(id),
         fullName = name.value.trim(),
@@ -134,10 +123,6 @@ internal class OfflineFirstIntakeRepository(
         lastCheckInAt = null,
         avatarUrl = null,
     )
-
-    private companion object {
-        const val FIRST_MEMBERSHIP_NUMBER = 10_000
-    }
 }
 
 private fun IntakeRow.editField(field: IntakeFieldKey, value: String): IntakeRow = when (field) {

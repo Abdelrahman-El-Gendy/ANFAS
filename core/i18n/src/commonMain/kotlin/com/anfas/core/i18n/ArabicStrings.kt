@@ -119,6 +119,17 @@ object ArabicStrings : AppStrings {
         override val profileExpired = "منتهية"
         override fun profileStartsOn(date: String) = "تبدأ $date"
         override fun profilePercent(percent: Int) = "$percent%"
+        override val addTitle = "إضافة عضو"
+        override val addMessage =
+            "يُخصَّص رقم العضوية تلقائيًا. يمكنك بيع خطة له بعد ذلك من زر التجديد."
+        override val addFullName = "الاسم الكامل"
+        override val addPhone = "رقم الهاتف"
+        override val addPhoneOptional = "اختياري — مطلوب لتذكيرات واتساب."
+        override val addConfirm = "إضافة عضو"
+        override val addSaving = "جارٍ الإضافة…"
+        override fun added(name: String, number: String) =
+            "تمت إضافة $name برقم ${number.asLtrIsolate()}."
+        override val addNameRequired = "أدخل اسمًا."
     }
 
     override val reminders = object : AppStrings.Reminders {

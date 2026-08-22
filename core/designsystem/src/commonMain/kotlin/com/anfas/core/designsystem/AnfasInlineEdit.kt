@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -68,7 +69,11 @@ fun AnfasInlineEditField(
             // Zero-width content; the Box only needs its background.
             Text(text = "", style = effectiveStyle)
         }
-        Box(modifier = Modifier.padding(start = 8.dp)) {
+        // Column, not Box. A Box *stacks* its children, so the error message was drawn on top
+        // of the value it was complaining about -- "Duplicate" over "01001234567". The KDoc has
+        // always said "underneath"; the table's narrow cells just made the overlap read as
+        // clutter rather than as a bug, and the row cards made it obvious.
+        Column(modifier = Modifier.padding(start = 8.dp)) {
             Box(
                 modifier = Modifier
                     .then(

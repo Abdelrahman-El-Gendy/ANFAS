@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -55,6 +56,7 @@ import com.anfas.core.designsystem.AnfasTableDivider
 import com.anfas.core.designsystem.AnfasTableFooter
 import com.anfas.core.designsystem.AnfasTableHeaderCell
 import com.anfas.core.designsystem.AnfasTableHeaderRow
+import com.anfas.core.designsystem.AnfasTableMinWidth
 import com.anfas.core.designsystem.AnfasTableRow
 import com.anfas.core.designsystem.AnfasTableScroll
 import com.anfas.core.designsystem.AnfasTextAction
@@ -352,8 +354,19 @@ private fun ValidationPane(
             // headings stay above their own columns. The footer is deliberately outside it —
             // it carries Discard and Import, and an action you have to go looking for
             // sideways is an action nobody finds.
-            AnfasTableScroll(modifier = Modifier.weight(1f), fillHeight = true) {
-                TableContent(batch, component, s)
+            // A six-column table needs 640dp. Below that AnfasTableScroll made Start, End and
+            // Plan reachable only by scrolling sideways, so on a phone they read as missing —
+            // and their inline editors, which have always been there, were unreachable with
+            // them. Narrow screens get one card per row instead, with every field labelled and
+            // editable in place.
+            BoxWithConstraints(modifier = Modifier.weight(1f)) {
+                if (maxWidth < AnfasTableMinWidth) {
+                    RowCardList(batch, component, s, Modifier.fillMaxSize())
+                } else {
+                    AnfasTableScroll(modifier = Modifier.fillMaxSize(), fillHeight = true) {
+                        TableContent(batch, component, s)
+                    }
+                }
             }
             TableFooter(state, component, scheme, s)
         }
@@ -383,6 +396,103 @@ private fun ColumnScope.TableContent(
             )
         }
     }
+}
+
+/**
+ * One card per scanned row, for a phone.
+ *
+ * Every field is labelled and inline-editable, which is the point: this screen exists so a human
+ * can correct what OCR misread, and a cell nobody can see is a cell nobody can fix.
+ */
+@Composable
+private fun RowCardList(
+    batch: IntakeBatch,
+    component: IntakeReviewComponent,
+    s: AppStrings,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        items(items = batch.rows, key = { it.id.value }) { row ->
+            IntakeRowCard(
+                row = row,
+                onEdit = { field, value -> component.onFieldEdited(row.id, field, value) },
+                s = s,
+            )
+        }
+    }
+}
+
+@Composable
+private fun IntakeRowCard(
+    row: IntakeRow,
+    onEdit: (IntakeFieldKey, String) -> Unit,
+    s: AppStrings,
+) {
+    val scheme = MaterialTheme.colorScheme
+    AnfasCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                // The printed row number, so staff can find this line on the paper in their hand.
+                text = s.intake.columnOrdinal + " " + row.ordinal.toString(),
+                style = AnfasTheme.textStyles.labelCaps,
+                color = scheme.onSurfaceVariant,
+            )
+            CardField(s.intake.columnName, row, IntakeFieldKey.NAME, onEdit, s)
+            CardField(s.intake.columnPhone, row, IntakeFieldKey.PHONE, onEdit, s)
+            // Start and End together on one line: they are read as a pair, and a wrong end date
+            // is usually only obvious next to its start.
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(Modifier.weight(1f)) {
+                    CardField(s.intake.columnStart, row, IntakeFieldKey.START_DATE, onEdit, s)
+                }
+                Box(Modifier.weight(1f)) {
+                    CardField(s.intake.columnEnd, row, IntakeFieldKey.END_DATE, onEdit, s)
+                }
+            }
+            CardField(s.intake.columnPlan, row, IntakeFieldKey.PLAN, onEdit, s)
+        }
+    }
+}
+
+@Composable
+private fun CardField(
+    label: String,
+    row: IntakeRow,
+    key: IntakeFieldKey,
+    onEdit: (IntakeFieldKey, String) -> Unit,
+    s: AppStrings,
+) {
+    val field = row.fieldFor(key)
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = label,
+            style = AnfasTheme.textStyles.labelCaps,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        AnfasInlineEditField(
+            value = field.value,
+            onValueChange = { onEdit(key, it) },
+            needsReview = field.needsReview,
+            error = row.errorFor(key)?.label(s),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/** Maps a key back to its cell, so the card can be built from a list rather than by hand. */
+private fun IntakeRow.fieldFor(key: IntakeFieldKey) = when (key) {
+    IntakeFieldKey.NAME -> name
+    IntakeFieldKey.PHONE -> phone
+    IntakeFieldKey.START_DATE -> startDate
+    IntakeFieldKey.END_DATE -> endDate
+    IntakeFieldKey.PLAN -> plan
 }
 
 @OptIn(ExperimentalLayoutApi::class)

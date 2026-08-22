@@ -31,7 +31,9 @@ val dataModule: Module = module {
     single { get<AnfasDatabase>().intakeDao() }
     single { get<AnfasDatabase>().staffDao() }
 
-    single<MemberRepository> { OfflineFirstMemberRepository(dao = get()) }
+    single<MemberRepository> {
+        OfflineFirstMemberRepository(dao = get(), newId = { Uuid.random().toString() })
+    }
     single<ReminderRepository> { OfflineFirstReminderRepository(dao = get()) }
     single<SubscriptionRepository> { OfflineFirstSubscriptionRepository(dao = get()) }
     single<SessionStore> { SettingsSessionStore(settings = get()) }

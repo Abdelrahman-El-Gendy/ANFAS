@@ -85,6 +85,17 @@ object EnglishStrings : AppStrings {
         override val profileExpired = "Expired"
         override fun profileStartsOn(date: String) = "Starts $date"
         override fun profilePercent(percent: Int) = "$percent%"
+        override val addTitle = "Add member"
+        override val addMessage =
+            "Their membership number is assigned automatically. Sell them a plan afterwards " +
+                "with Renew."
+        override val addFullName = "Full name"
+        override val addPhone = "Phone number"
+        override val addPhoneOptional = "Optional — needed for WhatsApp reminders."
+        override val addConfirm = "Add member"
+        override val addSaving = "Adding…"
+        override fun added(name: String, number: String) = "$name added as $number."
+        override val addNameRequired = "Enter a name."
     }
 
     override val reminders = object : AppStrings.Reminders {

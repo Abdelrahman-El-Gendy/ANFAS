@@ -1,6 +1,7 @@
 package com.anfas.feature.subscriptions
 
 import com.anfas.core.common.AppDispatchers
+import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.data.ReminderCounts
@@ -134,6 +135,11 @@ internal class FakeMemberRepository(private val member: Member?) : MemberReposit
 
     override fun observeMember(id: MemberId): Flow<AppResult<Member?>> =
         MutableStateFlow(AppResult.Success(member))
+
+    // Nothing in the subscriptions feature registers a member; the members feature's own test
+    // exercises this properly.
+    override suspend fun create(fullName: String, phone: String?): AppResult<Member> =
+        AppResult.Failure(AppError.Unexpected("not used by these tests"))
 
     override suspend fun upsert(members: List<Member>): AppResult<Unit> = AppResult.Success(Unit)
     override suspend fun delete(id: MemberId): AppResult<Unit> = AppResult.Success(Unit)

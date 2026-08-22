@@ -1,8 +1,11 @@
 package com.anfas.feature.members
 
+import com.anfas.core.auth.Permission
+import com.anfas.core.auth.can
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
 import com.anfas.core.common.appExceptionHandler
+import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.model.MemberId
 import com.arkivanov.decompose.ComponentContext
@@ -20,6 +23,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * The members directory.
@@ -35,6 +39,7 @@ import kotlinx.coroutines.flow.update
 class MembersListComponent(
     componentContext: ComponentContext,
     private val repository: MemberRepository,
+    private val auth: AuthRepository,
     dispatchers: AppDispatchers,
     private val onMemberClicked: (MemberId) -> Unit,
     private val onAddMemberClicked: () -> Unit,
@@ -45,15 +50,24 @@ class MembersListComponent(
         coroutineScope(dispatchers.main + SupervisorJob() + appExceptionHandler("MembersList"))
 
     private val query = MutableStateFlow("")
+    private val local = MutableStateFlow(LocalState())
 
     val state: StateFlow<MembersListState> =
         combine(
             query,
+            local,
+            auth.observeSession(),
             query.debounce { if (it.isEmpty()) 0L else SEARCH_DEBOUNCE_MS }
                 .distinctUntilChanged()
                 .flatMapLatest { term -> repository.observeMembers(term).map { term to it } },
-        ) { typed, (searchedTerm, result) ->
-            MembersListState(query = typed, content = result.toContent(searchedTerm))
+        ) { typed, ui, session, (searchedTerm, result) ->
+            MembersListState(
+                addForm = ui.addForm,
+                notice = ui.notice,
+                mayEditMembers = session?.can(Permission.EDIT_MEMBERS) == true,
+                query = typed,
+                content = result.toContent(searchedTerm),
+            )
         }.stateIn(
             scope = scope,
             started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
@@ -66,9 +80,70 @@ class MembersListComponent(
 
     fun onMemberSelected(id: MemberId) = onMemberClicked(id)
 
-    fun onAddMember() = onAddMemberClicked()
+    /**
+     * Opens the form rather than calling out to the router.
+     *
+     * Adding a member is a two-field dialog, not a destination: a pushed screen would need its
+     * own route, its own permission entry and a back stack, and it would leave the directory —
+     * which is where staff want to see the member appear.
+     */
+    fun onAddMember() {
+        local.update { it.copy(addForm = AddMemberForm(), notice = null) }
+        onAddMemberClicked()
+    }
+
+    fun onAddFormDismissed() = local.update { it.copy(addForm = null) }
+
+    fun onAddNameChanged(value: String) = local.update { current ->
+        val form = current.addForm ?: return@update current
+        current.copy(addForm = form.copy(fullName = value, nameError = false))
+    }
+
+    fun onAddPhoneChanged(value: String) = local.update { current ->
+        val form = current.addForm ?: return@update current
+        current.copy(addForm = form.copy(phone = value))
+    }
+
+    fun onNoticeShown() = local.update { it.copy(notice = null) }
+
+    fun onAddSubmit() {
+        val form = local.value.addForm ?: return
+        if (!form.canSubmit) {
+            local.update { it.copy(addForm = form.copy(nameError = form.fullName.isBlank())) }
+            return
+        }
+        local.update { it.copy(addForm = form.copy(isSubmitting = true)) }
+
+        scope.launch {
+            when (val result = repository.create(form.fullName, form.phone)) {
+                is AppResult.Failure -> local.update {
+                    it.copy(
+                        addForm = form.copy(isSubmitting = false),
+                        notice = MembersNotice.Failed(result.error.message),
+                    )
+                }
+
+                is AppResult.Success -> local.update {
+                    // The form closes and the directory re-reads itself, so the new member
+                    // appears where staff are already looking.
+                    it.copy(
+                        addForm = null,
+                        notice = MembersNotice.Added(
+                            name = result.value.fullName,
+                            membershipNumber = result.value.membershipNumber,
+                        ),
+                    )
+                }
+            }
+        }
+    }
 
     fun onScanSheet() = onScanSheetClicked()
+
+    private data class LocalState(
+        val addForm: AddMemberForm? = null,
+        val notice: MembersNotice? = null,
+    )
 
     private companion object {
         const val SEARCH_DEBOUNCE_MS = 250L

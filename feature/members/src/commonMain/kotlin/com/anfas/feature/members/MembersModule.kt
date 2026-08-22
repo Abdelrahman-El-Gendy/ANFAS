@@ -8,7 +8,9 @@ import org.koin.dsl.module
  * and own a coroutine scope tied to their lifecycle, so they must never be singletons.
  */
 val MembersModule: Module = module {
-    factory { MembersListComponentFactory(repository = get(), dispatchers = get()) }
+    factory {
+        MembersListComponentFactory(repository = get(), auth = get(), dispatchers = get())
+    }
     factory {
         MemberProfileComponentFactory(
             members = get(),

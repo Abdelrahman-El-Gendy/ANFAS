@@ -23,6 +23,18 @@ interface MemberRepository {
 
     fun observeMember(id: MemberId): Flow<AppResult<Member?>>
 
+    /**
+     * Registers one member by hand, allocating their membership number.
+     *
+     * Separate from [upsert] because it *allocates* rather than writes what it is given — the
+     * caller does not know the next free number, and letting a form invent one is how two members
+     * end up sharing an id. Returns the created member so the caller can navigate to it.
+     *
+     * A blank [phone] is stored as null, not "": a walk-in can be registered without one, and an
+     * empty string would be a distinct value that duplicate detection has to special-case.
+     */
+    suspend fun create(fullName: String, phone: String?): AppResult<Member>
+
     suspend fun upsert(members: List<Member>): AppResult<Unit>
 
     suspend fun delete(id: MemberId): AppResult<Unit>

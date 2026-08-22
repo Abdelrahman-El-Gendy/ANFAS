@@ -24,6 +24,37 @@ sealed interface MembersListContent {
  * gets replaced by [MembersListContent.Loading].
  */
 data class MembersListState(
+    /** Non-null while the add form is open. */
+    val addForm: AddMemberForm? = null,
+    val notice: MembersNotice? = null,
+    /** Whether this session holds `Permission.EDIT_MEMBERS`. */
+    val mayEditMembers: Boolean = false,
     val query: String = "",
     val content: MembersListContent = MembersListContent.Loading,
 )
+
+/**
+ * The manual add form, as state rather than a remembered composable value, so a rotation or a
+ * process death does not lose a half-typed name.
+ *
+ * [nameError] is a flag, not a message: the screen owns the wording, as everywhere else here.
+ */
+data class AddMemberForm(
+    val fullName: String = "",
+    val phone: String = "",
+    val isSubmitting: Boolean = false,
+    val nameError: Boolean = false,
+) {
+    /**
+     * A name is the only requirement. A walk-in can be registered without a phone, and demanding
+     * one at the desk is how staff end up typing 000.
+     */
+    val canSubmit: Boolean get() = !isSubmitting && fullName.isNotBlank()
+}
+
+/** Typed like every other notice here. */
+sealed interface MembersNotice {
+    data class Added(val name: String, val membershipNumber: String) : MembersNotice
+
+    data class Failed(val message: String) : MembersNotice
+}
