@@ -116,6 +116,33 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - compose material3 is pinned to an **alpha** (`1.11.0-alpha07`) — the newest in the 1.11 line.
 - KSP versioning is independent of Kotlin's. There is no `2.4.10-x.y.z`.
 
+## Release configuration
+
+- **Every navigation `Config` variant carries an explicit `@SerialName`.** Decompose serialises
+  the back stack into Essenty's `StateKeeper`, and the default discriminator is the class name,
+  which R8 is free to rename. Within one build writer and reader agree, so it tests clean; it
+  breaks when a build reads state saved by a build that obfuscated differently -- a crash on cold
+  resume after an app update, production only. `ConfigSerializationTest` locks the strings, and
+  they are **append-only**: an old value may be sitting in saved state on someone's phone.
+- **R8 is on for `release` and `stage`.** `stage` is minified *and* debuggable, which is the only
+  way to run instrumented tests against R8 output (`connectedAndroidTest` needs a debuggable APK
+  and `release` must never be one). `testBuildType = "stage"`.
+- **Verify R8 by installing and reading logcat, not by reasoning.** ML Kit registers components
+  through Firebase's `ComponentDiscovery`, which reflectively instantiates classes named in
+  manifest metadata; R8 stripped the constructors and OCR silently stopped working, as a
+  *warning*. The keep rule is in `androidApp/proguard-rules.pro` with the log line that found it.
+- **Signing material is never committed.** `keystore.properties` (Android) and
+  `Configuration/Local.xcconfig` (iOS `TEAM_ID`) are gitignored, with a committed `.template` for
+  the latter. Release falls back to debug signing when the keystore is absent so a fresh clone
+  still builds -- a convenience, never a shipping path. Confirm with
+  `apksigner verify --print-certs`.
+- **The bundle/package ids differ on purpose:** iOS and Android are `com.anfas.app`; desktop is
+  `com.anfas.app.desktop`, so an iPad build on the same Apple-silicon Mac cannot collide in
+  LaunchServices. `linux.packageName` must stay lowercase -- dpkg rejects uppercase.
+- **jpackage cannot cross-build**, so `targetFormats` is derived from `OperatingSystem.current()`.
+  Declaring Dmg+Msi+Deb together means every host fails on two of three.
+- The Room database is excluded from cloud backup and device transfer: the whole domain is PII.
+
 ## Commands
 
 ```

@@ -283,3 +283,25 @@
   until `:core:ocr` needed FileProvider, then failed `checkAarMetadata` against our AGP 9.0.1 ceiling.
 - Synthetic test images can over-fit the algorithm: the first generated sheet had columns 11px apart,
   which ML Kit fused. Give fixtures realistic ruled-column spacing.
+
+## Key Learnings — 2026-08-22 (Phase 4, release config)
+
+- **R8 failures are warnings, not crashes.** ML Kit's ComponentDiscovery logged
+  `NoSuchMethodException: ...TextRegistrar.<init>` at W level and OCR silently produced nothing.
+  Never conclude R8 is fine because the app launches — install the minified APK and exercise the
+  real feature path while watching logcat.
+- A `stage` build type (minified + debuggable + debug-signed + `testBuildType`) is the only way to
+  test R8 output; `connectedAndroidTest` needs a debuggable APK and `release` must not be one.
+- **Inside a `.kts`, `java` resolves to JavaPluginExtension** and shadows the package — import
+  `java.util.Properties`, never fully-qualify it. ktlint wants java imports last, and a comment
+  inside the import block makes it refuse to autocorrect at all.
+- Compose Multiplatform on iOS: insets belong to **Compose**, not SwiftUI. `.ignoresSafeArea()`
+  on the hosting view plus `safeContentPadding()` in Compose. Restricting it to `.keyboard` leaves
+  the window background showing as white bands.
+- `Modifier.weight` divides a **bounded** parent. A wrap-content root silently disables both the
+  weight and any `verticalScroll` inside it — content overflows and never scrolls. This only shows
+  up in landscape, where the content no longer happens to fit.
+- Emulator rotation: `settings put system accelerometer_rotation 0` first, and re-check it — it
+  reverts to 1 and silently overrides `user_rotation`. Confirm via the screenshot's dimensions.
+- iOS bundle ids are registered once and never change. Settle them before the first upload; the
+  KMP wizard's `com.anfas.app.ANFAS$(TEAM_ID)` pattern resolves to something malformed.
