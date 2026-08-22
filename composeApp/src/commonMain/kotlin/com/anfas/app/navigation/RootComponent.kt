@@ -17,6 +17,7 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -104,15 +105,35 @@ class RootComponent(componentContext: ComponentContext) :
     }
 
     /** Route definitions. One entry per destination. */
+
+    /**
+     * Every variant carries an explicit [SerialName], and that is a correctness requirement
+     * rather than tidiness.
+     *
+     * Decompose serialises the whole back stack into Essenty's StateKeeper on every state save,
+     * and a @Serializable sealed hierarchy writes a class discriminator that defaults to the
+     * fully-qualified class name. `decompose-android.aar` ships no ProGuard rules of its own, and
+     * kotlinx.serialization's rules deliberately allow these classes to be obfuscated — so R8 is
+     * free to rename them. Within one build the writer and the reader agree, which is why this
+     * tests perfectly clean. It breaks when state saved by one build is read by a build where R8
+     * chose different names: a crash on cold resume after an app update, in production only.
+     *
+     * A stable string decouples the persisted format from whatever R8 does to the class names.
+     * **Add a @SerialName to every new Config variant**, and never change an existing one — the
+     * old value may be sitting in a saved state on someone's phone.
+     */
     @Serializable
     sealed interface Config {
         @Serializable
+        @SerialName("members-list")
         data object MembersList : Config
 
         @Serializable
+        @SerialName("reminder-queue")
         data object ReminderQueue : Config
 
         @Serializable
+        @SerialName("intake-review")
         data object IntakeReview : Config
 
         /**
@@ -120,6 +141,7 @@ class RootComponent(componentContext: ComponentContext) :
          * state, and a value class adds nothing here beyond a custom serializer.
          */
         @Serializable
+        @SerialName("renewal")
         data class Renewal(val memberId: String) : Config
     }
 

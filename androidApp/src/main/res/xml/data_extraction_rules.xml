@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Room database holds member names, phone numbers and plan dates: the whole domain is PII.
+  It must not ride into a cloud backup or a device-to-device transfer, both because it is not the
+  phone owner's data to move and because a restored copy would silently diverge from the gym's
+  real membership. Settings (the language choice) are harmless and stay included.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="database" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="database" path="." />
+    </device-transfer>
+</data-extraction-rules>

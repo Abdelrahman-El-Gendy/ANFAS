@@ -1,14 +1,28 @@
-TEAM_ID=
+// Shared iOS build settings. Values that must not be committed come from Local.xcconfig, which
+// is gitignored -- see the include at the bottom.
 
 PRODUCT_NAME=ANFAS
-PRODUCT_BUNDLE_IDENTIFIER=com.anfas.app.ANFAS$(TEAM_ID)
+
+// A plain, stable reverse-DNS id. It was com.anfas.app.ANFAS$(TEAM_ID), the KMP wizard's
+// pattern, which resolved to the malformed "com.anfas.app.ANFAS" while TEAM_ID was blank and
+// would have changed the moment a Team ID was supplied. A bundle id is registered once with
+// App Store Connect and can never be changed afterwards, so this had to be settled before the
+// first upload rather than after.
+//
+// Deliberately the same id as Android's applicationId and deliberately DIFFERENT from the
+// desktop bundleID (com.anfas.app.desktop) -- see desktopApp/build.gradle.kts.
+PRODUCT_BUNDLE_IDENTIFIER=com.anfas.app
+
+// iOS 16, lowered from the wizard's 18.2. 18.2 would have excluded every iPhone older than an
+// XS from a reception-desk app whose whole job is being available on whatever handset the gym
+// already owns.
+IPHONEOS_DEPLOYMENT_TARGET=16.0
 
 // Versions come from gradle/version.properties via a generated file, so Android, iOS and
 // desktop cannot drift apart. `./gradlew check` fails if Version.xcconfig is stale.
-//
-// NOTE: PRODUCT_BUNDLE_IDENTIFIER above is still the KMP wizard's pattern and resolves to the
-// malformed "com.anfas.app.ANFAS" while TEAM_ID is blank. Fixing that, and splitting this file
-// into Base/Debug/Release with distribution signing, is Phase 4 of the hardening plan -- it
-// needs a real Apple Team ID, and the bundle id must be settled before it is registered with
-// App Store Connect.
 #include "Version.xcconfig"
+
+// TEAM_ID and any distribution signing identity live here. The file is gitignored and absent by
+// default; the include is optional so a fresh clone still builds for the simulator, which needs
+// no team. CI writes it from a secret.
+#include? "Local.xcconfig"

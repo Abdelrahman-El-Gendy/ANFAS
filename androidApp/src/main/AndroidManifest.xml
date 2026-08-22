@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+      INTERNET is declared here and nowhere else. There is deliberately no CAMERA permission:
+      capture goes through ACTION_IMAGE_CAPTURE, which requires none *provided the app never
+      declares it* — see core/ocr/src/androidMain/AndroidManifest.xml.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+
     <application
         android:name=".AnfasApplication"
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"

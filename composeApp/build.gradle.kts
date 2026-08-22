@@ -18,6 +18,10 @@ kotlin {
     }
 
     sourceSets {
+        commonTest.dependencies {
+            // Configs are persisted by Decompose, so their wire format is tested here.
+            implementation(libs.kotlinx.serialization.json)
+        }
         commonMain.dependencies {
             api(project(":core:model"))
             api(project(":core:common"))
