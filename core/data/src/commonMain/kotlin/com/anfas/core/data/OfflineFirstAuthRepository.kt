@@ -3,18 +3,21 @@ package com.anfas.core.data
 import com.anfas.core.auth.CredentialRules
 import com.anfas.core.auth.PasswordHash
 import com.anfas.core.auth.PasswordHasher
+import com.anfas.core.auth.Permission
 import com.anfas.core.auth.Role
 import com.anfas.core.auth.Session
 import com.anfas.core.auth.SessionStore
 import com.anfas.core.auth.SignInResult
 import com.anfas.core.auth.StaffAccount
 import com.anfas.core.auth.normaliseUsername
+import com.anfas.core.auth.permissions
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
 import com.anfas.core.common.logger
 import com.anfas.core.database.StaffDao
 import com.anfas.core.database.StaffEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
@@ -104,6 +107,98 @@ internal class OfflineFirstAuthRepository(
             sessionStore.save(session)
             log.i("First owner account created")
             CreateAccountOutcome.Created(session)
+        }
+    }
+
+    override suspend fun createStaff(
+        username: String,
+        password: String,
+        displayName: String,
+        roles: Set<Role>,
+    ): AppResult<CreateAccountOutcome> = withContext(dispatchers.io) {
+        runStorage("Could not create the account") {
+            val problems = CredentialRules.validate(
+                username = username,
+                password = password,
+                displayName = displayName,
+                existingUsernames = dao.allUsernames().toSet(),
+            )
+            if (problems.isNotEmpty()) return@runStorage CreateAccountOutcome.Rejected(problems)
+
+            val account = StaffAccount(
+                id = Uuid.random().toString(),
+                username = normaliseUsername(username),
+                displayName = displayName.trim(),
+                // Owner is stripped rather than rejected: the caller's UI does not offer it, so
+                // its presence would be a programming error, and silently narrowing is safer
+                // than creating a second owner because a check was missed somewhere.
+                roles = (roles - Role.Owner).ifEmpty { setOf(Role.Receptionist) },
+                passwordHash = hasher.hash(password),
+                createdAt = Clock.System.now(),
+            )
+            dao.upsert(account.toEntity())
+            // No username, no roles: a shared reception device's log must not say who was added.
+            log.i("Staff account created")
+            CreateAccountOutcome.Created(Session(account.id, account.roles))
+        }
+    }
+
+    override suspend fun setStaffEnabled(
+        id: String,
+        enabled: Boolean,
+    ): AppResult<StaffChangeOutcome> = withContext(dispatchers.io) {
+        runStorage("Could not change the account") {
+            val row = dao.findById(id) ?: return@runStorage StaffChangeOutcome.NotFound
+
+            if (!enabled && wouldLoseLastAdministrator(row)) {
+                return@runStorage StaffChangeOutcome.WouldLockOutDevice
+            }
+
+            dao.upsert(row.copy(isEnabled = enabled))
+            StaffChangeOutcome.Changed
+        }
+    }
+
+    override suspend fun resetStaffPassword(
+        id: String,
+        newPassword: String,
+    ): AppResult<StaffChangeOutcome> = withContext(dispatchers.io) {
+        runStorage("Could not reset the password") {
+            val row = dao.findById(id) ?: return@runStorage StaffChangeOutcome.NotFound
+
+            // Only the password rule applies: the username and display name are unchanged, and
+            // running the full validator would report the account's own username as taken.
+            val problems = CredentialRules.validatePassword(newPassword)
+            if (problems.isNotEmpty()) return@runStorage StaffChangeOutcome.Rejected(problems)
+
+            val hash = hasher.hash(newPassword)
+            dao.upsert(
+                row.copy(
+                    passwordAlgorithm = hash.algorithm,
+                    passwordIterations = hash.iterations,
+                    passwordSalt = hash.salt,
+                    passwordHash = hash.hash,
+                ),
+            )
+            log.i("Staff password reset")
+            StaffChangeOutcome.Changed
+        }
+    }
+
+    /**
+     * True when [candidate] is the only enabled account that can still administer the device.
+     *
+     * Without this an owner can disable themselves and leave a device nobody can administer —
+     * and there is no server to recover from, so the only way back would be wiping the app and
+     * losing the membership.
+     */
+    private suspend fun wouldLoseLastAdministrator(candidate: StaffEntity): Boolean {
+        if (Permission.MANAGE_STAFF !in candidate.rolesSet().flatMap { it.permissions }) {
+            return false
+        }
+        val others = dao.observeAll().first().filter { it.id != candidate.id && it.isEnabled }
+        return others.none { row ->
+            Permission.MANAGE_STAFF in row.rolesSet().flatMap { it.permissions }
         }
     }
 

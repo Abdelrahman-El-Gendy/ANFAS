@@ -321,6 +321,21 @@ object AnfasIcons {
 
     // --- added for :feature:intake-ocr ----------------------------------------------------
 
+    /** Two figures, for Staff. Distinct from Person (a member) and PersonAdd (an action). */
+    val Group: ImageVector by lazy {
+        stroked("Group") {
+            circle(9f, 8f, 3.2f)
+            moveTo(3.5f, 19f)
+            curveTo(3.5f, 15.6f, 6f, 14f, 9f, 14f)
+            curveTo(12f, 14f, 14.5f, 15.6f, 14.5f, 19f)
+            moveTo(16f, 5.2f)
+            curveTo(18f, 5.6f, 19.2f, 7f, 19.2f, 8.6f)
+            curveTo(19.2f, 10.2f, 18f, 11.4f, 16.4f, 11.8f)
+            moveTo(17.5f, 14.4f)
+            curveTo(19.8f, 15.1f, 21f, 16.6f, 21f, 19f)
+        }
+    }
+
     /** The eye the export's password field shows. Not auto-mirrored: an eye is symmetrical. */
     val Visibility: ImageVector by lazy {
         stroked("Visibility") {

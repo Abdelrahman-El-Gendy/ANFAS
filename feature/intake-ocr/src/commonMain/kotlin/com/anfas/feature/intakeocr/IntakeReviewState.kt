@@ -45,6 +45,8 @@ data class IntakeReviewState(
      * user changes it in Settings, so a toast that disappears would leave them stuck.
      */
     val cameraDenied: Boolean = false,
+    /** Whether this session holds `Permission.IMPORT_INTAKE`. */
+    val mayImport: Boolean = false,
     val outcome: ImportOutcome? = null,
     val notice: IntakeNotice? = null,
 ) {
@@ -53,7 +55,14 @@ data class IntakeReviewState(
     val readyCount: Int get() = batch?.importableRows?.size ?: 0
     val totalCount: Int get() = batch?.rows?.size ?: 0
 
-    val canImport: Boolean get() = batch?.canImport == true && !isImporting
+    /**
+     * Scanning and importing are separate permissions, so this is a real boundary and not
+     * polish: a coach holds SCAN_INTAKE and can review a sheet, but turning those rows into
+     * member records is IMPORT_INTAKE. The route guard cannot catch it — both sit on this one
+     * screen.
+     */
+    val canImport: Boolean
+        get() = batch?.canImport == true && !isImporting && mayImport
 
     companion object {
         const val MIN_ZOOM = 0.5f

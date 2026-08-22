@@ -1,8 +1,11 @@
 package com.anfas.feature.intakeocr
 
+import com.anfas.core.auth.Permission
+import com.anfas.core.auth.can
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
 import com.anfas.core.common.appExceptionHandler
+import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.IntakeFieldKey
 import com.anfas.core.data.IntakeRepository
 import com.anfas.core.model.IntakeBatch
@@ -43,6 +46,7 @@ class IntakeReviewComponent(
     private val repository: IntakeRepository,
     private val ingestion: IntakeIngestion,
     private val cameraPermissions: CameraPermissions,
+    private val auth: AuthRepository,
     dispatchers: AppDispatchers,
     private val onImported: (imported: Int) -> Unit,
 ) : ComponentContext by componentContext {
@@ -54,6 +58,7 @@ class IntakeReviewComponent(
 
     val state: StateFlow<IntakeReviewState> = combine(
         ui,
+        auth.observeSession(),
         repository.observeBatches().flatMapLatest { batchesResult ->
             when (batchesResult) {
                 is AppResult.Failure ->
@@ -75,7 +80,7 @@ class IntakeReviewComponent(
                 }
             }
         },
-    ) { local, batchResult ->
+    ) { local, session, batchResult ->
         IntakeReviewState(
             content = batchResult.toContent(),
             zoom = local.zoom,
@@ -84,6 +89,7 @@ class IntakeReviewComponent(
             isImporting = local.isImporting,
             isScanning = local.isScanning,
             cameraDenied = local.cameraDenied,
+            mayImport = session?.can(Permission.IMPORT_INTAKE) == true,
             outcome = local.outcome,
             notice = local.notice,
         )

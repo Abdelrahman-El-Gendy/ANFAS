@@ -20,7 +20,20 @@ class SignInComponentFactory internal constructor(
         )
 }
 
-/** Factory only — the component owns a scope tied to its Decompose lifecycle. */
+/** Lets :composeApp create a [StaffListComponent] without seeing what it depends on. */
+class StaffListComponentFactory internal constructor(
+    private val repository: AuthRepository,
+    private val dispatchers: AppDispatchers,
+) {
+    fun create(componentContext: ComponentContext): StaffListComponent = StaffListComponent(
+        componentContext = componentContext,
+        repository = repository,
+        dispatchers = dispatchers,
+    )
+}
+
+/** Factories only — components own scopes tied to their Decompose lifecycles. */
 val AuthModule: Module = module {
     factory { SignInComponentFactory(repository = get(), dispatchers = get()) }
+    factory { StaffListComponentFactory(repository = get(), dispatchers = get()) }
 }

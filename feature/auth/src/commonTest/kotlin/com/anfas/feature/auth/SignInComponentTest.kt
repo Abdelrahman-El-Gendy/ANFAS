@@ -11,6 +11,7 @@ import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
 import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.CreateAccountOutcome
+import com.anfas.core.data.StaffChangeOutcome
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
@@ -192,7 +193,10 @@ class SignInComponentTest {
         val sessions = MutableStateFlow<Session?>(null)
         val repository = FakeAuthRepository(hasAccounts = false, sessions = sessions)
         val component = component(repository)
-        component.state.test { awaitUntilNotChecking(); cancelAndIgnoreRemainingEvents() }
+        component.state.test {
+            awaitUntilNotChecking()
+            cancelAndIgnoreRemainingEvents()
+        }
         component.onDisplayNameChanged("Fahd")
         component.onUsernameChanged("fahd")
 
@@ -267,6 +271,24 @@ private class FakeAuthRepository(
 
     override fun observeStaff(): Flow<AppResult<List<StaffAccount>>> =
         flowOf(AppResult.Success(emptyList()))
+
+    // Staff management is not what SignInComponent does; StaffListComponentTest covers these.
+    override suspend fun createStaff(
+        username: String,
+        password: String,
+        displayName: String,
+        roles: Set<Role>,
+    ): AppResult<CreateAccountOutcome> = AppResult.Success(CreateAccountOutcome.AlreadyInitialised)
+
+    override suspend fun setStaffEnabled(
+        id: String,
+        enabled: Boolean,
+    ): AppResult<StaffChangeOutcome> = AppResult.Success(StaffChangeOutcome.NotFound)
+
+    override suspend fun resetStaffPassword(
+        id: String,
+        newPassword: String,
+    ): AppResult<StaffChangeOutcome> = AppResult.Success(StaffChangeOutcome.NotFound)
 }
 private class TestDispatchers(private val dispatcher: CoroutineDispatcher) : AppDispatchers {
     override val io: CoroutineDispatcher = dispatcher

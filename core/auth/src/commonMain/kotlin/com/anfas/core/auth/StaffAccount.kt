@@ -76,6 +76,18 @@ object CredentialRules {
      */
     const val MIN_PASSWORD_LENGTH: Int = 8
 
+    /**
+     * The password rule on its own, for an owner-driven reset where the username and display name
+     * are unchanged. Running the full [validate] there would report the account's own username as
+     * taken.
+     */
+    fun validatePassword(password: String): Set<CredentialProblem> =
+        if (password.codePointCount() < MIN_PASSWORD_LENGTH) {
+            setOf(CredentialProblem.PasswordTooShort)
+        } else {
+            emptySet()
+        }
+
     fun validate(
         username: String,
         password: String,
@@ -89,11 +101,8 @@ object CredentialRules {
         if (normalised in existingUsernames.map(::normaliseUsername)) {
             problems += CredentialProblem.UsernameTaken
         }
-        // Length is counted in code points, not UTF-16 units, so an emoji or an Arabic
-        // presentation form does not count double.
-        if (password.codePointCount() < MIN_PASSWORD_LENGTH) {
-            problems += CredentialProblem.PasswordTooShort
-        }
+        // One definition of the password rule, shared with validatePassword.
+        problems += validatePassword(password)
         if (displayName.isBlank()) problems += CredentialProblem.DisplayNameBlank
 
         return problems

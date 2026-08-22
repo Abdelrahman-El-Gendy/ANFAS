@@ -23,22 +23,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.anfas.app.navigation.RootComponent
+import com.anfas.app.navigation.requiredPermission
 import com.anfas.app.navigation.topLevel
+import com.anfas.core.auth.Permission
+import com.anfas.core.auth.Session
+import com.anfas.core.auth.can
 import com.anfas.core.designsystem.AnfasBottomNav
 import com.anfas.core.designsystem.AnfasBreakpoints
+import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasLanguageToggle
 import com.anfas.core.designsystem.AnfasNavRail
 import com.anfas.core.designsystem.AnfasScript
 import com.anfas.core.designsystem.AnfasTextAction
 import com.anfas.core.designsystem.AnfasTheme
+import com.anfas.core.designsystem.EmptyStateAction
 import com.anfas.core.designsystem.NavItem
 import com.anfas.core.designsystem.TextActionEmphasis
 import com.anfas.core.i18n.AppLanguage
+import com.anfas.core.i18n.AppStrings
 import com.anfas.core.i18n.LanguageController
 import com.anfas.core.i18n.ProvideLocalization
 import com.anfas.core.i18n.strings
 import com.anfas.feature.auth.SignInScreen
+import com.anfas.feature.auth.StaffListScreen
 import com.anfas.feature.intakeocr.IntakeReviewScreen
 import com.anfas.feature.members.MemberProfileScreen
 import com.anfas.feature.members.MembersListScreen
@@ -91,26 +99,30 @@ fun App(root: RootComponent) {
                         emphasis = TextActionEmphasis.Muted,
                     )
                 }
-                val items = listOf(
-                    NavItem(
-                        label = s.members.title,
-                        icon = AnfasIcons.Person,
-                        selected = active == RootComponent.TopLevel.MEMBERS,
-                        onClick = { root.onTopLevelSelected(RootComponent.TopLevel.MEMBERS) },
-                    ),
-                    NavItem(
-                        label = s.reminders.title,
-                        icon = AnfasIcons.Payments,
-                        selected = active == RootComponent.TopLevel.REMINDERS,
-                        onClick = { root.onTopLevelSelected(RootComponent.TopLevel.REMINDERS) },
-                    ),
-                    NavItem(
-                        label = s.intake.title,
-                        icon = AnfasIcons.DocumentScanner,
-                        selected = active == RootComponent.TopLevel.INTAKE,
-                        onClick = { root.onTopLevelSelected(RootComponent.TopLevel.INTAKE) },
-                    ),
-                )
+                // Built from TopLevel so the destination list, its permission and its label
+                // cannot drift apart. Destinations the session cannot reach are removed, not
+                // disabled: a greyed tab advertises a capability the role does not have, and
+                // RBAC that leaks the shape of the app is only half a boundary.
+                val items: List<NavItem> = RootComponent.TopLevel.entries
+                    .filter { destination -> session?.can(destination.permission) == true }
+                    .map { destination ->
+                        NavItem(
+                            label = when (destination) {
+                                RootComponent.TopLevel.MEMBERS -> s.members.title
+                                RootComponent.TopLevel.REMINDERS -> s.reminders.title
+                                RootComponent.TopLevel.INTAKE -> s.intake.title
+                                RootComponent.TopLevel.STAFF -> s.staff.title
+                            },
+                            icon = when (destination) {
+                                RootComponent.TopLevel.MEMBERS -> AnfasIcons.Person
+                                RootComponent.TopLevel.REMINDERS -> AnfasIcons.Payments
+                                RootComponent.TopLevel.INTAKE -> AnfasIcons.DocumentScanner
+                                RootComponent.TopLevel.STAFF -> AnfasIcons.Group
+                            },
+                            selected = active == destination,
+                            onClick = { root.onTopLevelSelected(destination) },
+                        )
+                    }
 
                 // Insets are applied per-region, not wholesale. safeContentPadding() on the
                 // whole shell also inset the bottom navigation bar, leaving it hovering above a
@@ -148,7 +160,7 @@ fun App(root: RootComponent) {
                             if (session == null) {
                                 SignInScreen(root.signIn, Modifier.fillMaxSize())
                             } else {
-                                Host(root, Modifier.fillMaxSize())
+                                Host(root, session!!, Modifier.fillMaxSize())
                             }
                         }
                     } else {
@@ -193,7 +205,7 @@ fun App(root: RootComponent) {
                                     modifier = Modifier.fillMaxWidth().weight(1f),
                                 )
                             } else {
-                                Host(root, Modifier.fillMaxWidth().weight(1f))
+                                Host(root, session!!, Modifier.fillMaxWidth().weight(1f))
                                 AnfasBottomNav(items)
                             }
                         }
@@ -204,16 +216,42 @@ fun App(root: RootComponent) {
     }
 }
 
+/**
+ * [session] is passed in so every child can be checked against it. Hiding an unreachable
+ * destination from the nav bar is the primary defence; this is the second, for a route that is
+ * reached anyway — a back stack restored after process death, or a destination pushed by code
+ * that forgot to check.
+ */
 @Composable
-private fun Host(root: RootComponent, modifier: Modifier) {
+private fun Host(root: RootComponent, session: Session, modifier: Modifier) {
+    val s = strings
     Box(modifier = modifier) {
         Children(stack = root.stack, modifier = Modifier.fillMaxSize()) { created ->
+            val required = created.configuration.requiredPermission
+            if (!session.can(required)) {
+                // The design's permission-denied screen. Its copy is about a staff *role*, which
+                // is exactly what this is — unlike the camera denial in intake, which reuses none
+                // of it.
+                AnfasEmptyState(
+                    icon = AnfasIcons.Warning,
+                    title = s.states.permissionDeniedTitle(required.areaLabel(s)),
+                    message = s.states.permissionDeniedMessage,
+                    primaryAction = EmptyStateAction(
+                        label = s.states.permissionDeniedAction,
+                        onClick = root::onPermissionDeniedDismissed,
+                    ),
+                )
+                return@Children
+            }
             when (val child = created.instance) {
                 is RootComponent.Child.MembersList ->
                     MembersListScreen(component = child.component)
 
                 is RootComponent.Child.MemberProfile ->
                     MemberProfileScreen(component = child.component)
+
+                is RootComponent.Child.StaffList ->
+                    StaffListScreen(component = child.component)
 
                 is RootComponent.Child.ReminderQueue ->
                     ReminderQueueScreen(component = child.component)
@@ -235,4 +273,19 @@ private fun Host(root: RootComponent, modifier: Modifier) {
 private fun AppLanguage.toScript(): AnfasScript = when (this) {
     AppLanguage.EN -> AnfasScript.Latin
     AppLanguage.AR -> AnfasScript.Arabic
+}
+
+/**
+ * The human name for the area a permission guards, for the permission-denied message.
+ *
+ * Reuses the destinations' own titles where there is one, so the sentence a coach sees names the
+ * thing they tapped rather than an internal enum.
+ */
+private fun Permission.areaLabel(s: AppStrings): String = when (this) {
+    Permission.VIEW_MEMBERS, Permission.EDIT_MEMBERS -> s.members.title
+    Permission.MANAGE_SUBSCRIPTIONS -> s.renewal.selectDuration
+    Permission.VIEW_REMINDERS, Permission.RETRY_REMINDERS -> s.reminders.title
+    Permission.SCAN_INTAKE, Permission.IMPORT_INTAKE -> s.intake.title
+    Permission.VIEW_THERAPY -> s.states.fieldStatus
+    Permission.MANAGE_STAFF -> s.staff.title
 }

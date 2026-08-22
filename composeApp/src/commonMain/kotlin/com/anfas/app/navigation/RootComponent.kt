@@ -1,12 +1,16 @@
 package com.anfas.app.navigation
 
+import com.anfas.core.auth.Permission
 import com.anfas.core.auth.Session
+import com.anfas.core.auth.can
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.data.AuthRepository
 import com.anfas.core.model.MemberId
 import com.anfas.feature.auth.SignInComponent
 import com.anfas.feature.auth.SignInComponentFactory
+import com.anfas.feature.auth.StaffListComponent
+import com.anfas.feature.auth.StaffListComponentFactory
 import com.anfas.feature.intakeocr.IntakeReviewComponent
 import com.anfas.feature.intakeocr.IntakeReviewComponentFactory
 import com.anfas.feature.members.MemberProfileComponent
@@ -58,6 +62,7 @@ class RootComponent(componentContext: ComponentContext) :
     private val authRepository: AuthRepository by inject()
     private val dispatchers: AppDispatchers by inject()
     private val signInFactory: SignInComponentFactory by inject()
+    private val staffListFactory: StaffListComponentFactory by inject()
     private val membersListFactory: MembersListComponentFactory by inject()
     private val memberProfileFactory: MemberProfileComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
@@ -103,8 +108,36 @@ class RootComponent(componentContext: ComponentContext) :
         // different member of staff — does not resume on the previous person's screen.
         scope.launch {
             session.collect { current ->
-                if (current == null) navigation.replaceAll(Config.MembersList)
+                if (current == null) {
+                    navigation.replaceAll(Config.MembersList)
+                } else {
+                    // Land on the first destination this session can reach. A therapist has no
+                    // reminders and a coach cannot import, so assuming Members is only right
+                    // because every role that can sign in holds VIEW_MEMBERS — assert that by
+                    // falling back explicitly rather than by luck.
+                    val landing = TopLevel.entries.firstOrNull { current.can(it.permission) }
+                    if (landing != null) onTopLevelSelected(landing)
+                }
             }
+        }
+    }
+
+    /**
+     * Back out of a route this session may not see.
+     *
+     * Pops if there is anywhere to pop to, otherwise replaces with the first destination the
+     * session *can* reach — a permission-denied screen with a dead "go back" is a trap.
+     */
+    fun onPermissionDeniedDismissed() {
+        val landing = TopLevel.entries.firstOrNull { session.value?.can(it.permission) == true }
+        if (stack.value.backStack.isNotEmpty()) {
+            navigation.pop()
+        } else if (landing != null) {
+            onTopLevelSelected(landing)
+        } else {
+            // No reachable destination at all, which means this account can do nothing. Signing
+            // out is the only honest exit.
+            onSignOut()
         }
     }
 
@@ -118,6 +151,7 @@ class RootComponent(componentContext: ComponentContext) :
                 TopLevel.MEMBERS -> Config.MembersList
                 TopLevel.REMINDERS -> Config.ReminderQueue
                 TopLevel.INTAKE -> Config.IntakeReview
+                TopLevel.STAFF -> Config.StaffList
             },
         )
     }
@@ -162,6 +196,10 @@ class RootComponent(componentContext: ComponentContext) :
                 // Imported members land in the directory, so that is where to look next.
                 onImported = { navigation.replaceAll(Config.MembersList) },
             ),
+        )
+
+        Config.StaffList -> Child.StaffList(
+            staffListFactory.create(componentContext = context),
         )
 
         is Config.Renewal -> Child.Renewal(
@@ -211,6 +249,10 @@ class RootComponent(componentContext: ComponentContext) :
          * state, and a value class adds nothing here beyond a custom serializer.
          */
         @Serializable
+        @SerialName("staff-list")
+        data object StaffList : Config
+
+        @Serializable
         @SerialName("member-profile")
         data class MemberProfile(val memberId: String) : Config
 
@@ -223,13 +265,24 @@ class RootComponent(componentContext: ComponentContext) :
     sealed interface Child {
         data class MembersList(val component: MembersListComponent) : Child
         data class MemberProfile(val component: MemberProfileComponent) : Child
+        data class StaffList(val component: StaffListComponent) : Child
         data class ReminderQueue(val component: ReminderQueueComponent) : Child
         data class IntakeReview(val component: IntakeReviewComponent) : Child
         data class Renewal(val component: RenewalSheetComponent) : Child
     }
 
-    /** The destinations the nav rail/bottom bar offers. */
-    enum class TopLevel { MEMBERS, REMINDERS, INTAKE }
+    /**
+     * The destinations the nav rail/bottom bar offers, each with the permission it needs.
+     *
+     * Carrying the permission here rather than checking roles at the call site is what makes
+     * adding a role a one-line change in Role.permissions instead of a hunt through the shell.
+     */
+    enum class TopLevel(val permission: Permission) {
+        MEMBERS(Permission.VIEW_MEMBERS),
+        REMINDERS(Permission.VIEW_REMINDERS),
+        INTAKE(Permission.SCAN_INTAKE),
+        STAFF(Permission.MANAGE_STAFF),
+    }
 }
 
 /** Which nav entry should read as active for a given route, or null for detail screens. */
@@ -241,10 +294,32 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
 
         RootComponent.Config.IntakeReview -> RootComponent.TopLevel.INTAKE
 
+        RootComponent.Config.StaffList -> RootComponent.TopLevel.STAFF
+
         // Detail routes keep the *parent* tab lit rather than clearing the bar. The profile is
         // reached from the directory and the renewal sheet from the profile, so Members staying
         // highlighted tells you where back will take you.
         is RootComponent.Config.MemberProfile -> RootComponent.TopLevel.MEMBERS
 
         is RootComponent.Config.Renewal -> null
+    }
+
+/**
+ * The permission a route requires, checked by the shell before the screen is composed.
+ *
+ * Hiding an unreachable destination from the nav bar is the primary defence; this is the second
+ * one, for a route that is reached anyway — a back stack restored after process death, or a
+ * destination pushed by code that forgot to check. Without it a coach could land on the renewal
+ * sheet and take a payment.
+ *
+ * Exhaustive on purpose: adding a Config without deciding its permission will not compile.
+ */
+internal val RootComponent.Config.requiredPermission: Permission
+    get() = when (this) {
+        RootComponent.Config.MembersList -> Permission.VIEW_MEMBERS
+        is RootComponent.Config.MemberProfile -> Permission.VIEW_MEMBERS
+        RootComponent.Config.ReminderQueue -> Permission.VIEW_REMINDERS
+        RootComponent.Config.IntakeReview -> Permission.SCAN_INTAKE
+        is RootComponent.Config.Renewal -> Permission.MANAGE_SUBSCRIPTIONS
+        RootComponent.Config.StaffList -> Permission.MANAGE_STAFF
     }

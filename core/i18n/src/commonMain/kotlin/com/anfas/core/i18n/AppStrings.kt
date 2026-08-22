@@ -307,4 +307,52 @@ interface AppStrings {
         val problemPasswordTooShort: String
         val problemDisplayNameBlank: String
     }
+
+    val staff: Staff
+
+    interface Staff {
+        val title: String
+        val subtitle: String
+        val addStaff: String
+        val you: String
+        val disabled: String
+        val enable: String
+        val disable: String
+        val resetPassword: String
+        fun resetPasswordFor(name: String): String
+        val newPassword: String
+        val save: String
+        val saving: String
+        val creating: String
+        val emptyTitle: String
+        val emptyMessage: String
+        val loadFailedTitle: String
+        fun showingStaff(count: Int): String
+
+        /** Column headings. */
+        val columnName: String
+        val columnRoles: String
+        val columnActions: String
+
+        /** Notices. */
+        fun created(name: String): String
+        val passwordReset: String
+        val accountEnabled: String
+        val accountDisabled: String
+
+        /**
+         * The refusal that keeps a device recoverable. Worded as a rule, not an error, because
+         * there is no server to recover from and the user needs to know it is deliberate.
+         */
+        val wouldLockOutDevice: String
+        val accountGone: String
+
+        /** Role names. */
+        val roleOwner: String
+        val roleAdmin: String
+        val roleTherapist: String
+        val roleCoach: String
+        val roleReceptionist: String
+        val roleMember: String
+    }
 }

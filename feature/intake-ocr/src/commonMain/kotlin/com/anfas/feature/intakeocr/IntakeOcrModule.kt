@@ -1,6 +1,7 @@
 package com.anfas.feature.intakeocr
 
 import com.anfas.core.common.AppDispatchers
+import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.IntakeRepository
 import com.anfas.core.ocr.CameraPermissions
 import com.arkivanov.decompose.ComponentContext
@@ -15,6 +16,7 @@ class IntakeReviewComponentFactory internal constructor(
     private val intake: IntakeRepository,
     private val ingestion: IntakeIngestion,
     private val cameraPermissions: CameraPermissions,
+    private val auth: AuthRepository,
     private val dispatchers: AppDispatchers,
 ) {
     fun create(
@@ -25,6 +27,7 @@ class IntakeReviewComponentFactory internal constructor(
         repository = intake,
         ingestion = ingestion,
         cameraPermissions = cameraPermissions,
+        auth = auth,
         dispatchers = dispatchers,
         onImported = onImported,
     )
@@ -42,6 +45,7 @@ val IntakeOcrModule: Module = module {
             intake = get(),
             ingestion = get(),
             cameraPermissions = get(),
+            auth = get(),
             dispatchers = get(),
         )
     }

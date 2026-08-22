@@ -16,10 +16,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -161,6 +163,141 @@ class AuthRepositoryTest {
 
         assertNull(store.current())
         assertTrue(repository.hasAnyAccount().valueOrFail())
+    }
+
+    // --- staff management -------------------------------------------------------------------
+
+    @Test
+    fun `an owner can create staff with the roles they choose`() = runTest {
+        val repository = repository()
+        repository.createFirstOwner("fahd", "correct-horse", "Fahd").valueOrFail()
+
+        val outcome = repository
+            .createStaff("mona", "another-pass", "Mona", setOf(Role.Receptionist))
+            .valueOrFail()
+
+        assertIs<CreateAccountOutcome.Created>(outcome)
+        assertTrue(repository.signIn("mona", "another-pass").valueOrFail() is SignInResult.Success)
+    }
+
+    /**
+     * The owner is established once, at first run. A second owner is a support problem — who
+     * removes whom — with no product need, so the role is narrowed rather than rejected.
+     */
+    @Test
+    fun `creating staff cannot grant the owner role`() = runTest {
+        val repository = repository()
+        repository.createFirstOwner("fahd", "correct-horse", "Fahd").valueOrFail()
+        repository.createStaff("mona", "another-pass", "Mona", setOf(Role.Owner, Role.Coach))
+            .valueOrFail()
+
+        val mona = repository.observeStaff().first().valueOrFail().first { it.username == "mona" }
+
+        assertFalse(Role.Owner in mona.roles)
+        assertEquals(setOf(Role.Coach), mona.roles)
+    }
+
+    @Test
+    fun `creating staff with no usable role falls back to receptionist`() = runTest {
+        val repository = repository()
+        repository.createFirstOwner("fahd", "correct-horse", "Fahd").valueOrFail()
+        repository.createStaff("mona", "another-pass", "Mona", setOf(Role.Owner)).valueOrFail()
+
+        val mona = repository.observeStaff().first().valueOrFail().first { it.username == "mona" }
+
+        assertEquals(setOf(Role.Receptionist), mona.roles)
+    }
+
+    @Test
+    fun `a duplicate username is refused`() = runTest {
+        val repository = repository()
+        repository.createFirstOwner("fahd", "correct-horse", "Fahd").valueOrFail()
+
+        val outcome = repository
+            .createStaff("FAHD", "another-pass", "Someone", setOf(Role.Coach))
+            .valueOrFail()
+
+        val rejected = assertIs<CreateAccountOutcome.Rejected>(outcome)
+        assertTrue(CredentialProblem.UsernameTaken in rejected.problems)
+    }
+
+    /**
+     * The rule that keeps a device recoverable. There is no server, so an owner who disables
+     * themselves would leave a device nobody can administer and no way back except wiping the
+     * app and losing the membership.
+     */
+    @Test
+    fun `the last administrator cannot disable themselves`() = runTest {
+        val repository = repository()
+        val created = repository.createFirstOwner("fahd", "correct-horse", "Fahd").valueOrFail()
+        val ownerId = assertIs<CreateAccountOutcome.Created>(created).session.userId
+
+        assertEquals(
+            StaffChangeOutcome.WouldLockOutDevice,
+            repository.setStaffEnabled(ownerId, enabled = false).valueOrFail(),
+        )
+    }
+
+    @Test
+    fun `a non-administrator can be disabled and then cannot sign in`() = runTest {
+        val repository = repository()
+        repository.createFirstOwner("fahd", "correct-horse", "Fahd").valueOrFail()
+        repository.createStaff("mona", "another-pass", "Mona", setOf(Role.Coach)).valueOrFail()
+        val mona = repository.observeStaff().first().valueOrFail().first { it.username == "mona" }
+
+        assertEquals(
+            StaffChangeOutcome.Changed,
+            repository.setStaffEnabled(mona.id, enabled = false).valueOrFail(),
+        )
+        assertEquals(
+            SignInResult.AccountDisabled,
+            repository.signIn("mona", "another-pass").valueOrFail(),
+        )
+    }
+
+    @Test
+    fun `an owner can reset a password and the old one stops working`() = runTest {
+        val repository = repository()
+        repository.createFirstOwner("fahd", "correct-horse", "Fahd").valueOrFail()
+        repository.createStaff("mona", "another-pass", "Mona", setOf(Role.Coach)).valueOrFail()
+        val mona = repository.observeStaff().first().valueOrFail().first { it.username == "mona" }
+
+        repository.resetStaffPassword(mona.id, "brand-new-pass").valueOrFail()
+
+        assertTrue(
+            repository.signIn("mona", "brand-new-pass").valueOrFail() is SignInResult.Success,
+        )
+        assertEquals(
+            SignInResult.InvalidCredentials,
+            repository.signIn("mona", "another-pass").valueOrFail(),
+        )
+    }
+
+    /** Only the password rule applies — the full validator would call the account's own name taken. */
+    @Test
+    fun `a reset only checks the password rule`() = runTest {
+        val repository = repository()
+        val created = repository.createFirstOwner("fahd", "correct-horse", "Fahd").valueOrFail()
+        val ownerId = assertIs<CreateAccountOutcome.Created>(created).session.userId
+
+        assertEquals(
+            StaffChangeOutcome.Rejected(setOf(CredentialProblem.PasswordTooShort)),
+            repository.resetStaffPassword(ownerId, "short").valueOrFail(),
+        )
+        assertEquals(
+            StaffChangeOutcome.Changed,
+            repository.resetStaffPassword(ownerId, "long-enough-pass").valueOrFail(),
+        )
+    }
+
+    @Test
+    fun `changing a missing account reports not found`() = runTest {
+        val repository = repository()
+
+        assertEquals(
+            StaffChangeOutcome.NotFound,
+            repository.setStaffEnabled("nope", enabled = false).valueOrFail(),
+        )
     }
 
     private fun repository(

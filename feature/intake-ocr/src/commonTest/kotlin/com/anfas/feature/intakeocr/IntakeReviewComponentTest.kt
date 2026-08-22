@@ -2,12 +2,20 @@ package com.anfas.feature.intakeocr
 
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
+import com.anfas.core.auth.Permission
+import com.anfas.core.auth.Role
+import com.anfas.core.auth.Session
+import com.anfas.core.auth.SignInResult
+import com.anfas.core.auth.StaffAccount
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
+import com.anfas.core.data.AuthRepository
+import com.anfas.core.data.CreateAccountOutcome
 import com.anfas.core.data.ImportOutcome
 import com.anfas.core.data.IntakeFieldKey
 import com.anfas.core.data.IntakeRepository
+import com.anfas.core.data.StaffChangeOutcome
 import com.anfas.core.model.IntakeBatch
 import com.anfas.core.model.IntakeBatchId
 import com.anfas.core.model.IntakeBatchStatus
@@ -36,6 +44,9 @@ import kotlin.test.assertTrue
 import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
+/** State is a combine of three flows, so the first useful value can be a few emissions in. */
+private const val EMISSIONS = 6
+
 class IntakeReviewComponentTest {
 
     @Test
@@ -303,10 +314,55 @@ class IntakeReviewComponentTest {
         assertEquals(1, permissions.settingsOpened)
     }
 
+    /**
+     * The RBAC boundary the route guard cannot enforce. Scanning and importing sit on the same
+     * screen, so a coach — who holds SCAN_INTAKE but not IMPORT_INTAKE — must be able to review
+     * a sheet and must not be able to turn it into member records.
+     */
+    @Test
+    fun `a session without IMPORT_INTAKE cannot import a ready batch`() = runTest {
+        val repository =
+            FakeIntakeRepository(batches = listOf(batch("b-1", rows = listOf(row("r-1")))))
+        val component = component(
+            repository = repository,
+            permissions = setOf(Permission.SCAN_INTAKE, Permission.VIEW_MEMBERS),
+        )
+
+        component.state.test {
+            var seen = awaitItem()
+            repeat(EMISSIONS) {
+                if (seen.batch != null) return@repeat
+                seen = awaitItem()
+            }
+            assertFalse(seen.mayImport, "a coach must not hold IMPORT_INTAKE")
+            assertFalse(seen.canImport, "so the import action must be unavailable")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `a session with IMPORT_INTAKE can import a ready batch`() = runTest {
+        val repository =
+            FakeIntakeRepository(batches = listOf(batch("b-1", rows = listOf(row("r-1")))))
+        val component = component(repository = repository)
+
+        component.state.test {
+            var seen = awaitItem()
+            repeat(EMISSIONS) {
+                if (seen.canImport) return@repeat
+                seen = awaitItem()
+            }
+            assertTrue(seen.mayImport)
+            assertTrue(seen.canImport)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun TestScope.component(
         repository: IntakeRepository,
         onImported: (Int) -> Unit = {},
         cameraPermissions: CameraPermissions = FakeCameraPermissions(),
+        permissions: Set<Permission> = Permission.entries.toSet(),
     ): IntakeReviewComponent {
         val lifecycle = LifecycleRegistry()
         val component = IntakeReviewComponent(
@@ -318,6 +374,7 @@ class IntakeReviewComponentTest {
                 imageStore = RecordingImageStore(),
             ),
             cameraPermissions = cameraPermissions,
+            auth = FakeAuth(permissions = permissions),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onImported = onImported,
         )
@@ -446,4 +503,54 @@ internal class FakeIntakeRepository(
         }
         return AppResult.Success(Unit)
     }
+}
+
+/**
+ * Session source for the component. Defaults to every permission so the existing tests keep
+ * exercising the behaviour they were written for; the import-gating test narrows it.
+ */
+private class FakeAuth(private val permissions: Set<Permission>) : AuthRepository {
+    private val roles = if (permissions == Permission.entries.toSet()) {
+        setOf(Role.Owner)
+    } else if (Permission.IMPORT_INTAKE in permissions) {
+        setOf(Role.Receptionist)
+    } else {
+        setOf(Role.Coach)
+    }
+
+    override fun observeSession(): Flow<Session?> =
+        MutableStateFlow(Session(userId = "s-1", roles = roles))
+
+    override suspend fun hasAnyAccount(): AppResult<Boolean> = AppResult.Success(true)
+
+    override suspend fun signIn(username: String, password: String): AppResult<SignInResult> =
+        AppResult.Success(SignInResult.InvalidCredentials)
+
+    override suspend fun signOut(): AppResult<Unit> = AppResult.Success(Unit)
+
+    override suspend fun createFirstOwner(
+        username: String,
+        password: String,
+        displayName: String,
+    ): AppResult<CreateAccountOutcome> = AppResult.Success(CreateAccountOutcome.AlreadyInitialised)
+
+    override fun observeStaff(): Flow<AppResult<List<StaffAccount>>> =
+        MutableStateFlow(AppResult.Success(emptyList()))
+
+    override suspend fun createStaff(
+        username: String,
+        password: String,
+        displayName: String,
+        roles: Set<Role>,
+    ): AppResult<CreateAccountOutcome> = AppResult.Success(CreateAccountOutcome.AlreadyInitialised)
+
+    override suspend fun setStaffEnabled(
+        id: String,
+        enabled: Boolean,
+    ): AppResult<StaffChangeOutcome> = AppResult.Success(StaffChangeOutcome.NotFound)
+
+    override suspend fun resetStaffPassword(
+        id: String,
+        newPassword: String,
+    ): AppResult<StaffChangeOutcome> = AppResult.Success(StaffChangeOutcome.NotFound)
 }

@@ -1,6 +1,7 @@
 package com.anfas.core.data
 
 import com.anfas.core.auth.CredentialProblem
+import com.anfas.core.auth.Permission
 import com.anfas.core.auth.Role
 import com.anfas.core.auth.Session
 import com.anfas.core.auth.SignInResult
@@ -50,6 +51,49 @@ interface AuthRepository {
     ): AppResult<CreateAccountOutcome>
 
     fun observeStaff(): Flow<AppResult<List<StaffAccount>>>
+
+    /**
+     * Creates a staff account with the given roles. Requires [Permission.MANAGE_STAFF], which the
+     * caller must already have checked — this layer does not know who is asking.
+     *
+     * Refuses [Role.Owner] deliberately: the owner is established once, at first run. Letting the
+     * owner mint a second owner is a support problem (who removes whom) with no product need, and
+     * the narrower rule can be widened later if one appears.
+     */
+    suspend fun createStaff(
+        username: String,
+        password: String,
+        displayName: String,
+        roles: Set<Role>,
+    ): AppResult<CreateAccountOutcome>
+
+    /**
+     * Switches an account off without deleting it, so its history stays attributable.
+     *
+     * Refuses to disable the last enabled account holding [Permission.MANAGE_STAFF] — otherwise
+     * a device can be left with nobody able to turn anything back on, and there is no server to
+     * recover from.
+     */
+    suspend fun setStaffEnabled(id: String, enabled: Boolean): AppResult<StaffChangeOutcome>
+
+    /** Owner-driven password reset. There is no self-service reset: see SignInComponent's KDoc. */
+    suspend fun resetStaffPassword(id: String, newPassword: String): AppResult<StaffChangeOutcome>
+}
+
+/** Typed like [CreateAccountOutcome] so the screen can explain a refusal rather than a failure. */
+sealed interface StaffChangeOutcome {
+    data object Changed : StaffChangeOutcome
+
+    data class Rejected(val problems: Set<CredentialProblem>) : StaffChangeOutcome
+
+    /** The account is gone — deleted on another device, or the id is stale. */
+    data object NotFound : StaffChangeOutcome
+
+    /**
+     * Refused because it would leave nobody able to administer the device. Its own case rather
+     * than a generic failure, because the user needs to know it is a rule and not a bug.
+     */
+    data object WouldLockOutDevice : StaffChangeOutcome
 }
 
 /** Typed so the form can attach each problem to its field instead of showing one sentence. */

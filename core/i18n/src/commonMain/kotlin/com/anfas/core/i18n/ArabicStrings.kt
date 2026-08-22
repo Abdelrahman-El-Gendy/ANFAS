@@ -364,4 +364,51 @@ object ArabicStrings : AppStrings {
         override val problemPasswordTooShort = "٨ أحرف على الأقل."
         override val problemDisplayNameBlank = "أدخل اسمًا."
     }
+
+    override val staff = object : AppStrings.Staff {
+        override val title = "الموظفون"
+        override val subtitle = "من يمكنه تسجيل الدخول على هذا الجهاز، وما يستطيع فعله."
+        override val addStaff = "إضافة موظف"
+        override val you = "أنت"
+        override val disabled = "مُعطّل"
+        override val enable = "تشغيل"
+        override val disable = "تعطيل"
+        override val resetPassword = "تغيير كلمة المرور"
+        override fun resetPasswordFor(name: String) = "تغيير كلمة المرور لـ $name"
+        override val newPassword = "كلمة المرور الجديدة"
+        override val save = "حفظ"
+        override val saving = "جارٍ الحفظ…"
+        override val creating = "جارٍ الإنشاء…"
+        override val emptyTitle = "لا يوجد موظفون آخرون"
+        override val emptyMessage = "أضف العاملين في الصالة ليتمكنوا من تسجيل الدخول."
+        override val loadFailedTitle = "تعذّر تحميل الموظفين"
+        override fun showingStaff(count: Int) = when (arabicPlural(count)) {
+            PluralCategory.ZERO -> "لا توجد حسابات"
+            PluralCategory.ONE -> "حساب واحد"
+            PluralCategory.TWO -> "حسابان"
+            PluralCategory.FEW -> "$count حسابات"
+            PluralCategory.MANY -> "$count حسابًا"
+            PluralCategory.OTHER -> "$count حساب"
+        }
+
+        override val columnName = "الاسم"
+        override val columnRoles = "الأدوار"
+        override val columnActions = "إجراءات"
+
+        override fun created(name: String) = "يمكن لـ $name تسجيل الدخول الآن."
+        override val passwordReset = "تم تغيير كلمة المرور."
+        override val accountEnabled = "تم تشغيل الحساب."
+        override val accountDisabled = "تم تعطيل الحساب."
+        override val wouldLockOutDevice =
+            "هذا هو الحساب الوحيد الذي يمكنه إدارة الموظفين. أضف حسابًا آخر أولًا، " +
+                "وإلا لن يتمكن أحد من إعادة تشغيله."
+        override val accountGone = "هذا الحساب غير متوفر."
+
+        override val roleOwner = "المالك"
+        override val roleAdmin = "مسؤول"
+        override val roleTherapist = "أخصائي علاج"
+        override val roleCoach = "مدرب"
+        override val roleReceptionist = "موظف استقبال"
+        override val roleMember = "عضو"
+    }
 }

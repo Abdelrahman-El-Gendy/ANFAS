@@ -306,4 +306,45 @@ object EnglishStrings : AppStrings {
         override val problemPasswordTooShort = "At least 8 characters."
         override val problemDisplayNameBlank = "Enter a name."
     }
+
+    override val staff = object : AppStrings.Staff {
+        override val title = "Staff"
+        override val subtitle = "Who can sign in to this device, and what they can do."
+        override val addStaff = "Add staff"
+        override val you = "You"
+        override val disabled = "Disabled"
+        override val enable = "Enable"
+        override val disable = "Disable"
+        override val resetPassword = "Reset password"
+        override fun resetPasswordFor(name: String) = "Reset password for $name"
+        override val newPassword = "New password"
+        override val save = "Save"
+        override val saving = "Saving…"
+        override val creating = "Creating…"
+        override val emptyTitle = "No other staff yet"
+        override val emptyMessage = "Add the people who work at the gym so they can sign in."
+        override val loadFailedTitle = "Couldn't load staff"
+        override fun showingStaff(count: Int) =
+            if (count == 1) "Showing 1 account" else "Showing $count accounts"
+
+        override val columnName = "Name"
+        override val columnRoles = "Roles"
+        override val columnActions = "Actions"
+
+        override fun created(name: String) = "$name can now sign in."
+        override val passwordReset = "Password changed."
+        override val accountEnabled = "Account enabled."
+        override val accountDisabled = "Account disabled."
+        override val wouldLockOutDevice =
+            "This is the only account that can manage staff. Add another first, " +
+                "or nobody could turn it back on."
+        override val accountGone = "That account is no longer available."
+
+        override val roleOwner = "Owner"
+        override val roleAdmin = "Admin"
+        override val roleTherapist = "Therapist"
+        override val roleCoach = "Coach"
+        override val roleReceptionist = "Receptionist"
+        override val roleMember = "Member"
+    }
 }
