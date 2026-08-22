@@ -1,17 +1,20 @@
 package com.anfas.app
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.anfas.app.navigation.RootComponent
 import com.anfas.app.navigation.topLevel
 import com.anfas.core.designsystem.AnfasBottomNav
@@ -96,14 +99,34 @@ fun App(root: RootComponent) {
                                     items = items,
                                     title = s.common.appName,
                                     subtitle = s.common.appTagline,
+                                    // Without this the toggle existed only on compact, so
+                                    // language could not be changed at all on desktop.
+                                    footer = toggle,
                                 )
                             }
                             Host(root, Modifier.fillMaxSize())
                         }
                     } else {
                         Column(modifier = Modifier.fillMaxSize()) {
+                            // The toggle sits above the content, not in the bottom bar. As a
+                            // fourth bottom-nav slot it stole width from three real
+                            // destinations and crowded the bar's end edge; a language switch
+                            // is also not a navigation destination.
+                            if (active != null) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            horizontal = AnfasTheme.spacing.marginMobile,
+                                            vertical = 8.dp,
+                                        ),
+                                    horizontalArrangement = Arrangement.End,
+                                ) {
+                                    toggle()
+                                }
+                            }
                             Host(root, Modifier.fillMaxWidth().weight(1f))
-                            if (active != null) AnfasBottomNav(items, trailing = toggle)
+                            if (active != null) AnfasBottomNav(items)
                         }
                     }
                 }

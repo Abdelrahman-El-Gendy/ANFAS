@@ -21,6 +21,7 @@ together with Android Studio, and remember these move as a set:
 | `gradle-wrapper` | AGP 9.0.x needs Gradle 9.1+; AGP 9.3.x needs 9.5+ |
 | `android-compileSdk` | AGP 9.0.1 tops out at 36 |
 | `androidx-lifecycle` | 2.11.0 needs AGP 9.1+/SDK 37, so we are on 2.10.0 |
+| `androidx-core` | 1.19.0 needs AGP 9.1+/SDK 37, so we are on 1.18.0 |
 
 ## Module graph
 

@@ -2,13 +2,17 @@ package com.anfas.core.designsystem
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,11 +41,23 @@ fun AnfasTabs(
 ) {
     val scheme = MaterialTheme.colorScheme
     Column(modifier = modifier.fillMaxWidth()) {
-        Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+        // Scrollable so a long translation overflows into a gesture rather than a squeeze.
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(32.dp),
+        ) {
             tabs.forEachIndexed { index, tab ->
                 val selected = index == selectedIndex
                 Column(
-                    modifier = Modifier.clickable { onTabSelected(index) },
+                    // width(IntrinsicSize.Max) is load-bearing, not cosmetic. The indicator
+                    // below uses fillMaxWidth(), which resolves against the *incoming* max
+                    // constraint -- so without this the first tab claimed the whole row and
+                    // every later tab was measured at ~one character wide, rendering its label
+                    // as a vertical stack of letters. Bounding the column to its own intrinsic
+                    // width makes fillMaxWidth() mean "as wide as this tab's label row".
+                    modifier = Modifier
+                        .width(IntrinsicSize.Max)
+                        .clickable { onTabSelected(index) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Row(
@@ -53,6 +69,11 @@ fun AnfasTabs(
                             text = tab.label,
                             style = AnfasTheme.textStyles.bodyMedium,
                             color = if (selected) scheme.primary else scheme.onSurfaceVariant,
+                            // A tab label is two or three words at most. If it ever does not
+                            // fit, clipping one strip is recoverable; wrapping mid-word shatters
+                            // the whole row, which is how the bug above stayed invisible.
+                            maxLines = 1,
+                            softWrap = false,
                         )
                         if (tab.count != null) {
                             CountBadge(tab.count, tab.emphasiseCount)

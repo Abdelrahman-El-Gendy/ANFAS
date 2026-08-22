@@ -5,7 +5,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
  * "your query found nothing" (`search-no-results`), where there is nothing to create.
  */
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 fun AnfasEmptyState(
     icon: ImageVector,
     title: String,
@@ -85,9 +87,14 @@ fun AnfasEmptyState(
             modifier = Modifier.padding(top = 8.dp).widthIn(max = 420.dp),
         )
         if (primaryAction != null || secondaryAction != null) {
-            Row(
-                modifier = Modifier.padding(top = 32.dp).fillMaxWidth().widthIn(max = 420.dp),
+            // FlowRow, not Row: side by side these two buttons competed for a phone's width and
+            // the loser wrapped its label onto a second line at a different height from its
+            // neighbour. Flowing lets them stack on a narrow screen and stay inline on a wide
+            // one, which is what the export shows at each form factor.
+            FlowRow(
+                modifier = Modifier.padding(top = 32.dp).widthIn(max = 420.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 secondaryAction?.let {
                     AnfasSecondaryButton(text = it.label, onClick = it.onClick, icon = it.icon)

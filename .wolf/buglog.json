@@ -1,518 +1,588 @@
-{
-  "version": 1,
-  "bugs": [
-    {
-      "id": "bug-001",
-      "timestamp": "2026-08-21T09:07:30Z",
-      "error_message": "stitch MCP: 'Failed to connect - Incompatible auth server: does not support dynamic client registration'",
-      "file": "~/.claude.json (user-scope mcpServers.stitch)",
-      "root_cause": "stitch was configured as an http server at https://stitch.googleapis.com/mcp. That endpoint requires a pre-registered OAuth client; Claude Code only performs dynamic client registration, so authentication can never succeed. Re-running the OAuth flow cannot fix it.",
-      "fix": "Replaced with the stdio proxy: claude mcp add stitch -s user -e STITCH_API_KEY=<key> -- npx -y @_davideast/stitch-mcp proxy. The proxy hard-errors without STITCH_API_KEY or STITCH_ACCESS_TOKEN.",
-      "tags": [
-        "mcp",
-        "stitch",
-        "oauth",
-        "dcr",
-        "config"
-      ],
-      "related_bugs": [
-        "bug-002"
-      ],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T09:07:30Z"
-    },
-    {
-      "id": "bug-002",
-      "timestamp": "2026-08-21T09:07:30Z",
-      "error_message": "mcp__stitch__download_assets returned 'Assets downloaded to <dir>' but wrote no files anywhere on disk",
-      "file": "design/stitch/export/ (expected output dir)",
-      "root_cause": "download_assets is a proxy-side convenience tool in @_davideast/stitch-mcp, not a real Stitch API call. It reports success unconditionally and silently writes nothing. Verified by searching the whole filesystem for files modified in the last 15 minutes.",
-      "fix": "Ignore the tool. Take htmlCode.downloadUrl / screenshot.downloadUrl from list_screens and curl them. The html download URL is a base64 protobuf in which only the html_<32hex> file id varies, so every screen's URL is reconstructable from a constant prefix+suffix; the URLs need no auth.",
-      "tags": [
-        "mcp",
-        "stitch",
-        "download_assets",
-        "silent-failure",
-        "false-success"
-      ],
-      "related_bugs": [
-        "bug-001"
-      ],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T09:07:30Z"
-    },
-    {
-      "id": "bug-003",
-      "timestamp": "2026-08-21T09:36:19Z",
-      "error_message": "e: Cannot access 'androidx.room3.RoomDatabase' which is a supertype of 'AnfasDatabase'. Check your module classpath for missing or conflicting dependencies.",
-      "file": "core/database/build.gradle.kts",
-      "root_cause": ":core:database declared `implementation(libs.bundles.room)`, but AnfasDatabase extends RoomDatabase and DatabaseBuilderFactory returns RoomDatabase.Builder \u2014 room3-runtime is part of the module's ABI, so a consumer (:core:data) could not compile against it.",
-      "fix": "Split the bundle: `api(libs.androidx.room3.runtime)` because it is in the ABI, `implementation(libs.androidx.sqlite.bundled)` because the driver is internal to buildDatabase(). Features still never see Room \u2014 anfas.kmp.feature withholds :core:database.",
-      "tags": [
-        "gradle",
-        "kmp",
-        "room",
-        "api-vs-implementation",
-        "abi"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T09:36:19Z"
-    },
-    {
-      "id": "bug-004",
-      "timestamp": "2026-08-21T09:36:19Z",
-      "error_message": "e: Name contains illegal characters: \",\". (core/data + feature/members commonTest, only on compileTestKotlinIosSimulatorArm64)",
-      "file": "core/data/src/commonTest/.../OfflineFirstMemberRepositoryTest.kt",
-      "root_cause": "Backtick-quoted test function names containing a comma. The JVM target accepts them, so `:core:data:jvmTest` passed and the failure only appeared when `check` reached the Kotlin/Native test compilation.",
-      "fix": "Stripped , ; : . from all backticked test names. Lesson: run `./gradlew check` (which compiles native test targets) before believing a KMP test suite is green \u2014 a jvmTest pass proves nothing about iOS.",
-      "tags": [
-        "kmp",
-        "kotlin-native",
-        "tests",
-        "backtick-names"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T09:36:19Z"
-    },
-    {
-      "id": "bug-005",
-      "timestamp": "2026-08-21T09:36:19Z",
-      "error_message": "e: Unresolved reference 'number' (kotlinx.datetime.Month.number)",
-      "file": "feature/members/src/commonMain/.../LastCheckIn.kt",
-      "root_cause": "kotlinx-datetime 0.8.0's Month has no `number` property.",
-      "fix": "Index a MonthAbbreviations array by Enum.ordinal; the enum is declared January..December in order.",
-      "tags": [
-        "kotlinx-datetime",
-        "api-change"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T09:36:19Z"
-    },
-    {
-      "id": "bug-006",
-      "timestamp": "2026-08-21T12:13:45Z",
-      "error_message": "e: Overload resolution ambiguity / Conflicting overloads in OfflineFirstMemberRepository.kt (runStorage, asStorageError)",
-      "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/StorageBoundary.kt",
-      "root_cause": "Extracted the shared error-boundary helpers into StorageBoundary.kt as `internal` while OfflineFirstMemberRepository.kt still had its own `private` copies with the same names in the same package.",
-      "fix": "Deleted the private copies and rewrote the member repository to use the shared runStorage/asAppResult. Extracting a helper means removing the original, not adding a second.",
-      "tags": [
-        "kotlin",
-        "refactor",
-        "duplicate-declaration"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T12:13:45Z"
-    },
-    {
-      "id": "bug-007",
-      "timestamp": "2026-08-21T12:13:45Z",
-      "error_message": "e: Cannot access class 'kotlinx.datetime.LocalDate'. Check your module classpath (from :core:data)",
-      "file": "core/model/build.gradle.kts",
-      "root_cause": "kotlinx-datetime was `implementation` in :core:model, but SubscriptionTerm.startsOn and RenewalQuote.endsOn expose LocalDate, so it is part of the module's ABI. Same class of mistake as bug-003 with room3.",
-      "fix": "Changed to `api(libs.kotlinx.datetime)`. Rule: if a type from a dependency appears in your public signatures, it is `api`.",
-      "tags": [
-        "gradle",
-        "kmp",
-        "api-vs-implementation",
-        "abi",
-        "kotlinx-datetime"
-      ],
-      "related_bugs": [
-        "bug-003"
-      ],
-      "occurrences": 2,
-      "last_seen": "2026-08-21T12:13:45Z"
-    },
-    {
-      "id": "bug-008",
-      "timestamp": "2026-08-21T12:13:45Z",
-      "error_message": "e: Unresolved reference 'datetime' in core/common/RelativeTime.kt \u2014 only during :core:common:compileCommonMainKotlinMetadata",
-      "file": "core/common/build.gradle.kts",
-      "root_cause": "kotlinx-datetime was reached transitively via api(project(\":core:model\")). Platform compilations (jvmTest) resolved it, but commonMain *metadata* compilation did not, so `:core:common:jvmTest` passed while `check` failed later.",
-      "fix": "Declared api(libs.kotlinx.datetime) directly in :core:common. Do not rely on a transitive api dependency in commonMain metadata compilation; declare ABI deps explicitly.",
-      "tags": [
-        "gradle",
-        "kmp",
-        "metadata-compilation",
-        "transitive-dependency"
-      ],
-      "related_bugs": [
-        "bug-007"
-      ],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T12:13:45Z"
-    },
-    {
-      "id": "bug-009",
-      "timestamp": "2026-08-21T12:13:45Z",
-      "error_message": "app.cash.turbine.TurbineAssertionError: Unconsumed events found (3 ReminderQueueComponentTest failures)",
-      "file": "feature/subscriptions/src/commonTest/.../ReminderQueueComponentTest.kt",
-      "root_cause": "A StateFlow keeps emitting after the assertion of interest \u2014 combine() re-emits when any upstream changes. Turbine treats leftover emissions at the end of a test() block as a failure.",
-      "fix": "End each state.test { } block with cancelAndIgnoreRemainingEvents() once the interesting emission has been asserted.",
-      "tags": [
-        "tests",
-        "turbine",
-        "stateflow",
-        "coroutines"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T12:13:45Z"
-    },
-    {
-      "id": "bug-010",
-      "timestamp": "2026-08-21T12:13:45Z",
-      "error_message": "e: Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch (clock.now().todayIn(zone))",
-      "file": "feature/subscriptions/src/commonMain/.../RenewalSheetComponent.kt",
-      "root_cause": "kotlinx-datetime's todayIn is an extension on Clock, not on Instant.",
-      "fix": "Call clock.todayIn(timeZone) directly.",
-      "tags": [
-        "kotlinx-datetime",
-        "api"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T12:13:45Z"
-    },
-    {
-      "id": "bug-011",
-      "timestamp": "2026-08-21T12:30:42.512Z",
-      "error_message": "Missing error handling in unknown",
-      "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/Member.kt",
-      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
-      "fix": "Added try/catch block",
-      "tags": [
-        "auto-detected",
-        "error-handling",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T12:30:42.512Z"
-    },
-    {
-      "id": "bug-012",
-      "timestamp": "2026-08-21T12:32:43.581Z",
-      "error_message": "Null/undefined access in ",
-      "file": "core/data/src/commonTest/kotlin/com/anfas/core/data/FakeMemberDao.kt",
-      "root_cause": "Property access on potentially null/undefined value",
-      "fix": "Added null safety (optional chaining or null check)",
-      "tags": [
-        "auto-detected",
-        "null-safety",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T12:32:43.581Z"
-    },
-    {
-      "id": "bug-013",
-      "timestamp": "2026-08-21T12:34:42.209Z",
-      "error_message": "Significant refactor of ",
-      "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
-      "root_cause": "6 lines replaced/restructured",
-      "fix": "Rewrote 11\u21926 lines (6 removed) | Also: /** Sentinel for \"no particular batch\"; the query ; const val BATCH_ANY = \"\"",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 2,
-      "last_seen": "2026-08-21T12:34:56.644Z"
-    },
-    {
-      "id": "bug-014",
-      "timestamp": "2026-08-21T12:35:10.868Z",
-      "error_message": "Wrong reference: AppError should be AppResult",
-      "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
-      "root_cause": "Used \"AppError\" instead of \"AppResult\"",
-      "fix": "Changed AppError \u2192 AppResult",
-      "tags": [
-        "auto-detected",
-        "wrong-reference",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T12:35:10.868Z"
-    },
-    {
-      "id": "bug-015",
-      "timestamp": "2026-08-21T13:26:43.568Z",
-      "error_message": "Significant refactor of ",
-      "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "root_cause": "28 lines replaced/restructured",
-      "fix": "Rewrote 37\u219217 lines (28 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T13:26:43.569Z"
-    },
-    {
-      "id": "bug-016",
-      "timestamp": "2026-08-21T13:26:51.572Z",
-      "error_message": "Wrong reference: width should be size",
-      "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "root_cause": "Used \"width\" instead of \"size\"",
-      "fix": "Changed width \u2192 size",
-      "tags": [
-        "auto-detected",
-        "wrong-reference",
-        "kt"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T13:26:51.572Z"
-    },
-    {
-      "id": "bug-011",
-      "timestamp": "2026-08-21T13:36:02Z",
-      "error_message": "AssertionError: expected:<[#88393, #88394]> but was:<[#88394]> \u2014 only one member imported instead of two",
-      "file": "core/data/src/commonTest/.../OfflineFirstIntakeRepositoryTest.kt",
-      "root_cause": "The test fixture's newId lambda returned a constant string, so every imported row got the same member primary key and the Room upsert collapsed them into a single row. The repository was correct; the double-checked assertion caught the fixture.",
-      "fix": "Made the fixture's newId a counter. Lesson: any injected id generator in a test must be unique per call, or upserts silently merge records and the test looks like a product bug.",
-      "tags": [
-        "tests",
-        "fixtures",
-        "upsert",
-        "primary-key"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T13:36:02Z"
-    },
-    {
-      "id": "bug-012",
-      "timestamp": "2026-08-21T13:36:02Z",
-      "error_message": "e: Conflicting import: imported name 'IntakeReviewComponent' is ambiguous (RootComponent.kt)",
-      "file": "composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "root_cause": "A python str.replace patch inserted the same import block twice because the anchor line appeared more than once in the file after an earlier partial edit.",
-      "fix": "Deduplicated the imports by hand. When patching source with replace(), pass a count or assert the anchor occurs exactly once first.",
-      "tags": [
-        "tooling",
-        "codegen",
-        "imports"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T13:36:02Z"
-    },
-    {
-      "id": "bug-019",
-      "timestamp": "2026-08-21T14:07:42.332Z",
-      "error_message": "Significant refactor of ",
-      "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
-      "root_cause": "2 lines replaced/restructured",
-      "fix": "Rewrote 3\u219242 lines (2 removed)",
-      "tags": [
-        "auto-detected",
-        "refactor",
-        "md"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T14:07:42.332Z"
-    },
-    {
-      "id": "bug-020",
-      "timestamp": "2026-08-21T14:08:19.737Z",
-      "error_message": "Missing error handling in unknown",
-      "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
-      "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
-      "fix": "Added try/catch block",
-      "tags": [
-        "auto-detected",
-        "error-handling",
-        "md"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T14:08:19.737Z"
-    },
-    {
-      "id": "bug-013",
-      "timestamp": "2026-08-21T22:33:29Z",
-      "error_message": "Error resolving plugin [id: 'org.jetbrains.kotlin.plugin.serialization', version: '2.4.10'] > already on the classpath with an unknown version",
-      "file": "build.gradle.kts (root)",
-      "root_cause": "Applied the anfas.quality convention plugin at the ROOT project. That puts the convention project's entire runtime classpath -- including the Kotlin plugins -- on the root buildscript classpath, which every subproject inherits. Subprojects then cannot resolve their own plugin versions.",
-      "fix": "Root applies Spotless by version-catalog alias instead, with its own small spotless block for root-level .kts. Modules get formatting via their anfas.* convention plugin. Never apply a convention plugin to the root project of this build.",
-      "tags": [
-        "gradle",
-        "convention-plugins",
-        "classpath",
-        "root-project"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T22:33:29Z"
-    },
-    {
-      "id": "bug-014",
-      "timestamp": "2026-08-21T22:33:29Z",
-      "error_message": "Execution failed for task ':feature:announcements:spotlessKotlin' > Could not read path '.../merged_res/androidHostTest/.../values-ne_values-ne.arsc.flat'",
-      "file": "build-logic/convention/src/main/kotlin/anfas.quality.gradle.kts",
-      "root_cause": "Spotless had targetExclude(\"**/build/**\"), which forces it to ENUMERATE build intermediates in order to exclude them. AGP deletes merged-resource files mid-build, so the enumeration hit a file that had vanished.",
-      "fix": "Dropped the targetExclude entirely. target(\"src/**/*.kt\") already cannot match build/, which is a sibling of src/. Scope targets narrowly instead of excluding broadly.",
-      "tags": [
-        "gradle",
-        "spotless",
-        "agp",
-        "file-enumeration"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T22:33:29Z"
-    },
-    {
-      "id": "bug-015",
-      "timestamp": "2026-08-21T22:33:29Z",
-      "error_message": "Configuration cache problems: Task ':verifyIosVersionConfig' cannot serialize Gradle script object references",
-      "file": "build.gradle.kts (root)",
-      "root_cause": "A doLast block referenced a script-level function (renderIosVersionConfig). Task actions are serialized for the configuration cache and cannot capture script objects.",
-      "fix": "Render the expected text at CONFIGURATION time into a local String and have the task action capture only that. Also: do not declare a generated file as an input of the task that verifies it -- Gradle reports an implicit task dependency. Use outputs.upToDateWhen { false } for a verification task instead.",
-      "tags": [
-        "gradle",
-        "configuration-cache",
-        "tasks"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T22:33:29Z"
-    },
-    {
-      "id": "bug-016",
-      "timestamp": "2026-08-21T22:33:29Z",
-      "error_message": "androidx.sqlite.SQLiteException: Error code: 1555, UNIQUE constraint failed: room_master_table.id (MigrationV4ToV5Test)",
-      "file": "core/database/src/jvmTest/.../MigrationV4ToV5Test.kt",
-      "root_cause": "The test hand-inserted the schema identity hash into room_master_table, but a Room schema JSON's setupQueries ALREADY contain both the CREATE TABLE and the INSERT OR REPLACE for that row.",
-      "fix": "Execute the schema's setupQueries verbatim and add no manual insert. Room will not recognise a hand-built database as being at version N without that row, so it must come from exactly one place.",
-      "tags": [
-        "room",
-        "migration",
-        "tests",
-        "schema"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T22:33:29Z"
-    },
-    {
-      "id": "bug-017",
-      "timestamp": "2026-08-21T22:33:29Z",
-      "error_message": "macOS has no `timeout` command -- a verification run silently never started ('command not found: timeout')",
-      "file": "n/a (shell)",
-      "root_cause": "Used `timeout 90 ./gradlew ...` to bound a run. GNU coreutils is not present on macOS by default, so the whole pipeline failed and the absence of the expected log file was misread as a code problem.",
-      "fix": "Background the process and poll for the expected condition with an until-loop, then pkill. Do not assume GNU coreutils on this machine.",
-      "tags": [
-        "shell",
-        "macos",
-        "tooling",
-        "false-negative"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T22:33:29Z"
-    },
-    {
-      "id": "bug-018",
-      "timestamp": "2026-08-21T23:07:44Z",
-      "error_message": "expected:<[01001234567]> but was:<[\u0660\u0661\u0660\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667]> -- duplicate phone detection silently failing",
-      "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/IntakeValidator.kt",
-      "root_cause": "Char.isDigit() returns TRUE for Arabic-Indic digits (U+0660..U+0669), so filter { it.isDigit() } kept them and the same phone number in Arabic numerals produced a different normalisation key. All 18 existing tests used Latin digits.",
-      "fix": "Fold Arabic-Indic and Eastern Arabic digits to ASCII BEFORE filtering (TextNormalisation.foldDigitsToAscii). Rule: never use isDigit() as a filter when non-Latin input is possible -- fold first.",
-      "tags": [
-        "i18n",
-        "arabic",
-        "unicode",
-        "duplicate-detection",
-        "silent-failure"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T23:07:44Z"
-    },
-    {
-      "id": "bug-019",
-      "timestamp": "2026-08-21T23:07:44Z",
-      "error_message": "Compose MP 1.11.1 has no public API to override the Resources locale; iOS locale changes need an app relaunch",
-      "file": "core/i18n (design decision)",
-      "root_cause": "LocalComposeEnvironment is internal and ResourceEnvironment has an internal constructor. On iOS, Locale.current reads NSLocale.preferredLanguages, changeable only via NSUserDefaults AppleLanguages and effective next launch.",
-      "fix": "Do not use Compose Resources for strings when an in-app language toggle is required. A typed AppStrings interface behind a CompositionLocal makes switching an ordinary recomposition on all platforms, and makes a missing translation a compile error.",
-      "tags": [
-        "compose-multiplatform",
-        "i18n",
-        "locale",
-        "api-limitation"
-      ],
-      "related_bugs": [],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T23:07:44Z"
-    },
-    {
-      "id": "bug-020",
-      "timestamp": "2026-08-21T23:07:44Z",
-      "error_message": "Overlay boxes would jump to mirrored positions over a photograph in Arabic",
-      "file": "feature/intake-ocr/src/commonMain/.../IntakeReviewScreen.kt",
-      "root_cause": "Modifier.offset IS layout-direction aware (it negates x under RTL); absoluteOffset is the direction-agnostic one. The plan initially had this backwards. A photograph is not a mirrored artifact, so mirroring the overlay points staff at the wrong line.",
-      "fix": "Force LocalLayoutDirection = Ltr on the entire image pane, not absoluteOffset on one call -- that also covers future Alignment/Arrangement/gesture code. Fixed alongside a second bug in the same lines: boxes were sized against the pane rather than the rendered image rect, so letterboxing displaced every box.",
-      "tags": [
-        "compose",
-        "rtl",
-        "layout",
-        "offset"
-      ],
-      "related_bugs": [
-        "bug-021"
-      ],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T23:07:44Z"
-    },
-    {
-      "id": "bug-021",
-      "timestamp": "2026-08-21T23:07:44Z",
-      "error_message": "Latin-tuned typography breaks Arabic: tofu glyphs, shattered words, unreadable labels",
-      "file": "core/designsystem/src/commonMain/.../AnfasType.kt",
-      "root_cause": "Three separate defects. (1) The bundled IBM Plex Sans has no Arabic glyphs, and FontFamily selects by weight not glyph coverage, so merging faces would not help. (2) The export's letter-spacing breaks the joins between letters in a cursive script. (3) labelCaps is 11sp uppercase, meaningless in a script with no letter case.",
-      "fix": "Bundle IBM Plex Sans Arabic and BRANCH the family by script; zero letterSpacing for Arabic; grow labelCaps 1sp and drop its tracking; add ~10% lineHeight so ascenders/harakat do not clip.",
-      "tags": [
-        "i18n",
-        "arabic",
-        "typography",
-        "compose"
-      ],
-      "related_bugs": [
-        "bug-020"
-      ],
-      "occurrences": 1,
-      "last_seen": "2026-08-21T23:07:44Z"
-    },
-    {
-      "id": "bug-022",
-      "timestamp": "2026-08-21T23:07:44Z",
-      "error_message": "Repeated self-inflicted breakage from broad python str.replace on source files",
-      "file": "multiple (ReminderQueueState.kt, AnfasType.kt)",
-      "root_cause": "Patching Kotlin with str.replace against remembered formatting: Spotless had reformatted the files, so anchors matched partially or matched text that had already been rewritten. Results included a sealed interface spliced into the middle of a data class body and a duplicated @Composable annotation.",
-      "fix": "For multi-line structural edits, replace by LINE RANGE after grepping the current structure, or rewrite the file. Always re-read after Spotless has run.",
-      "tags": [
-        "tooling",
-        "codegen",
-        "refactoring"
-      ],
-      "related_bugs": [
-        "bug-012"
-      ],
-      "occurrences": 2,
-      "last_seen": "2026-08-21T23:07:44Z"
-    }
-  ]
-}
+[
+  {
+    "id": "bug-001",
+    "timestamp": "2026-08-21T09:07:30Z",
+    "error_message": "stitch MCP: 'Failed to connect - Incompatible auth server: does not support dynamic client registration'",
+    "file": "~/.claude.json (user-scope mcpServers.stitch)",
+    "root_cause": "stitch was configured as an http server at https://stitch.googleapis.com/mcp. That endpoint requires a pre-registered OAuth client; Claude Code only performs dynamic client registration, so authentication can never succeed. Re-running the OAuth flow cannot fix it.",
+    "fix": "Replaced with the stdio proxy: claude mcp add stitch -s user -e STITCH_API_KEY=<key> -- npx -y @_davideast/stitch-mcp proxy. The proxy hard-errors without STITCH_API_KEY or STITCH_ACCESS_TOKEN.",
+    "tags": [
+      "mcp",
+      "stitch",
+      "oauth",
+      "dcr",
+      "config"
+    ],
+    "related_bugs": [
+      "bug-002"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T09:07:30Z"
+  },
+  {
+    "id": "bug-002",
+    "timestamp": "2026-08-21T09:07:30Z",
+    "error_message": "mcp__stitch__download_assets returned 'Assets downloaded to <dir>' but wrote no files anywhere on disk",
+    "file": "design/stitch/export/ (expected output dir)",
+    "root_cause": "download_assets is a proxy-side convenience tool in @_davideast/stitch-mcp, not a real Stitch API call. It reports success unconditionally and silently writes nothing. Verified by searching the whole filesystem for files modified in the last 15 minutes.",
+    "fix": "Ignore the tool. Take htmlCode.downloadUrl / screenshot.downloadUrl from list_screens and curl them. The html download URL is a base64 protobuf in which only the html_<32hex> file id varies, so every screen's URL is reconstructable from a constant prefix+suffix; the URLs need no auth.",
+    "tags": [
+      "mcp",
+      "stitch",
+      "download_assets",
+      "silent-failure",
+      "false-success"
+    ],
+    "related_bugs": [
+      "bug-001"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T09:07:30Z"
+  },
+  {
+    "id": "bug-003",
+    "timestamp": "2026-08-21T09:36:19Z",
+    "error_message": "e: Cannot access 'androidx.room3.RoomDatabase' which is a supertype of 'AnfasDatabase'. Check your module classpath for missing or conflicting dependencies.",
+    "file": "core/database/build.gradle.kts",
+    "root_cause": ":core:database declared `implementation(libs.bundles.room)`, but AnfasDatabase extends RoomDatabase and DatabaseBuilderFactory returns RoomDatabase.Builder \u2014 room3-runtime is part of the module's ABI, so a consumer (:core:data) could not compile against it.",
+    "fix": "Split the bundle: `api(libs.androidx.room3.runtime)` because it is in the ABI, `implementation(libs.androidx.sqlite.bundled)` because the driver is internal to buildDatabase(). Features still never see Room \u2014 anfas.kmp.feature withholds :core:database.",
+    "tags": [
+      "gradle",
+      "kmp",
+      "room",
+      "api-vs-implementation",
+      "abi"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T09:36:19Z"
+  },
+  {
+    "id": "bug-004",
+    "timestamp": "2026-08-21T09:36:19Z",
+    "error_message": "e: Name contains illegal characters: \",\". (core/data + feature/members commonTest, only on compileTestKotlinIosSimulatorArm64)",
+    "file": "core/data/src/commonTest/.../OfflineFirstMemberRepositoryTest.kt",
+    "root_cause": "Backtick-quoted test function names containing a comma. The JVM target accepts them, so `:core:data:jvmTest` passed and the failure only appeared when `check` reached the Kotlin/Native test compilation.",
+    "fix": "Stripped , ; : . from all backticked test names. Lesson: run `./gradlew check` (which compiles native test targets) before believing a KMP test suite is green \u2014 a jvmTest pass proves nothing about iOS.",
+    "tags": [
+      "kmp",
+      "kotlin-native",
+      "tests",
+      "backtick-names"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T09:36:19Z"
+  },
+  {
+    "id": "bug-005",
+    "timestamp": "2026-08-21T09:36:19Z",
+    "error_message": "e: Unresolved reference 'number' (kotlinx.datetime.Month.number)",
+    "file": "feature/members/src/commonMain/.../LastCheckIn.kt",
+    "root_cause": "kotlinx-datetime 0.8.0's Month has no `number` property.",
+    "fix": "Index a MonthAbbreviations array by Enum.ordinal; the enum is declared January..December in order.",
+    "tags": [
+      "kotlinx-datetime",
+      "api-change"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T09:36:19Z"
+  },
+  {
+    "id": "bug-006",
+    "timestamp": "2026-08-21T12:13:45Z",
+    "error_message": "e: Overload resolution ambiguity / Conflicting overloads in OfflineFirstMemberRepository.kt (runStorage, asStorageError)",
+    "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/StorageBoundary.kt",
+    "root_cause": "Extracted the shared error-boundary helpers into StorageBoundary.kt as `internal` while OfflineFirstMemberRepository.kt still had its own `private` copies with the same names in the same package.",
+    "fix": "Deleted the private copies and rewrote the member repository to use the shared runStorage/asAppResult. Extracting a helper means removing the original, not adding a second.",
+    "tags": [
+      "kotlin",
+      "refactor",
+      "duplicate-declaration"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T12:13:45Z"
+  },
+  {
+    "id": "bug-007",
+    "timestamp": "2026-08-21T12:13:45Z",
+    "error_message": "e: Cannot access class 'kotlinx.datetime.LocalDate'. Check your module classpath (from :core:data)",
+    "file": "core/model/build.gradle.kts",
+    "root_cause": "kotlinx-datetime was `implementation` in :core:model, but SubscriptionTerm.startsOn and RenewalQuote.endsOn expose LocalDate, so it is part of the module's ABI. Same class of mistake as bug-003 with room3.",
+    "fix": "Changed to `api(libs.kotlinx.datetime)`. Rule: if a type from a dependency appears in your public signatures, it is `api`.",
+    "tags": [
+      "gradle",
+      "kmp",
+      "api-vs-implementation",
+      "abi",
+      "kotlinx-datetime"
+    ],
+    "related_bugs": [
+      "bug-003"
+    ],
+    "occurrences": 2,
+    "last_seen": "2026-08-21T12:13:45Z"
+  },
+  {
+    "id": "bug-008",
+    "timestamp": "2026-08-21T12:13:45Z",
+    "error_message": "e: Unresolved reference 'datetime' in core/common/RelativeTime.kt \u2014 only during :core:common:compileCommonMainKotlinMetadata",
+    "file": "core/common/build.gradle.kts",
+    "root_cause": "kotlinx-datetime was reached transitively via api(project(\":core:model\")). Platform compilations (jvmTest) resolved it, but commonMain *metadata* compilation did not, so `:core:common:jvmTest` passed while `check` failed later.",
+    "fix": "Declared api(libs.kotlinx.datetime) directly in :core:common. Do not rely on a transitive api dependency in commonMain metadata compilation; declare ABI deps explicitly.",
+    "tags": [
+      "gradle",
+      "kmp",
+      "metadata-compilation",
+      "transitive-dependency"
+    ],
+    "related_bugs": [
+      "bug-007"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T12:13:45Z"
+  },
+  {
+    "id": "bug-009",
+    "timestamp": "2026-08-21T12:13:45Z",
+    "error_message": "app.cash.turbine.TurbineAssertionError: Unconsumed events found (3 ReminderQueueComponentTest failures)",
+    "file": "feature/subscriptions/src/commonTest/.../ReminderQueueComponentTest.kt",
+    "root_cause": "A StateFlow keeps emitting after the assertion of interest \u2014 combine() re-emits when any upstream changes. Turbine treats leftover emissions at the end of a test() block as a failure.",
+    "fix": "End each state.test { } block with cancelAndIgnoreRemainingEvents() once the interesting emission has been asserted.",
+    "tags": [
+      "tests",
+      "turbine",
+      "stateflow",
+      "coroutines"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T12:13:45Z"
+  },
+  {
+    "id": "bug-010",
+    "timestamp": "2026-08-21T12:13:45Z",
+    "error_message": "e: Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch (clock.now().todayIn(zone))",
+    "file": "feature/subscriptions/src/commonMain/.../RenewalSheetComponent.kt",
+    "root_cause": "kotlinx-datetime's todayIn is an extension on Clock, not on Instant.",
+    "fix": "Call clock.todayIn(timeZone) directly.",
+    "tags": [
+      "kotlinx-datetime",
+      "api"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T12:13:45Z"
+  },
+  {
+    "id": "bug-011",
+    "timestamp": "2026-08-21T12:30:42.512Z",
+    "error_message": "Missing error handling in unknown",
+    "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/Member.kt",
+    "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
+    "fix": "Added try/catch block",
+    "tags": [
+      "auto-detected",
+      "error-handling",
+      "kt"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T12:30:42.512Z"
+  },
+  {
+    "id": "bug-012",
+    "timestamp": "2026-08-21T12:32:43.581Z",
+    "error_message": "Null/undefined access in ",
+    "file": "core/data/src/commonTest/kotlin/com/anfas/core/data/FakeMemberDao.kt",
+    "root_cause": "Property access on potentially null/undefined value",
+    "fix": "Added null safety (optional chaining or null check)",
+    "tags": [
+      "auto-detected",
+      "null-safety",
+      "kt"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T12:32:43.581Z"
+  },
+  {
+    "id": "bug-013",
+    "timestamp": "2026-08-21T12:34:42.209Z",
+    "error_message": "Significant refactor of ",
+    "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
+    "root_cause": "6 lines replaced/restructured",
+    "fix": "Rewrote 11\u21926 lines (6 removed) | Also: /** Sentinel for \"no particular batch\"; the query ; const val BATCH_ANY = \"\"",
+    "tags": [
+      "auto-detected",
+      "refactor",
+      "kt"
+    ],
+    "related_bugs": [],
+    "occurrences": 2,
+    "last_seen": "2026-08-21T12:34:56.644Z"
+  },
+  {
+    "id": "bug-014",
+    "timestamp": "2026-08-21T12:35:10.868Z",
+    "error_message": "Wrong reference: AppError should be AppResult",
+    "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
+    "root_cause": "Used \"AppError\" instead of \"AppResult\"",
+    "fix": "Changed AppError \u2192 AppResult",
+    "tags": [
+      "auto-detected",
+      "wrong-reference",
+      "kt"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T12:35:10.868Z"
+  },
+  {
+    "id": "bug-015",
+    "timestamp": "2026-08-21T13:26:43.568Z",
+    "error_message": "Significant refactor of ",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+    "root_cause": "28 lines replaced/restructured",
+    "fix": "Rewrote 37\u219217 lines (28 removed)",
+    "tags": [
+      "auto-detected",
+      "refactor",
+      "kt"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T13:26:43.569Z"
+  },
+  {
+    "id": "bug-016",
+    "timestamp": "2026-08-21T13:26:51.572Z",
+    "error_message": "Wrong reference: width should be size",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+    "root_cause": "Used \"width\" instead of \"size\"",
+    "fix": "Changed width \u2192 size",
+    "tags": [
+      "auto-detected",
+      "wrong-reference",
+      "kt"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T13:26:51.572Z"
+  },
+  {
+    "id": "bug-011",
+    "timestamp": "2026-08-21T13:36:02Z",
+    "error_message": "AssertionError: expected:<[#88393, #88394]> but was:<[#88394]> \u2014 only one member imported instead of two",
+    "file": "core/data/src/commonTest/.../OfflineFirstIntakeRepositoryTest.kt",
+    "root_cause": "The test fixture's newId lambda returned a constant string, so every imported row got the same member primary key and the Room upsert collapsed them into a single row. The repository was correct; the double-checked assertion caught the fixture.",
+    "fix": "Made the fixture's newId a counter. Lesson: any injected id generator in a test must be unique per call, or upserts silently merge records and the test looks like a product bug.",
+    "tags": [
+      "tests",
+      "fixtures",
+      "upsert",
+      "primary-key"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T13:36:02Z"
+  },
+  {
+    "id": "bug-012",
+    "timestamp": "2026-08-21T13:36:02Z",
+    "error_message": "e: Conflicting import: imported name 'IntakeReviewComponent' is ambiguous (RootComponent.kt)",
+    "file": "composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
+    "root_cause": "A python str.replace patch inserted the same import block twice because the anchor line appeared more than once in the file after an earlier partial edit.",
+    "fix": "Deduplicated the imports by hand. When patching source with replace(), pass a count or assert the anchor occurs exactly once first.",
+    "tags": [
+      "tooling",
+      "codegen",
+      "imports"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T13:36:02Z"
+  },
+  {
+    "id": "bug-019",
+    "timestamp": "2026-08-21T14:07:42.332Z",
+    "error_message": "Significant refactor of ",
+    "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
+    "root_cause": "2 lines replaced/restructured",
+    "fix": "Rewrote 3\u219242 lines (2 removed)",
+    "tags": [
+      "auto-detected",
+      "refactor",
+      "md"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T14:07:42.332Z"
+  },
+  {
+    "id": "bug-020",
+    "timestamp": "2026-08-21T14:08:19.737Z",
+    "error_message": "Missing error handling in unknown",
+    "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
+    "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
+    "fix": "Added try/catch block",
+    "tags": [
+      "auto-detected",
+      "error-handling",
+      "md"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T14:08:19.737Z"
+  },
+  {
+    "id": "bug-013",
+    "timestamp": "2026-08-21T22:33:29Z",
+    "error_message": "Error resolving plugin [id: 'org.jetbrains.kotlin.plugin.serialization', version: '2.4.10'] > already on the classpath with an unknown version",
+    "file": "build.gradle.kts (root)",
+    "root_cause": "Applied the anfas.quality convention plugin at the ROOT project. That puts the convention project's entire runtime classpath -- including the Kotlin plugins -- on the root buildscript classpath, which every subproject inherits. Subprojects then cannot resolve their own plugin versions.",
+    "fix": "Root applies Spotless by version-catalog alias instead, with its own small spotless block for root-level .kts. Modules get formatting via their anfas.* convention plugin. Never apply a convention plugin to the root project of this build.",
+    "tags": [
+      "gradle",
+      "convention-plugins",
+      "classpath",
+      "root-project"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T22:33:29Z"
+  },
+  {
+    "id": "bug-014",
+    "timestamp": "2026-08-21T22:33:29Z",
+    "error_message": "Execution failed for task ':feature:announcements:spotlessKotlin' > Could not read path '.../merged_res/androidHostTest/.../values-ne_values-ne.arsc.flat'",
+    "file": "build-logic/convention/src/main/kotlin/anfas.quality.gradle.kts",
+    "root_cause": "Spotless had targetExclude(\"**/build/**\"), which forces it to ENUMERATE build intermediates in order to exclude them. AGP deletes merged-resource files mid-build, so the enumeration hit a file that had vanished.",
+    "fix": "Dropped the targetExclude entirely. target(\"src/**/*.kt\") already cannot match build/, which is a sibling of src/. Scope targets narrowly instead of excluding broadly.",
+    "tags": [
+      "gradle",
+      "spotless",
+      "agp",
+      "file-enumeration"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T22:33:29Z"
+  },
+  {
+    "id": "bug-015",
+    "timestamp": "2026-08-21T22:33:29Z",
+    "error_message": "Configuration cache problems: Task ':verifyIosVersionConfig' cannot serialize Gradle script object references",
+    "file": "build.gradle.kts (root)",
+    "root_cause": "A doLast block referenced a script-level function (renderIosVersionConfig). Task actions are serialized for the configuration cache and cannot capture script objects.",
+    "fix": "Render the expected text at CONFIGURATION time into a local String and have the task action capture only that. Also: do not declare a generated file as an input of the task that verifies it -- Gradle reports an implicit task dependency. Use outputs.upToDateWhen { false } for a verification task instead.",
+    "tags": [
+      "gradle",
+      "configuration-cache",
+      "tasks"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T22:33:29Z"
+  },
+  {
+    "id": "bug-016",
+    "timestamp": "2026-08-21T22:33:29Z",
+    "error_message": "androidx.sqlite.SQLiteException: Error code: 1555, UNIQUE constraint failed: room_master_table.id (MigrationV4ToV5Test)",
+    "file": "core/database/src/jvmTest/.../MigrationV4ToV5Test.kt",
+    "root_cause": "The test hand-inserted the schema identity hash into room_master_table, but a Room schema JSON's setupQueries ALREADY contain both the CREATE TABLE and the INSERT OR REPLACE for that row.",
+    "fix": "Execute the schema's setupQueries verbatim and add no manual insert. Room will not recognise a hand-built database as being at version N without that row, so it must come from exactly one place.",
+    "tags": [
+      "room",
+      "migration",
+      "tests",
+      "schema"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T22:33:29Z"
+  },
+  {
+    "id": "bug-017",
+    "timestamp": "2026-08-21T22:33:29Z",
+    "error_message": "macOS has no `timeout` command -- a verification run silently never started ('command not found: timeout')",
+    "file": "n/a (shell)",
+    "root_cause": "Used `timeout 90 ./gradlew ...` to bound a run. GNU coreutils is not present on macOS by default, so the whole pipeline failed and the absence of the expected log file was misread as a code problem.",
+    "fix": "Background the process and poll for the expected condition with an until-loop, then pkill. Do not assume GNU coreutils on this machine.",
+    "tags": [
+      "shell",
+      "macos",
+      "tooling",
+      "false-negative"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T22:33:29Z"
+  },
+  {
+    "id": "bug-018",
+    "timestamp": "2026-08-21T23:07:44Z",
+    "error_message": "expected:<[01001234567]> but was:<[\u0660\u0661\u0660\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667]> -- duplicate phone detection silently failing",
+    "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/IntakeValidator.kt",
+    "root_cause": "Char.isDigit() returns TRUE for Arabic-Indic digits (U+0660..U+0669), so filter { it.isDigit() } kept them and the same phone number in Arabic numerals produced a different normalisation key. All 18 existing tests used Latin digits.",
+    "fix": "Fold Arabic-Indic and Eastern Arabic digits to ASCII BEFORE filtering (TextNormalisation.foldDigitsToAscii). Rule: never use isDigit() as a filter when non-Latin input is possible -- fold first.",
+    "tags": [
+      "i18n",
+      "arabic",
+      "unicode",
+      "duplicate-detection",
+      "silent-failure"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T23:07:44Z"
+  },
+  {
+    "id": "bug-019",
+    "timestamp": "2026-08-21T23:07:44Z",
+    "error_message": "Compose MP 1.11.1 has no public API to override the Resources locale; iOS locale changes need an app relaunch",
+    "file": "core/i18n (design decision)",
+    "root_cause": "LocalComposeEnvironment is internal and ResourceEnvironment has an internal constructor. On iOS, Locale.current reads NSLocale.preferredLanguages, changeable only via NSUserDefaults AppleLanguages and effective next launch.",
+    "fix": "Do not use Compose Resources for strings when an in-app language toggle is required. A typed AppStrings interface behind a CompositionLocal makes switching an ordinary recomposition on all platforms, and makes a missing translation a compile error.",
+    "tags": [
+      "compose-multiplatform",
+      "i18n",
+      "locale",
+      "api-limitation"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T23:07:44Z"
+  },
+  {
+    "id": "bug-020",
+    "timestamp": "2026-08-21T23:07:44Z",
+    "error_message": "Overlay boxes would jump to mirrored positions over a photograph in Arabic",
+    "file": "feature/intake-ocr/src/commonMain/.../IntakeReviewScreen.kt",
+    "root_cause": "Modifier.offset IS layout-direction aware (it negates x under RTL); absoluteOffset is the direction-agnostic one. The plan initially had this backwards. A photograph is not a mirrored artifact, so mirroring the overlay points staff at the wrong line.",
+    "fix": "Force LocalLayoutDirection = Ltr on the entire image pane, not absoluteOffset on one call -- that also covers future Alignment/Arrangement/gesture code. Fixed alongside a second bug in the same lines: boxes were sized against the pane rather than the rendered image rect, so letterboxing displaced every box.",
+    "tags": [
+      "compose",
+      "rtl",
+      "layout",
+      "offset"
+    ],
+    "related_bugs": [
+      "bug-021"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T23:07:44Z"
+  },
+  {
+    "id": "bug-021",
+    "timestamp": "2026-08-21T23:07:44Z",
+    "error_message": "Latin-tuned typography breaks Arabic: tofu glyphs, shattered words, unreadable labels",
+    "file": "core/designsystem/src/commonMain/.../AnfasType.kt",
+    "root_cause": "Three separate defects. (1) The bundled IBM Plex Sans has no Arabic glyphs, and FontFamily selects by weight not glyph coverage, so merging faces would not help. (2) The export's letter-spacing breaks the joins between letters in a cursive script. (3) labelCaps is 11sp uppercase, meaningless in a script with no letter case.",
+    "fix": "Bundle IBM Plex Sans Arabic and BRANCH the family by script; zero letterSpacing for Arabic; grow labelCaps 1sp and drop its tracking; add ~10% lineHeight so ascenders/harakat do not clip.",
+    "tags": [
+      "i18n",
+      "arabic",
+      "typography",
+      "compose"
+    ],
+    "related_bugs": [
+      "bug-020"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-21T23:07:44Z"
+  },
+  {
+    "id": "bug-022",
+    "timestamp": "2026-08-21T23:07:44Z",
+    "error_message": "Repeated self-inflicted breakage from broad python str.replace on source files",
+    "file": "multiple (ReminderQueueState.kt, AnfasType.kt)",
+    "root_cause": "Patching Kotlin with str.replace against remembered formatting: Spotless had reformatted the files, so anchors matched partially or matched text that had already been rewritten. Results included a sealed interface spliced into the middle of a data class body and a duplicated @Composable annotation.",
+    "fix": "For multi-line structural edits, replace by LINE RANGE after grepping the current structure, or rewrite the file. Always re-read after Spotless has run.",
+    "tags": [
+      "tooling",
+      "codegen",
+      "refactoring"
+    ],
+    "related_bugs": [
+      "bug-012"
+    ],
+    "occurrences": 2,
+    "last_seen": "2026-08-21T23:07:44Z"
+  },
+  {
+    "id": "bug-031",
+    "timestamp": "2026-08-22T12:15:00Z",
+    "error_message": "Reminder queue tab labels rendered as a vertical stack of single letters ('F a i l e d'), in both English and Arabic",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTabs.kt",
+    "root_cause": "Each tab's 2dp selection indicator used Box(Modifier.fillMaxWidth()) inside the per-tab Column. fillMaxWidth resolves against the INCOMING max constraint, not the sibling label's width, so the first tab's Column claimed the entire Row width and every later tab was measured at ~one character wide.",
+    "fix": "Bound the per-tab Column with Modifier.width(IntrinsicSize.Max) so fillMaxWidth means 'as wide as this tab's label row'. Added maxLines=1/softWrap=false on the label and horizontalScroll on the strip so a future overflow clips or scrolls instead of shattering.",
+    "tags": [
+      "compose",
+      "layout",
+      "fillMaxWidth",
+      "intrinsics",
+      "designsystem",
+      "rtl"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T12:15:00Z"
+  },
+  {
+    "id": "bug-032",
+    "timestamp": "2026-08-22T12:15:00Z",
+    "error_message": "Language toggle crammed into the bottom navigation bar as a fourth slot; completely absent on the wide/rail layout",
+    "file": "composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
+    "root_cause": "App.kt passed the toggle as AnfasBottomNav(trailing = toggle), which stole width from three real destinations and crowded the bar's end edge. AnfasNavRail's footer slot existed but was never passed anything, so on desktop/tablet there was no way to change language at all.",
+    "fix": "Moved the toggle to an end-aligned row above the Host on compact, and passed footer = toggle to AnfasNavRail on wide. A language switch is not a navigation destination.",
+    "tags": [
+      "compose",
+      "navigation",
+      "i18n",
+      "layout",
+      "desktop"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T12:15:00Z"
+  },
+  {
+    "id": "bug-033",
+    "timestamp": "2026-08-22T12:15:00Z",
+    "error_message": "Members empty state: 'SCAN SHEET' wrapped onto two lines while the adjacent 'ADD MEMBER' stayed on one",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasEmptyState.kt",
+    "root_cause": "The two action buttons sat in a plain Row, so on a phone they competed for width and whichever was measured second wrapped its label at a different height from its neighbour.",
+    "fix": "Switched the actions container to FlowRow with vertical spacing, so the buttons stack on a narrow screen and stay inline on a wide one.",
+    "tags": [
+      "compose",
+      "layout",
+      "flowrow",
+      "designsystem",
+      "empty-state"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T12:15:00Z"
+  },
+  {
+    "id": "bug-034",
+    "timestamp": "2026-08-22T12:15:00Z",
+    "error_message": "checkAndroidHostTestAarMetadata FAILED: Dependency 'androidx.core:core:1.19.0' requires Android Gradle plugin 9.1.0 or higher / compileSdk 37",
+    "file": "gradle/libs.versions.toml",
+    "root_cause": "androidx-core was pinned at 1.19.0 in the catalog but had no Android-compiling consumer, so the incompatibility was latent. :core:ocr became the first consumer (FileProvider) and surfaced it. AGP is capped at 9.0.1 by the installed Android Studio.",
+    "fix": "Downgraded androidx-core to 1.18.0, the highest release compatible with AGP 9.0.1 / compileSdk 36, and added it to CLAUDE.md's version-ceiling table next to androidx-lifecycle.",
+    "tags": [
+      "gradle",
+      "agp",
+      "version-ceiling",
+      "androidx",
+      "catalog"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T12:15:00Z"
+  }
+]
