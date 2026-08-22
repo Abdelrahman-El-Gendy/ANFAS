@@ -10,10 +10,16 @@ kotlin {
         commonMain.dependencies {
             api(project(":core:model"))
             api(project(":core:common"))
+            // api, not implementation: AuthRepository's signature is made of :core:auth types
+            // (Session, SignInResult, Role), so they are part of this module's ABI. The same
+            // lesson as room3-runtime and kotlinx-datetime earlier in this project.
+            api(project(":core:auth"))
             implementation(project(":core:database"))
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.bundles.koin)
+            // SettingsSessionStore persists which staff id is signed in. No secret: see its KDoc.
+            implementation(libs.bundles.settings)
         }
         commonTest.dependencies {
             implementation(libs.turbine)

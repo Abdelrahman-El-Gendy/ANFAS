@@ -276,4 +276,35 @@ interface AppStrings {
         val fieldPhone: String
         val fieldStatus: String
     }
+
+    val auth: Auth
+
+    interface Auth {
+        val signInTitle: String
+        val signInTagline: String
+        val username: String
+        val password: String
+        val showPassword: String
+        val hidePassword: String
+        val rememberMe: String
+        val signIn: String
+        val signingIn: String
+        val signOut: String
+
+        /** Sign-in failures. Deliberately one message for both wrong user and wrong password. */
+        val invalidCredentials: String
+        val accountDisabled: String
+
+        /** First run: no accounts exist, so the app offers setup rather than an unusable login. */
+        val setupTitle: String
+        val setupMessage: String
+        val displayName: String
+        val createOwner: String
+        val creating: String
+
+        val problemUsernameTooShort: String
+        val problemUsernameTaken: String
+        val problemPasswordTooShort: String
+        val problemDisplayNameBlank: String
+    }
 }

@@ -3,10 +3,12 @@ package com.anfas.app.di
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.DefaultAppDispatchers
 import com.anfas.core.common.logger
+import com.anfas.core.common.platformSettingsModule
 import com.anfas.core.data.dataModule
 import com.anfas.core.i18n.i18nModule
 import com.anfas.core.ocr.ocrModule
 import com.anfas.feature.announcements.AnnouncementsModule
+import com.anfas.feature.auth.AuthModule
 import com.anfas.feature.classes.ClassesModule
 import com.anfas.feature.equipment.EquipmentModule
 import com.anfas.feature.intakeocr.IntakeOcrModule
@@ -21,6 +23,9 @@ import org.koin.dsl.module
 
 val coreModule: Module = module {
     single<AppDispatchers> { DefaultAppDispatchers }
+    // Key-value storage, registered once. Both :core:i18n (language) and :core:data (session)
+    // resolve Settings from here — see platformSettingsModule's KDoc.
+    includes(platformSettingsModule())
 }
 
 /**
@@ -28,6 +33,7 @@ val coreModule: Module = module {
  * Add a feature here when you add it to :composeApp's dependencies.
  */
 val featureModules: List<Module> = listOf(
+    AuthModule,
     MembersModule,
     SubscriptionsModule,
     IntakeOcrModule,

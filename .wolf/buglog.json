@@ -855,5 +855,40 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-22T16:00:00Z"
+  },
+  {
+    "id": "bug-050",
+    "timestamp": "2026-08-22T18:20:00Z",
+    "error_message": "After signing out, the app showed 'Set up this device' instead of the login form, with the previous user's name and username still in the fields",
+    "file": "feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/SignInComponent.kt",
+    "root_cause": "The component decided its mode once in init. The shell creates it eagerly at startup \u2014 before any account exists \u2014 so it latched FirstRun and never re-evaluated. Submitting would have self-healed via AlreadyInitialised, but the user was shown the wrong form. Retaining the fields also left the previous person's details on screen, which matters on a shared reception device.",
+    "fix": "The component now collects observeSession() and re-runs hasAnyAccount() whenever the session becomes null, replacing the whole state so the form is cleared too. Regression test added.",
+    "tags": [
+      "auth",
+      "state",
+      "lifecycle",
+      "privacy",
+      "compose"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T18:20:00Z"
+  },
+  {
+    "id": "bug-051",
+    "timestamp": "2026-08-22T18:20:00Z",
+    "error_message": "MigrationV4ToV5Test FAILED: schema version should now be 5 expected:<5> but was:<6>",
+    "file": "core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt",
+    "root_cause": "The test hardcoded the target schema version and was named for it. Adding the staff table for sign-in took the database to v6, so opening a v4 file now migrates all the way forward \u2014 the test broke for a reason unconnected to what it verifies.",
+    "fix": "Renamed to MigrationFromV4Test and generalised: it now asserts the whole chain ran (placeholder dropped by v5, staff added by v6, the member row survived) and that migrating never invents a staff account. The version number moved to a named constant with a note that the assertion which matters is that the chain applied.",
+    "tags": [
+      "room",
+      "migration",
+      "tests",
+      "brittleness"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T18:20:00Z"
   }
 ]

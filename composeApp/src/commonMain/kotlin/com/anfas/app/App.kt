@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.anfas.app.navigation.RootComponent
@@ -27,12 +30,15 @@ import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasLanguageToggle
 import com.anfas.core.designsystem.AnfasNavRail
 import com.anfas.core.designsystem.AnfasScript
+import com.anfas.core.designsystem.AnfasTextAction
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.NavItem
+import com.anfas.core.designsystem.TextActionEmphasis
 import com.anfas.core.i18n.AppLanguage
 import com.anfas.core.i18n.LanguageController
 import com.anfas.core.i18n.ProvideLocalization
 import com.anfas.core.i18n.strings
+import com.anfas.feature.auth.SignInScreen
 import com.anfas.feature.intakeocr.IntakeReviewScreen
 import com.anfas.feature.members.MemberProfileScreen
 import com.anfas.feature.members.MembersListScreen
@@ -63,8 +69,12 @@ fun App(root: RootComponent) {
     ProvideLocalization(language) {
         AnfasTheme(script = language.toScript()) {
             Surface(modifier = Modifier.fillMaxSize()) {
+                val session by root.session.collectAsState()
                 val stack by root.stack.subscribeAsState()
-                val active = stack.active.configuration.topLevel
+                // Nav chrome is hidden while signed out: there is nothing to navigate to, and a
+                // bottom bar over a login form invites tapping into screens that do not exist yet
+                // for this user.
+                val active = stack.active.configuration.topLevel.takeIf { session != null }
                 val s = strings
                 val languages = AppLanguage.entries
                 val toggle: @Composable () -> Unit = {
@@ -72,6 +82,13 @@ fun App(root: RootComponent) {
                         options = languages.map { it.endonym },
                         selectedIndex = languages.indexOf(language),
                         onSelect = { languageController.select(languages[it]) },
+                    )
+                }
+                val signOut: @Composable () -> Unit = {
+                    AnfasTextAction(
+                        text = s.auth.signOut,
+                        onClick = root::onSignOut,
+                        emphasis = TextActionEmphasis.Muted,
                     )
                 }
                 val items = listOf(
@@ -118,10 +135,21 @@ fun App(root: RootComponent) {
                                     subtitle = s.common.appTagline,
                                     // Without this the toggle existed only on compact, so
                                     // language could not be changed at all on desktop.
-                                    footer = toggle,
+                                    footer = {
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        ) {
+                                            toggle()
+                                            signOut()
+                                        }
+                                    },
                                 )
                             }
-                            Host(root, Modifier.fillMaxSize())
+                            if (session == null) {
+                                SignInScreen(root.signIn, Modifier.fillMaxSize())
+                            } else {
+                                Host(root, Modifier.fillMaxSize())
+                            }
                         }
                     } else {
                         Column(modifier = Modifier.fillMaxSize()) {
@@ -129,7 +157,9 @@ fun App(root: RootComponent) {
                             // fourth bottom-nav slot it stole width from three real
                             // destinations and crowded the bar's end edge; a language switch
                             // is also not a navigation destination.
-                            if (active != null) {
+                            if (session == null) {
+                                // Signed out: the toggle alone, so someone can read the login
+                                // form in their own language before they have an account.
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -141,9 +171,31 @@ fun App(root: RootComponent) {
                                 ) {
                                     toggle()
                                 }
+                            } else {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            horizontal = AnfasTheme.spacing.marginMobile,
+                                            vertical = 8.dp,
+                                        ),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    signOut()
+                                    Spacer(Modifier.width(8.dp))
+                                    toggle()
+                                }
                             }
-                            Host(root, Modifier.fillMaxWidth().weight(1f))
-                            if (active != null) AnfasBottomNav(items)
+                            if (session == null) {
+                                SignInScreen(
+                                    component = root.signIn,
+                                    modifier = Modifier.fillMaxWidth().weight(1f),
+                                )
+                            } else {
+                                Host(root, Modifier.fillMaxWidth().weight(1f))
+                                AnfasBottomNav(items)
+                            }
                         }
                     }
                 }

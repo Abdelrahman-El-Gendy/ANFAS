@@ -321,6 +321,34 @@ object AnfasIcons {
 
     // --- added for :feature:intake-ocr ----------------------------------------------------
 
+    /** The eye the export's password field shows. Not auto-mirrored: an eye is symmetrical. */
+    val Visibility: ImageVector by lazy {
+        stroked("Visibility") {
+            moveTo(2f, 12f)
+            curveTo(4.5f, 7f, 8f, 5f, 12f, 5f)
+            curveTo(16f, 5f, 19.5f, 7f, 22f, 12f)
+            curveTo(19.5f, 17f, 16f, 19f, 12f, 19f)
+            curveTo(8f, 19f, 4.5f, 17f, 2f, 12f)
+            close()
+            circle(12f, 12f, 3.2f)
+        }
+    }
+
+    /** The same eye with a slash, for the shown-password state. */
+    val VisibilityOff: ImageVector by lazy {
+        stroked("VisibilityOff") {
+            moveTo(2f, 12f)
+            curveTo(4.5f, 7f, 8f, 5f, 12f, 5f)
+            curveTo(16f, 5f, 19.5f, 7f, 22f, 12f)
+            curveTo(19.5f, 17f, 16f, 19f, 12f, 19f)
+            curveTo(8f, 19f, 4.5f, 17f, 2f, 12f)
+            close()
+            circle(12f, 12f, 3.2f)
+            moveTo(4f, 20f)
+            lineTo(20f, 4f)
+        }
+    }
+
     val ZoomIn: ImageVector by lazy {
         stroked("ZoomIn") {
             circle(10.5f, 10.5f, 6.5f)

@@ -15,8 +15,9 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         SubscriptionEntity::class,
         IntakeBatchEntity::class,
         IntakeRowEntity::class,
+        StaffEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
     // v2 adds the `members` table. Adding a table needs no hand-written logic, but the
     // migration is declared rather than falling back to a destructive recreate — the
@@ -36,6 +37,10 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         // target. @DeleteTable needs the spec below because Room cannot tell a dropped table
         // from a renamed one.
         AutoMigration(from = 4, to = 5, spec = DropPlaceholderTable::class),
+        // v6 adds `staff` for local sign-in. A new table, so no hand-written logic — but note
+        // that an existing install has zero staff rows after this migration, which is exactly
+        // the state the first-run setup screen handles. Migrating must never invent an account.
+        AutoMigration(from = 5, to = 6),
     ],
 )
 @ConstructedBy(AnfasDatabaseConstructor::class)
@@ -47,6 +52,8 @@ abstract class AnfasDatabase : RoomDatabase() {
     abstract fun subscriptionDao(): SubscriptionDao
 
     abstract fun intakeDao(): IntakeDao
+
+    abstract fun staffDao(): StaffDao
 
     companion object {
         const val FILE_NAME: String = "anfas.db"

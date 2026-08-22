@@ -8,16 +8,9 @@ import org.koin.dsl.module
  * and a second instance would let two screens disagree.
  */
 val i18nModule: Module = module {
-    includes(platformI18nModule())
+    // Settings comes from :core:common's platformSettingsModule, registered once for the app —
+    // :core:data needs the same store for the session. See that module's KDoc.
     single { LanguageController(settings = get(), deviceLanguageTag = deviceLanguageTag()) }
 }
-
-/**
- * Explicit per-platform Settings, following the same expect/actual shape as
- * :core:data's platformDatabaseModule rather than using multiplatform-settings-no-arg — that
- * artifact gets its Android Context by registering a hidden ContentProvider, and this keeps the
- * androidContext() requirement visible.
- */
-internal expect fun platformI18nModule(): Module
 
 internal expect fun deviceLanguageTag(): String?

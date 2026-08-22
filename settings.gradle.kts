@@ -54,6 +54,7 @@ include(":core:network")
 include(":core:ocr")
 include(":core:auth")
 
+include(":feature:auth")
 include(":feature:members")
 include(":feature:subscriptions")
 include(":feature:intake-ocr")

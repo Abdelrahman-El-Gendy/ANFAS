@@ -27,7 +27,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AnfasCallout(
     title: String,
-    message: String,
+    /**
+     * Nullable: a sign-in failure has no useful remedy to add beyond retyping, and a second line
+     * restating the first is filler. Passing an empty string would leave its 8dp gap behind.
+     */
+    message: String? = null,
     modifier: Modifier = Modifier,
     accent: Color = MaterialTheme.colorScheme.error,
 ) {
@@ -50,12 +54,14 @@ fun AnfasCallout(
                 style = AnfasTheme.textStyles.bodyLarge,
                 color = scheme.onSurface,
             )
-            Box(Modifier.height(8.dp))
-            Text(
-                text = message,
-                style = AnfasTheme.textStyles.bodyMedium,
-                color = scheme.onSurfaceVariant,
-            )
+            message?.let {
+                Box(Modifier.height(8.dp))
+                Text(
+                    text = it,
+                    style = AnfasTheme.textStyles.bodyMedium,
+                    color = scheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

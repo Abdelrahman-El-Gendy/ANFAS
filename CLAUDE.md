@@ -116,6 +116,29 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - compose material3 is pinned to an **alpha** (`1.11.0-alpha07`) — the newest in the 1.11 line.
 - KSP versioning is independent of Kotlin's. There is no `2.4.10-x.y.z`.
 
+## Staff sign-in
+
+- **There is no auth server.** Accounts are local rows in `staff`, created on the device by
+  whoever holds `Role.Owner`. So the interesting states are "no accounts yet" and "signed out",
+  never "token expired".
+- **A migration must never invent an account.** An app that ships with a default password ships
+  with a published one. An install arriving at schema v6 has zero staff rows, and
+  `SignInComponent` offers first-run setup for exactly that — asserted in `MigrationFromV4Test`.
+- **Passwords are PBKDF2-HMAC-SHA256** at `PasswordHash.DEFAULT_ITERATIONS`, via `javax.crypto`
+  on Android/JVM and CommonCrypto on Apple — both ship with the platform, so there is no crypto
+  dependency and nothing hand-rolled. `PasswordHashTest` pins a **known vector** and runs on every
+  target: if the two implementations diverge, an account created on the iPad cannot sign in on the
+  phone. The stored `iterations` is what verifies, so raising the default never locks anyone out.
+- **`SignInResult.InvalidCredentials` covers both wrong-user and wrong-password**, and the
+  repository hashes against a decoy when the username is unknown so the two also *cost* the same.
+  Distinguishing them lets whoever holds the device enumerate staff.
+- **`SettingsSessionStore` holds no secret** — a staff id and role names. `Settings` is unencrypted
+  on every platform, so a token there would be readable on a rooted device.
+- **`Settings` is registered once, in `:core:common`.** Both `:core:i18n` (language) and
+  `:core:data` (session) resolve it; two `single<Settings>` registrations is a Koin duplicate.
+- Not built, deliberately: **"Forgot password?"** needs a server round trip, and **"Remember me"**
+  would change nothing since the session persists either way.
+
 ## Cross-cutting state screens
 
 The export's four interrupt states live in `:core:designsystem` as parameterised components, not

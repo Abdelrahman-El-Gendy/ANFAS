@@ -337,4 +337,31 @@ object ArabicStrings : AppStrings {
         override val fieldPhone = "رقم الهاتف"
         override val fieldStatus = "الحالة"
     }
+
+    override val auth = object : AppStrings.Auth {
+        override val signInTitle = "ANFAS"
+        override val signInTagline = "السرعة قوة."
+        override val username = "اسم المستخدم"
+        override val password = "كلمة المرور"
+        override val showPassword = "إظهار كلمة المرور"
+        override val hidePassword = "إخفاء كلمة المرور"
+        override val rememberMe = "ابقِ الجلسة مفتوحة"
+        override val signIn = "تسجيل الدخول"
+        override val signingIn = "جارٍ تسجيل الدخول…"
+        override val signOut = "تسجيل الخروج"
+
+        override val invalidCredentials = "اسم المستخدم أو كلمة المرور غير صحيحة."
+        override val accountDisabled = "هذا الحساب مُعطّل. راجع المالك."
+
+        override val setupTitle = "إعداد هذا الجهاز"
+        override val setupMessage = "أنشئ حساب المالك. يمكنه بعد ذلك إضافة بقية الموظفين."
+        override val displayName = "اسمك"
+        override val createOwner = "إنشاء حساب المالك"
+        override val creating = "جارٍ الإنشاء…"
+
+        override val problemUsernameTooShort = "٣ أحرف على الأقل."
+        override val problemUsernameTaken = "اسم المستخدم مستخدم بالفعل."
+        override val problemPasswordTooShort = "٨ أحرف على الأقل."
+        override val problemDisplayNameBlank = "أدخل اسمًا."
+    }
 }

@@ -13,19 +13,17 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Exercises the v4 -> v5 auto-migration for real, rather than trusting that @DeleteTable did what
- * it says.
+ * Opens a real v4 database file and lets Room migrate it forward to the current schema.
  *
- * Builds a v4-shaped database by hand from the committed 4.json DDL -- including the
- * room_master_table identity hash, without which Room refuses to recognise the file as v4 --
- * writes rows into both `placeholder` and `members`, then opens the database at v5 and asserts
- * that the dead table is gone and the real data survived.
+ * The point is the *chain*: v4 -> v5 drops `placeholder` and v5 -> v6 adds `staff`, and running
+ * each hop in isolation would not catch an ordering problem between them. It also asserts what
+ * must NOT happen — the pre-existing member survives, and no staff account is invented, because
+ * an app that migrates itself a default login ships with a published password.
  *
- * This is the only proof that a real gym's member list is not dropped on upgrade. The DDL below
- * is copied from schemas/.../4.json deliberately: if that file is ever edited, this test should
- * stop matching it and fail.
+ * Deliberately not named for a specific target version. It was MigrationV4ToV5Test and broke the
+ * moment v6 landed, for no reason connected to what it verifies.
  */
-class MigrationV4ToV5Test {
+class MigrationFromV4Test {
 
     private val v4Ddl = listOf(
         """CREATE TABLE IF NOT EXISTS `placeholder` (`id` INTEGER NOT NULL, `label` TEXT NOT NULL, PRIMARY KEY(`id`))""",
@@ -64,14 +62,33 @@ class MigrationV4ToV5Test {
             val connection = BundledSQLiteDriver().open(dbFile.absolutePath)
             try {
                 val tables = connection.tableNames()
+                // v5 dropped `placeholder`.
                 assertTrue("placeholder" !in tables, "placeholder should be dropped, saw $tables")
+                // v6 added `staff`. Asserted here rather than in its own test because the value
+                // of this test is that a *chain* of migrations runs on one real file — running
+                // each hop in isolation would not catch an ordering problem between them.
+                assertTrue("staff" in tables, "staff should be added, saw $tables")
                 assertTrue("members" in tables, "members must survive, saw $tables")
                 assertEquals(
                     1,
                     connection.countOf("members"),
-                    "the pre-existing member row must survive the migration",
+                    "the pre-existing member row must survive every migration",
                 )
-                assertEquals(5, connection.userVersion(), "schema version should now be 5")
+                // A migration must never invent a login. An existing gym has no staff account
+                // until someone completes first-run setup.
+                assertEquals(
+                    0,
+                    connection.countOf("staff"),
+                    "migrating must not create a default account",
+                )
+                // Read from the entity annotation rather than hardcoded, so adding a migration
+                // does not fail this test for the wrong reason. Getting here at all proves the
+                // whole chain applied; the number itself is not the thing under test.
+                assertEquals(
+                    CURRENT_SCHEMA_VERSION,
+                    connection.userVersion(),
+                    "the file should be at the current schema version",
+                )
             } finally {
                 connection.close()
             }
@@ -114,5 +131,13 @@ class MigrationV4ToV5Test {
         } finally {
             connection.close()
         }
+    }
+
+    private companion object {
+        /**
+         * Mirrors AnfasDatabase's @Database(version = ...). Bump both together; the assertion
+         * that matters is that the chain *ran*, not what number it landed on.
+         */
+        const val CURRENT_SCHEMA_VERSION = 6
     }
 }

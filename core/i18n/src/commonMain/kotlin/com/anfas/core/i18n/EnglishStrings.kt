@@ -276,4 +276,34 @@ object EnglishStrings : AppStrings {
         override val fieldPhone = "Phone number"
         override val fieldStatus = "Status"
     }
+
+    override val auth = object : AppStrings.Auth {
+        override val signInTitle = "ANFAS"
+        override val signInTagline = "Speed is strength."
+        override val username = "Username"
+        override val password = "Password"
+        override val showPassword = "Show password"
+        override val hidePassword = "Hide password"
+        override val rememberMe = "Keep me signed in"
+        override val signIn = "Sign in"
+        override val signingIn = "Signing in…"
+        override val signOut = "Sign out"
+
+        // One message for "no such user" and "wrong password", on purpose: naming which one
+        // was wrong tells whoever is holding the device which usernames exist.
+        override val invalidCredentials = "That username and password don't match."
+        override val accountDisabled = "This account has been switched off. Ask the owner."
+
+        override val setupTitle = "Set up this device"
+        override val setupMessage =
+            "Create the owner account. It can add the rest of your staff afterwards."
+        override val displayName = "Your name"
+        override val createOwner = "Create owner account"
+        override val creating = "Creating…"
+
+        override val problemUsernameTooShort = "At least 3 characters."
+        override val problemUsernameTaken = "That username is taken."
+        override val problemPasswordTooShort = "At least 8 characters."
+        override val problemDisplayNameBlank = "Enter a name."
+    }
 }

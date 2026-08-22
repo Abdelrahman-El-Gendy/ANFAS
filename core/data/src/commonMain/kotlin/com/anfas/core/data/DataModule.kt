@@ -1,5 +1,8 @@
 package com.anfas.core.data
 
+import com.anfas.core.auth.PasswordHasher
+import com.anfas.core.auth.Pbkdf2PasswordHasher
+import com.anfas.core.auth.SessionStore
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.database.AnfasDatabase
@@ -26,10 +29,21 @@ val dataModule: Module = module {
     single { get<AnfasDatabase>().reminderDao() }
     single { get<AnfasDatabase>().subscriptionDao() }
     single { get<AnfasDatabase>().intakeDao() }
+    single { get<AnfasDatabase>().staffDao() }
 
     single<MemberRepository> { OfflineFirstMemberRepository(dao = get()) }
     single<ReminderRepository> { OfflineFirstReminderRepository(dao = get()) }
     single<SubscriptionRepository> { OfflineFirstSubscriptionRepository(dao = get()) }
+    single<SessionStore> { SettingsSessionStore(settings = get()) }
+    single<PasswordHasher> { Pbkdf2PasswordHasher() }
+    single<AuthRepository> {
+        OfflineFirstAuthRepository(
+            dao = get(),
+            sessionStore = get(),
+            hasher = get(),
+            dispatchers = get(),
+        )
+    }
     single<IntakeRepository> {
         OfflineFirstIntakeRepository(
             intakeDao = get(),

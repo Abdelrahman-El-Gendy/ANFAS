@@ -13,6 +13,13 @@ kotlin {
             // does not resolve it that way, and an ABI dependency should be explicit anyway.
             api(libs.kotlinx.datetime)
             implementation(libs.kermit)
+            // platformSettingsModule() is a Koin module and returns Settings, so both are ABI.
+            api(libs.bundles.settings)
+            api(libs.bundles.koin)
+        }
+        androidMain.dependencies {
+            // androidContext() — SharedPreferences needs a Context.
+            implementation(libs.koin.android)
         }
     }
 }

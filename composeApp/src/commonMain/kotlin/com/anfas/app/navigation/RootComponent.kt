@@ -1,6 +1,12 @@
 package com.anfas.app.navigation
 
+import com.anfas.core.auth.Session
+import com.anfas.core.common.AppDispatchers
+import com.anfas.core.common.appExceptionHandler
+import com.anfas.core.data.AuthRepository
 import com.anfas.core.model.MemberId
+import com.anfas.feature.auth.SignInComponent
+import com.anfas.feature.auth.SignInComponentFactory
 import com.anfas.feature.intakeocr.IntakeReviewComponent
 import com.anfas.feature.intakeocr.IntakeReviewComponentFactory
 import com.anfas.feature.members.MemberProfileComponent
@@ -12,6 +18,7 @@ import com.anfas.feature.subscriptions.ReminderQueueComponentFactory
 import com.anfas.feature.subscriptions.RenewalSheetComponent
 import com.anfas.feature.subscriptions.RenewalSheetComponentFactory
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.childContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
@@ -19,6 +26,12 @@ import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
@@ -42,11 +55,38 @@ class RootComponent(componentContext: ComponentContext) :
     ComponentContext by componentContext,
     KoinComponent {
 
+    private val authRepository: AuthRepository by inject()
+    private val dispatchers: AppDispatchers by inject()
+    private val signInFactory: SignInComponentFactory by inject()
     private val membersListFactory: MembersListComponentFactory by inject()
     private val memberProfileFactory: MemberProfileComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
     private val renewalSheetFactory: RenewalSheetComponentFactory by inject()
     private val intakeReviewFactory: IntakeReviewComponentFactory by inject()
+
+    private val scope =
+        coroutineScope(dispatchers.main + SupervisorJob() + appExceptionHandler("Root"))
+
+    /**
+     * Null means nobody is signed in, which the shell renders as [signIn] instead of the app.
+     *
+     * Gating in the shell rather than adding a SignIn route to the stack is deliberate: an auth
+     * screen inside the navigation stack can be reached with the back button after signing in,
+     * and a signed-out app would still hold a back stack of screens it must not show.
+     */
+    val session: StateFlow<Session?> = authRepository.observeSession()
+        .stateIn(scope, SharingStarted.Eagerly, initialValue = null)
+
+    /**
+     * Created eagerly with its own child context rather than lazily inside the stack, so it keeps
+     * its typed-but-unsubmitted state across a configuration change while the user is filling it
+     * in — the same reason every other component here is lifecycle-scoped.
+     */
+    val signIn: SignInComponent = signInFactory.create(
+        componentContext = childContext(key = "signIn"),
+        // Nothing to navigate: `session` emits and the shell swaps the subtree.
+        onSignedIn = {},
+    )
 
     private val navigation = StackNavigation<Config>()
 
@@ -57,6 +97,20 @@ class RootComponent(componentContext: ComponentContext) :
         handleBackButton = true,
         childFactory = ::createChild,
     )
+
+    init {
+        // Reset to the first tab whenever the session ends, so signing back in — possibly as a
+        // different member of staff — does not resume on the previous person's screen.
+        scope.launch {
+            session.collect { current ->
+                if (current == null) navigation.replaceAll(Config.MembersList)
+            }
+        }
+    }
+
+    fun onSignOut() {
+        scope.launch { authRepository.signOut() }
+    }
 
     fun onTopLevelSelected(destination: TopLevel) {
         navigation.replaceAll(
