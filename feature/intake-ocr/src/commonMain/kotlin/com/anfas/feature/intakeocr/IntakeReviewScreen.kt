@@ -3,10 +3,14 @@ package com.anfas.feature.intakeocr
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,6 +22,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,14 +56,18 @@ import com.anfas.core.designsystem.AnfasTableFooter
 import com.anfas.core.designsystem.AnfasTableHeaderCell
 import com.anfas.core.designsystem.AnfasTableHeaderRow
 import com.anfas.core.designsystem.AnfasTableRow
+import com.anfas.core.designsystem.AnfasTableScroll
 import com.anfas.core.designsystem.AnfasTextAction
 import com.anfas.core.designsystem.AnfasTheme
+import com.anfas.core.designsystem.EmptyStateAction
 import com.anfas.core.designsystem.TextActionEmphasis
 import com.anfas.core.i18n.AppStrings
 import com.anfas.core.i18n.strings
 import com.anfas.core.model.IntakeBatch
 import com.anfas.core.model.IntakeIssue
 import com.anfas.core.model.IntakeRow
+import com.anfas.core.ocr.ocrCapability
+import com.anfas.core.ocr.rememberImageSource
 
 /**
  * Reviewing a scanned sign-up sheet.
@@ -71,13 +81,16 @@ import com.anfas.core.model.IntakeRow
  *    is a destructive operation with no defined semantics anywhere in the design — which
  *    fields win, what happens to the other's history. Correcting the phone number is offered
  *    instead, which is reversible.
- *  - **No source image.** There is no capture path yet, so the pane renders its overlay over a
- *    placeholder. See the note on `IntakeRepository.createBatch`.
+ *  - **The source pane is pinned LTR.** A photograph is not a mirrored artifact, so the overlay
+ *    boxes must not flip under an Arabic layout even though the rest of the screen does.
  */
 @Composable
 fun IntakeReviewScreen(component: IntakeReviewComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
     val s = strings
+    // Registered unconditionally: rememberImageSource has to be called from composition on
+    // Android, so it cannot sit behind the capability check that gates the buttons below.
+    val imageSource = rememberImageSource(component::onImageCaptured)
 
     Column(
         modifier = modifier
@@ -107,9 +120,23 @@ fun IntakeReviewScreen(component: IntakeReviewComponent, modifier: Modifier = Mo
             IntakeReviewContent.NoBatches -> AnfasEmptyState(
                 icon = AnfasIcons.DocumentScanner,
                 title = s.intake.emptyTitle,
-                // The export offers a "New scan" button here. Capture is not implemented, and
-                // a button that does nothing is worse than none — see the class comment.
-                message = s.intake.emptyMessage,
+                // Desktop has neither a camera nor an OCR engine, so it says so instead of
+                // offering buttons that cannot work. The UI reads the capability flag rather
+                // than branching on platform.
+                message = if (ocrCapability.isSupported) {
+                    s.intake.emptyMessage
+                } else {
+                    s.intake.emptyMessageNoCapture
+                },
+                primaryAction = EmptyStateAction(
+                    label = s.intake.newScan,
+                    onClick = imageSource::captureFromCamera,
+                    icon = AnfasIcons.DocumentScanner,
+                ).takeIf { ocrCapability.canCapture },
+                secondaryAction = EmptyStateAction(
+                    label = s.intake.choosePhoto,
+                    onClick = imageSource::pickFromLibrary,
+                ).takeIf { ocrCapability.canPickImage },
             )
 
             is IntakeReviewContent.Loaded -> ReviewBody(
@@ -296,47 +323,87 @@ private fun ValidationPane(
     val scheme = MaterialTheme.colorScheme
     val s = strings
     AnfasCard(modifier = modifier) {
-        AnfasTableHeaderRow {
-            AnfasTableHeaderCell(s.intake.columnOrdinal, Modifier.width(OrdinalWidth))
-            AnfasTableHeaderCell(s.intake.columnName, Modifier.weight(WEIGHT_NAME))
-            AnfasTableHeaderCell(s.intake.columnPhone, Modifier.weight(WEIGHT_PHONE))
-            AnfasTableHeaderCell(s.intake.columnStart, Modifier.weight(WEIGHT_DATE))
-            AnfasTableHeaderCell(s.intake.columnEnd, Modifier.weight(WEIGHT_DATE))
-            AnfasTableHeaderCell(s.intake.columnPlan, Modifier.weight(WEIGHT_PLAN))
-        }
-        LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
-            items(items = batch.rows, key = { it.id.value }) { row ->
-                IntakeRowCells(
-                    row = row,
-                    isLast = row == batch.rows.last(),
-                    onEdit = { field, value -> component.onFieldEdited(row.id, field, value) },
-                )
+        // Six columns do not fit a phone. Weights would divide the width evenly and clip every
+        // cell to a few characters -- "Omar H", "Nov", "Mor" -- which is unreadable and, worse,
+        // hides the misreads this screen exists to catch. So the table keeps a usable minimum
+        // width and scrolls horizontally when the pane is narrower than that.
+        Column(modifier = Modifier.fillMaxHeight()) {
+            // Only the header and the rows scroll, and they share one scroll state so the
+            // headings stay above their own columns. The footer is deliberately outside it —
+            // it carries Discard and Import, and an action you have to go looking for
+            // sideways is an action nobody finds.
+            AnfasTableScroll(modifier = Modifier.weight(1f), fillHeight = true) {
+                TableContent(batch, component, s)
             }
+            TableFooter(state, component, scheme, s)
         }
-        AnfasTableFooter {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = s.intake.rowsReady(state.readyCount, state.totalCount),
-                    style = AnfasTheme.textStyles.bodyMedium,
-                    color = scheme.onSurfaceVariant,
+    }
+}
+
+@Composable
+private fun ColumnScope.TableContent(
+    batch: IntakeBatch,
+    component: IntakeReviewComponent,
+    s: AppStrings,
+) {
+    AnfasTableHeaderRow {
+        AnfasTableHeaderCell(s.intake.columnOrdinal, Modifier.width(OrdinalWidth))
+        AnfasTableHeaderCell(s.intake.columnName, Modifier.weight(WEIGHT_NAME))
+        AnfasTableHeaderCell(s.intake.columnPhone, Modifier.weight(WEIGHT_PHONE))
+        AnfasTableHeaderCell(s.intake.columnStart, Modifier.weight(WEIGHT_DATE))
+        AnfasTableHeaderCell(s.intake.columnEnd, Modifier.weight(WEIGHT_DATE))
+        AnfasTableHeaderCell(s.intake.columnPlan, Modifier.weight(WEIGHT_PLAN))
+    }
+    LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
+        items(items = batch.rows, key = { it.id.value }) { row ->
+            IntakeRowCells(
+                row = row,
+                isLast = row == batch.rows.last(),
+                onEdit = { field, value -> component.onFieldEdited(row.id, field, value) },
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TableFooter(
+    state: IntakeReviewState,
+    component: IntakeReviewComponent,
+    scheme: ColorScheme,
+    s: AppStrings,
+) {
+    AnfasTableFooter {
+        // FlowRow so a phone stacks the count above the actions instead of squeezing the label
+        // into a four-line column beside them.
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = s.intake.rowsReady(state.readyCount, state.totalCount),
+                style = AnfasTheme.textStyles.bodyMedium,
+                color = scheme.onSurfaceVariant,
+                // weight() is what keeps the buttons whole. Unweighted, this label claimed
+                // its full intrinsic width and the import button was measured at whatever
+                // was left -- on a phone that collapsed it to a featureless amber sliver.
+                // Weighted children are measured last, so the buttons now get their
+                // intrinsic size and the label takes the remainder.
+                modifier = Modifier.weight(1f),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                AnfasSecondaryButton(text = s.common.discard, onClick = component::onDiscard)
+                AnfasPrimaryButton(
+                    text = if (state.isImporting) {
+                        s.intake.importing
+                    } else {
+                        s.intake.importCount(state.readyCount)
+                    },
+                    icon = AnfasIcons.Upload,
+                    onClick = component::onImport,
+                    enabled = state.canImport,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    AnfasSecondaryButton(text = s.common.discard, onClick = component::onDiscard)
-                    AnfasPrimaryButton(
-                        text = if (state.isImporting) {
-                            s.intake.importing
-                        } else {
-                            s.intake.importCount(state.readyCount)
-                        },
-                        icon = AnfasIcons.Upload,
-                        onClick = component::onImport,
-                        enabled = state.canImport,
-                    )
-                }
             }
         }
     }
@@ -441,6 +508,10 @@ private fun IntakeNotice.render(s: AppStrings): String = when (this) {
     IntakeNotice.Discarded -> s.intake.sheetDiscarded
 
     is IntakeNotice.Failed -> message
+
+    is IntakeNotice.Scanned -> s.intake.scannedRows(rows)
+
+    IntakeNotice.NothingFound -> s.intake.scanFoundNothing
 }
 
 @Composable

@@ -9,6 +9,7 @@ import com.anfas.core.model.IntakeBatch
 import com.anfas.core.model.IntakeBatchId
 import com.anfas.core.model.IntakeBatchStatus
 import com.anfas.core.model.IntakeRowId
+import com.anfas.core.ocr.CapturedImage
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,6 +39,7 @@ import kotlinx.coroutines.launch
 class IntakeReviewComponent(
     componentContext: ComponentContext,
     private val repository: IntakeRepository,
+    private val ingestion: IntakeIngestion,
     dispatchers: AppDispatchers,
     private val onImported: (imported: Int) -> Unit,
 ) : ComponentContext by componentContext {
@@ -77,6 +79,7 @@ class IntakeReviewComponent(
             panX = local.panX,
             panY = local.panY,
             isImporting = local.isImporting,
+            isScanning = local.isScanning,
             outcome = local.outcome,
             notice = local.notice,
         )
@@ -128,6 +131,33 @@ class IntakeReviewComponent(
         }
     }
 
+    /**
+     * Called with whatever the platform image source produced. Capture itself lives in the
+     * screen, because Android's ActivityResultLauncher can only be registered in composition.
+     *
+     * A cancelled capture never reaches here — the platform sources report nothing for a
+     * cancel, since backing out of the camera is not an error to explain.
+     */
+    fun onImageCaptured(result: AppResult<CapturedImage>) {
+        when (result) {
+            is AppResult.Failure -> ui.update {
+                it.copy(notice = IntakeNotice.Failed(result.error.message))
+            }
+
+            is AppResult.Success -> scope.launch {
+                ui.update { it.copy(isScanning = true) }
+                val notice = when (val outcome = ingestion.ingest(result.value)) {
+                    is IngestionResult.Ingested -> IntakeNotice.Scanned(outcome.rows)
+                    IngestionResult.NothingFound -> IntakeNotice.NothingFound
+                    is IngestionResult.Failed -> IntakeNotice.Failed(outcome.error.message)
+                }
+                // The new batch arrives through observeBatches(), so the screen switches
+                // itself; this only reports what happened.
+                ui.update { it.copy(isScanning = false, notice = notice) }
+            }
+        }
+    }
+
     fun onNoticeShown() = ui.update { it.copy(notice = null, outcome = null) }
 
     private suspend fun performImport(batchId: IntakeBatchId) {
@@ -159,6 +189,7 @@ class IntakeReviewComponent(
         val panX: Float = 0f,
         val panY: Float = 0f,
         val isImporting: Boolean = false,
+        val isScanning: Boolean = false,
         val outcome: com.anfas.core.data.ImportOutcome? = null,
         val notice: IntakeNotice? = null,
     )

@@ -177,7 +177,18 @@ object EnglishStrings : AppStrings {
         override val emptyTitle = "No scans yet"
         override val emptyMessage =
             "Photograph a paper sign-up sheet to import members in bulk. " +
-                "Capture is not available yet."
+                "Text is read on the device — English script only for now."
+        override val emptyMessageNoCapture =
+            "Photograph a paper sign-up sheet on the phone or tablet app to import members " +
+                "in bulk. This computer has no camera or text recognition."
+        override val newScan = "New scan"
+        override val choosePhoto = "Choose photo"
+        override val scanning = "Reading the sheet…"
+        override fun scannedRows(count: Int) =
+            if (count == 1) "Found 1 row to review" else "Found $count rows to review"
+        override val scanFoundNothing =
+            "No rows could be read. Try again with the sheet flat and well lit."
+        override val scanFailed = "The sheet could not be read."
         override val loadFailedTitle = "Couldn't load the sheet"
 
         override fun importedAll(count: Int) =

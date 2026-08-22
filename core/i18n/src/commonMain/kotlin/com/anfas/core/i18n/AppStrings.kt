@@ -174,7 +174,18 @@ interface AppStrings {
         val importing: String
         val emptyTitle: String
         val emptyMessage: String
+
+        /** Desktop has no camera and no OCR engine; the empty state says so plainly. */
+        val emptyMessageNoCapture: String
         val loadFailedTitle: String
+
+        /** Capture. */
+        val newScan: String
+        val choosePhoto: String
+        val scanning: String
+        fun scannedRows(count: Int): String
+        val scanFoundNothing: String
+        val scanFailed: String
 
         /** Import outcome. The leftovers must be named, or staff think the sheet is done. */
         fun importedAll(count: Int): String

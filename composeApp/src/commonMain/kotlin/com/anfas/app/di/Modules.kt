@@ -5,6 +5,7 @@ import com.anfas.core.common.DefaultAppDispatchers
 import com.anfas.core.common.logger
 import com.anfas.core.data.dataModule
 import com.anfas.core.i18n.i18nModule
+import com.anfas.core.ocr.ocrModule
 import com.anfas.feature.announcements.AnnouncementsModule
 import com.anfas.feature.classes.ClassesModule
 import com.anfas.feature.equipment.EquipmentModule
@@ -50,5 +51,6 @@ fun initKoin(declaration: KoinAppDeclaration = {}): KoinApplication = startKoin 
     modules(coreModule)
     modules(dataModule)
     modules(i18nModule)
+    modules(ocrModule)
     modules(featureModules)
 }

@@ -89,3 +89,9 @@
 | 02:07 | Typed notices replace component prose; 27 English assertions became type assertions | feature/* | 120 tests green | ~25k |
 | 02:07 | Arabic typography: IBM Plex Sans Arabic bundled, tracking zeroed, labelCaps +1sp, +10% leading | core/designsystem | compiles all targets | ~18k |
 | 02:07 | RTL: intake pane pinned LTR + aspect-ratio fix, 7 cells dataMonoLtr, 5 icons autoMirror | feature/*, designsystem | verified running with ar | ~15k |
+
+## Session: 2026-08-21 02:21
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:00 | Verified whole OCR intake pipeline on a Pixel 9 emulator: photo -> ML Kit -> parser -> review -> import -> 4 members | core/ocr, core/model, feature/intake-ocr, feature/members | 426 tests green, all targets compile | ~large |

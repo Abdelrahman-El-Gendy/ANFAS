@@ -256,3 +256,30 @@
 - [2026-08-21] **Only 400/500/600 IBM Plex Sans weights are bundled** — the three the ramp uses.
   Adding a weight means adding a TTF, not letting Compose synthesise one.
 
+
+## Key Learnings — 2026-08-22 (OCR intake, verified on device)
+
+- **Run the app.** Three layout bugs and two data-integrity bugs in this session were invisible to
+  426 unit tests and only appeared on a real emulator. `adb exec-out screencap -p > file.png` plus
+  reading the PNG is the fastest loop; `adb` is not on PATH — use `~/Library/Android/sdk/platform-tools/adb`.
+- **`Modifier.fillMaxWidth()` inside a `Row` child resolves against the *incoming* max constraint,
+  not the sibling's width.** The first child then claims the whole row and later children are
+  measured at ~one character. Bound the child with `width(IntrinsicSize.Max)`. This bit twice in
+  one session (AnfasTabs indicator, and the intake footer via unweighted `Text` under `SpaceBetween`).
+- **Unweighted children in a `Row` are measured first, at full intrinsic width.** A long label
+  beside buttons starves the buttons. Give the label `weight(1f)`.
+- **`FlowRow` is the default for action pairs**, not `Row` — two buttons side by side compete for a
+  phone's width and the loser wraps its label to a different height.
+- **ML Kit returns `Text.Line`s that fuse whole columns together** when horizontal gaps are small.
+  Always emit word-level `Text.Element` boxes. Measured on a printed A4 sheet: word gaps 0.005–0.009
+  of page width, column gaps 0.017+.
+- **An OCR parser must group boxes into cells by gap before classifying anything**, or it is coupled
+  to one engine's idea of a "line" — Vision returns lines, ML Kit returns words.
+- **A name cell must reject any digits.** A blank name raises MISSING_NAME and reaches a human; a
+  member silently imported as "Omar Hassan 2023Monthly" does not.
+- **Six-column tables need a minimum width and horizontal scroll on phones** (`AnfasTableScroll`).
+  Wrap header + rows only — a scrolled footer hides its own action buttons.
+- **Catalog versions with no consumer hide incompatibilities.** `androidx-core 1.19.0` sat unused
+  until `:core:ocr` needed FileProvider, then failed `checkAarMetadata` against our AGP 9.0.1 ceiling.
+- Synthetic test images can over-fit the algorithm: the first generated sheet had columns 11px apart,
+  which ML Kit fused. Give fixtures realistic ruled-column spacing.

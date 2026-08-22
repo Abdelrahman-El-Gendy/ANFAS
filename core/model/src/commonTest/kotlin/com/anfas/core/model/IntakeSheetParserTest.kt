@@ -277,4 +277,51 @@ class IntakeSheetParserTest {
         // Row 2 has no name, so it is blocked -- the parser and validator compose without glue.
         assertEquals(1, validated.count { it.isImportable })
     }
+
+    /**
+     * Regression: ML Kit reports words, not cells. Before [IntakeSheetParser] grouped boxes into
+     * cells first, "Nov" / "1," / "2023" each failed every content test, so all three dates and
+     * the plan came out blank -- and the leftovers were appended to the member's *name*. The
+     * screen still showed "4 of 4 rows ready for import", which is the dangerous part.
+     */
+    @Test
+    fun `word-level boxes parse the same as whole-cell boxes`() {
+        val words = englishHeader() + wordLevelRow(
+            top = 0.20f,
+            ordinal = "1",
+            name = "Omar Hassan",
+            phone = "01001234567",
+            start = "Nov 1, 2023",
+            end = "Dec 1, 2023",
+            plan = "Monthly",
+        )
+
+        val parsed = IntakeSheetParser.parse(words, newRowId = { IntakeRowId("r$it") })
+
+        val row = parsed.rows.single()
+        assertEquals("Omar Hassan", row.name.value)
+        assertEquals("01001234567", row.phone.value)
+        assertEquals("Nov 1, 2023", row.startDate.value)
+        assertEquals("Dec 1, 2023", row.endDate.value)
+        assertEquals("Monthly", row.plan.value)
+    }
+
+    /**
+     * A fused token like "2023Monthly" — which ML Kit really does produce when two columns are
+     * printed close together — must not end up in the name. A blank cell with a review marker is
+     * recoverable; a member imported as "Omar Hassan 2023Monthly" is not.
+     */
+    @Test
+    fun `unparseable numeric debris never lands in the name`() {
+        val row = englishHeader() + listOf(
+            ocrLine("1", 0.04f, 0.20f, 0.08f, 0.23f),
+            ocrLine("Omar Hassan", 0.10f, 0.20f, 0.32f, 0.23f),
+            ocrLine("01001234567", 0.35f, 0.20f, 0.52f, 0.23f),
+            ocrLine("2023Monthly", 0.86f, 0.20f, 0.97f, 0.23f),
+        )
+
+        val parsed = IntakeSheetParser.parse(row, newRowId = { IntakeRowId("r$it") })
+
+        assertEquals("Omar Hassan", parsed.rows.single().name.value)
+    }
 }

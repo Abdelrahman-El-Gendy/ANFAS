@@ -12,6 +12,7 @@ import org.koin.dsl.module
  */
 class IntakeReviewComponentFactory internal constructor(
     private val intake: IntakeRepository,
+    private val ingestion: IntakeIngestion,
     private val dispatchers: AppDispatchers,
 ) {
     fun create(
@@ -20,6 +21,7 @@ class IntakeReviewComponentFactory internal constructor(
     ): IntakeReviewComponent = IntakeReviewComponent(
         componentContext = componentContext,
         repository = intake,
+        ingestion = ingestion,
         dispatchers = dispatchers,
         onImported = onImported,
     )
@@ -30,5 +32,13 @@ class IntakeReviewComponentFactory internal constructor(
  * tied to its Decompose lifecycle and must never be a singleton.
  */
 val IntakeOcrModule: Module = module {
-    factory { IntakeReviewComponentFactory(intake = get(), dispatchers = get()) }
+    // Stateless, so a single is fine — unlike the component, which owns a lifecycle scope.
+    single { IntakeIngestion(recogniser = get(), repository = get(), imageStore = get()) }
+    factory {
+        IntakeReviewComponentFactory(
+            intake = get(),
+            ingestion = get(),
+            dispatchers = get(),
+        )
+    }
 }

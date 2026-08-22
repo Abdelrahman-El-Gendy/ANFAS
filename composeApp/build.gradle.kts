@@ -27,6 +27,9 @@ kotlin {
             // The app shell owns DI wiring, so it is the one place that legitimately sees
             // every core module and every feature module.
             implementation(project(":core:database"))
+            // For ocrModule only. The shell owns the DI graph, so it has to see every module
+            // it registers; the capture and recognition types stay inside :feature:intake-ocr.
+            implementation(project(":core:ocr"))
             // :core:network and :core:auth are deliberately NOT here. Both are documented
             // seams with no implementations and no callers yet, and an unused dependency edge
             // still costs build time, R8 input, and -- for :core:network -- links OkHttp,

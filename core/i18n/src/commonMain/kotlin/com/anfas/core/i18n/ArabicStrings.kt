@@ -217,7 +217,25 @@ object ArabicStrings : AppStrings {
         override val importing = "جارٍ الاستيراد…"
         override val emptyTitle = "لا توجد صور بعد"
         override val emptyMessage =
-            "صوّر كشف تسجيل ورقي لاستيراد الأعضاء دفعة واحدة. التصوير غير متاح بعد."
+            "صوّر كشف تسجيل ورقي لاستيراد الأعضاء دفعة واحدة. " +
+                "تُقرأ النصوص على الجهاز — بالحروف اللاتينية فقط حاليًا."
+        override val emptyMessageNoCapture =
+            "صوّر كشف التسجيل الورقي من تطبيق الهاتف أو التابلت " +
+                "لاستيراد الأعضاء دفعة واحدة. هذا الجهاز لا يحتوي على كاميرا أو تعرّف على النصوص."
+        override val newScan = "مسح جديد"
+        override val choosePhoto = "اختر صورة"
+        override val scanning = "جارٍ قراءة الكشف…"
+        override fun scannedRows(count: Int) = when (arabicPlural(count)) {
+            PluralCategory.ZERO -> "لم يتم العثور على صفوف"
+            PluralCategory.ONE -> "تم العثور على صف واحد للمراجعة"
+            PluralCategory.TWO -> "تم العثور على صفين للمراجعة"
+            PluralCategory.FEW -> "تم العثور على $count صفوف للمراجعة"
+            PluralCategory.MANY -> "تم العثور على $count صفًا للمراجعة"
+            PluralCategory.OTHER -> "تم العثور على $count صف للمراجعة"
+        }
+        override val scanFoundNothing =
+            "لم نتمكن من قراءة أي صف. حاول مرة أخرى مع فرد الكشف وإضاءة جيدة."
+        override val scanFailed = "لم نتمكن من قراءة الكشف."
         override val loadFailedTitle = "تعذّر تحميل الكشف"
 
         override fun importedAll(count: Int) = when (arabicPlural(count)) {

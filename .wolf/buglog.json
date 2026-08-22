@@ -584,5 +584,79 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-22T12:15:00Z"
+  },
+  {
+    "id": "bug-035",
+    "timestamp": "2026-08-22T13:00:00Z",
+    "error_message": "Intake review table showed Start, End and Plan as empty for every row, while still reporting '4 of 4 rows ready for import'",
+    "file": "core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/Ocr.android.kt",
+    "root_cause": "The Android recogniser emitted ML Kit Text.Line boxes. ML Kit fuses text on a shared baseline when horizontal gaps are small, so 'Nov 1, 2023 Dec 1, 2023Monthly' arrived as ONE box spanning x 0.63..0.99 across three columns. A box spanning three columns cannot be assigned to any of them, so all three cells came out blank -- and the row still counted as importable.",
+    "fix": "Emit word-level Text.Element boxes instead of Text.Line, falling back to the line when a model reports no elements. Verified on a real emulator scan: 21 boxes became 51, and all six columns populate.",
+    "tags": [
+      "ocr",
+      "mlkit",
+      "android",
+      "parser",
+      "intake",
+      "silent-data-loss"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T13:00:00Z"
+  },
+  {
+    "id": "bug-036",
+    "timestamp": "2026-08-22T13:00:00Z",
+    "error_message": "With word-level OCR input the parser produced empty dates and plan, and appended 'Nov', 'Dec' and '2023Monthly' to the member's NAME",
+    "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/IntakeSheetParser.kt",
+    "root_cause": "IntakeSheetParser classified each incoming box independently. That works for line-level input ('Nov 1, 2023' parses as a date) but not word-level ('Nov' parses as nothing), so every fragment fell through to the unclaimed bucket and anything with letters was swept into the name cell.",
+    "fix": "Added a mergeIntoCells stage that groups a row's boxes into cells by horizontal gap before any classification, making the parser independent of recogniser granularity. Calibrated Tuning.minColumnGap from 0.03 to 0.015 against measured ML Kit output (word gaps 0.005-0.009, column gaps 0.017+). Also replaced the name-cell guard with a strict no-digits rule so fused debris like '2023Monthly' can never enter a name. Two regression tests added.",
+    "tags": [
+      "parser",
+      "intake",
+      "ocr",
+      "core-model",
+      "data-integrity"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T13:00:00Z"
+  },
+  {
+    "id": "bug-037",
+    "timestamp": "2026-08-22T13:00:00Z",
+    "error_message": "Intake footer's IMPORT button rendered as a featureless amber vertical sliver on a phone",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+    "root_cause": "The footer Row used Arrangement.SpaceBetween with an unweighted Text. Unweighted children are measured first at their full intrinsic width, so 'N of N rows ready for import' consumed the row and the button group was measured at whatever remained. Same class of defect as the AnfasTabs indicator bug.",
+    "fix": "Gave the label Modifier.weight(1f) so the buttons are measured at intrinsic size and the label takes the remainder, plus FlowRow so the label stacks above the actions on a narrow screen.",
+    "tags": [
+      "compose",
+      "layout",
+      "weight",
+      "intake",
+      "phone"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T13:00:00Z"
+  },
+  {
+    "id": "bug-038",
+    "timestamp": "2026-08-22T13:00:00Z",
+    "error_message": "Every cell in the intake and members tables truncated to a few characters on a phone ('Omar Ha...', 'Activ e', 'ACTIO NS', 'ID:' with no number)",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTableScroll.kt",
+    "root_cause": "Both tables lay out columns with Modifier.weight, which is correct at the desktop widths the design was drawn at. On a ~360dp phone the same weights divide the width between four to six columns and every cell clips. On the intake review screen that hides the OCR misreads the screen exists to surface; on members it hid the membership number entirely, which looked like import failing to assign one.",
+    "fix": "Added a shared AnfasTableScroll that keeps a 640dp minimum table width and scrolls horizontally below it, wrapping only the header and rows so an action footer stays fixed. Applied to both tables. A fillHeight flag is required because forcing fillMaxHeight consumed the height the members footer needed and pushed 'Showing N members' off screen.",
+    "tags": [
+      "compose",
+      "layout",
+      "designsystem",
+      "tables",
+      "phone",
+      "responsive"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T13:00:00Z"
   }
 ]

@@ -25,8 +25,15 @@ object IntakeSheetParser {
         val maxLinesPerRow: Int = 12,
         /** Rows to search for a header before giving up on one. */
         val headerSearchRows: Int = 3,
-        /** Minimum x-gap that separates two columns, as a fraction of page width. */
-        val minColumnGap: Float = 0.03f,
+        /**
+         * Minimum x-gap that separates two columns, as a fraction of page width — anything
+         * narrower is treated as a space inside one cell by [mergeIntoCells].
+         *
+         * Calibrated against real ML Kit output on a printed A4 sheet, where gaps between words
+         * inside a cell measured 0.005–0.009 and gaps between columns 0.017 and up. 0.015 sits
+         * in that valley. It is a [Tuning] field precisely because handwriting will move it.
+         */
+        val minColumnGap: Float = 0.015f,
         /** A single cell wider than this is a footer or signature line, not a member. */
         val footerCellWidth: Float = 0.6f,
     )
@@ -79,7 +86,7 @@ object IntakeSheetParser {
                 discarded++
                 return@forEach
             }
-            val assigned = assign(row, direction)
+            val assigned = assign(mergeIntoCells(row, tuning), direction)
             val built = buildRow(assigned, ordinalFallback = rows.size + 1, newRowId = newRowId)
             if (built == null) discarded++ else rows.add(built)
         }
@@ -166,6 +173,52 @@ object IntakeSheetParser {
     }
 
     /**
+     * Groups a row's boxes into **cells** before anything is classified.
+     *
+     * This exists because recognisers disagree about what a "line" is, and the difference is not
+     * cosmetic. ML Kit returns word-level elements; Vision returns whole lines; and ML Kit's own
+     * line grouping will happily fuse a run of columns into one box when the horizontal gaps are
+     * small. Classifying raw boxes therefore fails in both directions — a word-level "Nov" is
+     * not a parseable date, and a fused "Nov 1, 2023 Dec 1, 2023" is not one either.
+     *
+     * Re-grouping on the horizontal gap makes the parser independent of that choice: whatever
+     * granularity arrives, a cell is a run of boxes separated by less than a column gap. Every
+     * downstream heuristic then sees the cell it was written for.
+     *
+     * Confidence is the minimum of the parts, matching [buildRow]'s deliberate pessimism.
+     */
+    private fun mergeIntoCells(row: List<OcrLine>, tuning: Tuning): List<OcrLine> {
+        if (row.size < 2) return row
+        val sorted = row.sortedBy { it.bounds.left }
+        val cells = mutableListOf<MutableList<OcrLine>>(mutableListOf(sorted.first()))
+
+        sorted.drop(1).forEach { box ->
+            val current = cells.last()
+            // Measured against the rightmost edge so far, not the previous box: a short box
+            // nested inside a wider one must not reopen the gap.
+            val gap = box.bounds.left - current.maxOf { it.bounds.right }
+            if (gap < tuning.minColumnGap) current.add(box) else cells.add(mutableListOf(box))
+        }
+
+        return cells.map { parts ->
+            if (parts.size == 1) {
+                parts.single()
+            } else {
+                OcrLine(
+                    text = parts.joinToString(" ") { it.text },
+                    confidence = parts.minOf { it.confidence },
+                    bounds = OcrBounds(
+                        left = parts.minOf { it.bounds.left },
+                        top = parts.minOf { it.bounds.top },
+                        right = parts.maxOf { it.bounds.right },
+                        bottom = parts.maxOf { it.bounds.bottom },
+                    ),
+                )
+            }
+        }
+    }
+
+    /**
      * Assigns a row's cells to columns by **content**, not position.
      *
      * Content-first is what saves the feature on real sheets: photographs get cropped, columns
@@ -231,9 +284,12 @@ object IntakeSheetParser {
             }
         }
 
-        // Whatever is left and looks like words is the name. A phone-classified cell can never
-        // become the name while an unclaimed candidate exists.
-        unclaimed.filter { hasLetters(it.text) }
+        // Whatever is left and reads like a name becomes the name. The digit guard matters:
+        // without it an unparseable date fragment or a fused "2023Monthly" has letters, falls
+        // through here, and is silently appended to somebody's name -- which then imports as a
+        // member record with garbage in it. A leftover that is mostly digits is dropped instead,
+        // leaving the cell blank and visibly in need of review.
+        unclaimed.filter { hasLetters(it.text) && !containsDigits(it.text) }
             .forEach { result.getOrPut(Column.NAME) { mutableListOf() }.add(it) }
 
         return result
@@ -301,6 +357,19 @@ object IntakeSheetParser {
     }
 
     private fun hasLetters(text: String): Boolean = text.count { it.isLetter() } >= 2
+
+    /**
+     * A name has no digits in it. This guards the name cell against date and plan debris — a
+     * fused "2023Monthly", which ML Kit really does emit when two columns are printed close
+     * together, has seven letters and would otherwise pass [hasLetters] and be appended to
+     * somebody's name.
+     *
+     * Deliberately strict. If OCR drops a digit into a real name the cell is left blank, which
+     * raises MISSING_NAME and puts the row in front of a human; the alternative failure mode is
+     * a member imported as "Omar Hassan 2023Monthly", which nobody notices.
+     */
+    private fun containsDigits(text: String): Boolean =
+        text.foldDigitsToAscii().any { it.isDigit() }
 
     private fun isDigitsOnly(text: String): Boolean {
         val folded = text.foldDigitsToAscii().filter { !it.isWhitespace() }

@@ -4,5 +4,23 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!--
+	  MANDATORY on iOS, unlike Android. Without NSCameraUsageDescription the OS *terminates*
+	  the app the moment a capture is attempted, rather than merely denying it.
+
+	  There is deliberately no NSPhotoLibraryUsageDescription: PHPickerViewController and
+	  UIImagePickerController's photo-library source run out of process and need no permission.
+	-->
+	<key>NSCameraUsageDescription</key>
+	<string>ANFAS uses the camera to photograph paper sign-up sheets so members can be imported without retyping them.</string>
+	<!--
+	  Both app languages are declared so the OS picks the right localisation for system-supplied
+	  UI (the camera permission alert included) instead of defaulting to English.
+	-->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ar</string>
+	</array>
 </dict>
 </plist>

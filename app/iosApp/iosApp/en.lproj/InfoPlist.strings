@@ -1,0 +1,2 @@
+/* Shown in the system camera-permission alert. */
+"NSCameraUsageDescription" = "ANFAS uses the camera to photograph paper sign-up sheets so members can be imported without retyping them.";

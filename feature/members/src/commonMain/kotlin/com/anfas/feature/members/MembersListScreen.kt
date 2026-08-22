@@ -38,6 +38,7 @@ import com.anfas.core.designsystem.AnfasTableFooter
 import com.anfas.core.designsystem.AnfasTableHeaderCell
 import com.anfas.core.designsystem.AnfasTableHeaderRow
 import com.anfas.core.designsystem.AnfasTableRow
+import com.anfas.core.designsystem.AnfasTableScroll
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.EmptyStateAction
 import com.anfas.core.designsystem.Tone
@@ -145,26 +146,28 @@ private fun MembersTable(
 ) {
     val s = strings
     AnfasCard(modifier = Modifier.fillMaxWidth()) {
-        AnfasTableHeaderRow {
-            AnfasTableHeaderCell(s.members.columnMember, Modifier.weight(COLUMN_WEIGHT_MEMBER))
-            AnfasTableHeaderCell(s.members.columnStatus, Modifier.weight(COLUMN_WEIGHT_STATUS))
-            AnfasTableHeaderCell(
-                s.members.columnLastCheckIn,
-                Modifier.weight(COLUMN_WEIGHT_CHECK_IN),
-            )
-            AnfasTableHeaderCell(
-                text = s.members.columnActions,
-                modifier = Modifier.width(ActionsColumnWidth),
-                textAlign = TextAlign.End,
-            )
-        }
-        LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false)) {
-            items(items = members, key = { it.id.value }) { member ->
-                MemberRow(
-                    member = member,
-                    isLast = member == members.last(),
-                    onClick = { onMemberClicked(member.id) },
+        AnfasTableScroll {
+            AnfasTableHeaderRow {
+                AnfasTableHeaderCell(s.members.columnMember, Modifier.weight(COLUMN_WEIGHT_MEMBER))
+                AnfasTableHeaderCell(s.members.columnStatus, Modifier.weight(COLUMN_WEIGHT_STATUS))
+                AnfasTableHeaderCell(
+                    s.members.columnLastCheckIn,
+                    Modifier.weight(COLUMN_WEIGHT_CHECK_IN),
                 )
+                AnfasTableHeaderCell(
+                    text = s.members.columnActions,
+                    modifier = Modifier.width(ActionsColumnWidth),
+                    textAlign = TextAlign.End,
+                )
+            }
+            LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f, fill = false)) {
+                items(items = members, key = { it.id.value }) { member ->
+                    MemberRow(
+                        member = member,
+                        isLast = member == members.last(),
+                        onClick = { onMemberClicked(member.id) },
+                    )
+                }
             }
         }
         AnfasTableFooter {

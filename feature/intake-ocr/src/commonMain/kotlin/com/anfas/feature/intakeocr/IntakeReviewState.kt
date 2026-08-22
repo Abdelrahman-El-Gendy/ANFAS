@@ -37,6 +37,8 @@ data class IntakeReviewState(
     val panX: Float = 0f,
     val panY: Float = 0f,
     val isImporting: Boolean = false,
+    /** A capture is being recognised and parsed. Separate from [isImporting]: different wait. */
+    val isScanning: Boolean = false,
     val outcome: ImportOutcome? = null,
     val notice: IntakeNotice? = null,
 ) {
@@ -59,4 +61,10 @@ sealed interface IntakeNotice {
     data class Imported(val imported: Int, val skipped: Int) : IntakeNotice
     data object Discarded : IntakeNotice
     data class Failed(val message: String) : IntakeNotice
+
+    /** A capture produced rows. The batch itself arrives through the repository. */
+    data class Scanned(val rows: Int) : IntakeNotice
+
+    /** Readable photo, no member rows in it — a blur or a bad angle, so worth saying. */
+    data object NothingFound : IntakeNotice
 }

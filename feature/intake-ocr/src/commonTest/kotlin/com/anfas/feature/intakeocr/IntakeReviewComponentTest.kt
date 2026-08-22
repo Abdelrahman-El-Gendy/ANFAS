@@ -265,6 +265,11 @@ class IntakeReviewComponentTest {
         val component = IntakeReviewComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
             repository = repository,
+            ingestion = IntakeIngestion(
+                recogniser = FakeTextRecogniser(),
+                repository = repository,
+                imageStore = RecordingImageStore(),
+            ),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onImported = onImported,
         )
@@ -310,14 +315,18 @@ private class TestDispatchers(private val dispatcher: CoroutineDispatcher) : App
  * would pass against a store that never recomputes issues, which is the whole behaviour under
  * test.
  */
-private class FakeIntakeRepository(
+internal class FakeIntakeRepository(
     batches: List<IntakeBatch> = emptyList(),
     private val importResult: AppResult<ImportOutcome>? = null,
+    private val createResult: AppResult<Unit>? = null,
 ) : IntakeRepository {
 
     private val state = MutableStateFlow(batches)
 
     val edits = mutableListOf<Pair<IntakeFieldKey, String>>()
+
+    /** Every batch handed to [createBatch], so a test can assert that none was. */
+    val created = mutableListOf<IntakeBatch>()
 
     override fun observeBatches(): Flow<AppResult<List<IntakeBatch>>> =
         state.map { AppResult.Success(it) }
@@ -330,6 +339,8 @@ private class FakeIntakeRepository(
     }
 
     override suspend fun createBatch(batch: IntakeBatch): AppResult<Unit> {
+        createResult?.let { return it }
+        created += batch
         state.value = state.value + batch
         return AppResult.Success(Unit)
     }

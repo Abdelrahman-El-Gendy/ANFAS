@@ -1,0 +1,2 @@
+/* Shown in the system camera-permission alert. */
+"NSCameraUsageDescription" = "يستخدم ANFAS الكاميرا لتصوير كشوف التسجيل الورقية حتى يمكن استيراد الأعضاء دون إعادة كتابة بياناتهم.";

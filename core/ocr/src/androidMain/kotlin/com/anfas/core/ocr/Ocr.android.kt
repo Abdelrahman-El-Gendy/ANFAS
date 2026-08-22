@@ -111,35 +111,68 @@ private class MlKitTextRecogniser(
  * ML Kit gives pixel rectangles; [OcrLine] is normalised 0..1 with a top-left origin, which is
  * already ML Kit's convention — so this only divides, with no axis flip (contrast the iOS side,
  * where Vision's bottom-left origin has to be inverted).
+ *
+ * **Emits words (`Text.Element`), not `Text.Line`s.** This is not a detail. ML Kit groups text
+ * on a shared baseline into one Line whenever the horizontal gaps are small, so on a real sheet
+ * a whole tail of columns arrives as a single Line — measured here, "Nov 1, 2023 Dec 1,
+ * 2023Monthly" came back as one box spanning x 0.63..0.99, covering Start, End *and* Plan. A box
+ * spanning three columns cannot be assigned to any of them, so those three cells came out empty
+ * while the row still looked importable.
+ *
+ * Words carry their own boxes, and IntakeSheetParser already clusters by x-gap and re-joins
+ * whatever lands in the same column — so handing it words lets its column detection do the work
+ * it was written for, instead of trusting ML Kit's idea of a line.
  */
 private fun Text.toOcrLines(image: CapturedImage): List<OcrLine> {
     val width = image.widthPx.toFloat().takeIf { it > 0f } ?: return emptyList()
     val height = image.heightPx.toFloat().takeIf { it > 0f } ?: return emptyList()
 
-    return textBlocks.flatMap { it.lines }.mapNotNull { line ->
-        val box = line.boundingBox ?: return@mapNotNull null
-        OcrLine(
-            text = line.text,
-            confidence = line.lineConfidence(),
-            bounds = OcrBounds.normalised(
-                left = box.left / width,
-                top = box.top / height,
-                right = box.right / width,
-                bottom = box.bottom / height,
-            ),
-        )
+    fun rect(box: android.graphics.Rect) = OcrBounds.normalised(
+        left = box.left / width,
+        top = box.top / height,
+        right = box.right / width,
+        bottom = box.bottom / height,
+    )
+
+    return textBlocks.flatMap { it.lines }.flatMap { line ->
+        // Fall back to the line itself when a model reports no elements, so a future model that
+        // omits them degrades to the old behaviour rather than dropping the row entirely.
+        val words = line.elements.mapNotNull { element ->
+            element.boundingBox?.let {
+                OcrLine(
+                    text = element.text,
+                    confidence = element.reportedConfidence(),
+                    bounds = rect(it),
+                )
+            }
+        }
+        words.ifEmpty {
+            line.boundingBox?.let {
+                listOf(
+                    OcrLine(
+                        text = line.text,
+                        confidence = line.reportedConfidence(),
+                        bounds = rect(it),
+                    ),
+                )
+            }.orEmpty()
+        }
     }
 }
 
 /**
- * Isolated in one place on purpose. `Text.Line.getConfidence()` is annotated as returning a
- * float but is documented to be populated only for some models, and returns NaN otherwise.
- * A NaN would propagate silently into IntakeField.needsReview and make every cell look
- * suspicious, so an unusable value becomes 1f — "no reason to doubt this" — and the parser's
- * own heuristics carry the review decision instead.
+ * Isolated in one place on purpose. `getConfidence()` is annotated as returning a float but is
+ * documented to be populated only for some models, and returns NaN otherwise. A NaN would
+ * propagate silently into IntakeField.needsReview and make every cell look suspicious, so an
+ * unusable value becomes 1f — "no reason to doubt this" — and the parser's own heuristics carry
+ * the review decision instead.
  */
-private fun Text.Line.lineConfidence(): Float {
-    val reported = runCatching { confidence }.getOrNull() ?: return 1f
+private fun Text.Line.reportedConfidence(): Float = normaliseConfidence { confidence }
+
+private fun Text.Element.reportedConfidence(): Float = normaliseConfidence { confidence }
+
+private inline fun normaliseConfidence(read: () -> Float?): Float {
+    val reported = runCatching(read).getOrNull() ?: return 1f
     return if (reported.isNaN()) 1f else reported.coerceIn(0f, 1f)
 }
 

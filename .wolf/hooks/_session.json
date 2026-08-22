@@ -1,315 +1,108 @@
 {
-  "files_written": [
-    {
-      "file": "/Users/abdelrahmanelgendy/.claude/projects/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/memory/stitch-mcp-needs-stdio-proxy.md",
-      "action": "create",
-      "tokens": 629,
-      "at": "2026-08-21T09:08:58.314Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonMain/kotlin/com/anfas/core/model/Intake.kt",
-      "action": "create",
-      "tokens": 1486,
-      "at": "2026-08-21T12:25:26.554Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonMain/kotlin/com/anfas/core/model/Ids.kt",
-      "action": "edit",
-      "tokens": 48,
-      "at": "2026-08-21T12:25:42.385Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonMain/kotlin/com/anfas/core/model/IntakeValidator.kt",
-      "action": "create",
-      "tokens": 1638,
-      "at": "2026-08-21T12:26:11.916Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonTest/kotlin/com/anfas/core/model/IntakeValidatorTest.kt",
-      "action": "create",
-      "tokens": 2493,
-      "at": "2026-08-21T12:27:04.435Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/IntakeEntity.kt",
-      "action": "create",
-      "tokens": 1227,
-      "at": "2026-08-21T12:28:47.440Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt",
-      "action": "edit",
-      "tokens": 36,
-      "at": "2026-08-21T12:29:01.234Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt",
-      "action": "edit",
-      "tokens": 98,
-      "at": "2026-08-21T12:29:08.988Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt",
-      "action": "edit",
-      "tokens": 27,
-      "at": "2026-08-21T12:29:15.704Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonMain/kotlin/com/anfas/core/model/Member.kt",
-      "action": "edit",
-      "tokens": 200,
-      "at": "2026-08-21T12:30:42.512Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/MemberEntity.kt",
-      "action": "edit",
-      "tokens": 269,
-      "at": "2026-08-21T12:30:59.102Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/MemberEntity.kt",
-      "action": "edit",
-      "tokens": 154,
-      "at": "2026-08-21T12:31:08.170Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/MemberMappers.kt",
-      "action": "edit",
-      "tokens": 319,
-      "at": "2026-08-21T12:31:27.511Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/MemberMappers.kt",
-      "action": "edit",
-      "tokens": 46,
-      "at": "2026-08-21T12:31:34.688Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonTest/kotlin/com/anfas/core/data/FakeMemberDao.kt",
-      "action": "edit",
-      "tokens": 97,
-      "at": "2026-08-21T12:32:27.397Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonTest/kotlin/com/anfas/core/data/FakeMemberDao.kt",
-      "action": "edit",
-      "tokens": 128,
-      "at": "2026-08-21T12:32:43.580Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/IntakeMappers.kt",
-      "action": "create",
-      "tokens": 952,
-      "at": "2026-08-21T12:33:14.945Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/IntakeRepository.kt",
-      "action": "create",
-      "tokens": 690,
-      "at": "2026-08-21T12:33:33.376Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
-      "action": "create",
-      "tokens": 2046,
-      "at": "2026-08-21T12:34:17.720Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/IntakeEntity.kt",
-      "action": "edit",
-      "tokens": 100,
-      "at": "2026-08-21T12:34:30.147Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
-      "action": "edit",
-      "tokens": 98,
-      "at": "2026-08-21T12:34:42.208Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
-      "action": "edit",
-      "tokens": 2,
-      "at": "2026-08-21T12:34:49.307Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
-      "action": "edit",
-      "tokens": 26,
-      "at": "2026-08-21T12:34:56.643Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
-      "action": "edit",
-      "tokens": 18,
-      "at": "2026-08-21T12:35:03.955Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
-      "action": "edit",
-      "tokens": 11,
-      "at": "2026-08-21T12:35:10.867Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt",
-      "action": "edit",
-      "tokens": 155,
-      "at": "2026-08-21T12:36:20.677Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt",
-      "action": "edit",
-      "tokens": 25,
-      "at": "2026-08-21T12:36:28.198Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonTest/kotlin/com/anfas/core/data/FakeIntakeDao.kt",
-      "action": "create",
-      "tokens": 1190,
-      "at": "2026-08-21T12:36:58.134Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonTest/kotlin/com/anfas/core/data/OfflineFirstIntakeRepositoryTest.kt",
-      "action": "create",
-      "tokens": 2956,
-      "at": "2026-08-21T12:37:40.102Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonTest/kotlin/com/anfas/core/data/FakeMemberDao.kt",
-      "action": "edit",
-      "tokens": 72,
-      "at": "2026-08-21T12:45:11.665Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonTest/kotlin/com/anfas/core/data/OfflineFirstIntakeRepositoryTest.kt",
-      "action": "edit",
-      "tokens": 167,
-      "at": "2026-08-21T12:45:34.559Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasIcons.kt",
-      "action": "edit",
-      "tokens": 504,
-      "at": "2026-08-21T12:48:02.595Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasInlineEdit.kt",
-      "action": "create",
-      "tokens": 1368,
-      "at": "2026-08-21T13:20:00.102Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewState.kt",
-      "action": "create",
-      "tokens": 494,
-      "at": "2026-08-21T13:20:22.488Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponent.kt",
-      "action": "create",
-      "tokens": 2040,
-      "at": "2026-08-21T13:21:00.974Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "action": "create",
-      "tokens": 5064,
-      "at": "2026-08-21T13:26:20.945Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "action": "edit",
-      "tokens": 265,
-      "at": "2026-08-21T13:26:43.568Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "action": "edit",
-      "tokens": 42,
-      "at": "2026-08-21T13:26:51.571Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeOcrModule.kt",
-      "action": "create",
-      "tokens": 340,
-      "at": "2026-08-21T13:27:13.670Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 116,
-      "at": "2026-08-21T13:28:14.074Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/build.gradle.kts",
-      "action": "create",
-      "tokens": 93,
-      "at": "2026-08-21T13:28:37.779Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponentTest.kt",
-      "action": "create",
-      "tokens": 3934,
-      "at": "2026-08-21T13:29:32.260Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponentTest.kt",
-      "action": "edit",
+  "session_id": "session-2026-08-21-0221",
+  "started": "2026-08-21T23:21:52.510Z",
+  "files_read": {
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/01-members.png": {
+      "count": 1,
       "tokens": 0,
-      "at": "2026-08-21T13:29:42.547Z"
+      "first_read": "2026-08-22T09:05:53.030Z"
     },
-    {
-      "file": "/Users/abdelrahmanelgendy/.claude/plans/plan-what-is-remaining-abundant-elephant.md",
-      "action": "create",
-      "tokens": 1207,
-      "at": "2026-08-21T13:54:16.991Z"
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/02-members.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:06:28.739Z"
     },
-    {
-      "file": "/Users/abdelrahmanelgendy/.claude/plans/plan-what-is-remaining-abundant-elephant.md",
-      "action": "edit",
-      "tokens": 718,
-      "at": "2026-08-21T14:07:42.331Z"
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/04-arabic.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:06:44.083Z"
     },
-    {
-      "file": "/Users/abdelrahmanelgendy/.claude/plans/plan-what-is-remaining-abundant-elephant.md",
-      "action": "edit",
-      "tokens": 1153,
-      "at": "2026-08-21T14:08:19.736Z"
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/03-reminders.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:07:02.470Z"
     },
-    {
-      "file": "/Users/abdelrahmanelgendy/.claude/plans/plan-what-is-remaining-abundant-elephant.md",
-      "action": "create",
-      "tokens": 5608,
-      "at": "2026-08-21T14:11:24.319Z"
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/05-fixed-ar.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:10:59.515Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/06-fixed-reminders-ar.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:11:24.696Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/07-fixed-reminders-en.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:11:53.795Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/08-intake-capture.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:30:12.137Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/09-picker.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:32:40.566Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/10-after-scan.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:33:20.720Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/11-scanned.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:34:13.217Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/12-state.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:38:21.938Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/13-words.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:39:27.331Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/14-full.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:47:21.189Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/15-table-fixed.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:50:53.342Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/16-final.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:52:50.982Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/18-imported.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:54:42.884Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/19-members-scroll.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:56:52.701Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/shots/20-members-footer.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-22T09:58:06.489Z"
     }
-  ],
-  "edit_counts": {
-    "../../.claude/projects/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/memory/stitch-mcp-needs-stdio-proxy.md": 1,
-    "core/model/src/commonMain/kotlin/com/anfas/core/model/Intake.kt": 1,
-    "core/model/src/commonMain/kotlin/com/anfas/core/model/Ids.kt": 1,
-    "core/model/src/commonMain/kotlin/com/anfas/core/model/IntakeValidator.kt": 1,
-    "core/model/src/commonTest/kotlin/com/anfas/core/model/IntakeValidatorTest.kt": 1,
-    "core/database/src/commonMain/kotlin/com/anfas/core/database/IntakeEntity.kt": 2,
-    "core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt": 3,
-    "core/model/src/commonMain/kotlin/com/anfas/core/model/Member.kt": 1,
-    "core/database/src/commonMain/kotlin/com/anfas/core/database/MemberEntity.kt": 2,
-    "core/data/src/commonMain/kotlin/com/anfas/core/data/MemberMappers.kt": 2,
-    "core/data/src/commonTest/kotlin/com/anfas/core/data/FakeMemberDao.kt": 3,
-    "core/data/src/commonMain/kotlin/com/anfas/core/data/IntakeMappers.kt": 1,
-    "core/data/src/commonMain/kotlin/com/anfas/core/data/IntakeRepository.kt": 1,
-    "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt": 6,
-    "core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt": 2,
-    "core/data/src/commonTest/kotlin/com/anfas/core/data/FakeIntakeDao.kt": 1,
-    "core/data/src/commonTest/kotlin/com/anfas/core/data/OfflineFirstIntakeRepositoryTest.kt": 2,
-    "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasIcons.kt": 1,
-    "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasInlineEdit.kt": 1,
-    "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewState.kt": 1,
-    "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponent.kt": 1,
-    "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt": 3,
-    "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeOcrModule.kt": 1,
-    "composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt": 1,
-    "feature/intake-ocr/build.gradle.kts": 1,
-    "feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponentTest.kt": 2,
-    "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md": 4
-  }
+  },
+  "files_written": [],
+  "edit_counts": {},
+  "anatomy_hits": 0,
+  "anatomy_misses": 19,
+  "repeated_reads_warned": 0,
+  "cerebrum_warnings": 0,
+  "stop_count": 1
 }

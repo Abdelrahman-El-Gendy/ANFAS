@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-08-21T23:19:18.835Z",
+  "projectRoot": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS",
+  "instincts": {
+    "instincts": [
+      {
+        "id": "immutable-data-class",
+        "type": "pattern",
+        "description": "Immutable data class for Compose stability",
+        "context": "jetpack-compose",
+        "confidence": 0.4,
+        "createdAt": "2026-08-21T23:08:10.940Z",
+        "lastUsed": "2026-08-21T23:08:10.943Z",
+        "usageCount": 1
+      }
+    ],
+    "version": "1.0",
+    "lastUpdated": "2026-08-21T23:08:10.944Z"
+  },
+  "gitBranch": "hardening/phase-3-ocr",
+  "lastFiles": [
+    ".wolf/buglog.json",
+    ".wolf/memory.md",
+    "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasIcons.kt",
+    "core/model/src/commonMain/kotlin/com/anfas/core/model/Intake.kt",
+    "core/model/src/commonMain/kotlin/com/anfas/core/model/IntakeSheetParser.kt",
+    "core/model/src/commonMain/kotlin/com/anfas/core/model/OcrLine.kt",
+    "core/model/src/commonTest/kotlin/com/anfas/core/model/IntakeSheetParserTest.kt",
+    "core/model/src/commonTest/kotlin/com/anfas/core/model/SheetFixtures.kt",
+    "core/ocr/build.gradle.kts",
+    "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+    "feature/members/src/commonMain/kotlin/com/anfas/feature/members/MembersListScreen.kt",
+    "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/FailedReminderDialog.kt",
+    "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueScreen.kt",
+    "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/RenewalSheetScreen.kt",
+    "settings.gradle.kts"
+  ]
+}

@@ -7,6 +7,13 @@ plugins {
 
 kotlin {
     sourceSets {
+        commonMain.dependencies {
+            // Declared here, not in anfas.kmp.feature: only this feature scans anything, and
+            // adding it to the convention plugin would put ML Kit on all seven features'
+            // compile classpaths.
+            implementation(project(":core:ocr"))
+            implementation(libs.bundles.coil)
+        }
         commonTest.dependencies {
             implementation(libs.turbine)
         }
