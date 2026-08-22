@@ -10,6 +10,7 @@ import com.anfas.core.ocr.ocrModule
 import com.anfas.feature.announcements.AnnouncementsModule
 import com.anfas.feature.auth.AuthModule
 import com.anfas.feature.classes.ClassesModule
+import com.anfas.feature.dashboard.DashboardModule
 import com.anfas.feature.equipment.EquipmentModule
 import com.anfas.feature.intakeocr.IntakeOcrModule
 import com.anfas.feature.members.MembersModule
@@ -34,6 +35,7 @@ val coreModule: Module = module {
  */
 val featureModules: List<Module> = listOf(
     AuthModule,
+    DashboardModule,
     MembersModule,
     SubscriptionsModule,
     IntakeOcrModule,

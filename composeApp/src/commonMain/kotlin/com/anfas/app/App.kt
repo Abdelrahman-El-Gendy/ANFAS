@@ -47,6 +47,7 @@ import com.anfas.core.i18n.ProvideLocalization
 import com.anfas.core.i18n.strings
 import com.anfas.feature.auth.SignInScreen
 import com.anfas.feature.auth.StaffListScreen
+import com.anfas.feature.dashboard.DashboardScreen
 import com.anfas.feature.intakeocr.IntakeReviewScreen
 import com.anfas.feature.members.MemberProfileScreen
 import com.anfas.feature.members.MembersListScreen
@@ -108,12 +109,14 @@ fun App(root: RootComponent) {
                     .map { destination ->
                         NavItem(
                             label = when (destination) {
+                                RootComponent.TopLevel.DASHBOARD -> s.dashboard.title
                                 RootComponent.TopLevel.MEMBERS -> s.members.title
                                 RootComponent.TopLevel.REMINDERS -> s.reminders.title
                                 RootComponent.TopLevel.INTAKE -> s.intake.title
                                 RootComponent.TopLevel.STAFF -> s.staff.title
                             },
                             icon = when (destination) {
+                                RootComponent.TopLevel.DASHBOARD -> AnfasIcons.Schedule
                                 RootComponent.TopLevel.MEMBERS -> AnfasIcons.Person
                                 RootComponent.TopLevel.REMINDERS -> AnfasIcons.Payments
                                 RootComponent.TopLevel.INTAKE -> AnfasIcons.DocumentScanner
@@ -244,6 +247,9 @@ private fun Host(root: RootComponent, session: Session, modifier: Modifier) {
                 return@Children
             }
             when (val child = created.instance) {
+                is RootComponent.Child.Dashboard ->
+                    DashboardScreen(component = child.component)
+
                 is RootComponent.Child.MembersList ->
                     MembersListScreen(component = child.component)
 

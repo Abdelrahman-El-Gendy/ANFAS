@@ -25,6 +25,7 @@ class ConfigSerializationTest {
     @Test
     fun `every config variant encodes its stable discriminator`() {
         val expected = mapOf<RootComponent.Config, String>(
+            RootComponent.Config.Dashboard to "dashboard",
             RootComponent.Config.MembersList to "members-list",
             RootComponent.Config.ReminderQueue to "reminder-queue",
             RootComponent.Config.IntakeReview to "intake-review",

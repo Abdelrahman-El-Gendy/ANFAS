@@ -8,7 +8,13 @@ import org.koin.dsl.module
  * tied to their Decompose lifecycle and must never be singletons.
  */
 val SubscriptionsModule: Module = module {
-    factory { ReminderQueueComponentFactory(reminders = get(), dispatchers = get()) }
+    factory {
+        ReminderQueueComponentFactory(
+            reminders = get(),
+            auth = get(),
+            dispatchers = get(),
+        )
+    }
     factory {
         RenewalSheetComponentFactory(
             members = get(),

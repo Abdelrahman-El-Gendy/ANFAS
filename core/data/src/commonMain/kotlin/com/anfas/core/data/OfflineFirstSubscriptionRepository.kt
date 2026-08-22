@@ -22,6 +22,10 @@ internal class OfflineFirstSubscriptionRepository(private val dao: SubscriptionD
         dao.observeCurrent(memberId.value)
             .asAppResult("Could not load the current subscription") { it?.toDomain() }
 
+    override fun observeCurrentTerms(): Flow<AppResult<List<SubscriptionTerm>>> =
+        dao.observeAllCurrent()
+            .asAppResult("Could not load subscriptions") { rows -> rows.map { it.toDomain() } }
+
     override suspend fun confirmRenewal(
         memberId: MemberId,
         quote: RenewalQuote,

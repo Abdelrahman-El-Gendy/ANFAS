@@ -358,4 +358,33 @@ object EnglishStrings : AppStrings {
         override val roleReceptionist = "Receptionist"
         override val roleMember = "Member"
     }
+
+    override val dashboard = object : AppStrings.Dashboard {
+        override val title = "Today"
+        override val subtitle = "What needs doing at the desk."
+        override val activeMembers = "Active members"
+        override fun ofTotal(total: Int) = "of $total"
+        override val needingRenewal = "Need renewing"
+        override val needingRenewalHint = "Expired or expiring within a week"
+        override val failedReminders = "Failed reminders"
+        override val failedRemindersHint = "Not delivered"
+        override val nothingToChase = "Nothing to chase"
+
+        override val renewalQueueTitle = "Renewals to chase"
+        override val renewalQueueEmpty = "No memberships are expiring this week."
+        override val allClearTitle = "All clear"
+        override val allClearMessage =
+            "No memberships expiring this week and no reminders failing."
+        override val loadFailedTitle = "Couldn't load today's figures"
+
+        override val columnMember = "Member"
+        override val columnPlan = "Plan"
+        override val columnEnds = "Ends"
+        override val expired = "Expired"
+        override fun inDays(days: Int) = when (days) {
+            0 -> "Today"
+            1 -> "Tomorrow"
+            else -> "In $days days"
+        }
+    }
 }

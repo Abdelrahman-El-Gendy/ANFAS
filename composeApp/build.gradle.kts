@@ -31,6 +31,7 @@ kotlin {
             // The app shell owns DI wiring, so it is the one place that legitimately sees
             // every core module and every feature module.
             implementation(project(":feature:auth"))
+            implementation(project(":feature:dashboard"))
             implementation(project(":core:database"))
             // For ocrModule only. The shell owns the DI graph, so it has to see every module
             // it registers; the capture and recognition types stay inside :feature:intake-ocr.

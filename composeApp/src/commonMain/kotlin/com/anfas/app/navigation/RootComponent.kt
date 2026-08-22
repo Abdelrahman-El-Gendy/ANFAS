@@ -11,6 +11,8 @@ import com.anfas.feature.auth.SignInComponent
 import com.anfas.feature.auth.SignInComponentFactory
 import com.anfas.feature.auth.StaffListComponent
 import com.anfas.feature.auth.StaffListComponentFactory
+import com.anfas.feature.dashboard.DashboardComponent
+import com.anfas.feature.dashboard.DashboardComponentFactory
 import com.anfas.feature.intakeocr.IntakeReviewComponent
 import com.anfas.feature.intakeocr.IntakeReviewComponentFactory
 import com.anfas.feature.members.MemberProfileComponent
@@ -63,6 +65,7 @@ class RootComponent(componentContext: ComponentContext) :
     private val dispatchers: AppDispatchers by inject()
     private val signInFactory: SignInComponentFactory by inject()
     private val staffListFactory: StaffListComponentFactory by inject()
+    private val dashboardFactory: DashboardComponentFactory by inject()
     private val membersListFactory: MembersListComponentFactory by inject()
     private val memberProfileFactory: MemberProfileComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
@@ -148,6 +151,7 @@ class RootComponent(componentContext: ComponentContext) :
     fun onTopLevelSelected(destination: TopLevel) {
         navigation.replaceAll(
             when (destination) {
+                TopLevel.DASHBOARD -> Config.Dashboard
                 TopLevel.MEMBERS -> Config.MembersList
                 TopLevel.REMINDERS -> Config.ReminderQueue
                 TopLevel.INTAKE -> Config.IntakeReview
@@ -157,6 +161,14 @@ class RootComponent(componentContext: ComponentContext) :
     }
 
     private fun createChild(config: Config, context: ComponentContext): Child = when (config) {
+        Config.Dashboard -> Child.Dashboard(
+            dashboardFactory.create(
+                componentContext = context,
+                onMemberClicked = { id -> navigation.push(Config.MemberProfile(id.value)) },
+                onOpenReminders = { onTopLevelSelected(TopLevel.REMINDERS) },
+            ),
+        )
+
         Config.MembersList -> Child.MembersList(
             membersListFactory.create(
                 componentContext = context,
@@ -233,6 +245,10 @@ class RootComponent(componentContext: ComponentContext) :
     @Serializable
     sealed interface Config {
         @Serializable
+        @SerialName("dashboard")
+        data object Dashboard : Config
+
+        @Serializable
         @SerialName("members-list")
         data object MembersList : Config
 
@@ -263,6 +279,8 @@ class RootComponent(componentContext: ComponentContext) :
 
     /** Instantiated components, one per [Config]. */
     sealed interface Child {
+        data class Dashboard(val component: DashboardComponent) : Child
+
         data class MembersList(val component: MembersListComponent) : Child
         data class MemberProfile(val component: MemberProfileComponent) : Child
         data class StaffList(val component: StaffListComponent) : Child
@@ -278,6 +296,10 @@ class RootComponent(componentContext: ComponentContext) :
      * adding a role a one-line change in Role.permissions instead of a hunt through the shell.
      */
     enum class TopLevel(val permission: Permission) {
+        // First, so signing in lands on "what needs doing" rather than a directory. Gated on
+        // VIEW_MEMBERS because every tile is derived from member and subscription data — a role
+        // that cannot see members has nothing to put on it.
+        DASHBOARD(Permission.VIEW_MEMBERS),
         MEMBERS(Permission.VIEW_MEMBERS),
         REMINDERS(Permission.VIEW_REMINDERS),
         INTAKE(Permission.SCAN_INTAKE),
@@ -288,6 +310,8 @@ class RootComponent(componentContext: ComponentContext) :
 /** Which nav entry should read as active for a given route, or null for detail screens. */
 internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
     get() = when (this) {
+        RootComponent.Config.Dashboard -> RootComponent.TopLevel.DASHBOARD
+
         RootComponent.Config.MembersList -> RootComponent.TopLevel.MEMBERS
 
         RootComponent.Config.ReminderQueue -> RootComponent.TopLevel.REMINDERS
@@ -316,6 +340,7 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
  */
 internal val RootComponent.Config.requiredPermission: Permission
     get() = when (this) {
+        RootComponent.Config.Dashboard -> Permission.VIEW_MEMBERS
         RootComponent.Config.MembersList -> Permission.VIEW_MEMBERS
         is RootComponent.Config.MemberProfile -> Permission.VIEW_MEMBERS
         RootComponent.Config.ReminderQueue -> Permission.VIEW_REMINDERS

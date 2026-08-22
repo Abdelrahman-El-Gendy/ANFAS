@@ -422,4 +422,40 @@ object ArabicStrings : AppStrings {
         override val roleReceptionist = "موظف استقبال"
         override val roleMember = "عضو"
     }
+
+    override val dashboard = object : AppStrings.Dashboard {
+        override val title = "اليوم"
+        override val subtitle = "ما يجب عمله على المكتب."
+        override val activeMembers = "الأعضاء النشطون"
+        override fun ofTotal(total: Int) = "من ${total.toString().asLtrIsolate()}"
+        override val needingRenewal = "بحاجة إلى تجديد"
+        override val needingRenewalHint = "منتهية أو تنتهي خلال أسبوع"
+        override val failedReminders = "تذكيرات فاشلة"
+        override val failedRemindersHint = "لم تُسلَّم"
+        override val nothingToChase = "لا شيء للمتابعة"
+
+        override val renewalQueueTitle = "تجديدات للمتابعة"
+        override val renewalQueueEmpty = "لا توجد عضويات تنتهي هذا الأسبوع."
+        override val allClearTitle = "كل شيء تمام"
+        override val allClearMessage = "لا عضويات تنتهي هذا الأسبوع ولا تذكيرات فاشلة."
+        override val loadFailedTitle = "تعذّر تحميل أرقام اليوم"
+
+        override val columnMember = "العضو"
+        override val columnPlan = "الخطة"
+        override val columnEnds = "تنتهي"
+        override val expired = "منتهية"
+        override fun inDays(days: Int) = when (days) {
+            0 -> "اليوم"
+
+            1 -> "غدًا"
+
+            2 -> "بعد يومين"
+
+            else -> when (arabicPlural(days)) {
+                PluralCategory.FEW -> "بعد $days أيام"
+                PluralCategory.MANY -> "بعد $days يومًا"
+                else -> "بعد $days يوم"
+            }
+        }
+    }
 }

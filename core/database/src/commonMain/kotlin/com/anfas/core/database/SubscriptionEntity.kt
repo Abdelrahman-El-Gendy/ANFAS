@@ -67,6 +67,28 @@ interface SubscriptionDao {
     )
     fun observeCurrent(memberId: String): Flow<SubscriptionEntity?>
 
+    /**
+     * The latest term for every member that has one, newest end date first.
+     *
+     * Grouped in SQL rather than by reading all terms and filtering in Kotlin: a gym with years
+     * of renewal history has many rows per member, and the dashboard only ever wants the current
+     * one. The correlated MAX picks it per member.
+     *
+     * The subquery alias is `latest`, not `inner` — `INNER` is a SQL keyword, and Room's query
+     * verifier reads it as the start of an INNER JOIN.
+     */
+    @Query(
+        """
+        SELECT s.* FROM subscriptions s
+        WHERE s.ends_on_epoch_day = (
+            SELECT MAX(latest.ends_on_epoch_day) FROM subscriptions latest
+            WHERE latest.member_id = s.member_id
+        )
+        ORDER BY s.ends_on_epoch_day ASC
+        """,
+    )
+    fun observeAllCurrent(): Flow<List<SubscriptionEntity>>
+
     @Upsert
     suspend fun upsert(subscription: SubscriptionEntity)
 }

@@ -40,6 +40,7 @@ class NavigationPermissionTest {
     fun `a receptionist runs the desk without staff management`() {
         assertEquals(
             listOf(
+                RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
                 RootComponent.TopLevel.REMINDERS,
                 RootComponent.TopLevel.INTAKE,
@@ -52,14 +53,21 @@ class NavigationPermissionTest {
     @Test
     fun `a coach reaches members and intake only`() {
         assertEquals(
-            listOf(RootComponent.TopLevel.MEMBERS, RootComponent.TopLevel.INTAKE),
+            listOf(
+                RootComponent.TopLevel.DASHBOARD,
+                RootComponent.TopLevel.MEMBERS,
+                RootComponent.TopLevel.INTAKE,
+            ),
             destinationsFor(Role.Coach),
         )
     }
 
     @Test
     fun `a therapist reaches members only`() {
-        assertEquals(listOf(RootComponent.TopLevel.MEMBERS), destinationsFor(Role.Therapist))
+        assertEquals(
+            listOf(RootComponent.TopLevel.DASHBOARD, RootComponent.TopLevel.MEMBERS),
+            destinationsFor(Role.Therapist),
+        )
     }
 
     /**

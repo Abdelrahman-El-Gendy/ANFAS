@@ -42,12 +42,22 @@ data class ReminderQueueState(
     val selectedIds: Set<ReminderId> = emptySet(),
     val openedFailure: Reminder? = null,
     val notice: QueueNotice? = null,
+    /** Whether this session holds `Permission.RETRY_REMINDERS`. */
+    val mayRetry: Boolean = false,
 ) {
     val visibleReminders: List<Reminder>
         get() = (content as? ReminderQueueContent.Loaded)?.reminders ?: emptyList()
 
-    /** Bulk actions only make sense where a retry is possible, i.e. the Failed tab. */
-    val supportsSelection: Boolean get() = selectedStatus == ReminderStatus.FAILED
+    /**
+     * Bulk actions only make sense where a retry is possible — the Failed tab — and only for a
+     * session that may retry.
+     *
+     * Viewing the queue and re-sending from it are separate permissions: a retry sends a WhatsApp
+     * message on the gym's account, which is not the same act as reading who failed. The route
+     * guard cannot catch this, because both live on this one screen.
+     */
+    val supportsSelection: Boolean
+        get() = selectedStatus == ReminderStatus.FAILED && mayRetry
 
     val isFiltered: Boolean get() = query.isNotBlank() || templateFilter != null
 }

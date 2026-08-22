@@ -1,11 +1,18 @@
 package com.anfas.feature.subscriptions
 
+import com.anfas.core.auth.Role
+import com.anfas.core.auth.Session
+import com.anfas.core.auth.SignInResult
+import com.anfas.core.auth.StaffAccount
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
+import com.anfas.core.data.AuthRepository
+import com.anfas.core.data.CreateAccountOutcome
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.data.ReminderCounts
 import com.anfas.core.data.ReminderRepository
+import com.anfas.core.data.StaffChangeOutcome
 import com.anfas.core.data.SubscriptionRepository
 import com.anfas.core.model.FailureReason
 import com.anfas.core.model.Member
@@ -104,6 +111,10 @@ internal class FakeSubscriptionRepository(
     override fun observeCurrentTerm(memberId: MemberId): Flow<AppResult<SubscriptionTerm?>> =
         MutableStateFlow(AppResult.Success(currentTerm))
 
+    // Read by the dashboard, not by the renewal sheet these tests exercise.
+    override fun observeCurrentTerms(): Flow<AppResult<List<SubscriptionTerm>>> =
+        MutableStateFlow(AppResult.Success(listOfNotNull(currentTerm)))
+
     override suspend fun confirmRenewal(
         memberId: MemberId,
         quote: RenewalQuote,
@@ -183,3 +194,49 @@ internal fun plan(tier: PlanTier, price: Long, savings: Int? = null) = Subscript
     perks = "Full access",
     savingsPercent = savings,
 )
+
+/**
+ * Session source. `mayRetry` maps to Receptionist (holds RETRY_REMINDERS) or Coach (does not),
+ * so the test states the *capability* rather than a role it does not care about.
+ */
+internal class FakeAuth(mayRetry: Boolean) : AuthRepository {
+    private val session = Session(
+        userId = "s-1",
+        roles = setOf(if (mayRetry) Role.Receptionist else Role.Coach),
+    )
+
+    override fun observeSession(): Flow<Session?> = MutableStateFlow(session)
+
+    override suspend fun hasAnyAccount(): AppResult<Boolean> = AppResult.Success(true)
+
+    override suspend fun signIn(username: String, password: String): AppResult<SignInResult> =
+        AppResult.Success(SignInResult.InvalidCredentials)
+
+    override suspend fun signOut(): AppResult<Unit> = AppResult.Success(Unit)
+
+    override suspend fun createFirstOwner(
+        username: String,
+        password: String,
+        displayName: String,
+    ): AppResult<CreateAccountOutcome> = AppResult.Success(CreateAccountOutcome.AlreadyInitialised)
+
+    override fun observeStaff(): Flow<AppResult<List<StaffAccount>>> =
+        MutableStateFlow(AppResult.Success(emptyList()))
+
+    override suspend fun createStaff(
+        username: String,
+        password: String,
+        displayName: String,
+        roles: Set<Role>,
+    ): AppResult<CreateAccountOutcome> = AppResult.Success(CreateAccountOutcome.AlreadyInitialised)
+
+    override suspend fun setStaffEnabled(
+        id: String,
+        enabled: Boolean,
+    ): AppResult<StaffChangeOutcome> = AppResult.Success(StaffChangeOutcome.NotFound)
+
+    override suspend fun resetStaffPassword(
+        id: String,
+        newPassword: String,
+    ): AppResult<StaffChangeOutcome> = AppResult.Success(StaffChangeOutcome.NotFound)
+}

@@ -1,8 +1,11 @@
 package com.anfas.feature.subscriptions
 
+import com.anfas.core.auth.Permission
+import com.anfas.core.auth.can
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
 import com.anfas.core.common.appExceptionHandler
+import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.ReminderCounts
 import com.anfas.core.data.ReminderRepository
 import com.anfas.core.model.MemberId
@@ -39,6 +42,7 @@ import kotlinx.coroutines.launch
 class ReminderQueueComponent(
     componentContext: ComponentContext,
     private val repository: ReminderRepository,
+    private val auth: AuthRepository,
     dispatchers: AppDispatchers,
     private val onOpenMemberClicked: (MemberId) -> Unit,
 ) : ComponentContext by componentContext {
@@ -50,6 +54,7 @@ class ReminderQueueComponent(
 
     val state: StateFlow<ReminderQueueState> = combine(
         ui,
+        auth.observeSession(),
         repository.observeCounts(),
         ui.debounce { if (it.query.isEmpty()) 0L else SEARCH_DEBOUNCE_MS }
             .map { QueueQuery(it.status, it.query, it.template) }
@@ -57,7 +62,7 @@ class ReminderQueueComponent(
             .flatMapLatest { q ->
                 repository.observeQueue(q.status, q.query, q.template).map { q to it }
             },
-    ) { selections, countsResult, (queriedWith, queueResult) ->
+    ) { selections, session, countsResult, (queriedWith, queueResult) ->
         ReminderQueueState(
             selectedStatus = selections.status,
             counts = (countsResult as? AppResult.Success)?.value ?: ReminderCounts(),
@@ -69,6 +74,7 @@ class ReminderQueueComponent(
             selectedIds = selections.selectedIds intersect queueResult.idsOrEmpty(),
             openedFailure = queueResult.find(selections.openedId),
             notice = selections.notice,
+            mayRetry = session?.can(Permission.RETRY_REMINDERS) == true,
         )
     }.stateIn(
         scope = scope,
@@ -110,6 +116,11 @@ class ReminderQueueComponent(
 
     fun onRetry(id: ReminderId) = retry(listOf(id))
 
+    /**
+     * Enforced here as well as hidden in the UI. A component method is callable from anywhere,
+     * and a permission that only exists as a hidden button is not a boundary.
+     */
+
     fun onOpenFailure(id: ReminderId) = ui.update { it.copy(openedId = id, notice = null) }
 
     fun onDismissFailure() = ui.update { it.copy(openedId = null) }
@@ -120,6 +131,9 @@ class ReminderQueueComponent(
 
     private fun retry(ids: List<ReminderId>) {
         if (ids.isEmpty()) return
+        // Enforced here as well as hidden in the UI. A component method is callable from
+        // anywhere, and a permission that exists only as a hidden button is not a boundary.
+        if (!state.value.mayRetry) return
         scope.launch {
             val requested = ids.size
             when (val result = repository.retry(ids)) {

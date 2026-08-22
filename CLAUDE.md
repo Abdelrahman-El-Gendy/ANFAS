@@ -116,6 +116,26 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - compose material3 is pinned to an **alpha** (`1.11.0-alpha07`) — the newest in the 1.11 line.
 - KSP versioning is independent of Kotlin's. There is no `2.4.10-x.y.z`.
 
+## Dashboards
+
+- **The reception dashboard exists; `staff-dashboard` does not, deliberately.** Its capacity load,
+  equipment issues, cleanliness timer and upcoming classes are backed by nothing — four fabricated
+  figures is not a screen worth shipping. A dashboard is the screen where an invented number is
+  most likely to be believed and acted on.
+- **Not built on the reception dashboard either:** "Today's check-ins" (nothing records a
+  check-in; `Member.lastCheckInAt` is one timestamp per member and cannot answer "how many since
+  06:00"), percentage deltas (no history is kept, only current state), and the per-row SEND action
+  (the WhatsApp job is parked).
+- **One failing seam fails the whole screen.** A dashboard that silently omits a tile is worse
+  than one saying it could not load: the missing number reads as zero, and zero here means
+  "nothing to chase".
+- **`RenewalQueue` in `:core:model` owns the definition of "expiring soon"**, shared with the
+  profile pill via `TermProgress.EXPIRING_SOON_DAYS`. Two definitions of *soon* is how a dashboard
+  ends up disagreeing with the member it links to. Expired terms are **included** and sorted
+  first — a lapsed membership is money already lost, and a queue that hides it never gets chased.
+- Room note: a subquery alias must not be called `inner`. Room's query verifier reads it as the
+  start of an `INNER JOIN`.
+
 ## Staff sign-in
 
 - **There is no auth server.** Accounts are local rows in `staff`, created on the device by

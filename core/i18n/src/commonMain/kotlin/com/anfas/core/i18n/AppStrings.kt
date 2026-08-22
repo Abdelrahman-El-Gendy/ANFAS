@@ -366,4 +366,33 @@ interface AppStrings {
         val roleReceptionist: String
         val roleMember: String
     }
+
+    val dashboard: Dashboard
+
+    interface Dashboard {
+        val title: String
+        val subtitle: String
+
+        /** Tiles. Each one is backed by stored data — see the screen's KDoc for what is not. */
+        val activeMembers: String
+        fun ofTotal(total: Int): String
+        val needingRenewal: String
+        val needingRenewalHint: String
+        val failedReminders: String
+        val failedRemindersHint: String
+        val nothingToChase: String
+
+        val renewalQueueTitle: String
+        val renewalQueueEmpty: String
+        val allClearTitle: String
+        val allClearMessage: String
+        val loadFailedTitle: String
+
+        /** Row copy. */
+        val columnMember: String
+        val columnPlan: String
+        val columnEnds: String
+        val expired: String
+        fun inDays(days: Int): String
+    }
 }

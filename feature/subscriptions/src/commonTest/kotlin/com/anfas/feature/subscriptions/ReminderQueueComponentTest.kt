@@ -16,11 +16,14 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
+private const val RETRY_EMISSIONS = 6
+
 class ReminderQueueComponentTest {
 
     @Test
@@ -185,14 +188,56 @@ class ReminderQueueComponentTest {
         error("No notice was emitted")
     }
 
+    /**
+     * Viewing the queue and re-sending from it are separate permissions: a retry sends a WhatsApp
+     * message on the gym's account, which is not the same act as reading who failed. The route
+     * guard cannot catch this because both live on this one screen.
+     */
+    @Test
+    fun `a session without RETRY_REMINDERS cannot retry or select`() = runTest {
+        val repository = FakeReminderRepository(listOf(reminder("1")), null)
+        val component = ReminderQueueComponent(
+            componentContext = DefaultComponentContext(
+                lifecycle = LifecycleRegistry().also {
+                    it.resume()
+                },
+            ),
+            repository = repository,
+            auth = FakeAuth(mayRetry = false),
+            dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
+            onOpenMemberClicked = {},
+        )
+
+        component.state.test {
+            var seen = awaitItem()
+            repeat(RETRY_EMISSIONS) {
+                if (!seen.mayRetry && seen.visibleReminders.isNotEmpty()) return@repeat
+                seen = awaitItem()
+            }
+            assertFalse(seen.mayRetry)
+            // Bulk selection is withheld too: there is no action it could lead to.
+            assertFalse(seen.supportsSelection)
+
+            component.onRetry(ReminderId("1"))
+            assertEquals(
+                emptyList(),
+                repository.lastRetryIds,
+                "the retry must not reach the repository",
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun TestScope.component(
         reminders: List<com.anfas.core.model.Reminder>,
         forced: AppResult<List<com.anfas.core.model.Reminder>>? = null,
+        mayRetry: Boolean = true,
     ): ReminderQueueComponent {
         val lifecycle = LifecycleRegistry()
         val component = ReminderQueueComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
             repository = FakeReminderRepository(reminders, forced),
+            auth = FakeAuth(mayRetry = mayRetry),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onOpenMemberClicked = {},
         )

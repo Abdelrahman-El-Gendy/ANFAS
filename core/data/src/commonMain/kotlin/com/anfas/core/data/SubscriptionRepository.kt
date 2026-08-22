@@ -16,6 +16,15 @@ interface SubscriptionRepository {
     fun observeCurrentTerm(memberId: MemberId): Flow<AppResult<SubscriptionTerm?>>
 
     /**
+     * Every member's current term, soonest to expire first. Drives the dashboard's renewal queue.
+     *
+     * Deliberately not filtered by date here: "expiring soon" depends on *today*, which storage
+     * must not reach for, and the caller already has [com.anfas.core.model.TermProgress] to
+     * decide it.
+     */
+    fun observeCurrentTerms(): Flow<AppResult<List<SubscriptionTerm>>>
+
+    /**
      * Records a confirmed renewal as a new term.
      *
      * Takes the [quote] the member was actually shown rather than re-deriving the price here,
