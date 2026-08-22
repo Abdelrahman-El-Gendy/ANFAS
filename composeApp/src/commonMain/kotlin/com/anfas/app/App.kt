@@ -34,6 +34,7 @@ import com.anfas.core.i18n.LanguageController
 import com.anfas.core.i18n.ProvideLocalization
 import com.anfas.core.i18n.strings
 import com.anfas.feature.intakeocr.IntakeReviewScreen
+import com.anfas.feature.members.MemberProfileScreen
 import com.anfas.feature.members.MembersListScreen
 import com.anfas.feature.subscriptions.ReminderQueueScreen
 import com.anfas.feature.subscriptions.RenewalSheetScreen
@@ -158,6 +159,9 @@ private fun Host(root: RootComponent, modifier: Modifier) {
             when (val child = created.instance) {
                 is RootComponent.Child.MembersList ->
                     MembersListScreen(component = child.component)
+
+                is RootComponent.Child.MemberProfile ->
+                    MemberProfileScreen(component = child.component)
 
                 is RootComponent.Child.ReminderQueue ->
                     ReminderQueueScreen(component = child.component)

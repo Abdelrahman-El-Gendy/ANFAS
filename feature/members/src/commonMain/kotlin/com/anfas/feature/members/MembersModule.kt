@@ -9,4 +9,11 @@ import org.koin.dsl.module
  */
 val MembersModule: Module = module {
     factory { MembersListComponentFactory(repository = get(), dispatchers = get()) }
+    factory {
+        MemberProfileComponentFactory(
+            members = get(),
+            subscriptions = get(),
+            dispatchers = get(),
+        )
+    }
 }

@@ -46,6 +46,9 @@ interface AppStrings {
 
         /** Longer form used on the renewal sheet: "12 Aug 2026". */
         fun dateLong(day: Int, monthIndex: Int, year: Int): String
+
+        /** Content description for a back affordance. The icon auto-mirrors; this does not. */
+        val back: String
     }
 
     interface Members {
@@ -74,6 +77,31 @@ interface AppStrings {
         val statusExpired: String
         val statusSuspended: String
         val statusPaused: String
+
+        /** Member profile. */
+        val profileTitle: String
+        val profileCurrentMembership: String
+        val profileStartDate: String
+        val profileEndDate: String
+        val profileTimeRemaining: String
+        val profilePlan: String
+        val profileLastCheckIn: String
+        val profilePaid: String
+        val profileRenew: String
+        val profileSendReminder: String
+        val profileNoActivePlan: String
+        val profileNoActivePlanMessage: String
+        val profileNotFoundTitle: String
+        val profileNotFoundMessage: String
+        val profileNoPhone: String
+
+        /** Status pill above the membership card. */
+        fun profileExpiresInDays(days: Int): String
+        val profileExpired: String
+        fun profileStartsOn(date: String): String
+
+        /** "93%" — Latin digits, like every other number staff cross-reference. */
+        fun profilePercent(percent: Int): String
     }
 
     interface Reminders {

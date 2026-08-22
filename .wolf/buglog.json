@@ -785,5 +785,40 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-22T13:50:00Z"
+  },
+  {
+    "id": "bug-046",
+    "timestamp": "2026-08-22T15:15:00Z",
+    "error_message": "Member profile: 'Time remaining 0%' with an empty bar on a membership paid the same day",
+    "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/TermProgress.kt",
+    "root_cause": "The bar was fed TermProgress.fraction, which is the proportion of the term ELAPSED, while the label read 'Time remaining'. On day one of a term that is 0%, so a member who had just paid saw an empty bar.",
+    "fix": "Added TermProgress.remainingFraction and remainingPercent as their own tested properties, so the semantics live with the calculation rather than at the call site, and displayed the numeric percentage beside the bar because a full or empty bar alone is ambiguous.",
+    "tags": [
+      "ui",
+      "semantics",
+      "core-model",
+      "member-profile"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T15:15:00Z"
+  },
+  {
+    "id": "bug-047",
+    "timestamp": "2026-08-22T15:15:00Z",
+    "error_message": "Arabic member profile rendered the date as '22 2026 \u0623\u063a\u0633\u0637\u0633' and the member id as '10003#'",
+    "file": "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/BidiIsolate.kt",
+    "root_cause": "Both strings were rendered with the dataMonoLtr style, which forces TextDirection.Ltr. That style is correct for Latin-only data, but these strings CONTAIN Arabic \u2014 a translated month name, and the '\u0631\u0642\u0645 \u0627\u0644\u0639\u0636\u0648\u064a\u0629' label \u2014 so forcing LTR reordered those runs. Separately, the direction-neutral '#' resolves its direction from its surroundings, so in an RTL paragraph it migrated to the far side of the number.",
+    "fix": "Added String.asLtrIsolate() using LRI/PDI (U+2066/U+2069) and wrapped only the NUMBER inside the Arabic id string, leaving the label to follow the paragraph. Dates and money now use dataMono rather than dataMonoLtr, since they are localised strings containing script. dataMonoLtr is reserved for Latin-only runs such as phone numbers.",
+    "tags": [
+      "i18n",
+      "rtl",
+      "bidi",
+      "arabic",
+      "typography"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-22T15:15:00Z"
   }
 ]

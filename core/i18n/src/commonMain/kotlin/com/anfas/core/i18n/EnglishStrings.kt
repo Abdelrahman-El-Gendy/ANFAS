@@ -33,6 +33,7 @@ object EnglishStrings : AppStrings {
 
         override fun dateLong(day: Int, monthIndex: Int, year: Int) =
             "$day ${MONTHS_SHORT_EN[monthIndex]} $year"
+        override val back = "Back"
     }
 
     override val members = object : AppStrings.Members {
@@ -62,6 +63,28 @@ object EnglishStrings : AppStrings {
         override val statusExpired = "Expired"
         override val statusSuspended = "Suspended"
         override val statusPaused = "Paused"
+        override val profileTitle = "Member profile"
+        override val profileCurrentMembership = "Current membership"
+        override val profileStartDate = "Start date"
+        override val profileEndDate = "End date"
+        override val profileTimeRemaining = "Time remaining"
+        override val profilePlan = "Plan"
+        override val profileLastCheckIn = "Last check-in"
+        override val profilePaid = "Paid"
+        override val profileRenew = "Renew"
+        override val profileSendReminder = "Send reminder"
+        override val profileNoActivePlan = "No active membership"
+        override val profileNoActivePlanMessage =
+            "This member has no subscription on record. Renew to start one."
+        override val profileNotFoundTitle = "Member not found"
+        override val profileNotFoundMessage =
+            "This member may have been deleted on another device."
+        override val profileNoPhone = "No phone number"
+        override fun profileExpiresInDays(days: Int) =
+            if (days == 1) "Expires tomorrow" else "Expires in $days days"
+        override val profileExpired = "Expired"
+        override fun profileStartsOn(date: String) = "Starts $date"
+        override fun profilePercent(percent: Int) = "$percent%"
     }
 
     override val reminders = object : AppStrings.Reminders {

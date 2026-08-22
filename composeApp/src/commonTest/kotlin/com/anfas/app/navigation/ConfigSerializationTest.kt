@@ -28,6 +28,7 @@ class ConfigSerializationTest {
             RootComponent.Config.MembersList to "members-list",
             RootComponent.Config.ReminderQueue to "reminder-queue",
             RootComponent.Config.IntakeReview to "intake-review",
+            RootComponent.Config.MemberProfile(memberId = "m-1") to "member-profile",
             RootComponent.Config.Renewal(memberId = "m-1") to "renewal",
         )
 

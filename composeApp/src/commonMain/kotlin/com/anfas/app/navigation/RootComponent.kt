@@ -3,6 +3,8 @@ package com.anfas.app.navigation
 import com.anfas.core.model.MemberId
 import com.anfas.feature.intakeocr.IntakeReviewComponent
 import com.anfas.feature.intakeocr.IntakeReviewComponentFactory
+import com.anfas.feature.members.MemberProfileComponent
+import com.anfas.feature.members.MemberProfileComponentFactory
 import com.anfas.feature.members.MembersListComponent
 import com.anfas.feature.members.MembersListComponentFactory
 import com.anfas.feature.subscriptions.ReminderQueueComponent
@@ -41,6 +43,7 @@ class RootComponent(componentContext: ComponentContext) :
     KoinComponent {
 
     private val membersListFactory: MembersListComponentFactory by inject()
+    private val memberProfileFactory: MemberProfileComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
     private val renewalSheetFactory: RenewalSheetComponentFactory by inject()
     private val intakeReviewFactory: IntakeReviewComponentFactory by inject()
@@ -69,20 +72,33 @@ class RootComponent(componentContext: ComponentContext) :
         Config.MembersList -> Child.MembersList(
             membersListFactory.create(
                 componentContext = context,
-                // The member profile screen exists in the design but not yet in the app,
-                // so tapping a row opens the renewal sheet — the primary thing staff do
-                // with a member. When the profile lands, this becomes the profile route
-                // and renewal moves behind the row's overflow menu.
-                onMemberClicked = { id -> navigation.push(Config.Renewal(id.value)) },
+                onMemberClicked = { id -> navigation.push(Config.MemberProfile(id.value)) },
                 onAddMemberClicked = {},
-                onScanSheetClicked = {},
+                // Intake is a top-level destination, so this replaces rather than pushes —
+                // otherwise "scan a sheet" from the members empty state leaves a members
+                // screen underneath that back would return to mid-scan.
+                onScanSheetClicked = { onTopLevelSelected(TopLevel.INTAKE) },
+            ),
+        )
+
+        is Config.MemberProfile -> Child.MemberProfile(
+            memberProfileFactory.create(
+                componentContext = context,
+                memberId = MemberId(config.memberId),
+                // Pushed on top of the profile, so back returns to the member rather than to
+                // the directory — the profile is where you check the result of a renewal.
+                onRenewClicked = { id -> navigation.push(Config.Renewal(id.value)) },
+                onBackClicked = { navigation.pop() },
             ),
         )
 
         Config.ReminderQueue -> Child.ReminderQueue(
             reminderQueueFactory.create(
                 componentContext = context,
-                onOpenMemberClicked = { id -> navigation.push(Config.Renewal(id.value)) },
+                // The profile, not the renewal sheet: a failed reminder is a question about the
+                // member ("is this number right, is the plan still live"), and renewal is one
+                // tap further on from there.
+                onOpenMemberClicked = { id -> navigation.push(Config.MemberProfile(id.value)) },
             ),
         )
 
@@ -141,6 +157,10 @@ class RootComponent(componentContext: ComponentContext) :
          * state, and a value class adds nothing here beyond a custom serializer.
          */
         @Serializable
+        @SerialName("member-profile")
+        data class MemberProfile(val memberId: String) : Config
+
+        @Serializable
         @SerialName("renewal")
         data class Renewal(val memberId: String) : Config
     }
@@ -148,6 +168,7 @@ class RootComponent(componentContext: ComponentContext) :
     /** Instantiated components, one per [Config]. */
     sealed interface Child {
         data class MembersList(val component: MembersListComponent) : Child
+        data class MemberProfile(val component: MemberProfileComponent) : Child
         data class ReminderQueue(val component: ReminderQueueComponent) : Child
         data class IntakeReview(val component: IntakeReviewComponent) : Child
         data class Renewal(val component: RenewalSheetComponent) : Child
@@ -161,7 +182,15 @@ class RootComponent(componentContext: ComponentContext) :
 internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
     get() = when (this) {
         RootComponent.Config.MembersList -> RootComponent.TopLevel.MEMBERS
+
         RootComponent.Config.ReminderQueue -> RootComponent.TopLevel.REMINDERS
+
         RootComponent.Config.IntakeReview -> RootComponent.TopLevel.INTAKE
+
+        // Detail routes keep the *parent* tab lit rather than clearing the bar. The profile is
+        // reached from the directory and the renewal sheet from the profile, so Members staying
+        // highlighted tells you where back will take you.
+        is RootComponent.Config.MemberProfile -> RootComponent.TopLevel.MEMBERS
+
         is RootComponent.Config.Renewal -> null
     }

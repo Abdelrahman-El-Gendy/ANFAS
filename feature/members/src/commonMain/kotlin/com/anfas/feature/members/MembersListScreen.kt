@@ -236,24 +236,6 @@ private fun MemberRow(member: Member, isLast: Boolean, onClick: () -> Unit) {
     }
 }
 
-/** Photo when there is one, initials when there isn't — the export shows both. */
-@Composable
-private fun MemberAvatar(member: Member) {
-    Box(
-        modifier = Modifier
-            .size(32.dp)
-            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = member.initials,
-            style = AnfasTheme.textStyles.labelCaps,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
 private const val COLUMN_WEIGHT_MEMBER = 3f
 private const val COLUMN_WEIGHT_STATUS = 1.3f
 private const val COLUMN_WEIGHT_CHECK_IN = 1.6f

@@ -53,6 +53,7 @@ object ArabicStrings : AppStrings {
 
         override fun dateLong(day: Int, monthIndex: Int, year: Int) =
             "$day ${MONTHS_AR[monthIndex]} $year"
+        override val back = "رجوع"
     }
 
     override val members = object : AppStrings.Members {
@@ -65,7 +66,10 @@ object ArabicStrings : AppStrings {
         override val columnStatus = "الحالة"
         override val columnLastCheckIn = "آخر حضور"
         override val columnActions = "إجراءات"
-        override fun idPrefix(number: String) = "رقم العضوية: $number"
+
+        // The number is isolated, the label is not: see BidiIsolate.kt. Without this the
+        // neutral "#" resolves from its RTL surroundings and reads as "10003#".
+        override fun idPrefix(number: String) = "رقم العضوية: ${number.asLtrIsolate()}"
         override fun actionsFor(memberName: String) = "إجراءات $memberName"
 
         override fun showingMembers(count: Int) = when (arabicPlural(count)) {
@@ -88,6 +92,33 @@ object ArabicStrings : AppStrings {
         override val statusExpired = "منتهي"
         override val statusSuspended = "موقوف"
         override val statusPaused = "متوقف مؤقتًا"
+        override val profileTitle = "ملف العضو"
+        override val profileCurrentMembership = "العضوية الحالية"
+        override val profileStartDate = "تاريخ البداية"
+        override val profileEndDate = "تاريخ النهاية"
+        override val profileTimeRemaining = "الوقت المتبقي"
+        override val profilePlan = "الخطة"
+        override val profileLastCheckIn = "آخر حضور"
+        override val profilePaid = "المدفوع"
+        override val profileRenew = "تجديد"
+        override val profileSendReminder = "إرسال تذكير"
+        override val profileNoActivePlan = "لا توجد عضوية حالية"
+        override val profileNoActivePlanMessage =
+            "لا يوجد اشتراك مسجل لهذا العضو. اضغط تجديد للبدء."
+        override val profileNotFoundTitle = "العضو غير موجود"
+        override val profileNotFoundMessage = "قد يكون هذا العضو حُذف من جهاز آخر."
+        override val profileNoPhone = "لا يوجد رقم هاتف"
+        override fun profileExpiresInDays(days: Int) = when (arabicPlural(days)) {
+            PluralCategory.ZERO -> "انتهت"
+            PluralCategory.ONE -> "تنتهي غدًا"
+            PluralCategory.TWO -> "تنتهي بعد يومين"
+            PluralCategory.FEW -> "تنتهي بعد $days أيام"
+            PluralCategory.MANY -> "تنتهي بعد $days يومًا"
+            PluralCategory.OTHER -> "تنتهي بعد $days يوم"
+        }
+        override val profileExpired = "منتهية"
+        override fun profileStartsOn(date: String) = "تبدأ $date"
+        override fun profilePercent(percent: Int) = "$percent%"
     }
 
     override val reminders = object : AppStrings.Reminders {

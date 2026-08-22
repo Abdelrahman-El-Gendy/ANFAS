@@ -116,6 +116,17 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - compose material3 is pinned to an **alpha** (`1.11.0-alpha07`) — the newest in the 1.11 line.
 - KSP versioning is independent of Kotlin's. There is no `2.4.10-x.y.z`.
 
+## RTL and bidi
+
+- **`dataMonoLtr` is for Latin-only runs** — phone numbers, ids, raw template names. Never put a
+  *localised* string through it: a translated month name or the `ج.م` currency abbreviation gets
+  its runs reordered, which rendered `22 أغسطس 2026` as `22 2026 أغسطس`.
+- **Wrap the number, not the sentence.** For a localised string containing a Latin/numeric run,
+  use `String.asLtrIsolate()` (LRI/PDI) on the run and let the `Text` follow the paragraph.
+  Direction-**neutral** characters (`#`, `+`, `-`, currency codes) otherwise resolve from their
+  RTL surroundings and migrate to the wrong end — `#10003` read as `10003#`.
+- Verify in Arabic on a device. Neither of the above fails a test or looks wrong in English.
+
 ## Release configuration
 
 - **Every navigation `Config` variant carries an explicit `@SerialName`.** Decompose serialises
