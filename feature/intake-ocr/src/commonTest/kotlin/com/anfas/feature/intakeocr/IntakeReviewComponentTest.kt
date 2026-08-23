@@ -361,6 +361,7 @@ class IntakeReviewComponentTest {
     private fun TestScope.component(
         repository: IntakeRepository,
         onImported: (Int) -> Unit = {},
+        onCloseClicked: () -> Unit = {},
         cameraPermissions: CameraPermissions = FakeCameraPermissions(),
         permissions: Set<Permission> = Permission.entries.toSet(),
     ): IntakeReviewComponent {
@@ -377,6 +378,7 @@ class IntakeReviewComponentTest {
             auth = FakeAuth(permissions = permissions),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onImported = onImported,
+            onCloseClicked = onCloseClicked,
         )
         lifecycle.resume()
         return component

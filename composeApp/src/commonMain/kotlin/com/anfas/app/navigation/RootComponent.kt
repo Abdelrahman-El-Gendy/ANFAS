@@ -158,10 +158,18 @@ class RootComponent(componentContext: ComponentContext) :
                 TopLevel.MEMBERS -> Config.MembersList
                 TopLevel.CHECK_IN -> Config.CheckIn
                 TopLevel.REMINDERS -> Config.ReminderQueue
-                TopLevel.INTAKE -> Config.IntakeReview
-                TopLevel.STAFF -> Config.StaffList
             },
         )
+    }
+
+    /**
+     * Staff management, from the account menu rather than the nav bar.
+     *
+     * Pushed, not [navigation.replaceAll]: it is administration reached from wherever you were,
+     * and back returning you there is the whole reason it is not a tab.
+     */
+    fun onOpenStaff() {
+        navigation.push(Config.StaffList)
     }
 
     private fun createChild(config: Config, context: ComponentContext): Child = when (config) {
@@ -185,10 +193,11 @@ class RootComponent(componentContext: ComponentContext) :
                 componentContext = context,
                 onMemberClicked = { id -> navigation.push(Config.MemberProfile(id.value)) },
                 onAddMemberClicked = {},
-                // Intake is a top-level destination, so this replaces rather than pushes —
-                // otherwise "scan a sheet" from the members empty state leaves a members
-                // screen underneath that back would return to mid-scan.
-                onScanSheetClicked = { onTopLevelSelected(TopLevel.INTAKE) },
+                // Pushed, because scanning is a task whose product is members rather than a
+                // place you visit: back lands on the directory the new rows just joined. Safe
+                // to leave mid-scan too — the batch lives in `intake_batches`, so the component
+                // picks the same sheet back up rather than losing it.
+                onScanSheetClicked = { navigation.push(Config.IntakeReview) },
             ),
         )
 
@@ -216,13 +225,19 @@ class RootComponent(componentContext: ComponentContext) :
         Config.IntakeReview -> Child.IntakeReview(
             intakeReviewFactory.create(
                 componentContext = context,
-                // Imported members land in the directory, so that is where to look next.
-                onImported = { navigation.replaceAll(Config.MembersList) },
+                // Popping rather than replacing: intake is pushed from the directory, so this
+                // returns to the screen the imported members have just appeared in, with the
+                // rest of the stack intact.
+                onImported = { navigation.pop() },
+                onCloseClicked = { navigation.pop() },
             ),
         )
 
         Config.StaffList -> Child.StaffList(
-            staffListFactory.create(componentContext = context),
+            staffListFactory.create(
+                componentContext = context,
+                onBackClicked = { navigation.pop() },
+            ),
         )
 
         is Config.Renewal -> Child.Renewal(
@@ -310,6 +325,26 @@ class RootComponent(componentContext: ComponentContext) :
      *
      * Carrying the permission here rather than checking roles at the call site is what makes
      * adding a role a one-line change in Role.permissions instead of a hunt through the shell.
+     *
+     * **Four, and deliberately not more.** The bottom bar divides a phone's width equally between
+     * these, so each entry added shrinks every other one; Material caps a bottom bar at five and
+     * iOS at five-plus-More for the same reason. There were six here, which on a narrow phone in
+     * Arabic left every label ellipsised — a bar of six unreadable stubs, where the whole job of
+     * the labels is to tell you which is which.
+     *
+     * Cutting it is not a matter of dropping the two least important screens, but of asking which
+     * of the six are *places*:
+     *  - **Intake** is a task, not a place. You scan when a stack of paper arrives, and what it
+     *    produces is members — so it is an action on the directory, and back returns to the rows
+     *    it just created. The design already said this: `members-empty` offers "scan a sheet".
+     *  - **Staff** is administration, and belongs with the other account-level things (language,
+     *    sign out) rather than beside the screens used on every shift.
+     *
+     * Both remain real, permission-guarded routes; only their entry point moved. Nothing was
+     * removed from the app, and neither is nested inside a second menu.
+     *
+     * The count is already role-dependent — a coach sees three, a receptionist four — so this is
+     * a ceiling rather than a fixed set.
      */
     enum class TopLevel(val permission: Permission) {
         // First, so signing in lands on "what needs doing" rather than a directory. Gated on
@@ -319,8 +354,6 @@ class RootComponent(componentContext: ComponentContext) :
         MEMBERS(Permission.VIEW_MEMBERS),
         CHECK_IN(Permission.CHECK_IN_MEMBERS),
         REMINDERS(Permission.VIEW_REMINDERS),
-        INTAKE(Permission.SCAN_INTAKE),
-        STAFF(Permission.MANAGE_STAFF),
     }
 }
 
@@ -335,14 +368,17 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
 
         RootComponent.Config.ReminderQueue -> RootComponent.TopLevel.REMINDERS
 
-        RootComponent.Config.IntakeReview -> RootComponent.TopLevel.INTAKE
-
-        RootComponent.Config.StaffList -> RootComponent.TopLevel.STAFF
-
         // Detail routes keep the *parent* tab lit rather than clearing the bar. The profile is
         // reached from the directory and the renewal sheet from the profile, so Members staying
-        // highlighted tells you where back will take you.
+        // highlighted tells you where back will take you. Intake is the same: it is entered from
+        // the directory and returns to it.
         is RootComponent.Config.MemberProfile -> RootComponent.TopLevel.MEMBERS
+
+        RootComponent.Config.IntakeReview -> RootComponent.TopLevel.MEMBERS
+
+        // Nothing lit. Staff management is account-level, reached from the overflow menu rather
+        // than from a tab, so lighting one would point at a screen you did not come from.
+        RootComponent.Config.StaffList -> null
 
         is RootComponent.Config.Renewal -> null
     }

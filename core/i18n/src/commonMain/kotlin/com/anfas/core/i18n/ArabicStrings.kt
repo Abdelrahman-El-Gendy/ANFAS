@@ -54,6 +54,7 @@ object ArabicStrings : AppStrings {
         override fun dateLong(day: Int, monthIndex: Int, year: Int) =
             "$day ${MONTHS_AR[monthIndex]} $year"
         override val back = "رجوع"
+        override val moreOptions = "الحساب والإعدادات"
     }
 
     override val members = object : AppStrings.Members {

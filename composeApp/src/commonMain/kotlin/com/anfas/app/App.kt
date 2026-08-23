@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,12 +14,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anfas.app.navigation.RootComponent
 import com.anfas.app.navigation.requiredPermission
@@ -34,10 +36,12 @@ import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasLanguageToggle
 import com.anfas.core.designsystem.AnfasNavRail
+import com.anfas.core.designsystem.AnfasOverflowMenu
 import com.anfas.core.designsystem.AnfasScript
 import com.anfas.core.designsystem.AnfasTextAction
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.EmptyStateAction
+import com.anfas.core.designsystem.MenuAction
 import com.anfas.core.designsystem.NavItem
 import com.anfas.core.designsystem.TextActionEmphasis
 import com.anfas.core.i18n.AppLanguage
@@ -62,11 +66,16 @@ import org.koin.compose.koinInject
  * App shell: theme, the navigation host, and the top-level nav chrome.
  *
  * The design uses a fixed rail on desktop and a bottom bar on mobile, so the breakpoint from
- * the design system picks between them. Only the two destinations that actually exist are
- * offered — the export's sidebar lists eight, but an entry that leads nowhere is worse than
- * an absent one.
+ * the design system picks between them. Only destinations that actually exist are offered — the
+ * export's sidebar lists eight, but an entry that leads nowhere is worse than an absent one.
  *
- * Detail routes (the renewal sheet) hide the nav chrome: they are pushed, and back pops them.
+ * Three kinds of thing, kept apart on purpose, because collapsing them is what produced a
+ * six-slot bottom bar of ellipsised labels:
+ *  - **Destinations** — [RootComponent.TopLevel], at most four, in the bar or the rail.
+ *  - **Screen actions** — "scan a sheet" belongs to the directory, not to the bar.
+ *  - **Account-level things** — language, staff management, sign out. These are not destinations,
+ *    and on compact they live behind the top bar's overflow rather than competing with the
+ *    screens used on every shift.
  */
 @Composable
 fun App(root: RootComponent) {
@@ -101,6 +110,23 @@ fun App(root: RootComponent) {
                         emphasis = TextActionEmphasis.Muted,
                     )
                 }
+                // Account-level, not navigation. Staff management sits here rather than in the
+                // bar because it is administration done occasionally by one person, and every
+                // slot it took from the bar was taken from a screen used on every shift.
+                // Permission-filtered, not disabled, for the same reason the tabs are: a greyed
+                // entry advertises a capability the role does not have.
+                val accountActions: List<MenuAction> = buildList {
+                    if (session?.can(Permission.MANAGE_STAFF) == true) {
+                        add(
+                            MenuAction(
+                                label = s.staff.title,
+                                icon = AnfasIcons.Group,
+                                onClick = root::onOpenStaff,
+                            ),
+                        )
+                    }
+                    add(MenuAction(label = s.auth.signOut, onClick = root::onSignOut))
+                }
                 // Built from TopLevel so the destination list, its permission and its label
                 // cannot drift apart. Destinations the session cannot reach are removed, not
                 // disabled: a greyed tab advertises a capability the role does not have, and
@@ -114,16 +140,12 @@ fun App(root: RootComponent) {
                                 RootComponent.TopLevel.MEMBERS -> s.members.title
                                 RootComponent.TopLevel.CHECK_IN -> s.checkIn.title
                                 RootComponent.TopLevel.REMINDERS -> s.reminders.title
-                                RootComponent.TopLevel.INTAKE -> s.intake.title
-                                RootComponent.TopLevel.STAFF -> s.staff.title
                             },
                             icon = when (destination) {
                                 RootComponent.TopLevel.DASHBOARD -> AnfasIcons.Schedule
                                 RootComponent.TopLevel.MEMBERS -> AnfasIcons.Person
                                 RootComponent.TopLevel.CHECK_IN -> AnfasIcons.CheckCircle
                                 RootComponent.TopLevel.REMINDERS -> AnfasIcons.Payments
-                                RootComponent.TopLevel.INTAKE -> AnfasIcons.DocumentScanner
-                                RootComponent.TopLevel.STAFF -> AnfasIcons.Group
                             },
                             selected = active == destination,
                             onClick = { root.onTopLevelSelected(destination) },
@@ -153,11 +175,24 @@ fun App(root: RootComponent) {
                                     subtitle = s.common.appTagline,
                                     // Without this the toggle existed only on compact, so
                                     // language could not be changed at all on desktop.
+                                    // A 256dp rail has room to spell the account actions out,
+                                    // so they are laid out rather than hidden behind an
+                                    // overflow. The information architecture is the same as on
+                                    // compact -- four destinations above, account below the
+                                    // fold -- only the affordance differs, which is the whole
+                                    // reason a rail and a bar are different components.
                                     footer = {
                                         Column(
                                             verticalArrangement = Arrangement.spacedBy(8.dp),
                                         ) {
                                             toggle()
+                                            if (session?.can(Permission.MANAGE_STAFF) == true) {
+                                                AnfasTextAction(
+                                                    text = s.staff.title,
+                                                    onClick = root::onOpenStaff,
+                                                    emphasis = TextActionEmphasis.Muted,
+                                                )
+                                            }
                                             signOut()
                                         }
                                     },
@@ -171,38 +206,48 @@ fun App(root: RootComponent) {
                         }
                     } else {
                         Column(modifier = Modifier.fillMaxSize()) {
-                            // The toggle sits above the content, not in the bottom bar. As a
-                            // fourth bottom-nav slot it stole width from three real
-                            // destinations and crowded the bar's end edge; a language switch
-                            // is also not a navigation destination.
-                            if (session == null) {
-                                // Signed out: the toggle alone, so someone can read the login
-                                // form in their own language before they have an account.
+                            // A top bar, not a floating pair of controls. Neither the language
+                            // switch nor sign-out is a navigation destination, so neither
+                            // belongs in the bottom bar -- as bottom-nav slots they stole width
+                            // from the real destinations and crowded its end edge.
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = AnfasTheme.spacing.marginMobile,
+                                        end = 4.dp,
+                                        top = 4.dp,
+                                        bottom = 4.dp,
+                                    ),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = s.common.appName,
+                                    style = AnfasTheme.textStyles.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    // Weighted so the actions keep their size and the *name*
+                                    // truncates -- the reverse pushes the overflow button off
+                                    // the trailing edge, which is the fillMaxWidth-in-a-Row
+                                    // defect this codebase has already been bitten by.
+                                    modifier = Modifier.weight(1f),
+                                )
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            horizontal = AnfasTheme.spacing.marginMobile,
-                                            vertical = 8.dp,
-                                        ),
-                                    horizontalArrangement = Arrangement.End,
-                                ) {
-                                    toggle()
-                                }
-                            } else {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            horizontal = AnfasTheme.spacing.marginMobile,
-                                            vertical = 8.dp,
-                                        ),
-                                    horizontalArrangement = Arrangement.End,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    signOut()
-                                    Spacer(Modifier.width(8.dp))
+                                    // Signed out the toggle stands alone, so someone can read
+                                    // the login form in their own language before they have an
+                                    // account. There is no account to manage yet.
                                     toggle()
+                                    if (session != null) {
+                                        AnfasOverflowMenu(
+                                            actions = accountActions,
+                                            contentDescription = s.common.moreOptions,
+                                        )
+                                    }
                                 }
                             }
                             if (session == null) {

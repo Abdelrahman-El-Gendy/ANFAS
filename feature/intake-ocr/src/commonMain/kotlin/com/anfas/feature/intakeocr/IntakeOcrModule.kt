@@ -22,6 +22,7 @@ class IntakeReviewComponentFactory internal constructor(
     fun create(
         componentContext: ComponentContext,
         onImported: (imported: Int) -> Unit,
+        onCloseClicked: () -> Unit,
     ): IntakeReviewComponent = IntakeReviewComponent(
         componentContext = componentContext,
         repository = intake,
@@ -30,6 +31,7 @@ class IntakeReviewComponentFactory internal constructor(
         auth = auth,
         dispatchers = dispatchers,
         onImported = onImported,
+        onCloseClicked = onCloseClicked,
     )
 }
 

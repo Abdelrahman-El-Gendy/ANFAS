@@ -324,3 +324,29 @@
   layout, navigation and RTL.
 - My own repeated mistake: heredoc Python with `\\"` inside a JSON string literal fails to parse.
   Use plain quotes in buglog text.
+
+## Key Learnings — 2026-08-23 (navigation IA)
+
+- **A bottom bar divides width equally, so its item count is a hard constraint, not taste.** Six
+  items on a 448dp phone gives each ~74dp, which is less than an Arabic label needs — the bar
+  degrades into six ellipsised stubs whose only job was to say which is which. Material caps at
+  five, iOS at five-plus-More.
+- **Cut the bar by asking which entries are *places*, not which are least important.** The three
+  kinds of thing that get conflated into tabs: destinations, screen actions ("scan a sheet" belongs
+  to the directory), and account-level things (language, staff, sign out). Separating them removed
+  two tabs without removing anything from the app.
+- **Moving an entry point is not deleting a route.** Keep the `Config`, its `@SerialName` and its
+  `requiredPermission`; change only how it is entered. A test asserting the permissions still hold
+  is what stops "reduce the bar" turning into "lose two features".
+- **When an action moves onto a screen, check the permission pair.** SCAN_INTAKE is now only
+  exercisable from the directory, so every role holding it must also hold VIEW_MEMBERS — otherwise
+  it is a permission with no way to use it. Asserted in `NavigationPermissionTest`.
+- **A pushed screen must not repeat its title.** Top bar title + `AnfasScreenHeader` title on the
+  same screen reads as two screens stacked. Top bar carries the title; the body keeps the subtitle.
+- **A rail and a bar may legitimately differ in affordance, not in architecture.** 256dp has room
+  to spell out the account actions; a phone does not, so it gets an overflow. Same four
+  destinations, same account group, different chrome.
+- **A compile-time-complete string interface cannot catch a key that is never called.**
+  `showingMembers` and its six Arabic plural forms existed while the call site hardcoded English.
+  Only running the app in the other language finds these — read a `uiautomator` dump of the Arabic
+  build and look for the one Latin string among the Arabic ones.

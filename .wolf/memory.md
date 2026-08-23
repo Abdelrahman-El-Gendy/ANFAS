@@ -95,3 +95,12 @@
 | Time | Action | File(s) | Outcome | ~Tokens |
 |------|--------|---------|---------|--------|
 | 13:00 | Verified whole OCR intake pipeline on a Pixel 9 emulator: photo -> ML Kit -> parser -> review -> import -> 4 members | core/ocr, core/model, feature/intake-ocr, feature/members | 426 tests green, all targets compile | ~large |
+
+## Session: 2026-08-23 10:19
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:30 | Reduced the bottom nav from 6 routes to 4: Intake became a members-header action (pushed), Staff moved to a top-bar overflow menu | composeApp/App.kt, RootComponent.kt, core/designsystem/AnfasOverflowMenu.kt, AnfasDetailTopBar.kt | 810 tests green, all targets compile | ~large |
+| 12:00 | Added AnfasDetailTopBar to designsystem and used it on all three pushed screens (profile, intake, staff); deleted the private copy in MemberProfileScreen | core/designsystem, feature/members, feature/intake-ocr, feature/auth | one back affordance in one place | ~med |
+| 12:20 | Verified on the emulator in Arabic via uiautomator: 4 full labels, overflow -> staff, members tab stays lit on intake, back returns to the directory | n/a | as designed | ~med |
+| 12:40 | Fixed the members footer reading 'Showing 5 members' in English; now calls s.members.showingMembers | feature/members/MembersListScreen.kt | reads 'عرض 5 أعضاء' on device | ~small |

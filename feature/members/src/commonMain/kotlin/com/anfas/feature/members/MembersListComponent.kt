@@ -65,6 +65,7 @@ class MembersListComponent(
                 addForm = ui.addForm,
                 notice = ui.notice,
                 mayEditMembers = session?.can(Permission.EDIT_MEMBERS) == true,
+                mayScanIntake = session?.can(Permission.SCAN_INTAKE) == true,
                 query = typed,
                 content = result.toContent(searchedTerm),
             )

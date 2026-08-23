@@ -27,41 +27,104 @@ class NavigationPermissionTest {
         assertEquals(RootComponent.TopLevel.entries, destinationsFor(Role.Owner))
     }
 
-    /** Staff management is the only thing an admin cannot reach. */
+    /**
+     * Staff management is no longer a destination at all — it moved to the account menu — so an
+     * admin now sees exactly what an owner sees.
+     */
     @Test
-    fun `an admin reaches everything except staff`() {
-        assertEquals(
-            RootComponent.TopLevel.entries - RootComponent.TopLevel.STAFF,
-            destinationsFor(Role.Admin),
-        )
+    fun `an admin reaches every destination`() {
+        assertEquals(RootComponent.TopLevel.entries, destinationsFor(Role.Admin))
     }
 
     @Test
-    fun `a receptionist runs the desk without staff management`() {
+    fun `a receptionist runs the desk`() {
         assertEquals(
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
                 RootComponent.TopLevel.CHECK_IN,
                 RootComponent.TopLevel.REMINDERS,
-                RootComponent.TopLevel.INTAKE,
             ),
             destinationsFor(Role.Receptionist),
         )
     }
 
-    /** A coach sees who is in the room and can scan a sheet. No reminders, no staff. */
+    /** A coach sees who is in the room and whose membership is live. No reminders. */
     @Test
-    fun `a coach reaches members check-in and intake`() {
+    fun `a coach reaches the dashboard members and check-in`() {
         assertEquals(
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
                 RootComponent.TopLevel.CHECK_IN,
-                RootComponent.TopLevel.INTAKE,
             ),
             destinationsFor(Role.Coach),
         )
+    }
+
+    /**
+     * The bar divides a phone's width equally between destinations, so the count is a hard
+     * constraint rather than a preference: Material caps a bottom bar at five and iOS at
+     * five-plus-More. There were six, which in Arabic on a narrow phone ellipsised every label.
+     *
+     * Asserted against the enum rather than the rendered bar because the enum is what the shell
+     * maps over — a seventh destination fails here, at the point the decision is actually made.
+     */
+    @Test
+    fun `no role is offered more than four destinations`() {
+        assertTrue(
+            RootComponent.TopLevel.entries.size <= 4,
+            "a bottom bar of ${RootComponent.TopLevel.entries.size} divides a phone too far",
+        )
+        Role.entries.forEach { role ->
+            assertTrue(
+                destinationsFor(role).size <= 4,
+                "$role is offered ${destinationsFor(role).size} tabs",
+            )
+        }
+    }
+
+    /**
+     * Intake and staff management were destinations and are now reached from a screen and from
+     * the account menu respectively. They are still real routes with their own permissions —
+     * this is what stops "reduce the bar" from quietly meaning "delete two features".
+     */
+    @Test
+    fun `intake and staff remain reachable routes with their own permissions`() {
+        assertEquals(
+            Permission.SCAN_INTAKE,
+            RootComponent.Config.IntakeReview.requiredPermission,
+        )
+        assertEquals(
+            Permission.MANAGE_STAFF,
+            RootComponent.Config.StaffList.requiredPermission,
+        )
+
+        // The entry points, in the roles that hold them: a coach scans, only an owner manages
+        // staff. Losing either grant is how a moved entry point becomes an unreachable screen.
+        val coach = Session(userId = "s-1", roles = setOf(Role.Coach))
+        assertTrue(coach.can(Permission.SCAN_INTAKE), "a coach must still reach intake")
+        assertTrue(!coach.can(Permission.MANAGE_STAFF))
+
+        val admin = Session(userId = "s-2", roles = setOf(Role.Admin))
+        assertTrue(!admin.can(Permission.MANAGE_STAFF), "staff management stays with the owner")
+    }
+
+    /**
+     * Intake is entered from the directory, so a role that can scan must also be able to see the
+     * screen the button is on. Nothing enforces that except this: SCAN_INTAKE without
+     * VIEW_MEMBERS would be a permission with no way to exercise it.
+     */
+    @Test
+    fun `every role that can scan can reach the screen the action lives on`() {
+        Role.entries
+            .filter { Session(userId = "s-1", roles = setOf(it)).can(Permission.SCAN_INTAKE) }
+            .forEach { role ->
+                assertTrue(
+                    Session(userId = "s-1", roles = setOf(role)).can(Permission.VIEW_MEMBERS),
+                    "$role can scan but cannot open the directory the action lives on",
+                )
+            }
     }
 
     @Test
@@ -90,14 +153,6 @@ class NavigationPermissionTest {
 
         val coach = Session(userId = "s-1", roles = setOf(Role.Coach))
         assertTrue(!coach.can(RootComponent.Config.Renewal("m-1").requiredPermission))
-    }
-
-    @Test
-    fun `the staff route requires staff management`() {
-        assertEquals(
-            Permission.MANAGE_STAFF,
-            RootComponent.Config.StaffList.requiredPermission,
-        )
     }
 
     /**

@@ -137,6 +137,34 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - Not built: **capacity**. Knowing who is *inside* needs check-out, and there is none; a percentage
   from entries alone would climb all day and read as a full gym by closing time.
 
+## Navigation
+
+- **`TopLevel` holds four destinations and that is a ceiling, not a preference.** The bottom bar
+  divides a phone's width equally between its items, so each one added shrinks every other; Material
+  caps a bottom bar at five and iOS at five-plus-More. There were six, which on a 448dp screen in
+  Arabic ellipsised every label — a row of stubs whose only job was to say which is which. A fifth
+  destination needs a real argument, and the test in `NavigationPermissionTest` will fail until
+  someone makes it.
+- **Cut the bar by asking which entries are *places*, not which matter least.** Three kinds of thing
+  get conflated into tabs, and separating them is what removed two without removing any feature:
+  destinations; **screen actions** — "scan a sheet" belongs to the directory, since intake is a task
+  whose product is members; and **account-level things** — language, staff management, sign out.
+- **Intake is pushed from the members header, so back lands on the directory the new rows joined.**
+  Safe to leave mid-scan: the batch is a `REVIEWING` row in `intake_batches`, so the component picks
+  the same sheet back up. `Config.IntakeReview` maps to `TopLevel.MEMBERS` in `topLevel`, so the tab
+  it was entered from stays lit.
+- **Staff management is in the overflow menu, and `topLevel` returns null for it** — lighting a tab
+  would point at a screen you did not come from.
+- **Moving an entry point is not deleting a route.** The `Config`, its `@SerialName` and its
+  `requiredPermission` all stay. And check the permission *pair* when an action lands on a screen:
+  SCAN_INTAKE is now only exercisable from the directory, so every role holding it must also hold
+  VIEW_MEMBERS, or it is a permission with no way to use it.
+- **A pushed screen carries its title in `AnfasDetailTopBar`, not also in `AnfasScreenHeader`.**
+  The same title twice down one screen reads as two screens stacked. Desktop has no system back
+  gesture, so a pushed screen without that bar cannot be left at all.
+- The rail and the bar differ in **affordance, not architecture**: 256dp has room to spell the
+  account actions out, a phone does not. Same four destinations either way.
+
 ## Dashboards
 
 - **The reception dashboard exists; `staff-dashboard` does not, deliberately.** Its capacity load,

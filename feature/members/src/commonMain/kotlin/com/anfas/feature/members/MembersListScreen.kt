@@ -79,6 +79,22 @@ fun MembersListScreen(component: MembersListComponent, modifier: Modifier = Modi
         AnfasScreenHeader(
             title = s.members.title,
             subtitle = s.members.subtitle,
+            // Scanning a sign-up sheet lives here rather than in the nav bar: it is a task whose
+            // product is members, and this is the screen those members land in. Offered from the
+            // header as well as from the empty state, because a gym that has 300 members still
+            // receives paper -- an action only reachable when the directory is empty is
+            // effectively a first-run action.
+            actions = if (state.mayScanIntake) {
+                {
+                    AnfasSecondaryButton(
+                        text = s.members.scanSheet,
+                        icon = AnfasIcons.DocumentScanner,
+                        onClick = component::onScanSheet,
+                    )
+                }
+            } else {
+                null
+            },
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -192,13 +208,10 @@ private fun MembersTable(
         }
         AnfasTableFooter {
             Text(
-                text = if (members.size ==
-                    1
-                ) {
-                    "Showing 1 member"
-                } else {
-                    "Showing ${members.size} members"
-                },
+                // s.members.showingMembers, not a hardcoded English pair. The key and its Arabic
+                // plural forms existed all along -- this one call site never used them, so the
+                // footer read "Showing 5 members" underneath an otherwise fully Arabic table.
+                text = strings.members.showingMembers(members.size),
                 style = AnfasTheme.textStyles.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

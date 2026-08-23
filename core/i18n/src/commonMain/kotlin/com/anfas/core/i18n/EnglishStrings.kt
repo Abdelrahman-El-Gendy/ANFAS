@@ -34,6 +34,7 @@ object EnglishStrings : AppStrings {
         override fun dateLong(day: Int, monthIndex: Int, year: Int) =
             "$day ${MONTHS_SHORT_EN[monthIndex]} $year"
         override val back = "Back"
+        override val moreOptions = "Account and settings"
     }
 
     override val members = object : AppStrings.Members {

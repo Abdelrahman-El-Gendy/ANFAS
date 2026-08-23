@@ -2,6 +2,7 @@ package com.anfas.feature.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,11 +23,11 @@ import com.anfas.core.auth.Role
 import com.anfas.core.auth.StaffAccount
 import com.anfas.core.designsystem.AnfasCard
 import com.anfas.core.designsystem.AnfasChoiceChip
+import com.anfas.core.designsystem.AnfasDetailTopBar
 import com.anfas.core.designsystem.AnfasDialog
 import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasPrimaryButton
-import com.anfas.core.designsystem.AnfasScreenHeader
 import com.anfas.core.designsystem.AnfasSecondaryButton
 import com.anfas.core.designsystem.AnfasStatusChip
 import com.anfas.core.designsystem.AnfasTableDivider
@@ -50,16 +51,51 @@ fun StaffListScreen(component: StaffListComponent, modifier: Modifier = Modifier
     val state by component.state.collectAsState()
     val s = strings
 
+    Column(modifier = modifier.fillMaxSize()) {
+        // Pushed from the account menu, so it owns its way back. Outside the padded body Column
+        // deliberately: a top bar's divider spans the screen, and its back button should sit on
+        // the screen's edge rather than indented by the content margin.
+        AnfasDetailTopBar(
+            title = s.staff.title,
+            onBack = component::onBack,
+            backContentDescription = s.common.back,
+        )
+        Body(component = component, state = state, s = s)
+    }
+
+    when (val dialog = state.dialog) {
+        null -> Unit
+        is StaffDialog.Add -> AddStaffDialog(dialog, state, component, s)
+        is StaffDialog.ResetPassword -> ResetPasswordDialog(dialog, state, component, s)
+    }
+}
+
+@Composable
+private fun ColumnScope.Body(component: StaffListComponent, state: StaffListState, s: AppStrings) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
+        modifier = Modifier
+            .fillMaxWidth()
+            // weight(1f), so the table below is bounded and scrolls rather than being clipped
+            // to whatever is left over.
+            .weight(1f)
             .padding(horizontal = AnfasTheme.spacing.marginMobile)
             .padding(top = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        AnfasScreenHeader(title = s.staff.title, subtitle = s.staff.subtitle)
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        // No AnfasScreenHeader here: the top bar already carries the title, and printing
+        // "Staff" twice down the left edge of the same screen is how a pushed screen ends up
+        // looking like two screens stacked.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = s.staff.subtitle,
+                style = AnfasTheme.textStyles.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
             AnfasPrimaryButton(
                 text = s.staff.addStaff,
                 onClick = component::onAddStaff,
@@ -90,12 +126,6 @@ fun StaffListScreen(component: StaffListComponent, modifier: Modifier = Modifier
                 StaffTable(state = state, component = component, s = s)
             }
         }
-    }
-
-    when (val dialog = state.dialog) {
-        null -> Unit
-        is StaffDialog.Add -> AddStaffDialog(dialog, state, component, s)
-        is StaffDialog.ResetPassword -> ResetPasswordDialog(dialog, state, component, s)
     }
 }
 

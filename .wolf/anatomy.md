@@ -633,6 +633,12 @@
 - `AnfasIcons.kt` — The design specifies Material Symbols Outlined, which we cannot depend on: JetBrains (~2987 tok)
 - `AnfasInlineEdit.kt` — A table cell that can be corrected in place. (~1277 tok)
 - `AnfasNavigation.kt` — `NavItem` + `AnfasBottomNav` (<1024dp) and `AnfasNavRail` (>=1024dp) (~900 tok)
+- `AnfasOverflowMenu.kt` — `MenuAction` + `AnfasOverflowMenu`: the top bar's "⋮". Account-level
+  actions (staff, sign out) that are not navigation destinations and so must not take a bar slot.
+  Renders nothing when the action list is empty (~550 tok)
+- `AnfasDetailTopBar.kt` — back arrow + title (+ optional actions) for a *pushed* screen. Used by
+  member-profile, intake-review and staff-list; every pushed screen needs one because desktop has
+  no system back gesture (~440 tok)
 - `AnfasPalette.kt` — GENERATED from design/stitch/export. 47 M3 colour tokens + 4 brand accents. The only file with hex literals (~560 tok)
 - `AnfasScreenHeader.kt` — Page title + subtitle + trailing actions (~330 tok)
 - `AnfasSearchField.kt` — Search input on `background`, amber border on focus, clear affordance when non-empty (~520 tok)

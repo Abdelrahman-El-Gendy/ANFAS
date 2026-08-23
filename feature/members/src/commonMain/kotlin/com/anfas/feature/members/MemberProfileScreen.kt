@@ -22,13 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anfas.core.designsystem.AnfasCard
+import com.anfas.core.designsystem.AnfasDetailTopBar
 import com.anfas.core.designsystem.AnfasEmptyState
-import com.anfas.core.designsystem.AnfasIconButton
 import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasPrimaryButton
 import com.anfas.core.designsystem.AnfasProgressBar
 import com.anfas.core.designsystem.AnfasStatusChip
-import com.anfas.core.designsystem.AnfasTableDivider
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.ChipTone
 import com.anfas.core.designsystem.ProgressTone
@@ -67,7 +66,13 @@ fun MemberProfileScreen(component: MemberProfileComponent, modifier: Modifier = 
     val s = strings
 
     Column(modifier = modifier.fillMaxSize()) {
-        ProfileTopBar(title = s.members.profileTitle, onBack = component::onBack)
+        // Shared with the other two pushed screens (intake, staff) rather than reimplemented
+        // per screen -- the back affordance must sit in the same place on all of them.
+        AnfasDetailTopBar(
+            title = s.members.profileTitle,
+            onBack = component::onBack,
+            backContentDescription = s.common.back,
+        )
 
         when (val content = state.content) {
             MemberProfileContent.Loading -> Spacer(Modifier.fillMaxSize())
@@ -90,33 +95,6 @@ fun MemberProfileScreen(component: MemberProfileComponent, modifier: Modifier = 
                 modifier = Modifier.fillMaxWidth().weight(1f),
             )
         }
-    }
-}
-
-@Composable
-private fun ProfileTopBar(title: String, onBack: () -> Unit) {
-    val s = strings
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            // ArrowBack is declared with autoMirror, so this points the right way in Arabic.
-            AnfasIconButton(
-                icon = AnfasIcons.ArrowBack,
-                contentDescription = s.common.back,
-                onClick = onBack,
-            )
-            Text(
-                text = title,
-                style = AnfasTheme.textStyles.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        AnfasTableDivider()
     }
 }
 

@@ -29,6 +29,13 @@ data class MembersListState(
     val notice: MembersNotice? = null,
     /** Whether this session holds `Permission.EDIT_MEMBERS`. */
     val mayEditMembers: Boolean = false,
+    /**
+     * Whether this session holds `Permission.SCAN_INTAKE`.
+     *
+     * Intake is entered from this screen rather than from the nav bar, so this screen is now the
+     * only place the permission is expressed in the UI. A coach holds it; a therapist does not.
+     */
+    val mayScanIntake: Boolean = false,
     val query: String = "",
     val content: MembersListContent = MembersListContent.Loading,
 )

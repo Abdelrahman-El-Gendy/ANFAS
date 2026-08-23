@@ -30,6 +30,7 @@ class ConfigSerializationTest {
             RootComponent.Config.CheckIn to "check-in",
             RootComponent.Config.ReminderQueue to "reminder-queue",
             RootComponent.Config.IntakeReview to "intake-review",
+            RootComponent.Config.StaffList to "staff-list",
             RootComponent.Config.MemberProfile(memberId = "m-1") to "member-profile",
             RootComponent.Config.Renewal(memberId = "m-1") to "renewal",
         )

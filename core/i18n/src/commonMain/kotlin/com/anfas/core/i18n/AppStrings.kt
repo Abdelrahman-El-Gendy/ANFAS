@@ -49,6 +49,12 @@ interface AppStrings {
 
         /** Content description for a back affordance. The icon auto-mirrors; this does not. */
         val back: String
+
+        /**
+         * Content description for the top bar's overflow button. "More" alone is what a screen
+         * reader would announce with no hint of what is inside, so this names the group.
+         */
+        val moreOptions: String
     }
 
     interface Members {

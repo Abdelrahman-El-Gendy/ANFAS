@@ -25,11 +25,13 @@ class StaffListComponentFactory internal constructor(
     private val repository: AuthRepository,
     private val dispatchers: AppDispatchers,
 ) {
-    fun create(componentContext: ComponentContext): StaffListComponent = StaffListComponent(
-        componentContext = componentContext,
-        repository = repository,
-        dispatchers = dispatchers,
-    )
+    fun create(componentContext: ComponentContext, onBackClicked: () -> Unit): StaffListComponent =
+        StaffListComponent(
+            componentContext = componentContext,
+            repository = repository,
+            dispatchers = dispatchers,
+            onBackClicked = onBackClicked,
+        )
 }
 
 /** Factories only — components own scopes tied to their Decompose lifecycles. */

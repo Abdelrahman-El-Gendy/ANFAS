@@ -3,7 +3,6 @@ package com.anfas.feature.intakeocr
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,12 +42,12 @@ import androidx.compose.ui.unit.dp
 import com.anfas.core.data.IntakeFieldKey
 import com.anfas.core.designsystem.AnfasBreakpoints
 import com.anfas.core.designsystem.AnfasCard
+import com.anfas.core.designsystem.AnfasDetailTopBar
 import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIconButton
 import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasInlineEditField
 import com.anfas.core.designsystem.AnfasPrimaryButton
-import com.anfas.core.designsystem.AnfasScreenHeader
 import com.anfas.core.designsystem.AnfasSecondaryButton
 import com.anfas.core.designsystem.AnfasShapes
 import com.anfas.core.designsystem.AnfasTableDivider
@@ -94,78 +92,91 @@ fun IntakeReviewScreen(component: IntakeReviewComponent, modifier: Modifier = Mo
     // Android, so it cannot sit behind the capability check that gates the buttons below.
     val imageSource = rememberImageSource(component::onImageCaptured)
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = AnfasTheme.spacing.marginMobile)
-            .padding(top = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        AnfasScreenHeader(
+    Column(modifier = modifier.fillMaxSize()) {
+        // Intake is pushed from the directory rather than being a nav-bar destination, so it
+        // owns its way back. Outside the padded body: a top bar's divider spans the screen.
+        AnfasDetailTopBar(
             title = s.intake.title,
-            subtitle = s.intake.subtitle,
+            onBack = component::onClose,
+            backContentDescription = s.common.back,
         )
-
-        state.notice?.let { notice ->
-            NoticeBar(notice.render(s), component::onNoticeShown)
-        }
-
-        when (val content = state.content) {
-            IntakeReviewContent.Loading -> Box(Modifier.fillMaxSize())
-
-            is IntakeReviewContent.Failed -> AnfasEmptyState(
-                icon = AnfasIcons.ErrorOutline,
-                title = s.intake.loadFailedTitle,
-                message = content.message,
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                // weight(1f) so the review table below is bounded and scrolls. Without it the
+                // table takes its intrinsic height and the footer is pushed off-screen.
+                .weight(1f)
+                .padding(horizontal = AnfasTheme.spacing.marginMobile)
+                .padding(top = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                text = s.intake.subtitle,
+                style = AnfasTheme.textStyles.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            // Camera denied outranks the empty state. The empty state's primary action is
-            // "New scan", and offering it while the OS is refusing is how you get someone
-            // tapping a button that silently does nothing.
-            IntakeReviewContent.NoBatches if state.cameraDenied -> AnfasEmptyState(
-                icon = AnfasIcons.Warning,
-                title = s.intake.cameraDeniedTitle,
-                message = s.intake.cameraDeniedMessage,
-                primaryAction = EmptyStateAction(
-                    label = s.intake.cameraDeniedAction,
-                    onClick = component::onOpenSettings,
-                ),
-                // Still offered: the library needs no permission, so a denial does not have to
-                // be a dead end.
-                secondaryAction = EmptyStateAction(
-                    label = s.intake.choosePhoto,
-                    onClick = imageSource::pickFromLibrary,
-                ).takeIf { ocrCapability.canPickImage },
-            )
+            state.notice?.let { notice ->
+                NoticeBar(notice.render(s), component::onNoticeShown)
+            }
 
-            IntakeReviewContent.NoBatches -> AnfasEmptyState(
-                icon = AnfasIcons.DocumentScanner,
-                title = s.intake.emptyTitle,
-                // Desktop has neither a camera nor an OCR engine, so it says so instead of
-                // offering buttons that cannot work. The UI reads the capability flag rather
-                // than branching on platform.
-                message = if (ocrCapability.isSupported) {
-                    s.intake.emptyMessage
-                } else {
-                    s.intake.emptyMessageNoCapture
-                },
-                primaryAction = EmptyStateAction(
-                    label = s.intake.newScan,
-                    // Through the component, so camera access is checked first.
-                    onClick = { component.onCaptureRequested(imageSource::captureFromCamera) },
+            when (val content = state.content) {
+                IntakeReviewContent.Loading -> Box(Modifier.fillMaxSize())
+
+                is IntakeReviewContent.Failed -> AnfasEmptyState(
+                    icon = AnfasIcons.ErrorOutline,
+                    title = s.intake.loadFailedTitle,
+                    message = content.message,
+                )
+
+                // Camera denied outranks the empty state. The empty state's primary action is
+                // "New scan", and offering it while the OS is refusing is how you get someone
+                // tapping a button that silently does nothing.
+                IntakeReviewContent.NoBatches if state.cameraDenied -> AnfasEmptyState(
+                    icon = AnfasIcons.Warning,
+                    title = s.intake.cameraDeniedTitle,
+                    message = s.intake.cameraDeniedMessage,
+                    primaryAction = EmptyStateAction(
+                        label = s.intake.cameraDeniedAction,
+                        onClick = component::onOpenSettings,
+                    ),
+                    // Still offered: the library needs no permission, so a denial does not have to
+                    // be a dead end.
+                    secondaryAction = EmptyStateAction(
+                        label = s.intake.choosePhoto,
+                        onClick = imageSource::pickFromLibrary,
+                    ).takeIf { ocrCapability.canPickImage },
+                )
+
+                IntakeReviewContent.NoBatches -> AnfasEmptyState(
                     icon = AnfasIcons.DocumentScanner,
-                ).takeIf { ocrCapability.canCapture },
-                secondaryAction = EmptyStateAction(
-                    label = s.intake.choosePhoto,
-                    onClick = imageSource::pickFromLibrary,
-                ).takeIf { ocrCapability.canPickImage },
-            )
+                    title = s.intake.emptyTitle,
+                    // Desktop has neither a camera nor an OCR engine, so it says so instead of
+                    // offering buttons that cannot work. The UI reads the capability flag rather
+                    // than branching on platform.
+                    message = if (ocrCapability.isSupported) {
+                        s.intake.emptyMessage
+                    } else {
+                        s.intake.emptyMessageNoCapture
+                    },
+                    primaryAction = EmptyStateAction(
+                        label = s.intake.newScan,
+                        // Through the component, so camera access is checked first.
+                        onClick = { component.onCaptureRequested(imageSource::captureFromCamera) },
+                        icon = AnfasIcons.DocumentScanner,
+                    ).takeIf { ocrCapability.canCapture },
+                    secondaryAction = EmptyStateAction(
+                        label = s.intake.choosePhoto,
+                        onClick = imageSource::pickFromLibrary,
+                    ).takeIf { ocrCapability.canPickImage },
+                )
 
-            is IntakeReviewContent.Loaded -> ReviewBody(
-                batch = content.batch,
-                state = state,
-                component = component,
-            )
+                is IntakeReviewContent.Loaded -> ReviewBody(
+                    batch = content.batch,
+                    state = state,
+                    component = component,
+                )
+            }
         }
     }
 }

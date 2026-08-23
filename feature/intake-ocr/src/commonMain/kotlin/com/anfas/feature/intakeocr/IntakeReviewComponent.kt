@@ -49,6 +49,7 @@ class IntakeReviewComponent(
     private val auth: AuthRepository,
     dispatchers: AppDispatchers,
     private val onImported: (imported: Int) -> Unit,
+    private val onCloseClicked: () -> Unit,
 ) : ComponentContext by componentContext {
 
     private val scope =
@@ -98,6 +99,13 @@ class IntakeReviewComponent(
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = IntakeReviewState(),
     )
+
+    /**
+     * Leaving without importing. The batch is not discarded: it is a row in `intake_batches`,
+     * still REVIEWING, so this component picks the same sheet up again next time — walking away
+     * from a half-corrected sheet must not throw away the scan.
+     */
+    fun onClose() = onCloseClicked()
 
     fun onFieldEdited(rowId: IntakeRowId, field: IntakeFieldKey, value: String) {
         scope.launch {

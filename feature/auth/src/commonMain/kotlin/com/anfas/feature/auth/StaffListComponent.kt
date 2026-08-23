@@ -30,6 +30,7 @@ class StaffListComponent(
     componentContext: ComponentContext,
     private val repository: AuthRepository,
     dispatchers: AppDispatchers,
+    private val onBackClicked: () -> Unit,
 ) : ComponentContext by componentContext {
 
     private val scope =
@@ -57,6 +58,12 @@ class StaffListComponent(
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = StaffListState(),
     )
+
+    /**
+     * This screen is pushed from the account menu rather than being a nav-bar destination, so it
+     * needs its own way out — desktop has no system back gesture at all.
+     */
+    fun onBack() = onBackClicked()
 
     fun onAddStaff() = ui.update { it.copy(dialog = StaffDialog.Add(), notice = null) }
 
