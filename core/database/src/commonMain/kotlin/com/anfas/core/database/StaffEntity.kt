@@ -84,6 +84,13 @@ interface StaffDao {
     @Query("SELECT * FROM staff WHERE id = :id LIMIT 1")
     suspend fun findById(id: String): StaffEntity?
 
+    /**
+     * Observed rather than read once, so a rename or a role change by the Owner reaches the
+     * signed-in person's own chrome without them signing out and back in.
+     */
+    @Query("SELECT * FROM staff WHERE id = :id LIMIT 1")
+    fun observeById(id: String): Flow<StaffEntity?>
+
     /** Drives the first-run decision: no rows means offer setup, not a login nobody can pass. */
     @Query("SELECT COUNT(*) FROM staff")
     suspend fun count(): Int

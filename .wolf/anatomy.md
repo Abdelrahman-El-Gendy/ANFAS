@@ -633,9 +633,12 @@
 - `AnfasIcons.kt` — The design specifies Material Symbols Outlined, which we cannot depend on: JetBrains (~2987 tok)
 - `AnfasInlineEdit.kt` — A table cell that can be corrected in place. (~1277 tok)
 - `AnfasNavigation.kt` — `NavItem` + `AnfasBottomNav` (<1024dp) and `AnfasNavRail` (>=1024dp) (~900 tok)
-- `AnfasOverflowMenu.kt` — `MenuAction` + `AnfasOverflowMenu`: the top bar's "⋮". Account-level
-  actions (staff, sign out) that are not navigation destinations and so must not take a bar slot.
-  Renders nothing when the action list is empty (~550 tok)
+- `AnfasAvatar.kt` — `AnfasAvatar(initials, size)` + `initialsOf(name)`. Initials, not photos:
+  nothing in the app uploads one. Used by the rail footer, the compact top bar and MemberAvatar (~430 tok)
+- `AnfasIdentityRow.kt` — avatar + name + one supporting line, for the rail footer (~380 tok)
+- `AnfasOverflowMenu.kt` — `MenuAction` + `AnfasOverflowMenu`: the compact top bar's account button.
+  Shows the signed-in person's initials when known, else "⋮". Account-level actions (staff, sign
+  out) that are not navigation destinations. Renders nothing when the action list is empty (~650 tok)
 - `AnfasDetailTopBar.kt` — back arrow + title (+ optional actions) for a *pushed* screen. Used by
   member-profile, intake-review and staff-list; every pushed screen needs one because desktop has
   no system back gesture (~440 tok)

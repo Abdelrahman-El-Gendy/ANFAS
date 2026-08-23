@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -31,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -146,80 +148,131 @@ private fun BottomNavItem(item: NavItem, modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * The desktop rail, from the export's canonical sidebar.
+ *
+ * Desktop is where this product is mainly used, so the rail follows the export closely rather
+ * than mirroring the bottom bar: a brand block, the destination list, then a footer group
+ * separated by a rule holding secondary items and who is signed in.
+ *
+ * [secondaryItems] is a real distinction rather than styling. The export's sidebar keeps
+ * Settings/Support/Logout below an `mt-auto` divider, apart from the destinations, because they
+ * are not places you work — and the same separation is what keeps staff management off the
+ * bottom bar on a phone.
+ */
 @Composable
 fun AnfasNavRail(
     items: List<NavItem>,
     modifier: Modifier = Modifier,
     title: String? = null,
     subtitle: String? = null,
+    secondaryItems: List<NavItem> = emptyList(),
     footer: @Composable (() -> Unit)? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
     Row(modifier = modifier.fillMaxHeight()) {
         Column(
             modifier = Modifier
-                .width(256.dp)
+                .width(RAIL_WIDTH)
                 .fillMaxHeight()
-                .background(scheme.surfaceContainerLow)
+                // `bg-surface` in the export, not a raised container: the rail is the page's own
+                // ground with a rule down its trailing edge, and lifting it to
+                // surfaceContainerLow made it read as a panel floating over the content.
+                .background(scheme.surface)
                 .padding(horizontal = 16.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             if (title != null) {
-                Column(modifier = Modifier.padding(start = 12.dp, bottom = 24.dp)) {
-                    Text(
-                        text = title,
-                        style = AnfasTheme.textStyles.headlineSmall,
-                        color = scheme.primary,
-                    )
-                    if (subtitle != null) {
-                        Text(
-                            text = subtitle,
-                            style = AnfasTheme.textStyles.labelCaps,
-                            color = scheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-            items.forEach { item ->
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(AnfasShapes.base)
-                        .background(
-                            if (item.selected) {
-                                scheme.primaryContainer.copy(alpha = 0.20f)
-                            } else {
-                                Color.Transparent
-                            },
-                        )
-                        .selectable(
-                            selected = item.selected,
-                            role = Role.Tab,
-                            onClick = item.onClick,
-                        )
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                    modifier = Modifier.padding(start = 8.dp, bottom = 32.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Icon(
-                        imageVector = item.icon,
+                        imageVector = AnfasIcons.FitnessCenter,
+                        // The title next to it already names the app; a description here would
+                        // make a screen reader read the brand twice.
                         contentDescription = null,
-                        tint = if (item.selected) scheme.primary else scheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp),
+                        tint = scheme.primary,
+                        modifier = Modifier.size(28.dp),
                     )
-                    Text(
-                        text = item.label,
-                        style = AnfasTheme.textStyles.bodyMedium,
-                        color = if (item.selected) scheme.primary else scheme.onSurface,
-                    )
+                    Column {
+                        Text(
+                            text = title,
+                            style = AnfasTheme.textStyles.headlineMedium,
+                            color = scheme.primary,
+                        )
+                        if (subtitle != null) {
+                            Text(
+                                text = subtitle,
+                                style = AnfasTheme.textStyles.labelCaps,
+                                color = scheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
             }
-            if (footer != null) {
-                Spacer(Modifier.weight(1f))
-                footer()
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items.forEach { item -> RailItem(item) }
+            }
+            if (secondaryItems.isNotEmpty() || footer != null) {
+                AnfasEdgeDivider(modifier = Modifier.padding(vertical = 12.dp))
+                secondaryItems.forEach { item -> RailItem(item) }
+                footer?.invoke()
             }
         }
         AnfasVerticalDivider()
+    }
+}
+
+@Composable
+private fun RailItem(item: NavItem) {
+    val scheme = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(AnfasShapes.base)
+            .background(
+                // `bg-on-surface/5` in the export -- a neutral wash, not a tinted one. A
+                // primary-container fill competed with the primary text and the marker for the
+                // eye, so the selected row shouted while saying less.
+                if (item.selected) {
+                    scheme.onSurface.copy(alpha = AnfasTheme.alphas.tableRule)
+                } else {
+                    Color.Transparent
+                },
+            )
+            .selectable(selected = item.selected, role = Role.Tab, onClick = item.onClick)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            imageVector = item.icon,
+            contentDescription = null,
+            tint = if (item.selected) scheme.primary else scheme.onSurfaceVariant,
+            modifier = Modifier.size(24.dp),
+        )
+        Text(
+            text = item.label,
+            style = AnfasTheme.textStyles.bodyMedium,
+            color = if (item.selected) scheme.primary else scheme.onSurface,
+            fontWeight = if (item.selected) FontWeight.Bold else null,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        // `border-r-2 border-primary` in the export: a marker on the row's trailing edge, which
+        // under RTL must move to the other side. A Row child does that for free, whereas a
+        // border modifier would need an absolute side and get it wrong in Arabic.
+        Box(
+            modifier = Modifier
+                .width(2.dp)
+                .height(20.dp)
+                .background(if (item.selected) scheme.primary else Color.Transparent),
+        )
     }
 }
 
@@ -235,3 +288,6 @@ private fun AnfasVerticalDivider() {
 private val MIN_TOUCH_TARGET = 56.dp
 
 private const val SELECTION_ANIMATION_MS = 150
+
+/** `w-64` in the export. */
+private val RAIL_WIDTH = 256.dp

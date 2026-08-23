@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 /**
@@ -36,6 +39,7 @@ fun AnfasOverflowMenu(
     actions: List<MenuAction>,
     contentDescription: String,
     modifier: Modifier = Modifier,
+    initials: String? = null,
 ) {
     // Nothing to show. Rendering an icon button that opens an empty popup is worse than no
     // button: it reads as broken rather than as absent.
@@ -44,11 +48,29 @@ fun AnfasOverflowMenu(
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
-        AnfasIconButton(
-            icon = AnfasIcons.MoreVert,
-            contentDescription = contentDescription,
-            onClick = { expanded = true },
-        )
+        // The export's compact header opens the account from an avatar, not a "⋮", and that is
+        // worth following: it also answers "who is signed in" without spending a row on it.
+        // Falls back to the overflow glyph while the account read is still in flight, so the
+        // button never appears late.
+        if (initials.isNullOrEmpty()) {
+            AnfasIconButton(
+                icon = AnfasIcons.MoreVert,
+                contentDescription = contentDescription,
+                onClick = { expanded = true },
+            )
+        } else {
+            val label = contentDescription
+            IconButton(
+                onClick = { expanded = true },
+                // The description goes on the button, not on the avatar: the initials are
+                // decoration, and a screen reader announcing "FO" tells nobody anything.
+                modifier = Modifier.semantics { this.contentDescription = label },
+            ) {
+                // The design's `w-9 h-9`, inside a 48dp button so the tap target still clears
+                // both platforms' minimum.
+                AnfasAvatar(initials = initials, size = 36.dp)
+            }
+        }
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },

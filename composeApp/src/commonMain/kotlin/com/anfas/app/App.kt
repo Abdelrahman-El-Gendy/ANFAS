@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anfas.app.navigation.RootComponent
+import com.anfas.app.navigation.bottomBarSelection
 import com.anfas.app.navigation.requiredPermission
 import com.anfas.app.navigation.topLevel
 import com.anfas.core.auth.Permission
@@ -36,6 +37,7 @@ import com.anfas.core.designsystem.AnfasBreakpoints
 import com.anfas.core.designsystem.AnfasEdgeDivider
 import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIcons
+import com.anfas.core.designsystem.AnfasIdentityRow
 import com.anfas.core.designsystem.AnfasLanguageToggle
 import com.anfas.core.designsystem.AnfasNavRail
 import com.anfas.core.designsystem.AnfasOverflowMenu
@@ -46,6 +48,7 @@ import com.anfas.core.designsystem.EmptyStateAction
 import com.anfas.core.designsystem.MenuAction
 import com.anfas.core.designsystem.NavItem
 import com.anfas.core.designsystem.TextActionEmphasis
+import com.anfas.core.designsystem.initialsOf
 import com.anfas.core.i18n.AppLanguage
 import com.anfas.core.i18n.AppStrings
 import com.anfas.core.i18n.LanguageController
@@ -53,6 +56,7 @@ import com.anfas.core.i18n.ProvideLocalization
 import com.anfas.core.i18n.strings
 import com.anfas.feature.auth.SignInScreen
 import com.anfas.feature.auth.StaffListScreen
+import com.anfas.feature.auth.label
 import com.anfas.feature.checkin.CheckInScreen
 import com.anfas.feature.dashboard.DashboardScreen
 import com.anfas.feature.intakeocr.IntakeReviewScreen
@@ -91,6 +95,7 @@ fun App(root: RootComponent) {
         AnfasTheme(script = language.toScript()) {
             Surface(modifier = Modifier.fillMaxSize()) {
                 val session by root.session.collectAsState()
+                val currentStaff by root.currentStaff.collectAsState()
                 val stack by root.stack.subscribeAsState()
                 // Nav chrome is hidden while signed out: there is nothing to navigate to, and a
                 // bottom bar over a login form invites tapping into screens that do not exist yet
@@ -112,6 +117,14 @@ fun App(root: RootComponent) {
                         emphasis = TextActionEmphasis.Muted,
                     )
                 }
+                // Whoever is signed in, for the rail footer and the compact bar's avatar. Null
+                // until the database read lands, and null while signed out -- both render as no
+                // identity rather than as a placeholder person.
+                val staffName = currentStaff?.displayName
+                val staffRoles = currentStaff?.roles
+                    ?.sortedBy { it.ordinal }
+                    ?.joinToString(", ") { it.label(s) }
+                    .orEmpty()
                 // Account-level, not navigation. Staff management sits here rather than in the
                 // bar because it is administration done occasionally by one person, and every
                 // slot it took from the bar was taken from a screen used on every shift.
@@ -131,28 +144,61 @@ fun App(root: RootComponent) {
                 }
                 // Built from TopLevel so the destination list, its permission and its label
                 // cannot drift apart. Destinations the session cannot reach are removed, not
-                // disabled: a greyed tab advertises a capability the role does not have, and
+                // disabled: a greyed entry advertises a capability the role does not have, and
                 // RBAC that leaks the shape of the app is only half a boundary.
-                val items: List<NavItem> = RootComponent.TopLevel.entries
-                    .filter { destination -> session?.can(destination.permission) == true }
-                    .map { destination ->
+                //
+                // One builder, three lists, differing only by Placement -- so a new destination
+                // cannot end up on the rail and missing from the bar by omission.
+                val navItem: (RootComponent.TopLevel, RootComponent.TopLevel?) -> NavItem =
+                    { destination, selection ->
                         NavItem(
                             label = when (destination) {
                                 RootComponent.TopLevel.DASHBOARD -> s.dashboard.title
                                 RootComponent.TopLevel.MEMBERS -> s.members.title
                                 RootComponent.TopLevel.CHECK_IN -> s.checkIn.title
                                 RootComponent.TopLevel.REMINDERS -> s.reminders.title
+                                RootComponent.TopLevel.INTAKE -> s.intake.title
+                                RootComponent.TopLevel.STAFF -> s.staff.title
                             },
                             icon = when (destination) {
                                 RootComponent.TopLevel.DASHBOARD -> AnfasIcons.Schedule
                                 RootComponent.TopLevel.MEMBERS -> AnfasIcons.Person
                                 RootComponent.TopLevel.CHECK_IN -> AnfasIcons.CheckCircle
                                 RootComponent.TopLevel.REMINDERS -> AnfasIcons.Payments
+                                RootComponent.TopLevel.INTAKE -> AnfasIcons.DocumentScanner
+                                RootComponent.TopLevel.STAFF -> AnfasIcons.Group
                             },
-                            selected = active == destination,
+                            selected = selection == destination,
                             onClick = { root.onTopLevelSelected(destination) },
                         )
                     }
+                val reachable: (RootComponent.Placement) -> List<RootComponent.TopLevel> =
+                    { placement ->
+                        RootComponent.TopLevel.entries.filter {
+                            it.placement == placement && session?.can(it.permission) == true
+                        }
+                    }
+
+                // The bar: Primary only, and intake folds onto Members so the tab you came from
+                // stays lit.
+                val items: List<NavItem> = reachable(RootComponent.Placement.Primary)
+                    .map { navItem(it, active?.bottomBarSelection) }
+                // The rail: Primary plus WideOnly, each lighting itself.
+                val railItems: List<NavItem> =
+                    (
+                        reachable(RootComponent.Placement.Primary) +
+                            reachable(RootComponent.Placement.WideOnly)
+                        ).map { navItem(it, active) }
+                // Below the rail's divider, with sign-out. Rendered as rows rather than as the
+                // compact overflow because 256dp has room to spell them out.
+                val secondaryRailItems: List<NavItem> =
+                    reachable(RootComponent.Placement.Account).map { navItem(it, active) } +
+                        NavItem(
+                            label = s.auth.signOut,
+                            icon = AnfasIcons.Logout,
+                            selected = false,
+                            onClick = root::onSignOut,
+                        )
 
                 // Insets are applied per-region, not wholesale. safeContentPadding() on the
                 // whole shell also inset the bottom navigation bar, leaving it hovering above a
@@ -172,9 +218,15 @@ fun App(root: RootComponent) {
                         Row(modifier = Modifier.fillMaxSize()) {
                             if (active != null) {
                                 AnfasNavRail(
-                                    items = items,
+                                    // The rail carries every destination, the bar carries four.
+                                    // That is what the export does, and the reason is width: a
+                                    // 256dp list costs nothing per row, whereas the bar divides
+                                    // a phone between its items. So intake is a rail
+                                    // destination here and a members action on a phone.
+                                    items = railItems,
                                     title = s.common.appName,
                                     subtitle = s.common.appTagline,
+                                    secondaryItems = secondaryRailItems,
                                     // Without this the toggle existed only on compact, so
                                     // language could not be changed at all on desktop.
                                     // A 256dp rail has room to spell the account actions out,
@@ -187,15 +239,21 @@ fun App(root: RootComponent) {
                                         Column(
                                             verticalArrangement = Arrangement.spacedBy(8.dp),
                                         ) {
-                                            toggle()
-                                            if (session?.can(Permission.MANAGE_STAFF) == true) {
-                                                AnfasTextAction(
-                                                    text = s.staff.title,
-                                                    onClick = root::onOpenStaff,
-                                                    emphasis = TextActionEmphasis.Muted,
+                                            if (staffName != null) {
+                                                AnfasIdentityRow(
+                                                    name = staffName,
+                                                    subtitle = staffRoles,
                                                 )
                                             }
-                                            signOut()
+                                            // The language switch stays a control rather than
+                                            // becoming a rail row: it is a two-state toggle, and
+                                            // a row that navigates nowhere among rows that do is
+                                            // the confusion this footer group exists to avoid.
+                                            Row(
+                                                modifier = Modifier.padding(start = 12.dp),
+                                            ) {
+                                                toggle()
+                                            }
                                         }
                                     },
                                 )
@@ -252,6 +310,7 @@ fun App(root: RootComponent) {
                                         AnfasOverflowMenu(
                                             actions = accountActions,
                                             contentDescription = s.common.moreOptions,
+                                            initials = staffName?.let { initialsOf(it) },
                                         )
                                     }
                                 }

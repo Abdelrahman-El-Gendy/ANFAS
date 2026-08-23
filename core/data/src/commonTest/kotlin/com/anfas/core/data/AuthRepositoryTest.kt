@@ -371,6 +371,9 @@ private class FakeStaffDao : StaffDao {
 
     override suspend fun findById(id: String): StaffEntity? = rows.value.firstOrNull { it.id == id }
 
+    override fun observeById(id: String): Flow<StaffEntity?> =
+        rows.map { list -> list.firstOrNull { it.id == id } }
+
     override suspend fun count(): Int = rows.value.size
 
     override suspend fun allUsernames(): List<String> = rows.value.map { it.username }

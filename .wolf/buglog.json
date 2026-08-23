@@ -1097,5 +1097,22 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-23T13:35:00Z"
+  },
+  {
+    "id": "bug-064",
+    "timestamp": "2026-08-23T15:30:00Z",
+    "error_message": "Back button on the intake screen did nothing when the screen was reached from the desktop rail",
+    "file": "composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
+    "root_cause": "Intake is pushed from the members header on a phone but selected as a rail destination on desktop, and a rail selection is replaceAll. So on desktop the stack held one entry and Decompose's pop() silently did nothing - the AnfasDetailTopBar back arrow was dead, and desktop has no system back gesture to fall back on.",
+    "fix": "popOrGoTo(fallback): pop when the back stack is non-empty, otherwise onTopLevelSelected(fallback). Intake falls back to Members, staff to Dashboard. Same shape as the existing onPermissionDeniedDismissed. A screen reachable both by push and by rail selection must never use a bare pop().",
+    "tags": [
+      "navigation",
+      "decompose",
+      "desktop",
+      "rail"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-23T15:30:00Z"
   }
 ]

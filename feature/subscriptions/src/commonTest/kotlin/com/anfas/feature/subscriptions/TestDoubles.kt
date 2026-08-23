@@ -32,6 +32,7 @@ import com.anfas.core.model.SubscriptionTerm
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlin.time.Instant
 
@@ -206,6 +207,8 @@ internal class FakeAuth(mayRetry: Boolean) : AuthRepository {
     )
 
     override fun observeSession(): Flow<Session?> = MutableStateFlow(session)
+
+    override fun observeCurrentStaff(): Flow<StaffAccount?> = flowOf(null)
 
     override suspend fun hasAnyAccount(): AppResult<Boolean> = AppResult.Success(true)
 

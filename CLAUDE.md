@@ -139,31 +139,55 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 
 ## Navigation
 
-- **`TopLevel` holds four destinations and that is a ceiling, not a preference.** The bottom bar
-  divides a phone's width equally between its items, so each one added shrinks every other; Material
-  caps a bottom bar at five and iOS at five-plus-More. There were six, which on a 448dp screen in
-  Arabic ellipsised every label — a row of stubs whose only job was to say which is which. A fifth
-  destination needs a real argument, and the test in `NavigationPermissionTest` will fail until
-  someone makes it.
-- **Cut the bar by asking which entries are *places*, not which matter least.** Three kinds of thing
-  get conflated into tabs, and separating them is what removed two without removing any feature:
-  destinations; **screen actions** — "scan a sheet" belongs to the directory, since intake is a task
-  whose product is members; and **account-level things** — language, staff management, sign out.
-- **Intake is pushed from the members header, so back lands on the directory the new rows joined.**
-  Safe to leave mid-scan: the batch is a `REVIEWING` row in `intake_batches`, so the component picks
-  the same sheet back up. `Config.IntakeReview` maps to `TopLevel.MEMBERS` in `topLevel`, so the tab
-  it was entered from stays lit.
-- **Staff management is in the overflow menu, and `topLevel` returns null for it** — lighting a tab
-  would point at a screen you did not come from.
+**`TopLevel.placement` is the whole model.** The rail and the bar carry deliberately different
+lists, and the export does the same — its mobile bottom bar has exactly four items on every mobile
+screen, while its desktop sidebar has eight. The reason is width: a 256dp rail costs nothing per
+row, whereas the bar divides a phone equally between its items.
+
+| `Placement` | Where | Today |
+|---|---|---|
+| `Primary` | bar **and** rail | Dashboard, Members, Check-in, Reminders |
+| `WideOnly` | rail only; on a phone, reached from its parent screen | Intake |
+| `Account` | never a destination row — rail footer group, compact overflow | Staff |
+
+- **At most four `Primary`, and that is a ceiling rather than a preference.** Material caps a bottom
+  bar at five and iOS at five-plus-More. There were six here, which on a 448dp screen in Arabic
+  ellipsised every label — a row of stubs whose only job was to say which is which. A fifth needs a
+  real argument, and `NavigationPermissionTest` fails until someone makes it. Note the export's
+  fourth is **Schedule**; ours is Reminders only because `:feature:classes` is a stub, so Classes is
+  a *designed* bar destination and ranks above the other stubs.
+- **Cut the bar by asking which entries are *places*.** Three kinds of thing get conflated into
+  tabs: destinations; **screen actions** — "scan a sheet" belongs to the directory, since intake is
+  a task whose product is members, and `members-empty` says so; and **account-level things** —
+  language, staff, sign out.
+- **`bottomBarSelection`, not `topLevel`, is what lights the bar.** `topLevel` returns the canonical
+  destination so the rail lights itself; the bar has no slot for the other two, so intake folds onto
+  Members (where a phone entered it from) and staff lights nothing.
+- **A screen reachable both by push and by rail selection must not use a bare `pop()`.** From the
+  rail the stack holds one entry, so `pop()` silently does nothing and the back button is dead. Use
+  `popOrGoTo(fallback)`.
 - **Moving an entry point is not deleting a route.** The `Config`, its `@SerialName` and its
   `requiredPermission` all stay. And check the permission *pair* when an action lands on a screen:
-  SCAN_INTAKE is now only exercisable from the directory, so every role holding it must also hold
+  SCAN_INTAKE is exercisable from the directory on a phone, so every role holding it must also hold
   VIEW_MEMBERS, or it is a permission with no way to use it.
 - **A pushed screen carries its title in `AnfasDetailTopBar`, not also in `AnfasScreenHeader`.**
   The same title twice down one screen reads as two screens stacked. Desktop has no system back
   gesture, so a pushed screen without that bar cannot be left at all.
-- The rail and the bar differ in **affordance, not architecture**: 256dp has room to spell the
-  account actions out, a phone does not. Same four destinations either way.
+- **Chrome edges are `AnfasEdgeDivider` (10%), table rows are `AnfasTableDivider` (5%).** Two
+  different tokens in the export; they are not interchangeable.
+
+## Who is signed in
+
+- **`AuthRepository.observeCurrentStaff()` joins the session id against `staff`** rather than the
+  display name being a field on `Session`. Two reasons: the session is persisted in `Settings`,
+  which is unencrypted everywhere, and a name is staff PII with no business being there when the id
+  alone restores the session; and a stored copy goes stale when the Owner renames an account.
+- **Avatars are initials, everywhere.** The export fills every one with a generated photograph and
+  nothing in the app uploads one — for staff or members. `AnfasAvatar` takes `initials: String`, so
+  `:core:designsystem` stays domain-free and one circle serves both.
+- `Role.label(AppStrings)` is public in `:feature:auth`, not in `:core:i18n` — i18n owns the
+  strings, but which `Role` each belongs to is that feature's business, and i18n must not start
+  depending on `:core:auth`.
 
 ## Dashboards
 

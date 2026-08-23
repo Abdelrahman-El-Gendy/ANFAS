@@ -384,8 +384,12 @@ private fun StaffNotice.render(s: AppStrings): String = when (this) {
 /**
  * Role labels. Owner appears here even though it cannot be assigned, because the owner's own row
  * still has to render it.
+ *
+ * Public, and lives here rather than in `:core:i18n`, because i18n does not depend on
+ * `:core:auth` and should not start: it owns the *strings*, and which Role each belongs to is
+ * this feature's business. The app shell uses it to label whoever is signed in.
  */
-private fun Role.label(s: AppStrings): String = when (this) {
+fun Role.label(s: AppStrings): String = when (this) {
     Role.Owner -> s.staff.roleOwner
     Role.Admin -> s.staff.roleAdmin
     Role.Therapist -> s.staff.roleTherapist

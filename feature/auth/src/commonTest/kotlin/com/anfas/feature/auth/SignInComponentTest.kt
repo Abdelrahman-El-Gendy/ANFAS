@@ -254,6 +254,8 @@ private class FakeAuthRepository(
 
     override fun observeSession(): Flow<Session?> = sessions
 
+    override fun observeCurrentStaff(): Flow<StaffAccount?> = flowOf(null)
+
     override suspend fun hasAnyAccount(): AppResult<Boolean> =
         failWith?.let { AppResult.Failure(it) } ?: AppResult.Success(hasAccountsNow)
 

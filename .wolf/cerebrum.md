@@ -350,3 +350,27 @@
   `showingMembers` and its six Arabic plural forms existed while the call site hardcoded English.
   Only running the app in the other language finds these — read a `uiautomator` dump of the Arabic
   build and look for the one Latin string among the Arabic ones.
+
+## Key Learnings — 2026-08-23 (desktop is the primary form factor)
+
+- **The user considers desktop the core of this product.** When the rail and the bar disagree,
+  follow the rail. Extract and check the desktop export first.
+- **Stitch generates each screen independently, so the export is not self-consistent.** Across 16
+  desktop screens the sidebar had four different item lists and the brand was called four different
+  things ("Iron & Amber", "Titan Gym", "STRIVE", "FAHD Admin"). Derive the *canonical* structure from
+  the most frequent and most complete instance; do not treat any single screen as authoritative.
+- **The canonical desktop sidebar** is Dashboard, Members, Subscriptions, Intake, Classes, Recovery,
+  Equipment, Announcements, then an `mt-auto` footer group (Settings/Support/Logout) with an
+  avatar + name + role block.
+- **The export's own bottom bar is four items and its sidebar is eight.** Different lists per form
+  factor is the design's position, not a compromise — modelled here as `TopLevel.placement`.
+- **Prefer a join over a new persisted field for display data.** A name on `Session` would sit in
+  unencrypted `Settings` and go stale on rename; `observeCurrentStaff()` joins the session id
+  against `staff` and is always fresh.
+- **Avatars: the export fills every one with a generated photograph and nothing in this app uploads
+  one.** Initials are what the data supports. `AnfasAvatar(initials)` keeps designsystem domain-free.
+- **Two divider tokens, not one.** `white/5` between table rows, `white/10` on chrome edges.
+- Verify a wide layout without touching the user's screen: `adb shell wm size 2560x1600` +
+  `wm density 240` gives ~1706dp and a real `uiautomator` tree. Always `wm size reset` /
+  `wm density reset` afterwards. `screencapture` grabs the frontmost window, which is whatever the
+  user is actually doing.

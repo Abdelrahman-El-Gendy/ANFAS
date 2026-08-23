@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -332,6 +333,8 @@ private class FakeAuth(private val permissions: Set<Permission>) : AuthRepositor
 
     override fun observeSession(): Flow<Session?> =
         MutableStateFlow(Session(userId = "s-1", roles = roles))
+
+    override fun observeCurrentStaff(): Flow<StaffAccount?> = flowOf(null)
 
     override suspend fun hasAnyAccount(): AppResult<Boolean> = AppResult.Success(true)
 

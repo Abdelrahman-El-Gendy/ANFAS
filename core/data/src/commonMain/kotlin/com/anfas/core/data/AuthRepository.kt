@@ -24,6 +24,20 @@ interface AuthRepository {
     fun observeSession(): Flow<Session?>
 
     /**
+     * The signed-in person's own account, or null when nobody is signed in.
+     *
+     * A join against `staff` rather than fields added to [Session], for two reasons. The session
+     * is persisted in `Settings`, which is unencrypted on every platform, and a display name is
+     * staff PII that has no business being there when the id alone restores the session. And a
+     * stored copy would go stale: the Owner can rename an account or change its roles, and the
+     * renamed person should not have to sign out to see it.
+     *
+     * Scoped to the current session id, so this is not a way to read other people's accounts —
+     * that is [observeStaff], which the shell gates on `Permission.MANAGE_STAFF`.
+     */
+    fun observeCurrentStaff(): Flow<StaffAccount?>
+
+    /**
      * True when the database holds no staff at all.
      *
      * The app must not show a login it is impossible to pass, so a fresh install — or an existing

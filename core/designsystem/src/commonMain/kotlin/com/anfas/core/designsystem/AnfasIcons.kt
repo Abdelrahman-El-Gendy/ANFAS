@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.dp
  * outlined stroke, which is what Material Symbols Outlined is. Colour is irrelevant here —
  * `Icon()` tints the whole vector — so everything is declared black.
  *
- * This set covers the members feature only. Glyphs for navigation and the other features
- * (`document_scanner`, `card_membership`, `fitness_center`, …) are genuinely complex shapes;
- * decide on a real icon source before building those rather than approximating them here.
+ * Grown well past the members feature since. The remaining rule holds: a glyph goes in only
+ * when a screen uses it, and a genuinely complex Material Symbol is drawn honestly from its
+ * geometry rather than approximated with a nearby shape.
  */
 object AnfasIcons {
 
@@ -34,6 +34,49 @@ object AnfasIcons {
             // handle
             moveTo(15.6f, 15.6f)
             lineTo(20f, 20f)
+        }
+    }
+
+    /**
+     * `fitness_center` — the brand mark beside the app name in the rail. A dumbbell: a bar with
+     * a collar and a plate at each end. Drawn rather than approximated with a generic shape
+     * because it is the only glyph in the app that stands for the product itself.
+     */
+    val FitnessCenter: ImageVector by lazy {
+        stroked("FitnessCenter") {
+            // bar
+            moveTo(8f, 12f)
+            lineTo(16f, 12f)
+            // leading collar and plate
+            moveTo(6.5f, 9.5f)
+            lineTo(6.5f, 14.5f)
+            moveTo(4f, 8.5f)
+            lineTo(4f, 15.5f)
+            // trailing collar and plate
+            moveTo(17.5f, 9.5f)
+            lineTo(17.5f, 14.5f)
+            moveTo(20f, 8.5f)
+            lineTo(20f, 15.5f)
+        }
+    }
+
+    /**
+     * `logout` — a door with an arrow leaving it. Auto-mirrored: "out" is towards the trailing
+     * edge, which in Arabic is the left.
+     */
+    val Logout: ImageVector by lazy {
+        stroked("Logout", autoMirror = true) {
+            // door, open on the trailing side
+            moveTo(13f, 4f)
+            lineTo(6f, 4f)
+            lineTo(6f, 20f)
+            lineTo(13f, 20f)
+            // arrow leaving through it
+            moveTo(11f, 12f)
+            lineTo(20f, 12f)
+            moveTo(16.5f, 8.5f)
+            lineTo(20f, 12f)
+            lineTo(16.5f, 15.5f)
         }
     }
 

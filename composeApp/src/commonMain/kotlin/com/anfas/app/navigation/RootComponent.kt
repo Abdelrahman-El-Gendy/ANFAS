@@ -2,6 +2,7 @@ package com.anfas.app.navigation
 
 import com.anfas.core.auth.Permission
 import com.anfas.core.auth.Session
+import com.anfas.core.auth.StaffAccount
 import com.anfas.core.auth.can
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.appExceptionHandler
@@ -89,6 +90,16 @@ class RootComponent(componentContext: ComponentContext) :
         .stateIn(scope, SharingStarted.Eagerly, initialValue = null)
 
     /**
+     * The signed-in person's own account, for the chrome that names them.
+     *
+     * Separate from [session] rather than folded into it: the session is what the app is *gated*
+     * on and must be available synchronously from persisted state, whereas this is a database
+     * read that arrives a moment later. Merging them would delay the gate behind a query.
+     */
+    val currentStaff: StateFlow<StaffAccount?> = authRepository.observeCurrentStaff()
+        .stateIn(scope, SharingStarted.Eagerly, initialValue = null)
+
+    /**
      * Created eagerly with its own child context rather than lazily inside the stack, so it keeps
      * its typed-but-unsubmitted state across a configuration change while the user is filling it
      * in — the same reason every other component here is lifecycle-scoped.
@@ -121,7 +132,7 @@ class RootComponent(componentContext: ComponentContext) :
                     // reminders and a coach cannot import, so assuming Members is only right
                     // because every role that can sign in holds VIEW_MEMBERS — assert that by
                     // falling back explicitly rather than by luck.
-                    val landing = TopLevel.entries.firstOrNull { current.can(it.permission) }
+                    val landing = TopLevel.landingFor(current)
                     if (landing != null) onTopLevelSelected(landing)
                 }
             }
@@ -135,7 +146,7 @@ class RootComponent(componentContext: ComponentContext) :
      * session *can* reach — a permission-denied screen with a dead "go back" is a trap.
      */
     fun onPermissionDeniedDismissed() {
-        val landing = TopLevel.entries.firstOrNull { session.value?.can(it.permission) == true }
+        val landing = session.value?.let { TopLevel.landingFor(it) }
         if (stack.value.backStack.isNotEmpty()) {
             navigation.pop()
         } else if (landing != null) {
@@ -145,6 +156,18 @@ class RootComponent(componentContext: ComponentContext) :
             // out is the only honest exit.
             onSignOut()
         }
+    }
+
+    /**
+     * Leave a screen that has its own back affordance.
+     *
+     * Pops when there is something to pop, and otherwise goes to [fallback]. Both cases really
+     * happen for the same screen: intake is **pushed** from the directory on a phone, where back
+     * must return there, and **selected** from the rail on desktop, where the stack holds one
+     * entry and `pop()` would silently do nothing — a dead back button.
+     */
+    private fun popOrGoTo(fallback: TopLevel) {
+        if (stack.value.backStack.isNotEmpty()) navigation.pop() else onTopLevelSelected(fallback)
     }
 
     fun onSignOut() {
@@ -158,6 +181,8 @@ class RootComponent(componentContext: ComponentContext) :
                 TopLevel.MEMBERS -> Config.MembersList
                 TopLevel.CHECK_IN -> Config.CheckIn
                 TopLevel.REMINDERS -> Config.ReminderQueue
+                TopLevel.INTAKE -> Config.IntakeReview
+                TopLevel.STAFF -> Config.StaffList
             },
         )
     }
@@ -225,18 +250,20 @@ class RootComponent(componentContext: ComponentContext) :
         Config.IntakeReview -> Child.IntakeReview(
             intakeReviewFactory.create(
                 componentContext = context,
-                // Popping rather than replacing: intake is pushed from the directory, so this
-                // returns to the screen the imported members have just appeared in, with the
-                // rest of the stack intact.
-                onImported = { navigation.pop() },
-                onCloseClicked = { navigation.pop() },
+                // The directory either way: on a phone that is the screen underneath, and on
+                // desktop it is where the imported members have just appeared. Not a bare pop(),
+                // because from the rail there is nothing to pop and back would be dead.
+                onImported = { popOrGoTo(TopLevel.MEMBERS) },
+                onCloseClicked = { popOrGoTo(TopLevel.MEMBERS) },
             ),
         )
 
         Config.StaffList -> Child.StaffList(
             staffListFactory.create(
                 componentContext = context,
-                onBackClicked = { navigation.pop() },
+                // Reached from the account group on both form factors, so there is no one screen
+                // it sits under — the dashboard is where "done here" goes.
+                onBackClicked = { popOrGoTo(TopLevel.DASHBOARD) },
             ),
         )
 
@@ -346,14 +373,52 @@ class RootComponent(componentContext: ComponentContext) :
      * The count is already role-dependent — a coach sees three, a receptionist four — so this is
      * a ceiling rather than a fixed set.
      */
-    enum class TopLevel(val permission: Permission) {
+    enum class TopLevel(val permission: Permission, val placement: Placement) {
         // First, so signing in lands on "what needs doing" rather than a directory. Gated on
         // VIEW_MEMBERS because every tile is derived from member and subscription data — a role
         // that cannot see members has nothing to put on it.
-        DASHBOARD(Permission.VIEW_MEMBERS),
-        MEMBERS(Permission.VIEW_MEMBERS),
-        CHECK_IN(Permission.CHECK_IN_MEMBERS),
-        REMINDERS(Permission.VIEW_REMINDERS),
+        DASHBOARD(Permission.VIEW_MEMBERS, Placement.Primary),
+        MEMBERS(Permission.VIEW_MEMBERS, Placement.Primary),
+        CHECK_IN(Permission.CHECK_IN_MEMBERS, Placement.Primary),
+        REMINDERS(Permission.VIEW_REMINDERS, Placement.Primary),
+        INTAKE(Permission.SCAN_INTAKE, Placement.WideOnly),
+        STAFF(Permission.MANAGE_STAFF, Placement.Account),
+        ;
+
+        companion object {
+            /**
+             * Where a session lands on sign-in, and where a permission-denied screen backs out
+             * to. Restricted to [Placement.Primary] deliberately: opening the app on the intake
+             * queue, or on staff management, is not "what needs doing" — and on a phone neither
+             * has a tab, so the nav bar would show nothing selected on the very first screen.
+             */
+            fun landingFor(session: Session): TopLevel? = entries.firstOrNull {
+                it.placement == Placement.Primary &&
+                    session.can(it.permission)
+            }
+        }
+    }
+
+    /**
+     * Where a destination is offered. This is the one place the two form factors legitimately
+     * disagree, and the reason is width: a 256dp rail costs nothing per row, whereas the bottom
+     * bar divides a phone equally between its items.
+     */
+    enum class Placement {
+        /** Bottom bar and rail. At most four of these — see the note on [TopLevel]. */
+        Primary,
+
+        /**
+         * Rail only. On a phone it is reached from the screen it belongs to — intake is entered
+         * from the directory, because what it produces is members.
+         */
+        WideOnly,
+
+        /**
+         * Never a destination row: the rail's footer group, and the compact overflow. Not a place
+         * you work, so it does not compete with the screens used on every shift.
+         */
+        Account,
     }
 }
 
@@ -368,17 +433,14 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
 
         RootComponent.Config.ReminderQueue -> RootComponent.TopLevel.REMINDERS
 
-        // Detail routes keep the *parent* tab lit rather than clearing the bar. The profile is
-        // reached from the directory and the renewal sheet from the profile, so Members staying
-        // highlighted tells you where back will take you. Intake is the same: it is entered from
-        // the directory and returns to it.
+        RootComponent.Config.IntakeReview -> RootComponent.TopLevel.INTAKE
+
+        RootComponent.Config.StaffList -> RootComponent.TopLevel.STAFF
+
+        // Detail routes keep the *parent* destination lit rather than clearing the chrome. The
+        // profile is reached from the directory and the renewal sheet from the profile, so
+        // Members staying highlighted tells you where back will take you.
         is RootComponent.Config.MemberProfile -> RootComponent.TopLevel.MEMBERS
-
-        RootComponent.Config.IntakeReview -> RootComponent.TopLevel.MEMBERS
-
-        // Nothing lit. Staff management is account-level, reached from the overflow menu rather
-        // than from a tab, so lighting one would point at a screen you did not come from.
-        RootComponent.Config.StaffList -> null
 
         is RootComponent.Config.Renewal -> null
     }
@@ -403,4 +465,21 @@ internal val RootComponent.Config.requiredPermission: Permission
         RootComponent.Config.IntakeReview -> Permission.SCAN_INTAKE
         is RootComponent.Config.Renewal -> Permission.MANAGE_SUBSCRIPTIONS
         RootComponent.Config.StaffList -> Permission.MANAGE_STAFF
+    }
+
+/**
+ * Which **bottom bar** entry lights up, which is not always the destination you are on.
+ *
+ * The bar holds only [RootComponent.Placement.Primary] entries, so the two that are not in it
+ * have to resolve to something: intake folds onto Members, because on a phone that is where it
+ * was entered from and where back returns to, and staff management lights nothing at all —
+ * highlighting a tab would point at a screen you did not come from.
+ *
+ * The rail needs none of this: every destination has its own row there, so it lights itself.
+ */
+internal val RootComponent.TopLevel.bottomBarSelection: RootComponent.TopLevel?
+    get() = when (this) {
+        RootComponent.TopLevel.INTAKE -> RootComponent.TopLevel.MEMBERS
+        RootComponent.TopLevel.STAFF -> null
+        else -> this
     }

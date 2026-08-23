@@ -6,6 +6,7 @@ import com.anfas.core.auth.Session
 import com.anfas.core.auth.can
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -17,9 +18,18 @@ import kotlin.test.assertTrue
  */
 class NavigationPermissionTest {
 
+    /** Everything a session can reach, wherever it is offered from. */
     private fun destinationsFor(vararg roles: Role): List<RootComponent.TopLevel> {
         val session = Session(userId = "s-1", roles = roles.toSet())
         return RootComponent.TopLevel.entries.filter { session.can(it.permission) }
+    }
+
+    /** Just the bottom bar — the list whose length is width-constrained. */
+    private fun barFor(vararg roles: Role): List<RootComponent.TopLevel> {
+        val session = Session(userId = "s-1", roles = roles.toSet())
+        return RootComponent.TopLevel.entries.filter {
+            it.placement == RootComponent.Placement.Primary && session.can(it.permission)
+        }
     }
 
     @Test
@@ -27,36 +37,38 @@ class NavigationPermissionTest {
         assertEquals(RootComponent.TopLevel.entries, destinationsFor(Role.Owner))
     }
 
-    /**
-     * Staff management is no longer a destination at all — it moved to the account menu — so an
-     * admin now sees exactly what an owner sees.
-     */
+    /** Staff management is the only thing an admin cannot reach. */
     @Test
-    fun `an admin reaches every destination`() {
-        assertEquals(RootComponent.TopLevel.entries, destinationsFor(Role.Admin))
+    fun `an admin reaches everything except staff`() {
+        assertEquals(
+            RootComponent.TopLevel.entries - RootComponent.TopLevel.STAFF,
+            destinationsFor(Role.Admin),
+        )
     }
 
     @Test
-    fun `a receptionist runs the desk`() {
+    fun `a receptionist runs the desk without staff management`() {
         assertEquals(
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
                 RootComponent.TopLevel.CHECK_IN,
                 RootComponent.TopLevel.REMINDERS,
+                RootComponent.TopLevel.INTAKE,
             ),
             destinationsFor(Role.Receptionist),
         )
     }
 
-    /** A coach sees who is in the room and whose membership is live. No reminders. */
+    /** A coach sees who is in the room and can scan a sheet. No reminders, no staff. */
     @Test
-    fun `a coach reaches the dashboard members and check-in`() {
+    fun `a coach reaches the dashboard members check-in and intake`() {
         assertEquals(
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
                 RootComponent.TopLevel.CHECK_IN,
+                RootComponent.TopLevel.INTAKE,
             ),
             destinationsFor(Role.Coach),
         )
@@ -71,15 +83,14 @@ class NavigationPermissionTest {
      * maps over — a seventh destination fails here, at the point the decision is actually made.
      */
     @Test
-    fun `no role is offered more than four destinations`() {
-        assertTrue(
-            RootComponent.TopLevel.entries.size <= 4,
-            "a bottom bar of ${RootComponent.TopLevel.entries.size} divides a phone too far",
-        )
+    fun `no role is offered more than four bottom-bar destinations`() {
+        val bar = RootComponent.TopLevel.entries
+            .count { it.placement == RootComponent.Placement.Primary }
+        assertTrue(bar <= 4, "a bottom bar of $bar divides a phone too far")
         Role.entries.forEach { role ->
             assertTrue(
-                destinationsFor(role).size <= 4,
-                "$role is offered ${destinationsFor(role).size} tabs",
+                barFor(role).size <= 4,
+                "$role is offered ${barFor(role).size} tabs",
             )
         }
     }
@@ -136,6 +147,51 @@ class NavigationPermissionTest {
                 RootComponent.TopLevel.CHECK_IN,
             ),
             destinationsFor(Role.Therapist),
+        )
+    }
+
+    /**
+     * The rail carries every destination and the bar carries only Primary ones, so the two lists
+     * must differ in exactly the documented way and no other. A destination added without a
+     * Placement decision shows up here as a surprise in one list or the other.
+     */
+    @Test
+    fun `intake is a rail destination and staff is neither`() {
+        assertEquals(
+            RootComponent.Placement.WideOnly,
+            RootComponent.TopLevel.INTAKE.placement,
+        )
+        assertEquals(
+            RootComponent.Placement.Account,
+            RootComponent.TopLevel.STAFF.placement,
+        )
+        // On a phone intake has no slot, so the tab it was entered from stays lit; staff
+        // management lights nothing, because you did not come from a tab.
+        assertEquals(
+            RootComponent.TopLevel.MEMBERS,
+            RootComponent.TopLevel.INTAKE.bottomBarSelection,
+        )
+        assertNull(RootComponent.TopLevel.STAFF.bottomBarSelection)
+    }
+
+    /**
+     * Signing in must land on a bar destination. Landing on intake or staff management would
+     * open the app with nothing selected in the nav bar, and neither is "what needs doing".
+     */
+    @Test
+    fun `every assignable role lands on a bar destination`() {
+        (Role.entries - Role.Member).forEach { role ->
+            val session = Session(userId = "s-1", roles = setOf(role))
+            val landing = RootComponent.TopLevel.landingFor(session)
+            assertEquals(
+                RootComponent.Placement.Primary,
+                landing?.placement,
+                "$role lands on $landing",
+            )
+        }
+        assertNull(
+            RootComponent.TopLevel.landingFor(Session("s-1", setOf(Role.Member))),
+            "Member grants nothing, so it must land nowhere rather than on a denied screen",
         )
     }
 

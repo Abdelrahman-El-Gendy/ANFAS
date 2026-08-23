@@ -16,14 +16,18 @@ import com.anfas.core.common.AppResult
 import com.anfas.core.common.logger
 import com.anfas.core.database.StaffDao
 import com.anfas.core.database.StaffEntity
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class OfflineFirstAuthRepository(
     private val dao: StaffDao,
     private val sessionStore: SessionStore,
@@ -34,6 +38,19 @@ internal class OfflineFirstAuthRepository(
     private val log = logger("Auth")
 
     override fun observeSession(): Flow<Session?> = sessionStore.observe()
+
+    override fun observeCurrentStaff(): Flow<StaffAccount?> =
+        sessionStore.observe().flatMapLatest { session ->
+            // flatMapLatest, not combine: a sign-out must stop observing the row rather than
+            // keep emitting the previous person's name against a null session.
+            if (session ==
+                null
+            ) {
+                flowOf(null)
+            } else {
+                dao.observeById(session.userId).map { it?.toDomain() }
+            }
+        }
 
     override suspend fun hasAnyAccount(): AppResult<Boolean> = withContext(dispatchers.io) {
         runStorage("Could not read staff accounts") { dao.count() > 0 }
