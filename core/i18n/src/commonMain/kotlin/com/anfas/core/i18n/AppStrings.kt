@@ -394,5 +394,41 @@ interface AppStrings {
         val columnEnds: String
         val expired: String
         fun inDays(days: Int): String
+
+        /** Shown under the check-in tile only when somebody was refused. */
+        fun turnedAwayHint(count: Int): String
+    }
+
+    val checkIn: CheckIn
+
+    interface CheckIn {
+        val title: String
+        val subtitle: String
+        val searchPlaceholder: String
+        val searchPrompt: String
+        val action: String
+        val recording: String
+
+        /** Today's header figures. Capacity is absent — see the screen's KDoc. */
+        val totalToday: String
+        val deniedToday: String
+        val peakHour: String
+        fun hourLabel(hour: Int): String
+        val noPeakYet: String
+
+        val logTitle: String
+        val logEmpty: String
+        val loadFailedTitle: String
+        fun noMatches(query: String): String
+
+        /** Outcomes. Each one names what the desk does next, not just that it failed. */
+        val granted: String
+        val outcomeExpired: String
+        val outcomeSuspended: String
+        val outcomePaused: String
+        val outcomeNoMembership: String
+
+        fun grantedNotice(name: String): String
+        fun deniedNotice(name: String): String
     }
 }

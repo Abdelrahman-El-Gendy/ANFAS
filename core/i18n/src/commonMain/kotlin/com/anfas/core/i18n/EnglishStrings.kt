@@ -386,5 +386,36 @@ object EnglishStrings : AppStrings {
             1 -> "Tomorrow"
             else -> "In $days days"
         }
+        override fun turnedAwayHint(count: Int) =
+            if (count == 1) "1 turned away" else "$count turned away"
+    }
+
+    override val checkIn = object : AppStrings.CheckIn {
+        override val title = "Check-in"
+        override val subtitle = "Look a member up and let them in."
+        override val searchPlaceholder = "Search name or number"
+        override val searchPrompt = "Start typing a name or membership number."
+        override val action = "Check in"
+        override val recording = "Checking in…"
+
+        override val totalToday = "In today"
+        override val deniedToday = "Turned away"
+        override val peakHour = "Busiest since"
+        override fun hourLabel(hour: Int) = hour.toString().padStart(2, '0') + ":00"
+        override val noPeakYet = "Nobody yet"
+
+        override val logTitle = "Today's entries"
+        override val logEmpty = "Nobody has checked in today."
+        override val loadFailedTitle = "Couldn't load the check-in log"
+        override fun noMatches(query: String) = "No members match \"$query\"."
+
+        override val granted = "In"
+        override val outcomeExpired = "Membership expired"
+        override val outcomeSuspended = "Suspended"
+        override val outcomePaused = "Paused"
+        override val outcomeNoMembership = "No plan yet"
+
+        override fun grantedNotice(name: String) = "$name is in."
+        override fun deniedNotice(name: String) = "$name was turned away."
     }
 }

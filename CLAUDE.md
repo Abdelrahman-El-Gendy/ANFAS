@@ -116,6 +116,27 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - compose material3 is pinned to an **alpha** (`1.11.0-alpha07`) — the newest in the 1.11 line.
 - KSP versioning is independent of Kotlin's. There is no `2.4.10-x.y.z`.
 
+## Check-in
+
+- **`CheckInPolicy` decides the outcome, never the caller.** `recordAttempt` evaluates it against
+  the member's status and current term; a UI that could pass "granted" would eventually let an
+  expired member in by sending the wrong flag.
+- **Status outranks dates, and the two can disagree.** A member left marked ACTIVE whose term
+  lapsed last month is still refused — otherwise the gym gives away the renewal it is selling. A
+  term that has *not started* grants entry: they have paid, and turning them away because their
+  plan begins on Monday is not defensible at the desk.
+- **Refused attempts are recorded and do not move `lastCheckInAt`.** The moment someone was turned
+  away is what staff get asked about later; counting it as a visit would make the directory claim
+  an expired member trained today.
+- **`check_ins` copies the name and number rather than joining**, and has no foreign key: deleting
+  a member must not cascade away the record of them having been here, and a join would rewrite
+  history after a rename.
+- **The day's bounds are computed, not stored.** "Today" depends on the device zone, so a stored
+  date column would let yesterday evening reappear in today's log.
+- An unrecognised stored outcome reads as a **denial** — never claim someone was let in.
+- Not built: **capacity**. Knowing who is *inside* needs check-out, and there is none; a percentage
+  from entries alone would climb all day and read as a full gym by closing time.
+
 ## Dashboards
 
 - **The reception dashboard exists; `staff-dashboard` does not, deliberately.** Its capacity load,

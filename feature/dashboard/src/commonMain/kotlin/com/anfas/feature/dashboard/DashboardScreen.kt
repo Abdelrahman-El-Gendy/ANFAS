@@ -42,9 +42,6 @@ import com.anfas.core.i18n.strings
  * Departures from the export's `reception-dashboard`, every one because the number does not exist
  * rather than because the design was ignored. A dashboard is the screen where an invented figure
  * is most likely to be believed and acted on, so nothing here is fabricated:
- *  - **No "Today's check-ins".** Nothing records a check-in. `Member.lastCheckInAt` holds one
- *    timestamp per member, which cannot answer "how many since 06:00". It returns with the
- *    `live-checkin-log` screen, which needs a check-in table first.
  *  - **No percentage deltas** ("2.4% ▲"). Comparing against last week needs history the app does
  *    not keep — there are no snapshots, only current state — and a trend arrow pointing at
  *    nothing is worse than no arrow.
@@ -110,6 +107,16 @@ private fun Tiles(state: DashboardState, component: DashboardComponent, s: AppSt
             label = s.dashboard.activeMembers,
             value = state.activeMembers.toString(),
             hint = s.dashboard.ofTotal(state.totalMembers),
+            tone = ChipTone.Neutral,
+        )
+        Tile(
+            label = s.checkIn.totalToday,
+            value = state.checkedInToday.toString(),
+            hint = if (state.turnedAwayToday > 0) {
+                s.dashboard.turnedAwayHint(state.turnedAwayToday)
+            } else {
+                s.checkIn.logTitle
+            },
             tone = ChipTone.Neutral,
         )
         Tile(

@@ -1,0 +1,677 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 7,
+    "identityHash": "2e6d0387ab7bdcc296d2daf988441e3f",
+    "entities": [
+      {
+        "tableName": "members",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `fullName` TEXT NOT NULL, `membership_number` TEXT NOT NULL, `phone` TEXT, `phone_normalised` TEXT, `status` TEXT NOT NULL, `lastCheckInAtEpochMs` INTEGER, `avatarUrl` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fullName",
+            "columnName": "fullName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "membershipNumber",
+            "columnName": "membership_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "phoneNormalised",
+            "columnName": "phone_normalised",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastCheckInAtEpochMs",
+            "columnName": "lastCheckInAtEpochMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "avatarUrl",
+            "columnName": "avatarUrl",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_members_membership_number",
+            "unique": true,
+            "columnNames": [
+              "membership_number"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_members_membership_number` ON `${TABLE_NAME}` (`membership_number`)"
+          },
+          {
+            "name": "index_members_phone_normalised",
+            "unique": false,
+            "columnNames": [
+              "phone_normalised"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_members_phone_normalised` ON `${TABLE_NAME}` (`phone_normalised`)"
+          }
+        ]
+      },
+      {
+        "tableName": "reminders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `member_id` TEXT NOT NULL, `member_name` TEXT NOT NULL, `phone` TEXT NOT NULL, `template` TEXT NOT NULL, `scheduled_at_epoch_ms` INTEGER NOT NULL, `attempts` INTEGER NOT NULL, `status` TEXT NOT NULL, `failure_reason` TEXT, `failure_provider_code` INTEGER, `failure_last_attempt_epoch_ms` INTEGER, `failure_detail` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "memberId",
+            "columnName": "member_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "memberName",
+            "columnName": "member_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone",
+            "columnName": "phone",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "template",
+            "columnName": "template",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduledAtEpochMs",
+            "columnName": "scheduled_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attempts",
+            "columnName": "attempts",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "failureReason",
+            "columnName": "failure_reason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "failureProviderCode",
+            "columnName": "failure_provider_code",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "failureLastAttemptEpochMs",
+            "columnName": "failure_last_attempt_epoch_ms",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "failureDetail",
+            "columnName": "failure_detail",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_reminders_status_scheduled_at_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "status",
+              "scheduled_at_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_reminders_status_scheduled_at_epoch_ms` ON `${TABLE_NAME}` (`status`, `scheduled_at_epoch_ms`)"
+          },
+          {
+            "name": "index_reminders_member_id",
+            "unique": false,
+            "columnNames": [
+              "member_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_reminders_member_id` ON `${TABLE_NAME}` (`member_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "subscription_plans",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `tier` TEXT NOT NULL, `price_minor_units` INTEGER NOT NULL, `currency` TEXT NOT NULL, `perks` TEXT NOT NULL, `savings_percent` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tier",
+            "columnName": "tier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceMinorUnits",
+            "columnName": "price_minor_units",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currency",
+            "columnName": "currency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "perks",
+            "columnName": "perks",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savingsPercent",
+            "columnName": "savings_percent",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "subscriptions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `member_id` TEXT NOT NULL, `plan_id` TEXT NOT NULL, `tier` TEXT NOT NULL, `starts_on_epoch_day` INTEGER NOT NULL, `ends_on_epoch_day` INTEGER NOT NULL, `payment_method` TEXT NOT NULL, `paid_minor_units` INTEGER NOT NULL, `currency` TEXT NOT NULL, `created_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "memberId",
+            "columnName": "member_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "planId",
+            "columnName": "plan_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tier",
+            "columnName": "tier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startsOnEpochDay",
+            "columnName": "starts_on_epoch_day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endsOnEpochDay",
+            "columnName": "ends_on_epoch_day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paymentMethod",
+            "columnName": "payment_method",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paidMinorUnits",
+            "columnName": "paid_minor_units",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currency",
+            "columnName": "currency",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMs",
+            "columnName": "created_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_subscriptions_member_id_ends_on_epoch_day",
+            "unique": false,
+            "columnNames": [
+              "member_id",
+              "ends_on_epoch_day"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_subscriptions_member_id_ends_on_epoch_day` ON `${TABLE_NAME}` (`member_id`, `ends_on_epoch_day`)"
+          }
+        ]
+      },
+      {
+        "tableName": "intake_batches",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `captured_at_epoch_ms` INTEGER NOT NULL, `source_image_uri` TEXT, `status` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "capturedAtEpochMs",
+            "columnName": "captured_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sourceImageUri",
+            "columnName": "source_image_uri",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "intake_rows",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `batch_id` TEXT NOT NULL, `ordinal` INTEGER NOT NULL, `issues` TEXT NOT NULL, `bounds_left` REAL, `bounds_top` REAL, `bounds_right` REAL, `bounds_bottom` REAL, `name_value` TEXT NOT NULL, `name_confidence` REAL NOT NULL, `name_was_edited` INTEGER NOT NULL, `phone_value` TEXT NOT NULL, `phone_confidence` REAL NOT NULL, `phone_was_edited` INTEGER NOT NULL, `start_date_value` TEXT NOT NULL, `start_date_confidence` REAL NOT NULL, `start_date_was_edited` INTEGER NOT NULL, `end_date_value` TEXT NOT NULL, `end_date_confidence` REAL NOT NULL, `end_date_was_edited` INTEGER NOT NULL, `plan_value` TEXT NOT NULL, `plan_confidence` REAL NOT NULL, `plan_was_edited` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`batch_id`) REFERENCES `intake_batches`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batchId",
+            "columnName": "batch_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ordinal",
+            "columnName": "ordinal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "issues",
+            "columnName": "issues",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "boundsLeft",
+            "columnName": "bounds_left",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "boundsTop",
+            "columnName": "bounds_top",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "boundsRight",
+            "columnName": "bounds_right",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "boundsBottom",
+            "columnName": "bounds_bottom",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "name.value",
+            "columnName": "name_value",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name.confidence",
+            "columnName": "name_confidence",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name.wasEdited",
+            "columnName": "name_was_edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone.value",
+            "columnName": "phone_value",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone.confidence",
+            "columnName": "phone_confidence",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "phone.wasEdited",
+            "columnName": "phone_was_edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDate.value",
+            "columnName": "start_date_value",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDate.confidence",
+            "columnName": "start_date_confidence",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDate.wasEdited",
+            "columnName": "start_date_was_edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endDate.value",
+            "columnName": "end_date_value",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endDate.confidence",
+            "columnName": "end_date_confidence",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endDate.wasEdited",
+            "columnName": "end_date_was_edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plan.value",
+            "columnName": "plan_value",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plan.confidence",
+            "columnName": "plan_confidence",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plan.wasEdited",
+            "columnName": "plan_was_edited",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_intake_rows_batch_id_ordinal",
+            "unique": false,
+            "columnNames": [
+              "batch_id",
+              "ordinal"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_intake_rows_batch_id_ordinal` ON `${TABLE_NAME}` (`batch_id`, `ordinal`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "intake_batches",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "batch_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "staff",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `username` TEXT NOT NULL, `display_name` TEXT NOT NULL, `roles` TEXT NOT NULL, `password_algorithm` TEXT NOT NULL, `password_iterations` INTEGER NOT NULL, `password_salt` BLOB NOT NULL, `password_hash` BLOB NOT NULL, `created_at_epoch_ms` INTEGER NOT NULL, `is_enabled` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "display_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "roles",
+            "columnName": "roles",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "passwordAlgorithm",
+            "columnName": "password_algorithm",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "passwordIterations",
+            "columnName": "password_iterations",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "passwordSalt",
+            "columnName": "password_salt",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "passwordHash",
+            "columnName": "password_hash",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMs",
+            "columnName": "created_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isEnabled",
+            "columnName": "is_enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_staff_username",
+            "unique": true,
+            "columnNames": [
+              "username"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_staff_username` ON `${TABLE_NAME}` (`username`)"
+          }
+        ]
+      },
+      {
+        "tableName": "check_ins",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `member_id` TEXT, `member_name` TEXT NOT NULL, `membership_number` TEXT NOT NULL, `at_epoch_ms` INTEGER NOT NULL, `outcome` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "memberId",
+            "columnName": "member_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "memberName",
+            "columnName": "member_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "membershipNumber",
+            "columnName": "membership_number",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atEpochMs",
+            "columnName": "at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "outcome",
+            "columnName": "outcome",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_check_ins_at_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "at_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_check_ins_at_epoch_ms` ON `${TABLE_NAME}` (`at_epoch_ms`)"
+          },
+          {
+            "name": "index_check_ins_member_id",
+            "unique": false,
+            "columnNames": [
+              "member_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_check_ins_member_id` ON `${TABLE_NAME}` (`member_id`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2e6d0387ab7bdcc296d2daf988441e3f')"
+    ]
+  }
+}

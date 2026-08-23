@@ -10,6 +10,7 @@ import com.anfas.core.database.buildDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import kotlin.uuid.Uuid
@@ -30,6 +31,7 @@ val dataModule: Module = module {
     single { get<AnfasDatabase>().subscriptionDao() }
     single { get<AnfasDatabase>().intakeDao() }
     single { get<AnfasDatabase>().staffDao() }
+    single { get<AnfasDatabase>().checkInDao() }
 
     single<MemberRepository> {
         OfflineFirstMemberRepository(dao = get(), newId = { Uuid.random().toString() })
@@ -44,6 +46,18 @@ val dataModule: Module = module {
             sessionStore = get(),
             hasher = get(),
             dispatchers = get(),
+        )
+    }
+    single<CheckInRepository> {
+        OfflineFirstCheckInRepository(
+            dao = get(),
+            memberDao = get(),
+            subscriptionDao = get(),
+            dispatchers = get(),
+            // The device's zone, resolved once. "Today" for a gym is the local day, and the log
+            // must not shuffle when a phone crosses a boundary mid-session.
+            zone = TimeZone.currentSystemDefault(),
+            newId = { Uuid.random().toString() },
         )
     }
     single<IntakeRepository> {

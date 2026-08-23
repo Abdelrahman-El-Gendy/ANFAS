@@ -11,6 +11,8 @@ import com.anfas.feature.auth.SignInComponent
 import com.anfas.feature.auth.SignInComponentFactory
 import com.anfas.feature.auth.StaffListComponent
 import com.anfas.feature.auth.StaffListComponentFactory
+import com.anfas.feature.checkin.CheckInComponent
+import com.anfas.feature.checkin.CheckInComponentFactory
 import com.anfas.feature.dashboard.DashboardComponent
 import com.anfas.feature.dashboard.DashboardComponentFactory
 import com.anfas.feature.intakeocr.IntakeReviewComponent
@@ -67,6 +69,7 @@ class RootComponent(componentContext: ComponentContext) :
     private val staffListFactory: StaffListComponentFactory by inject()
     private val dashboardFactory: DashboardComponentFactory by inject()
     private val membersListFactory: MembersListComponentFactory by inject()
+    private val checkInFactory: CheckInComponentFactory by inject()
     private val memberProfileFactory: MemberProfileComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
     private val renewalSheetFactory: RenewalSheetComponentFactory by inject()
@@ -153,6 +156,7 @@ class RootComponent(componentContext: ComponentContext) :
             when (destination) {
                 TopLevel.DASHBOARD -> Config.Dashboard
                 TopLevel.MEMBERS -> Config.MembersList
+                TopLevel.CHECK_IN -> Config.CheckIn
                 TopLevel.REMINDERS -> Config.ReminderQueue
                 TopLevel.INTAKE -> Config.IntakeReview
                 TopLevel.STAFF -> Config.StaffList
@@ -166,6 +170,13 @@ class RootComponent(componentContext: ComponentContext) :
                 componentContext = context,
                 onMemberClicked = { id -> navigation.push(Config.MemberProfile(id.value)) },
                 onOpenReminders = { onTopLevelSelected(TopLevel.REMINDERS) },
+            ),
+        )
+
+        Config.CheckIn -> Child.CheckIn(
+            checkInFactory.create(
+                componentContext = context,
+                onMemberClicked = { id -> navigation.push(Config.MemberProfile(id.value)) },
             ),
         )
 
@@ -253,6 +264,10 @@ class RootComponent(componentContext: ComponentContext) :
         data object MembersList : Config
 
         @Serializable
+        @SerialName("check-in")
+        data object CheckIn : Config
+
+        @Serializable
         @SerialName("reminder-queue")
         data object ReminderQueue : Config
 
@@ -282,6 +297,7 @@ class RootComponent(componentContext: ComponentContext) :
         data class Dashboard(val component: DashboardComponent) : Child
 
         data class MembersList(val component: MembersListComponent) : Child
+        data class CheckIn(val component: CheckInComponent) : Child
         data class MemberProfile(val component: MemberProfileComponent) : Child
         data class StaffList(val component: StaffListComponent) : Child
         data class ReminderQueue(val component: ReminderQueueComponent) : Child
@@ -301,6 +317,7 @@ class RootComponent(componentContext: ComponentContext) :
         // that cannot see members has nothing to put on it.
         DASHBOARD(Permission.VIEW_MEMBERS),
         MEMBERS(Permission.VIEW_MEMBERS),
+        CHECK_IN(Permission.CHECK_IN_MEMBERS),
         REMINDERS(Permission.VIEW_REMINDERS),
         INTAKE(Permission.SCAN_INTAKE),
         STAFF(Permission.MANAGE_STAFF),
@@ -313,6 +330,8 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
         RootComponent.Config.Dashboard -> RootComponent.TopLevel.DASHBOARD
 
         RootComponent.Config.MembersList -> RootComponent.TopLevel.MEMBERS
+
+        RootComponent.Config.CheckIn -> RootComponent.TopLevel.CHECK_IN
 
         RootComponent.Config.ReminderQueue -> RootComponent.TopLevel.REMINDERS
 
@@ -342,6 +361,7 @@ internal val RootComponent.Config.requiredPermission: Permission
     get() = when (this) {
         RootComponent.Config.Dashboard -> Permission.VIEW_MEMBERS
         RootComponent.Config.MembersList -> Permission.VIEW_MEMBERS
+        RootComponent.Config.CheckIn -> Permission.CHECK_IN_MEMBERS
         is RootComponent.Config.MemberProfile -> Permission.VIEW_MEMBERS
         RootComponent.Config.ReminderQueue -> Permission.VIEW_REMINDERS
         RootComponent.Config.IntakeReview -> Permission.SCAN_INTAKE

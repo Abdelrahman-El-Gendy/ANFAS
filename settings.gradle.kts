@@ -55,6 +55,7 @@ include(":core:ocr")
 include(":core:auth")
 
 include(":feature:auth")
+include(":feature:checkin")
 include(":feature:dashboard")
 include(":feature:members")
 include(":feature:subscriptions")

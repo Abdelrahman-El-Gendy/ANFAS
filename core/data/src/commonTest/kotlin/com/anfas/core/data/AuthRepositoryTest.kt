@@ -312,11 +312,6 @@ class AuthRepositoryTest {
     )
 }
 
-private fun <T> AppResult<T>.valueOrFail(): T = when (this) {
-    is AppResult.Success -> value
-    is AppResult.Failure -> throw AssertionError("expected success, got ${error.message}")
-}
-
 /**
  * Reversible stand-in for PBKDF2. Real hashing at 210,000 iterations per assertion would make
  * this suite slow enough to tempt someone into lowering the production cost; the derivation itself
@@ -389,14 +384,4 @@ private class FakeStaffDao : StaffDao {
     override suspend fun delete(id: String) {
         rows.value = rows.value.filterNot { it.id == id }
     }
-}
-
-/**
- * Everything on the test dispatcher. The repository wraps its work in withContext(io), which
- * would otherwise escape runTest's scheduler and make these assertions race.
- */
-private object UnconfinedDispatchers : AppDispatchers {
-    override val io: CoroutineDispatcher = Dispatchers.Unconfined
-    override val default: CoroutineDispatcher = Dispatchers.Unconfined
-    override val main: CoroutineDispatcher = Dispatchers.Unconfined
 }

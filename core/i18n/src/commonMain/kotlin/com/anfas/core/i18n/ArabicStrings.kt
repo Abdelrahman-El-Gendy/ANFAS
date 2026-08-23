@@ -457,5 +457,42 @@ object ArabicStrings : AppStrings {
                 else -> "بعد $days يوم"
             }
         }
+        override fun turnedAwayHint(count: Int) = when (arabicPlural(count)) {
+            PluralCategory.ONE -> "مُنع شخص واحد"
+            PluralCategory.TWO -> "مُنع شخصان"
+            PluralCategory.FEW -> "مُنع $count أشخاص"
+            PluralCategory.MANY -> "مُنع $count شخصًا"
+            else -> "مُنع $count شخص"
+        }
+    }
+
+    override val checkIn = object : AppStrings.CheckIn {
+        override val title = "الحضور"
+        override val subtitle = "ابحث عن العضو واسمح له بالدخول."
+        override val searchPlaceholder = "ابحث بالاسم أو الرقم"
+        override val searchPrompt = "ابدأ بكتابة اسم أو رقم عضوية."
+        override val action = "تسجيل الحضور"
+        override val recording = "جارٍ التسجيل…"
+
+        override val totalToday = "دخلوا اليوم"
+        override val deniedToday = "مُنعوا"
+        override val peakHour = "أكثر ساعة"
+        override fun hourLabel(hour: Int) =
+            (hour.toString().padStart(2, '0') + ":00").asLtrIsolate()
+        override val noPeakYet = "لا أحد بعد"
+
+        override val logTitle = "حضور اليوم"
+        override val logEmpty = "لم يحضر أحد اليوم."
+        override val loadFailedTitle = "تعذّر تحميل سجل الحضور"
+        override fun noMatches(query: String) = "لا يوجد عضو يطابق «$query»."
+
+        override val granted = "دخل"
+        override val outcomeExpired = "العضوية منتهية"
+        override val outcomeSuspended = "موقوف"
+        override val outcomePaused = "متوقف مؤقتًا"
+        override val outcomeNoMembership = "لا توجد خطة بعد"
+
+        override fun grantedNotice(name: String) = "دخل $name."
+        override fun deniedNotice(name: String) = "تم منع $name."
     }
 }

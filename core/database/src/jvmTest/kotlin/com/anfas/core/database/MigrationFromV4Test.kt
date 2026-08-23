@@ -15,7 +15,8 @@ import kotlin.test.assertTrue
 /**
  * Opens a real v4 database file and lets Room migrate it forward to the current schema.
  *
- * The point is the *chain*: v4 -> v5 drops `placeholder` and v5 -> v6 adds `staff`, and running
+ * The point is the *chain*: v4 -> v5 drops `placeholder`, v5 -> v6 adds `staff` and v6 -> v7
+ * adds `check_ins`, and running
  * each hop in isolation would not catch an ordering problem between them. It also asserts what
  * must NOT happen — the pre-existing member survives, and no staff account is invented, because
  * an app that migrates itself a default login ships with a published password.
@@ -68,6 +69,8 @@ class MigrationFromV4Test {
                 // of this test is that a *chain* of migrations runs on one real file — running
                 // each hop in isolation would not catch an ordering problem between them.
                 assertTrue("staff" in tables, "staff should be added, saw $tables")
+                // v7. Asserted here for the same reason: the value of this test is the chain.
+                assertTrue("check_ins" in tables, "check_ins should be added, saw $tables")
                 assertTrue("members" in tables, "members must survive, saw $tables")
                 assertEquals(
                     1,
@@ -138,6 +141,6 @@ class MigrationFromV4Test {
          * Mirrors AnfasDatabase's @Database(version = ...). Bump both together; the assertion
          * that matters is that the chain *ran*, not what number it landed on.
          */
-        const val CURRENT_SCHEMA_VERSION = 6
+        const val CURRENT_SCHEMA_VERSION = 7
     }
 }

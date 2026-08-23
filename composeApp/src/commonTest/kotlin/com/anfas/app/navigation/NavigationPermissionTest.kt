@@ -42,6 +42,7 @@ class NavigationPermissionTest {
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
+                RootComponent.TopLevel.CHECK_IN,
                 RootComponent.TopLevel.REMINDERS,
                 RootComponent.TopLevel.INTAKE,
             ),
@@ -51,11 +52,12 @@ class NavigationPermissionTest {
 
     /** A coach sees who is in the room and can scan a sheet. No reminders, no staff. */
     @Test
-    fun `a coach reaches members and intake only`() {
+    fun `a coach reaches members check-in and intake`() {
         assertEquals(
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
+                RootComponent.TopLevel.CHECK_IN,
                 RootComponent.TopLevel.INTAKE,
             ),
             destinationsFor(Role.Coach),
@@ -63,9 +65,13 @@ class NavigationPermissionTest {
     }
 
     @Test
-    fun `a therapist reaches members only`() {
+    fun `a therapist reaches members and check-in`() {
         assertEquals(
-            listOf(RootComponent.TopLevel.DASHBOARD, RootComponent.TopLevel.MEMBERS),
+            listOf(
+                RootComponent.TopLevel.DASHBOARD,
+                RootComponent.TopLevel.MEMBERS,
+                RootComponent.TopLevel.CHECK_IN,
+            ),
             destinationsFor(Role.Therapist),
         )
     }

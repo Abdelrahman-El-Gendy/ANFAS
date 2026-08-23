@@ -24,3 +24,6 @@ value class IntakeBatchId(val value: String)
 
 @JvmInline
 value class IntakeRowId(val value: String)
+
+@JvmInline
+value class CheckInId(val value: String)

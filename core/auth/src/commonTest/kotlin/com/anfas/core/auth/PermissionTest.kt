@@ -63,7 +63,12 @@ class PermissionTest {
         val therapist = session(Role.Therapist)
 
         assertEquals(
-            setOf(Permission.VIEW_MEMBERS, Permission.VIEW_THERAPY),
+            setOf(
+                Permission.VIEW_MEMBERS,
+                Permission.VIEW_THERAPY,
+                // A therapist working a shift turns people away as often as the desk does.
+                Permission.CHECK_IN_MEMBERS,
+            ),
             therapist.permissions,
         )
     }

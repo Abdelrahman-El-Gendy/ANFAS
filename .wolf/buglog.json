@@ -1010,5 +1010,39 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-23T00:10:00Z"
+  },
+  {
+    "id": "bug-059",
+    "timestamp": "2026-08-23T10:15:00Z",
+    "error_message": "Today's check-in log rendered as a 12-pixel sliver showing one clipped row",
+    "file": "feature/checkin/src/commonMain/kotlin/com/anfas/feature/checkin/CheckInScreen.kt",
+    "root_cause": "The log card was the last child of a non-scrolling Column with no weight, so after the header, three summary figures and the search field it received whatever vertical space was left - almost none. Found via a uiautomator dump showing the row's bounds as 12px tall.",
+    "fix": "The log card takes weight(1f) and its LazyColumn fills it, same pattern as the members table. Both entries then rendered with their outcome chips.",
+    "tags": [
+      "compose",
+      "layout",
+      "weight",
+      "checkin"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-23T10:15:00Z"
+  },
+  {
+    "id": "bug-060",
+    "timestamp": "2026-08-23T10:15:00Z",
+    "error_message": "adb exec-out screencap returned entirely black frames while the app was rendering correctly",
+    "file": "n/a - emulator tooling",
+    "root_cause": "The emulator's capture surface broke after a long session of installs and rotations. Not an app fault: a uiautomator dump showed 59 nodes with all the expected text, and logcat showed no exception.",
+    "fix": "Verify via `uiautomator dump` and read the semantics tree instead - it is stronger evidence than a screenshot anyway, since it proves the accessibility tree rather than pixels. Do not conclude 'blank screen means broken app' without checking the node tree first.",
+    "tags": [
+      "tooling",
+      "emulator",
+      "screencap",
+      "verification"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-23T10:15:00Z"
   }
 ]

@@ -17,6 +17,10 @@ data class DashboardState(
     /** Memberships expired or expiring within a week. The renewal work queue's size. */
     val needingRenewal: Int = 0,
     val failedReminders: Int = 0,
+    /** Granted entries today. Real now that check-in records them. */
+    val checkedInToday: Int = 0,
+    /** Attempts refused today — expired, suspended or paused memberships. */
+    val turnedAwayToday: Int = 0,
     /** Soonest to expire first, already-lapsed ones ahead of those merely expiring. */
     val renewalQueue: List<RenewalQueueRow> = emptyList(),
     val error: String? = null,

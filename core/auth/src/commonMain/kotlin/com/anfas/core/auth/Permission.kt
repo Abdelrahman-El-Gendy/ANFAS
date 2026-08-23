@@ -35,6 +35,14 @@ enum class Permission {
      */
     IMPORT_INTAKE,
 
+    /**
+     * Let a member into the gym, and see today's entries.
+     *
+     * Everyone who works a shift needs this — a coach on the floor turns people away as often as
+     * the desk does — so it is the most widely granted permission here.
+     */
+    CHECK_IN_MEMBERS,
+
     /** Read and write therapy case files — clinical notes, so the narrowest grant here. */
     VIEW_THERAPY,
 
@@ -68,6 +76,7 @@ val Role.permissions: Set<Permission>
             Permission.RETRY_REMINDERS,
             Permission.SCAN_INTAKE,
             Permission.IMPORT_INTAKE,
+            Permission.CHECK_IN_MEMBERS,
         )
 
         // Needs to know who is in the room and whether their membership is live. Not payments,
@@ -76,12 +85,14 @@ val Role.permissions: Set<Permission>
         Role.Coach -> setOf(
             Permission.VIEW_MEMBERS,
             Permission.SCAN_INTAKE,
+            Permission.CHECK_IN_MEMBERS,
         )
 
         // Clinical work plus enough member context to do it.
         Role.Therapist -> setOf(
             Permission.VIEW_MEMBERS,
             Permission.VIEW_THERAPY,
+            Permission.CHECK_IN_MEMBERS,
         )
 
         // Members do not sign in to this app. The role exists so a future member-facing surface

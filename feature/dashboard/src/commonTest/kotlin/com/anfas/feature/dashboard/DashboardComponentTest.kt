@@ -4,11 +4,14 @@ import app.cash.turbine.test
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
+import com.anfas.core.data.CheckInRepository
 import com.anfas.core.data.ImportOutcome
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.data.ReminderCounts
 import com.anfas.core.data.ReminderRepository
 import com.anfas.core.data.SubscriptionRepository
+import com.anfas.core.model.CheckIn
+import com.anfas.core.model.CheckInSummary
 import com.anfas.core.model.Currency
 import com.anfas.core.model.Member
 import com.anfas.core.model.MemberId
@@ -152,6 +155,19 @@ class DashboardComponentTest {
         assertEquals(1, opened)
     }
 
+    /** The metric check-in unlocked. Denials are reported separately, not folded into entries. */
+    @Test
+    fun `today's entries and refusals are reported separately`() = runTest {
+        val component = component(checkedIn = 42, turnedAway = 3)
+
+        component.state.test {
+            val state = awaitSettled()
+            assertEquals(42, state.checkedInToday)
+            assertEquals(3, state.turnedAwayToday)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private suspend fun app.cash.turbine.TurbineTestContext<DashboardState>.awaitSettled():
         DashboardState {
         repeat(EMISSIONS) {
@@ -166,6 +182,8 @@ class DashboardComponentTest {
         terms: List<SubscriptionTerm> = emptyList(),
         counts: ReminderCounts = ReminderCounts(),
         countsFailure: AppError? = null,
+        checkedIn: Int = 0,
+        turnedAway: Int = 0,
         onOpenReminders: () -> Unit = {},
     ): DashboardComponent {
         val lifecycle = LifecycleRegistry()
@@ -174,6 +192,7 @@ class DashboardComponentTest {
             members = FakeMembers(members),
             subscriptions = FakeSubscriptions(terms),
             reminders = FakeReminders(counts, countsFailure),
+            checkIns = FakeCheckIns(checkedIn = checkedIn, turnedAway = turnedAway),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onMemberClicked = {},
             onOpenReminders = onOpenReminders,
@@ -270,4 +289,21 @@ private class TestDispatchers(private val dispatcher: CoroutineDispatcher) : App
     override val io: CoroutineDispatcher = dispatcher
     override val default: CoroutineDispatcher = dispatcher
     override val main: CoroutineDispatcher = dispatcher
+}
+
+private class FakeCheckIns(private val checkedIn: Int, private val turnedAway: Int) :
+    CheckInRepository {
+    override suspend fun recordAttempt(memberId: MemberId, today: LocalDate): AppResult<CheckIn> =
+        AppResult.Failure(AppError.Unexpected("not used"))
+
+    override fun observeDay(date: LocalDate): Flow<AppResult<List<CheckIn>>> =
+        MutableStateFlow(AppResult.Success(emptyList()))
+
+    override fun observeDaySummary(date: LocalDate): Flow<AppResult<CheckInSummary>> =
+        MutableStateFlow(
+            AppResult.Success(CheckInSummary(granted = checkedIn, denied = turnedAway)),
+        )
+
+    override fun observeMonthlyCount(memberId: MemberId, month: LocalDate): Flow<AppResult<Int>> =
+        MutableStateFlow(AppResult.Success(0))
 }

@@ -3,6 +3,7 @@ package com.anfas.feature.dashboard
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
 import com.anfas.core.common.appExceptionHandler
+import com.anfas.core.data.CheckInRepository
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.data.ReminderRepository
 import com.anfas.core.data.SubscriptionRepository
@@ -38,6 +39,7 @@ class DashboardComponent(
     members: MemberRepository,
     subscriptions: SubscriptionRepository,
     reminders: ReminderRepository,
+    checkIns: CheckInRepository,
     dispatchers: AppDispatchers,
     private val onMemberClicked: (MemberId) -> Unit,
     private val onOpenReminders: () -> Unit,
@@ -46,15 +48,25 @@ class DashboardComponent(
     private val scope =
         coroutineScope(dispatchers.main + SupervisorJob() + appExceptionHandler("Dashboard"))
 
+    // Resolved once: a dashboard session does not span midnight, and re-reading the date on
+    // every emission would rebuild the day query on each keystroke elsewhere in the app.
+    private val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
     val state: StateFlow<DashboardState> = combine(
         members.observeMembers(),
         subscriptions.observeCurrentTerms(),
         reminders.observeCounts(),
-    ) { membersResult, termsResult, countsResult ->
+        checkIns.observeDaySummary(today),
+    ) { membersResult, termsResult, countsResult, checkInResult ->
         // A failure in any one seam fails the whole screen. A dashboard showing three tiles and
         // silently omitting a fourth is worse than one saying it could not load: the missing
         // number reads as zero, and zero here means "nothing to chase".
-        val firstError = listOf<AppResult<*>>(membersResult, termsResult, countsResult)
+        val firstError = listOf<AppResult<*>>(
+            membersResult,
+            termsResult,
+            countsResult,
+            checkInResult,
+        )
             .filterIsInstance<AppResult.Failure>()
             .firstOrNull()
         if (firstError != null) {
@@ -64,10 +76,8 @@ class DashboardComponent(
         val allMembers = (membersResult as AppResult.Success).value
         val terms = (termsResult as AppResult.Success).value
         val counts = (countsResult as AppResult.Success).value
+        val checkInSummary = (checkInResult as AppResult.Success).value
 
-        // Recomputed from *today* on every emission rather than stored: a dashboard left open
-        // overnight would otherwise still be describing yesterday.
-        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
         val queue = RenewalQueue.needingAttention(terms, today)
 
         DashboardState(
@@ -76,6 +86,8 @@ class DashboardComponent(
             totalMembers = allMembers.size,
             needingRenewal = queue.size,
             failedReminders = counts.failed,
+            checkedInToday = checkInSummary.granted,
+            turnedAwayToday = checkInSummary.denied,
             renewalQueue = queue.toRows(allMembers),
             error = null,
         )

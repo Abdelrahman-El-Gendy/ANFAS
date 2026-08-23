@@ -16,8 +16,9 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         IntakeBatchEntity::class,
         IntakeRowEntity::class,
         StaffEntity::class,
+        CheckInEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
     // v2 adds the `members` table. Adding a table needs no hand-written logic, but the
     // migration is declared rather than falling back to a destructive recreate — the
@@ -41,6 +42,10 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         // that an existing install has zero staff rows after this migration, which is exactly
         // the state the first-run setup screen handles. Migrating must never invent an account.
         AutoMigration(from = 5, to = 6),
+        // v7 adds `check_ins`. A new table, so no hand-written logic — and deliberately with no
+        // foreign key to members: deleting a member must not cascade away the record of them
+        // having been here.
+        AutoMigration(from = 6, to = 7),
     ],
 )
 @ConstructedBy(AnfasDatabaseConstructor::class)
@@ -54,6 +59,8 @@ abstract class AnfasDatabase : RoomDatabase() {
     abstract fun intakeDao(): IntakeDao
 
     abstract fun staffDao(): StaffDao
+
+    abstract fun checkInDao(): CheckInDao
 
     companion object {
         const val FILE_NAME: String = "anfas.db"

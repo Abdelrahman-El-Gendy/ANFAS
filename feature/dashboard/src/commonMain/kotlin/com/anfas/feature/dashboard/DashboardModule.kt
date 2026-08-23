@@ -1,6 +1,7 @@
 package com.anfas.feature.dashboard
 
 import com.anfas.core.common.AppDispatchers
+import com.anfas.core.data.CheckInRepository
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.data.ReminderRepository
 import com.anfas.core.data.SubscriptionRepository
@@ -14,6 +15,7 @@ class DashboardComponentFactory internal constructor(
     private val members: MemberRepository,
     private val subscriptions: SubscriptionRepository,
     private val reminders: ReminderRepository,
+    private val checkIns: CheckInRepository,
     private val dispatchers: AppDispatchers,
 ) {
     fun create(
@@ -25,6 +27,7 @@ class DashboardComponentFactory internal constructor(
         members = members,
         subscriptions = subscriptions,
         reminders = reminders,
+        checkIns = checkIns,
         dispatchers = dispatchers,
         onMemberClicked = onMemberClicked,
         onOpenReminders = onOpenReminders,
@@ -37,6 +40,7 @@ val DashboardModule: Module = module {
             members = get(),
             subscriptions = get(),
             reminders = get(),
+            checkIns = get(),
             dispatchers = get(),
         )
     }
