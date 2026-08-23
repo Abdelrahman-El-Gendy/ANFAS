@@ -53,7 +53,9 @@ data class NavItem(
 fun AnfasBottomNav(items: List<NavItem>, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme
     Column(modifier = modifier.fillMaxWidth()) {
-        AnfasTableDivider()
+        // Edge, not table rule: the export draws `border-t border-white/10` here. At the table's
+        // 5% the bar stops reading as a surface of its own and the content appears to run into it.
+        AnfasEdgeDivider()
         Row(
             modifier = Modifier
                 .fillMaxWidth()

@@ -113,6 +113,23 @@ fun AnfasTableDivider(modifier: Modifier = Modifier) {
     )
 }
 
+/**
+ * The 1px rule along the edge of a piece of **chrome** — a header's underside, the bottom bar's
+ * top, the rail's side.
+ *
+ * Distinct from [AnfasTableDivider] and not interchangeable with it: the export draws rules
+ * between table rows at `white/5` and chrome edges at `white/10`, so a chrome edge built from the
+ * table rule is half as visible as it should be and the bar stops reading as a separate surface.
+ */
+@Composable
+fun AnfasEdgeDivider(modifier: Modifier = Modifier) {
+    HorizontalDivider(
+        modifier = modifier,
+        thickness = 1.dp,
+        color = AnfasTheme.colors.offWhite.copy(alpha = AnfasTheme.alphas.border),
+    )
+}
+
 /** Footer strip — the export puts the result count and pagination here. */
 @Composable
 fun AnfasTableFooter(content: @Composable RowScope.() -> Unit) {

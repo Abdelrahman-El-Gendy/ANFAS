@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-08-23T07:17:01.275Z",
+  "projectRoot": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS",
+  "instincts": {
+    "instincts": [
+      {
+        "id": "immutable-data-class",
+        "type": "pattern",
+        "description": "Immutable data class for Compose stability",
+        "context": "jetpack-compose",
+        "confidence": 0.5,
+        "createdAt": "2026-08-21T23:08:10.940Z",
+        "lastUsed": "2026-08-22T09:02:22.237Z",
+        "usageCount": 2
+      },
+      {
+        "id": "compose-lazy-key",
+        "type": "pattern",
+        "description": "LazyColumn/LazyRow with stable keys",
+        "context": "jetpack-compose",
+        "confidence": 0.6,
+        "createdAt": "2026-08-22T18:25:00.396Z",
+        "lastUsed": "2026-08-23T07:14:37.382Z",
+        "usageCount": 3
+      }
+    ],
+    "version": "1.0",
+    "lastUpdated": "2026-08-23T07:14:37.383Z"
+  },
+  "gitBranch": "hardening/phase-3-ocr",
+  "lastFiles": [
+    ".wolf/buglog.json",
+    ".wolf/cerebrum.md",
+    ".wolf/hooks/_session.json",
+    "CLAUDE.md",
+    "composeApp/build.gradle.kts",
+    "composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
+    "composeApp/src/commonMain/kotlin/com/anfas/app/di/Modules.kt",
+    "composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
+    "composeApp/src/commonTest/kotlin/com/anfas/app/navigation/ConfigSerializationTest.kt",
+    "composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt",
+    "core/auth/src/commonMain/kotlin/com/anfas/core/auth/Permission.kt",
+    "core/auth/src/commonTest/kotlin/com/anfas/core/auth/PermissionTest.kt",
+    "core/data/src/commonMain/kotlin/com/anfas/core/data/CheckInRepository.kt",
+    "core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt",
+    "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstCheckInRepository.kt",
+    "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstSubscriptionRepository.kt",
+    "core/data/src/commonMain/kotlin/com/anfas/core/data/SubscriptionRepository.kt",
+    "core/data/src/commonTest/kotlin/com/anfas/core/data/AuthRepositoryTest.kt",
+    "core/data/src/commonTest/kotlin/com/anfas/core/data/CheckInRepositoryTest.kt",
+    "core/data/src/commonTest/kotlin/com/anfas/core/data/TestSupport.kt"
+  ]
+}

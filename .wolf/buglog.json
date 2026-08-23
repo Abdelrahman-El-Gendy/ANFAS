@@ -1080,5 +1080,22 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-23T12:40:00Z"
+  },
+  {
+    "id": "bug-063",
+    "timestamp": "2026-08-23T13:35:00Z",
+    "error_message": "Chrome edges (bottom bar top, header underside) drawn with the table rule alpha, half as visible as the export specifies",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasNavigation.kt",
+    "root_cause": "AnfasTableDivider was reused for chrome because it was the only horizontal rule in the design system. The export draws rules between table rows at white/5 and chrome edges at white/10 - two different tokens - so the bar stopped reading as a surface of its own and the content appeared to run into it.",
+    "fix": "Added AnfasEdgeDivider at AnfasTheme.alphas.border (10%) with a KDoc saying the two are not interchangeable, and used it on AnfasBottomNav, AnfasDetailTopBar and the compact top bar. The rail's vertical divider already used the border alpha and was already correct.",
+    "tags": [
+      "designsystem",
+      "stitch",
+      "fidelity",
+      "tokens"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-23T13:35:00Z"
   }
 ]

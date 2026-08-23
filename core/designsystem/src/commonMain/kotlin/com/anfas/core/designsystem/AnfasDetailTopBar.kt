@@ -58,6 +58,6 @@ fun AnfasDetailTopBar(
             )
             actions?.invoke()
         }
-        AnfasTableDivider()
+        AnfasEdgeDivider()
     }
 }

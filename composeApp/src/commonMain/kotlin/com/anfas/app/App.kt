@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -32,6 +33,7 @@ import com.anfas.core.auth.Session
 import com.anfas.core.auth.can
 import com.anfas.core.designsystem.AnfasBottomNav
 import com.anfas.core.designsystem.AnfasBreakpoints
+import com.anfas.core.designsystem.AnfasEdgeDivider
 import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasLanguageToggle
@@ -213,11 +215,15 @@ fun App(root: RootComponent) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    // 56dp and a bottom edge, from the export's
+                                    // `h-16 border-b border-white/10` header. Fixed height
+                                    // rather than content height so the bar does not change
+                                    // size between English and Arabic, and 56 rather than 64
+                                    // because ours carries no avatar yet.
+                                    .height(TOP_BAR_HEIGHT)
                                     .padding(
                                         start = AnfasTheme.spacing.marginMobile,
                                         end = 4.dp,
-                                        top = 4.dp,
-                                        bottom = 4.dp,
                                     ),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
@@ -250,6 +256,7 @@ fun App(root: RootComponent) {
                                     }
                                 }
                             }
+                            AnfasEdgeDivider()
                             if (session == null) {
                                 SignInScreen(
                                     component = root.signIn,
@@ -347,3 +354,9 @@ private fun Permission.areaLabel(s: AppStrings): String = when (this) {
     Permission.VIEW_THERAPY -> s.states.fieldStatus
     Permission.MANAGE_STAFF -> s.staff.title
 }
+
+/**
+ * The compact top bar's height, from the export's `h-16` header. A constant rather than inline so
+ * it cannot drift from the bottom bar's own touch-target floor.
+ */
+private val TOP_BAR_HEIGHT = 56.dp
