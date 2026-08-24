@@ -30,10 +30,10 @@ import com.anfas.core.designsystem.AnfasBulkActionBar
 import com.anfas.core.designsystem.AnfasCard
 import com.anfas.core.designsystem.AnfasCheckbox
 import com.anfas.core.designsystem.AnfasChoiceChip
+import com.anfas.core.designsystem.AnfasDetailTopBar
 import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasPrimaryButton
-import com.anfas.core.designsystem.AnfasScreenHeader
 import com.anfas.core.designsystem.AnfasSearchField
 import com.anfas.core.designsystem.AnfasStatusChip
 import com.anfas.core.designsystem.AnfasTableDivider
@@ -72,71 +72,83 @@ fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = 
     val s = strings
 
     Box(modifier = modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = AnfasTheme.spacing.marginMobile)
-                .padding(top = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            AnfasScreenHeader(
+        Column(modifier = Modifier.fillMaxSize()) {
+            // No longer a bottom-bar destination: opened from the dashboard's renewal tile on a
+            // phone and from the rail on desktop, so it owns a back affordance. The title moves
+            // into it rather than being printed twice.
+            AnfasDetailTopBar(
                 title = s.reminders.title,
-                subtitle = s.reminders.subtitle,
+                onBack = component::onClose,
+                backContentDescription = s.common.back,
             )
-
-            AnfasTabs(
-                tabs = StatusTabs.map { status ->
-                    Tab(
-                        label = status.label(s),
-                        count = state.counts[status],
-                        emphasiseCount = status == ReminderStatus.FAILED &&
-                            state.counts.failed > 0,
-                    )
-                },
-                selectedIndex = StatusTabs.indexOf(state.selectedStatus).coerceAtLeast(0),
-                onTabSelected = { component.onStatusSelected(StatusTabs[it]) },
-            )
-
-            AnfasSearchField(
-                value = state.query,
-                onValueChange = component::onQueryChanged,
-                placeholder = s.reminders.searchPlaceholder,
-                clearContentDescription = s.common.clearSearch,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            TemplateFilterRow(
-                selected = state.templateFilter,
-                onSelected = component::onTemplateFilterChanged,
-            )
-
-            state.notice?.let { notice ->
-                NoticeBar(text = notice.render(s), onDismiss = component::onNoticeShown)
-            }
-
-            when (val content = state.content) {
-                ReminderQueueContent.Loading -> Box(Modifier.fillMaxSize())
-
-                is ReminderQueueContent.Failed -> AnfasEmptyState(
-                    icon = AnfasIcons.ErrorOutline,
-                    title = s.reminders.loadFailedTitle,
-                    message = content.message,
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = AnfasTheme.spacing.marginMobile)
+                    .padding(top = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text(
+                    text = s.reminders.subtitle,
+                    style = AnfasTheme.textStyles.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                is ReminderQueueContent.Empty -> QueueEmptyState(
-                    content = content,
-                    sentCount = state.counts.sent,
-                    onClearFilters = {
-                        component.onQueryChanged("")
-                        component.onTemplateFilterChanged(null)
+                AnfasTabs(
+                    tabs = StatusTabs.map { status ->
+                        Tab(
+                            label = status.label(s),
+                            count = state.counts[status],
+                            emphasiseCount = status == ReminderStatus.FAILED &&
+                                state.counts.failed > 0,
+                        )
                     },
+                    selectedIndex = StatusTabs.indexOf(state.selectedStatus).coerceAtLeast(0),
+                    onTabSelected = { component.onStatusSelected(StatusTabs[it]) },
                 )
 
-                is ReminderQueueContent.Loaded -> ReminderTable(
-                    reminders = content.reminders,
-                    state = state,
-                    component = component,
+                AnfasSearchField(
+                    value = state.query,
+                    onValueChange = component::onQueryChanged,
+                    placeholder = s.reminders.searchPlaceholder,
+                    clearContentDescription = s.common.clearSearch,
+                    modifier = Modifier.fillMaxWidth(),
                 )
+
+                TemplateFilterRow(
+                    selected = state.templateFilter,
+                    onSelected = component::onTemplateFilterChanged,
+                )
+
+                state.notice?.let { notice ->
+                    NoticeBar(text = notice.render(s), onDismiss = component::onNoticeShown)
+                }
+
+                when (val content = state.content) {
+                    ReminderQueueContent.Loading -> Box(Modifier.fillMaxSize())
+
+                    is ReminderQueueContent.Failed -> AnfasEmptyState(
+                        icon = AnfasIcons.ErrorOutline,
+                        title = s.reminders.loadFailedTitle,
+                        message = content.message,
+                    )
+
+                    is ReminderQueueContent.Empty -> QueueEmptyState(
+                        content = content,
+                        sentCount = state.counts.sent,
+                        onClearFilters = {
+                            component.onQueryChanged("")
+                            component.onTemplateFilterChanged(null)
+                        },
+                    )
+
+                    is ReminderQueueContent.Loaded -> ReminderTable(
+                        reminders = content.reminders,
+                        state = state,
+                        component = component,
+                    )
+                }
             }
         }
 

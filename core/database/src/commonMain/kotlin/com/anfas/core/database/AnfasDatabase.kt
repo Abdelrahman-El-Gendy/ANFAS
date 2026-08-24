@@ -17,8 +17,9 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         IntakeRowEntity::class,
         StaffEntity::class,
         CheckInEntity::class,
+        GymClassEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
     // v2 adds the `members` table. Adding a table needs no hand-written logic, but the
     // migration is declared rather than falling back to a destructive recreate — the
@@ -46,6 +47,10 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         // foreign key to members: deleting a member must not cascade away the record of them
         // having been here.
         AutoMigration(from = 6, to = 7),
+        // v8 adds `scheduled_classes` for the weekly timetable. A new table again — and note it
+        // carries no foreign key to `staff`, so its creation order does not matter: disabling a
+        // coach must never delete next week's classes.
+        AutoMigration(from = 7, to = 8),
     ],
 )
 @ConstructedBy(AnfasDatabaseConstructor::class)
@@ -61,6 +66,8 @@ abstract class AnfasDatabase : RoomDatabase() {
     abstract fun staffDao(): StaffDao
 
     abstract fun checkInDao(): CheckInDao
+
+    abstract fun gymClassDao(): GymClassDao
 
     companion object {
         const val FILE_NAME: String = "anfas.db"

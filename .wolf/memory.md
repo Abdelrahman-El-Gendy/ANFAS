@@ -111,3 +111,19 @@
 | 15:10 | Rebuilt AnfasNavRail to the export: bg-surface, brand mark, on-surface/5 selected fill + 2dp trailing primary marker, footer group with identity | core/designsystem/AnfasNavigation.kt, AnfasAvatar.kt, AnfasIdentityRow.kt, AnfasIcons.kt | rail verified on a 1706dp emulator in Arabic | ~large |
 | 15:25 | Added TopLevel.placement (Primary/WideOnly/Account) so the rail carries 5 and the bar 4, as the export does | composeApp/navigation/RootComponent.kt, App.kt, NavigationPermissionTest.kt | 812 tests green | ~large |
 | 15:35 | Fixed dead back button: intake reached from the rail is replaceAll'd, so pop() was a no-op | composeApp/navigation/RootComponent.kt | popOrGoTo(fallback); verified back lands on Members | ~med |
+
+## Session: 2026-08-24 09:51
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-24 09:51
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 09:56 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | modified landingFor() | ~52 |
+| 10:05 | Built the classes feature end to end: GymClass/ClassSchedule model, scheduled_classes table (v8), ClassRepository, feature/classes (day view + week grid), MANAGE_CLASSES permission | core/model, core/database, core/data, feature/classes, composeApp | 915 tests green, both iOS targets compile | ~large |
+| 10:10 | Verified on iPad Pro 13" simulator via xcodebuild snapshot_ui + mobile-mcp taps: day view and week grid both render, lane overlap layout correct, filters work | app/iosApp | found + fixed 2 real bugs (see below) | ~large |
+| 10:12 | Bug: week grid used AnfasBreakpoints.tabletMax (the rail/bar breakpoint) so it was unreachable on any window under ~1280dp, including a 1032pt iPad. Derived GRID_MIN_WIDTH from actual grid content width instead | feature/classes/ClassesScreen.kt | grid now reachable on iPad in landscape | ~med |
+| 10:14 | Bug: Arabic class strings used Kotlin's ${'$'}count escape (produces literal "$count"), so the grid read "$count مكانًا" under every block. Fixed all 9 occurrences; added PlaceholderInterpolationTest so this class of bug fails the build next time | core/i18n/ArabicStrings.kt, PlaceholderInterpolationTest.kt | reads "3 أماكن" etc; test asserts no '$' survives interpolation | ~med |
+| 10:16 | Reverted a temporary TopLevel.landingFor() hack used only to force-land on Classes for device verification | composeApp/navigation/RootComponent.kt | landingFor restored to Placement.Primary-based logic | ~small |

@@ -27,3 +27,6 @@ value class IntakeRowId(val value: String)
 
 @JvmInline
 value class CheckInId(val value: String)
+
+@JvmInline
+value class GymClassId(val value: String)

@@ -33,6 +33,9 @@ object EnglishStrings : AppStrings {
 
         override fun dateLong(day: Int, monthIndex: Int, year: Int) =
             "$day ${MONTHS_SHORT_EN[monthIndex]} $year"
+        override fun dayName(isoDayNumber: Int) = ENGLISH_DAYS
+            .getOrElse(isoDayNumber - 1) { "" }
+        override fun dayNameShort(isoDayNumber: Int) = dayName(isoDayNumber).take(3).uppercase()
         override val back = "Back"
         override val moreOptions = "Account and settings"
     }
@@ -391,6 +394,57 @@ object EnglishStrings : AppStrings {
             if (count == 1) "1 turned away" else "$count turned away"
     }
 
+    override val classes = object : AppStrings.Classes {
+        override val title = "Classes"
+        override val subtitle = "The weekly timetable."
+        override val todayTitle = "Today's schedule"
+        override val weekTitle = "Weekly schedule"
+        override val addClass = "Add class"
+        override val editClass = "Edit class"
+        override val deleteClass = "Delete class"
+        override val columnTime = "TIME"
+        override val columnClass = "CLASS"
+        override val columnInstructor = "INSTRUCTOR"
+        override val columnRoom = "ROOM"
+        override val columnCapacity = "CAPACITY"
+        override fun places(count: Int) = if (count == 1) "1 place" else "$count places"
+        override val unassigned = "Unassigned"
+        override val finishedToday = "Earlier today"
+        override val inProgress = "On now"
+        override val categoryGeneral = "General"
+        override val categoryWomensOnly = "Women's only"
+        override val categoryRecovery = "Recovery"
+        override val emptyTitle = "No classes yet"
+        override val emptyMessage = "Add the gym's weekly timetable and it will show up here."
+        override fun emptyDayTitle(day: String) = "Nothing on $day"
+        override val emptyDayMessage = "Pick another day, or switch to the week view."
+        override val loadFailedTitle = "Could not load the timetable"
+        override fun weekRange(range: String) = range
+        override val previousWeek = "Previous week"
+        override val nextWeek = "Next week"
+        override val today = "Today"
+        override val filterAllCoaches = "All coaches"
+        override val filterAllRooms = "All rooms"
+        override val fieldName = "Class name"
+        override val fieldCategory = "Category"
+        override val fieldRoom = "Room"
+        override val fieldCapacity = "Capacity"
+        override val fieldInstructor = "Instructor"
+        override val fieldDay = "Day"
+        override val fieldStart = "Starts"
+        override val fieldDuration = "Duration"
+        override fun durationMinutes(count: Int) = "$count min"
+        override val save = "Save class"
+        override val errorNameBlank = "Give the class a name."
+        override val errorRoomBlank = "Say which room it is in."
+        override val errorCapacity = "Capacity must be between 1 and 500."
+        override val errorDuration = "Duration must be between 5 minutes and 8 hours."
+        override fun roomClash(room: String, other: String) =
+            "Saved, but $room is also booked for $other at that time."
+        override fun saved(name: String) = "$name saved."
+        override fun deleted(name: String) = "$name removed from the timetable."
+    }
+
     override val checkIn = object : AppStrings.CheckIn {
         override val title = "Check-in"
         override val subtitle = "Look a member up and let them in."
@@ -420,3 +474,14 @@ object EnglishStrings : AppStrings {
         override fun deniedNotice(name: String) = "$name was turned away."
     }
 }
+
+/** ISO order: index 0 is Monday. */
+private val ENGLISH_DAYS = listOf(
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+)

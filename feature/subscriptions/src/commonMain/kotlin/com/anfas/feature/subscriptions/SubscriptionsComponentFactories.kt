@@ -21,12 +21,14 @@ class ReminderQueueComponentFactory internal constructor(
     fun create(
         componentContext: ComponentContext,
         onOpenMemberClicked: (MemberId) -> Unit,
+        onCloseClicked: () -> Unit,
     ): ReminderQueueComponent = ReminderQueueComponent(
         componentContext = componentContext,
         repository = reminders,
         auth = auth,
         dispatchers = dispatchers,
         onOpenMemberClicked = onOpenMemberClicked,
+        onCloseClicked = onCloseClicked,
     )
 }
 

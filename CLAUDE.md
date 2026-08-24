@@ -116,6 +116,45 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - compose material3 is pinned to an **alpha** (`1.11.0-alpha07`) — the newest in the 1.11 line.
 - KSP versioning is independent of Kotlin's. There is no `2.4.10-x.y.z`.
 
+## Classes
+
+- **A `GymClass` is a recurring weekly slot, not a dated occurrence.** Both designed screens agree:
+  `class-schedule` asks "what's on today" and `weekly-class-schedule` repeats a class across days
+  with no notion of *which* week. Storing dated instances would mean generating rows forward
+  forever and deciding how far. The cost, stated rather than hidden: there is no way to cancel a
+  single date or skip a public holiday — that needs an exceptions table, added when someone asks.
+- **`instructorStaffId` has no foreign key, and for a different reason than `check_ins` has none.**
+  A check-in copies the name because history must never change after the fact. A class slot
+  should follow a live rename — the repository resolves the name at read time via `Timetable`, and
+  an id that no longer resolves reads as "unassigned", which is a real, actionable state rather
+  than an error.
+- **A room clash is a warning, saved anyway — never a rejection.** Two classes can legitimately
+  share a room (a small group in the corner), and refusing the save would make the timetable
+  impossible to enter for a gym that does that. `SaveClassOutcome.SavedWithRoomClash` names the
+  other class; the row is written either way. The clash check reads back **after** the write and
+  excludes the row's own id, so editing a class never reports it clashing with its previous
+  version of itself.
+- **The overlap-lane layout algorithm is where a bug hides a class entirely, not where it looks
+  wrong.** A block assigned the wrong lane draws on top of another block and the covered one
+  simply disappears. `ClassSchedule.layoutDay` groups transitively (A–B–C is one group even
+  though A and C don't touch, because B's width must be decided against everything it competes
+  with) and assigns lanes greedily so a finished class's lane can be reused. Tested against the
+  actual invariant — overlapping blocks never share a lane, one group agrees on lane count — not
+  against a specific lane number, which would be as fragile as the bug itself.
+- **Viewing the timetable needs no permission beyond signing in; changing it needs
+  `MANAGE_CLASSES`.** Every role that can sign in is working a shift and needs to know what's on
+  next, same reasoning as check-in. The split is enforced inside the screen, the same shape as
+  scan/import on intake — one route, two permissions.
+- **The breakpoint that switches day-list to week-grid is derived from the grid's own content
+  width, never borrowed from `AnfasBreakpoints.tabletMax`.** That constant decides rail-vs-bottom-
+  bar for the whole shell and is measured against the *window* — a screen hosted inside the rail
+  layout only ever receives window-minus-256dp, so reusing it left the grid unreachable on an
+  iPad. `GRID_MIN_WIDTH` is the hour axis plus seven legible columns, compared against the local
+  `BoxWithConstraints` width instead.
+- **Classes is the export's own fourth bottom-bar item** (`Dashboard`/`Members`/`Schedule`/
+  `Check-in`), so it took the bar slot Reminders held; Reminders moved to `Placement.WideOnly` —
+  still one tap away from the dashboard's "needs renewal" tile, which is where you'd look for it.
+
 ## Check-in
 
 - **`CheckInPolicy` decides the outcome, never the caller.** `recordAttempt` evaluates it against

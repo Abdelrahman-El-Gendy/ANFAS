@@ -205,6 +205,7 @@ class ReminderQueueComponentTest {
             repository = repository,
             auth = FakeAuth(mayRetry = false),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
+            onCloseClicked = {},
             onOpenMemberClicked = {},
         )
 
@@ -239,6 +240,7 @@ class ReminderQueueComponentTest {
             repository = FakeReminderRepository(reminders, forced),
             auth = FakeAuth(mayRetry = mayRetry),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
+            onCloseClicked = {},
             onOpenMemberClicked = {},
         )
         lifecycle.resume()

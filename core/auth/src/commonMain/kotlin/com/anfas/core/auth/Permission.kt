@@ -48,6 +48,15 @@ enum class Permission {
 
     /** Create, disable and reset other staff accounts. Owner only. */
     MANAGE_STAFF,
+
+    /**
+     * Add, edit and remove classes on the weekly timetable.
+     *
+     * Separate from viewing it, which needs no permission beyond signing in: a coach on the floor
+     * has to know what is on and where, and every role that can sign in is working a shift. What
+     * a coach must not do is move somebody else's class.
+     */
+    MANAGE_CLASSES,
 }
 
 /**
@@ -77,6 +86,7 @@ val Role.permissions: Set<Permission>
             Permission.SCAN_INTAKE,
             Permission.IMPORT_INTAKE,
             Permission.CHECK_IN_MEMBERS,
+            Permission.MANAGE_CLASSES,
         )
 
         // Needs to know who is in the room and whether their membership is live. Not payments,

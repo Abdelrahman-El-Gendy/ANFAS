@@ -52,6 +52,7 @@ class NavigationPermissionTest {
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
+                RootComponent.TopLevel.CLASSES,
                 RootComponent.TopLevel.CHECK_IN,
                 RootComponent.TopLevel.REMINDERS,
                 RootComponent.TopLevel.INTAKE,
@@ -60,17 +61,26 @@ class NavigationPermissionTest {
         )
     }
 
-    /** A coach sees who is in the room and can scan a sheet. No reminders, no staff. */
+    /**
+     * A coach sees who is in the room, what is on, and can scan a sheet. No reminders, no staff.
+     * The timetable is *visible* to every role that can sign in — a coach on the floor has to
+     * know what is on next — while changing it needs MANAGE_CLASSES, which a coach does not hold.
+     */
     @Test
-    fun `a coach reaches the dashboard members check-in and intake`() {
+    fun `a coach reaches the dashboard members classes check-in and intake`() {
         assertEquals(
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
+                RootComponent.TopLevel.CLASSES,
                 RootComponent.TopLevel.CHECK_IN,
                 RootComponent.TopLevel.INTAKE,
             ),
             destinationsFor(Role.Coach),
+        )
+        assertTrue(
+            !Session("s-1", setOf(Role.Coach)).can(Permission.MANAGE_CLASSES),
+            "a coach must not be able to move somebody else's class",
         )
     }
 
@@ -139,11 +149,12 @@ class NavigationPermissionTest {
     }
 
     @Test
-    fun `a therapist reaches members and check-in`() {
+    fun `a therapist reaches members classes and check-in`() {
         assertEquals(
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
+                RootComponent.TopLevel.CLASSES,
                 RootComponent.TopLevel.CHECK_IN,
             ),
             destinationsFor(Role.Therapist),
@@ -155,6 +166,35 @@ class NavigationPermissionTest {
      * must differ in exactly the documented way and no other. A destination added without a
      * Placement decision shows up here as a surprise in one list or the other.
      */
+
+    /**
+     * The export's own bottom bar is Dashboard / Members / Schedule / Check-in, and Subscriptions
+     * appears only in its desktop sidebar. This pins that: the timetable is on the bar and the
+     * reminder queue is not.
+     */
+    @Test
+    fun `the bar matches the export - classes on it and reminders off it`() {
+        assertEquals(
+            listOf(
+                RootComponent.TopLevel.DASHBOARD,
+                RootComponent.TopLevel.MEMBERS,
+                RootComponent.TopLevel.CLASSES,
+                RootComponent.TopLevel.CHECK_IN,
+            ),
+            barFor(Role.Owner),
+        )
+        assertEquals(
+            RootComponent.Placement.WideOnly,
+            RootComponent.TopLevel.REMINDERS.placement,
+        )
+        // On a phone it is opened from the dashboard's renewal tile, so that is the tab that
+        // stays lit while you are in it.
+        assertEquals(
+            RootComponent.TopLevel.DASHBOARD,
+            RootComponent.TopLevel.REMINDERS.bottomBarSelection,
+        )
+    }
+
     @Test
     fun `intake is a rail destination and staff is neither`() {
         assertEquals(

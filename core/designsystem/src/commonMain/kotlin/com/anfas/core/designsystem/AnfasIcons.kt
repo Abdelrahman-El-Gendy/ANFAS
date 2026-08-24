@@ -80,6 +80,28 @@ object AnfasIcons {
         }
     }
 
+    /**
+     * `calendar_today` — the class timetable. A page with a bound top edge, which is what
+     * distinguishes it from [Schedule]'s clock face; the two sit next to each other in the nav.
+     */
+    val CalendarToday: ImageVector by lazy {
+        stroked("CalendarToday") {
+            moveTo(5f, 6f)
+            lineTo(19f, 6f)
+            lineTo(19f, 20f)
+            lineTo(5f, 20f)
+            lineTo(5f, 6f)
+            // binding
+            moveTo(5f, 10f)
+            lineTo(19f, 10f)
+            // rings
+            moveTo(8.5f, 4f)
+            lineTo(8.5f, 7f)
+            moveTo(15.5f, 4f)
+            lineTo(15.5f, 7f)
+        }
+    }
+
     val Add: ImageVector by lazy {
         stroked("Add") {
             moveTo(12f, 5f)

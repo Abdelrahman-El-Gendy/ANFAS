@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-21T14:11:24.311Z
-> Files: 513 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-24T06:56:37.392Z
+> Files: 514 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -495,7 +495,7 @@
 
 ## composeApp/src/commonMain/kotlin/com/anfas/app/navigation/
 
-- `RootComponent.kt` — Decompose navigation root. (~1684 tok)
+- `RootComponent.kt` — Decompose navigation root. (~6600 tok)
 
 ## composeApp/src/iosMain/kotlin/com/anfas/app/
 
@@ -557,6 +557,12 @@
 
 ## core/data/src/commonMain/kotlin/com/anfas/core/data/
 
+- `ClassRepository.kt` — `ClassRepository`, `Timetable` (classes + resolved instructor names),
+  `SaveClassOutcome` (Saved/SavedWithRoomClash/Invalid — a room clash is a warning, not a
+  rejection), `ClassProblem` (~500 tok)
+- `OfflineFirstClassRepository.kt` — Room-backed. Joins `scheduled_classes` with `staff` for
+  instructor names via `combine`. Clash check reads back *after* the write so editing a class
+  never reports it clashing with its own previous version (~1400 tok)
 - `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~573 tok)
 - `IntakeMappers.kt` — Storage <-> domain for OCR intake. (~889 tok)
 - `IntakeRepository.kt` — Which cell of a row an edit targets. (~644 tok)
@@ -567,6 +573,8 @@
 
 ## core/data/src/commonTest/kotlin/com/anfas/core/data/
 
+- `ClassRepositoryTest.kt` — 16 tests: overlap clash detection, edit-does-not-clash-with-self,
+  unresolvable/missing instructor reads as unassigned, all-problems-at-once (~2400 tok)
 - `FakeIntakeDao.kt` — In-memory IntakeDao. Mirrors the real thing where it matters: rows are ordered by ordinal, (~1110 tok)
 - `FakeMemberDao.kt` — In-memory stand-in for Room. Query semantics mirror the DAO's SQL — case-insensitive (~690 tok)
 - `OfflineFirstIntakeRepositoryTest.kt` — Only for the create-batch test, which needs a domain row to hand in. (~2806 tok)
@@ -595,6 +603,9 @@
 
 ## core/database/src/commonMain/kotlin/com/anfas/core/database/
 
+- `GymClassEntity.kt` — `scheduled_classes` table (v8) + `GymClassDao`. `day_of_week` stored as
+  ISO number, `start_minute_of_day` as minutes since midnight — both sort correctly as integers.
+  No FK on `instructor_staff_id`: disabling a coach must not delete next week's classes (~800 tok)
 - `AnfasDatabase.kt` — Required on Kotlin Multiplatform: Room cannot use reflection on native targets, so the (~603 tok)
 - `DatabaseBuilderFactory.kt` — Resolves the platform database location and hands back a builder. Actuals differ in what (~250 tok)
 - `IntakeEntity.kt` — A photographed sign-up sheet awaiting review. (~1198 tok)
@@ -631,17 +642,9 @@
 - `AnfasExtendedColors.kt` — M3 *fixed* roles + brand accents (offWhite/sage/rose/charcoal) as a data class + CompositionLocal. sage=therapy, rose=classes (~520 tok)
 - `AnfasIconButton.kt` — Circular borderless icon action; contentDescription is required, not defaulted (~230 tok)
 - `AnfasIcons.kt` — The design specifies Material Symbols Outlined, which we cannot depend on: JetBrains (~2987 tok)
+- `AnfasIdentityRow.kt` — avatar + name + one supporting line, for the rail footer (~380 tok)
 - `AnfasInlineEdit.kt` — A table cell that can be corrected in place. (~1277 tok)
 - `AnfasNavigation.kt` — `NavItem` + `AnfasBottomNav` (<1024dp) and `AnfasNavRail` (>=1024dp) (~900 tok)
-- `AnfasAvatar.kt` — `AnfasAvatar(initials, size)` + `initialsOf(name)`. Initials, not photos:
-  nothing in the app uploads one. Used by the rail footer, the compact top bar and MemberAvatar (~430 tok)
-- `AnfasIdentityRow.kt` — avatar + name + one supporting line, for the rail footer (~380 tok)
-- `AnfasOverflowMenu.kt` — `MenuAction` + `AnfasOverflowMenu`: the compact top bar's account button.
-  Shows the signed-in person's initials when known, else "⋮". Account-level actions (staff, sign
-  out) that are not navigation destinations. Renders nothing when the action list is empty (~650 tok)
-- `AnfasDetailTopBar.kt` — back arrow + title (+ optional actions) for a *pushed* screen. Used by
-  member-profile, intake-review and staff-list; every pushed screen needs one because desktop has
-  no system back gesture (~440 tok)
 - `AnfasPalette.kt` — GENERATED from design/stitch/export. 47 M3 colour tokens + 4 brand accents. The only file with hex literals (~560 tok)
 - `AnfasScreenHeader.kt` — Page title + subtitle + trailing actions (~330 tok)
 - `AnfasSearchField.kt` — Search input on `background`, amber border on focus, clear affordance when non-empty (~520 tok)
@@ -666,6 +669,12 @@
 
 ## core/model/src/commonMain/kotlin/com/anfas/core/model/
 
+- `GymClass.kt` — `GymClass` (recurring weekly slot, not a dated occurrence), `ClassCategory`
+  (GENERAL/WOMENS_ONLY/RECOVERY), `ClassOccupancy` (documents why no "14/20" is ever shown — no
+  booking system exists) (~900 tok)
+- `ClassSchedule.kt` — Pure grid arithmetic: `layoutDay` (transitive overlap grouping + greedy
+  lane reuse), `gridStartHour`/`gridEndHour` (widen-never-narrow), `splitByProgress`
+  (~1600 tok)
 - `Ids.kt` — Typed identifiers. One value class per aggregate root, so a MemberId can never be passed (~165 tok)
 - `Intake.kt` — A photographed sign-up sheet and everything OCR read off it. (~1387 tok)
 - `IntakeValidator.kt` — Decides what is wrong with each row of a batch — the logic behind the export's (~1529 tok)
@@ -680,6 +689,8 @@
 
 ## core/model/src/commonTest/kotlin/com/anfas/core/model/
 
+- `ClassScheduleTest.kt` — 17 tests on the grid layout: overlap never shares a lane, transitive
+  grouping, lane reuse after a class ends, midnight clamping, grid widen-not-narrow (~2100 tok)
 - `IntakeValidatorTest.kt` — Confident by default, so a test only opts into low confidence when that is the point. (~2327 tok)
 
 ## core/network/
@@ -723,7 +734,20 @@
 
 ## feature/classes/src/commonMain/kotlin/com/anfas/feature/classes/
 
-- `ClassesModule.kt` — Koin module for the classes feature. Intentionally empty — UI, components and use cases (~84 tok)
+- `ClassesModule.kt` — `ClassesComponentFactory` + Koin module (~200 tok)
+- `ClassesState.kt` — `ClassesContent`, `ClassesState` (visibleClasses/rooms/instructors derived
+  from filters), `ClassForm`, `ClassesNotice` (~750 tok)
+- `ClassesComponent.kt` — Decompose component backing both the mobile day view and the desktop
+  week grid. Samples the clock once per state build (not polled); owns the add/edit/delete flow
+  and the instructor/room filters (~1400 tok)
+- `ClassesScreen.kt` — `ClassesScreen`, day view (`DayView`/`DayPicker`/`ClassRow`) for compact,
+  week grid (`WeekGrid`/`DayColumn`/`ClassBlockCard`) for wide. Breakpoint is `GRID_MIN_WIDTH`,
+  derived from grid content width — NOT `AnfasBreakpoints.tabletMax`, which is the rail/bar
+  breakpoint and left the grid unreachable on a 1032pt iPad (~2200 tok)
+- `ClassFormDialog.kt` — add/edit dialog. Chip-based time/duration pickers, not text fields —
+  a gym timetable runs on the half hour (~900 tok)
+- `ClassCategoryUi.kt` — `ClassCategory.accent()`/`.label()`: sage=Recovery, rose=Women's Only,
+  primary=General, from design.md's prose palette (~250 tok)
 
 ## feature/equipment/
 
@@ -830,3 +854,9 @@
 ## server/src/test/kotlin/com/anfas/app/
 
 - `ApplicationTest.kt` — ApplicationTest: healthEndpointReportsOk (~188 tok)
+
+## core/i18n/src/commonTest/kotlin/com/anfas/core/i18n/
+
+- `PlaceholderInterpolationTest.kt` — Asserts no rendered string contains a literal `$` (catches
+  Kotlin's `${'$'}count` escape mistake — shipped once, invisible until run in Arabic) and that
+  every quantified/parameterised string actually contains its argument (~1100 tok)

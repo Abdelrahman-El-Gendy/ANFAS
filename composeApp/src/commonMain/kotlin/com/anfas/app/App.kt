@@ -58,6 +58,7 @@ import com.anfas.feature.auth.SignInScreen
 import com.anfas.feature.auth.StaffListScreen
 import com.anfas.feature.auth.label
 import com.anfas.feature.checkin.CheckInScreen
+import com.anfas.feature.classes.ClassesScreen
 import com.anfas.feature.dashboard.DashboardScreen
 import com.anfas.feature.intakeocr.IntakeReviewScreen
 import com.anfas.feature.members.MemberProfileScreen
@@ -155,6 +156,7 @@ fun App(root: RootComponent) {
                             label = when (destination) {
                                 RootComponent.TopLevel.DASHBOARD -> s.dashboard.title
                                 RootComponent.TopLevel.MEMBERS -> s.members.title
+                                RootComponent.TopLevel.CLASSES -> s.classes.title
                                 RootComponent.TopLevel.CHECK_IN -> s.checkIn.title
                                 RootComponent.TopLevel.REMINDERS -> s.reminders.title
                                 RootComponent.TopLevel.INTAKE -> s.intake.title
@@ -163,6 +165,7 @@ fun App(root: RootComponent) {
                             icon = when (destination) {
                                 RootComponent.TopLevel.DASHBOARD -> AnfasIcons.Schedule
                                 RootComponent.TopLevel.MEMBERS -> AnfasIcons.Person
+                                RootComponent.TopLevel.CLASSES -> AnfasIcons.CalendarToday
                                 RootComponent.TopLevel.CHECK_IN -> AnfasIcons.CheckCircle
                                 RootComponent.TopLevel.REMINDERS -> AnfasIcons.Payments
                                 RootComponent.TopLevel.INTAKE -> AnfasIcons.DocumentScanner
@@ -367,6 +370,9 @@ private fun Host(root: RootComponent, session: Session, modifier: Modifier) {
                 is RootComponent.Child.MembersList ->
                     MembersListScreen(component = child.component)
 
+                is RootComponent.Child.Classes ->
+                    ClassesScreen(component = child.component)
+
                 is RootComponent.Child.CheckIn ->
                     CheckInScreen(component = child.component)
 
@@ -410,6 +416,7 @@ private fun Permission.areaLabel(s: AppStrings): String = when (this) {
     Permission.VIEW_REMINDERS, Permission.RETRY_REMINDERS -> s.reminders.title
     Permission.SCAN_INTAKE, Permission.IMPORT_INTAKE -> s.intake.title
     Permission.CHECK_IN_MEMBERS -> s.checkIn.title
+    Permission.MANAGE_CLASSES -> s.classes.title
     Permission.VIEW_THERAPY -> s.states.fieldStatus
     Permission.MANAGE_STAFF -> s.staff.title
 }

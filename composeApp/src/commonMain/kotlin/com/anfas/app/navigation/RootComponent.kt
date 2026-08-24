@@ -14,6 +14,8 @@ import com.anfas.feature.auth.StaffListComponent
 import com.anfas.feature.auth.StaffListComponentFactory
 import com.anfas.feature.checkin.CheckInComponent
 import com.anfas.feature.checkin.CheckInComponentFactory
+import com.anfas.feature.classes.ClassesComponent
+import com.anfas.feature.classes.ClassesComponentFactory
 import com.anfas.feature.dashboard.DashboardComponent
 import com.anfas.feature.dashboard.DashboardComponentFactory
 import com.anfas.feature.intakeocr.IntakeReviewComponent
@@ -71,6 +73,7 @@ class RootComponent(componentContext: ComponentContext) :
     private val dashboardFactory: DashboardComponentFactory by inject()
     private val membersListFactory: MembersListComponentFactory by inject()
     private val checkInFactory: CheckInComponentFactory by inject()
+    private val classesFactory: ClassesComponentFactory by inject()
     private val memberProfileFactory: MemberProfileComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
     private val renewalSheetFactory: RenewalSheetComponentFactory by inject()
@@ -179,6 +182,7 @@ class RootComponent(componentContext: ComponentContext) :
             when (destination) {
                 TopLevel.DASHBOARD -> Config.Dashboard
                 TopLevel.MEMBERS -> Config.MembersList
+                TopLevel.CLASSES -> Config.Classes
                 TopLevel.CHECK_IN -> Config.CheckIn
                 TopLevel.REMINDERS -> Config.ReminderQueue
                 TopLevel.INTAKE -> Config.IntakeReview
@@ -202,8 +206,14 @@ class RootComponent(componentContext: ComponentContext) :
             dashboardFactory.create(
                 componentContext = context,
                 onMemberClicked = { id -> navigation.push(Config.MemberProfile(id.value)) },
-                onOpenReminders = { onTopLevelSelected(TopLevel.REMINDERS) },
+                // Pushed, not selected: on a phone Reminders has no tab, so back must return
+                // to the dashboard tile it was opened from.
+                onOpenReminders = { navigation.push(Config.ReminderQueue) },
             ),
+        )
+
+        Config.Classes -> Child.Classes(
+            classesFactory.create(componentContext = context),
         )
 
         Config.CheckIn -> Child.CheckIn(
@@ -240,6 +250,9 @@ class RootComponent(componentContext: ComponentContext) :
         Config.ReminderQueue -> Child.ReminderQueue(
             reminderQueueFactory.create(
                 componentContext = context,
+                // Reached from the dashboard tile on a phone and from the rail on desktop, so it
+                // needs popOrGoTo for the same reason intake does.
+                onCloseClicked = { popOrGoTo(TopLevel.DASHBOARD) },
                 // The profile, not the renewal sheet: a failed reminder is a question about the
                 // member ("is this number right, is the plan still live"), and renewal is one
                 // tap further on from there.
@@ -310,6 +323,10 @@ class RootComponent(componentContext: ComponentContext) :
         data object CheckIn : Config
 
         @Serializable
+        @SerialName("classes")
+        data object Classes : Config
+
+        @Serializable
         @SerialName("reminder-queue")
         data object ReminderQueue : Config
 
@@ -337,6 +354,8 @@ class RootComponent(componentContext: ComponentContext) :
     /** Instantiated components, one per [Config]. */
     sealed interface Child {
         data class Dashboard(val component: DashboardComponent) : Child
+
+        data class Classes(val component: ClassesComponent) : Child
 
         data class MembersList(val component: MembersListComponent) : Child
         data class CheckIn(val component: CheckInComponent) : Child
@@ -379,8 +398,23 @@ class RootComponent(componentContext: ComponentContext) :
         // that cannot see members has nothing to put on it.
         DASHBOARD(Permission.VIEW_MEMBERS, Placement.Primary),
         MEMBERS(Permission.VIEW_MEMBERS, Placement.Primary),
+
+        /**
+         * The export's own fourth bar item, and the reason it is here rather than Reminders:
+         * `class-schedule` and `weekly-class-schedule` put the timetable in the mobile bar and
+         * Subscriptions only in the desktop sidebar. Viewing needs no permission beyond signing
+         * in — everyone working a shift needs to know what is on — so this is gated on
+         * VIEW_MEMBERS like the dashboard, and *managing* is MANAGE_CLASSES inside the screen.
+         */
+        CLASSES(Permission.VIEW_MEMBERS, Placement.Primary),
         CHECK_IN(Permission.CHECK_IN_MEMBERS, Placement.Primary),
-        REMINDERS(Permission.VIEW_REMINDERS, Placement.Primary),
+
+        /**
+         * Off the bar, per the export: chasing renewals is desk work, and the phone's four slots
+         * belong to the floor. Still one tap away on a phone — the dashboard's "needs renewal"
+         * tile opens it, which is where you look for it anyway.
+         */
+        REMINDERS(Permission.VIEW_REMINDERS, Placement.WideOnly),
         INTAKE(Permission.SCAN_INTAKE, Placement.WideOnly),
         STAFF(Permission.MANAGE_STAFF, Placement.Account),
         ;
@@ -431,6 +465,8 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
 
         RootComponent.Config.CheckIn -> RootComponent.TopLevel.CHECK_IN
 
+        RootComponent.Config.Classes -> RootComponent.TopLevel.CLASSES
+
         RootComponent.Config.ReminderQueue -> RootComponent.TopLevel.REMINDERS
 
         RootComponent.Config.IntakeReview -> RootComponent.TopLevel.INTAKE
@@ -458,12 +494,23 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
 internal val RootComponent.Config.requiredPermission: Permission
     get() = when (this) {
         RootComponent.Config.Dashboard -> Permission.VIEW_MEMBERS
+
         RootComponent.Config.MembersList -> Permission.VIEW_MEMBERS
+
         RootComponent.Config.CheckIn -> Permission.CHECK_IN_MEMBERS
+
+        // Viewing the timetable, not managing it. MANAGE_CLASSES is enforced inside the screen,
+        // because add/edit and view live on one route -- the same split as scan/import.
+        RootComponent.Config.Classes -> Permission.VIEW_MEMBERS
+
         is RootComponent.Config.MemberProfile -> Permission.VIEW_MEMBERS
+
         RootComponent.Config.ReminderQueue -> Permission.VIEW_REMINDERS
+
         RootComponent.Config.IntakeReview -> Permission.SCAN_INTAKE
+
         is RootComponent.Config.Renewal -> Permission.MANAGE_SUBSCRIPTIONS
+
         RootComponent.Config.StaffList -> Permission.MANAGE_STAFF
     }
 
@@ -480,6 +527,7 @@ internal val RootComponent.Config.requiredPermission: Permission
 internal val RootComponent.TopLevel.bottomBarSelection: RootComponent.TopLevel?
     get() = when (this) {
         RootComponent.TopLevel.INTAKE -> RootComponent.TopLevel.MEMBERS
+        RootComponent.TopLevel.REMINDERS -> RootComponent.TopLevel.DASHBOARD
         RootComponent.TopLevel.STAFF -> null
         else -> this
     }

@@ -374,3 +374,47 @@
   `wm density 240` gives ~1706dp and a real `uiautomator` tree. Always `wm size reset` /
   `wm density reset` afterwards. `screencapture` grabs the frontmost window, which is whatever the
   user is actually doing.
+
+## Key Learnings — 2026-08-24 (classes feature)
+
+- **A grid/list breakpoint must be derived from what it actually needs to draw, not borrowed from
+  the rail/bar breakpoint.** `AnfasBreakpoints.tabletMax` (1024dp) decides rail-vs-bar and is
+  measured against the *window*; a screen hosted inside that layout only ever gets
+  window-minus-256dp. Reusing it for the week grid's own compact/wide switch made the grid
+  unreachable on any window under ~1280dp, including a 13" iPad in portrait/landscape. Compute a
+  content-derived minimum instead (hour axis + N columns of a legible minimum width) and compare
+  the *local* `BoxWithConstraints` width against that.
+- **Kotlin's `${'$'}count` escape produces the literal text, not an interpolation** — it compiles
+  clean and every existing test still passes, because nothing asserted the *content* of a
+  translated string, only its type. Caught only by running the built UI in Arabic. Added
+  `PlaceholderInterpolationTest` in `:core:i18n` asserting no rendered string contains a literal
+  `$` and that quantified/parameterised strings contain their argument — this is now a permanent
+  regression guard, not a one-off fix.
+- **A recurring weekly timetable is not a series of dated occurrences.** `GymClass` stores
+  `dayOfWeek` + `startsAt`, matching both designed screens exactly (`class-schedule` asks "what's
+  today", `weekly-class-schedule` repeats across days with no notion of *which* week). The
+  documented cost: no way to cancel a single date or handle a holiday — that needs an exceptions
+  table, added when someone asks, not guessed at now.
+- **The overlap/lane-layout algorithm for a calendar grid is the part worth unit-testing
+  hardest**, because a wrong lane assignment doesn't look wrong — it silently draws one class on
+  top of another and the covered class disappears. Test the *invariant* (overlapping items never
+  share a lane; everything in one overlap group agrees on lane count) rather than a specific lane
+  number, or the test itself becomes as fragile as the bug it's meant to catch.
+- **A domain field that should follow a live rename (`instructorStaffId`) gets no foreign key
+  for a different reason than one that must survive a delete (`CheckIn.memberName`).** Check-ins
+  copy data because history must never change; classes reference `staff.id` with no FK because a
+  disabled coach must not cascade-delete next week's schedule — the repository resolves the name
+  at read time and an unresolvable id reads as "unassigned", which is a real, actionable state.
+- **Verifying on-device without touching the user's screen**: `screencapture`/AppleScript require
+  screen-recording/assistive-access permission this environment doesn't have (returns black
+  frames or a permission error) — same lesson as the earlier Android `screencap` bug, now
+  confirmed on macOS/iOS too. Working alternative found this session: XcodeBuildMCP's
+  `snapshot_ui` gives a real accessibility-tree snapshot with tappable element refs, but has no
+  tap action of its own in this environment; `mcp__mobile-mcp__mobile_click_on_screen_at_coordinates`
+  (coordinates read off the snapshot) supplies the tap. `xcrun simctl io <udid> screenshot` DOES
+  work for a static picture when a tree isn't enough. Never trust a black/empty screencapture as
+  proof of a blank UI — check the accessibility tree or an `io screenshot` first.
+- **Never leave a verification-only hack in navigation logic.** Forcing `landingFor()` to always
+  return a specific destination (to reach a new screen quickly on a fresh device) is fine as a
+  scratch edit but must be reverted before the branch is considered done — grep the diff for it
+  before committing, since it silently breaks sign-in for every other role.

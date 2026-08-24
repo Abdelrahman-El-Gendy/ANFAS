@@ -53,6 +53,13 @@ object ArabicStrings : AppStrings {
 
         override fun dateLong(day: Int, monthIndex: Int, year: Int) =
             "$day ${MONTHS_AR[monthIndex]} $year"
+        override fun dayName(isoDayNumber: Int) = ARABIC_DAYS
+            .getOrElse(isoDayNumber - 1) { "" }
+
+        // Arabic has no case and no three-letter convention, so the short form drops the
+        // "يوم"-style prefix rather than truncating -- a truncated Arabic word is unreadable.
+        override fun dayNameShort(isoDayNumber: Int) = ARABIC_DAYS_SHORT
+            .getOrElse(isoDayNumber - 1) { "" }
         override val back = "رجوع"
         override val moreOptions = "الحساب والإعدادات"
     }
@@ -467,6 +474,64 @@ object ArabicStrings : AppStrings {
         }
     }
 
+    override val classes = object : AppStrings.Classes {
+        override val title = "الحصص"
+        override val subtitle = "الجدول الأسبوعي."
+        override val todayTitle = "جدول اليوم"
+        override val weekTitle = "الجدول الأسبوعي"
+        override val addClass = "إضافة حصة"
+        override val editClass = "تعديل الحصة"
+        override val deleteClass = "حذف الحصة"
+        override val columnTime = "الوقت"
+        override val columnClass = "الحصة"
+        override val columnInstructor = "المدرب"
+        override val columnRoom = "القاعة"
+        override val columnCapacity = "السعة"
+        override fun places(count: Int) = when (arabicPlural(count)) {
+            PluralCategory.ZERO -> "لا أماكن"
+            PluralCategory.ONE -> "مكان واحد"
+            PluralCategory.TWO -> "مكانان"
+            PluralCategory.FEW -> "$count أماكن"
+            PluralCategory.MANY -> "$count مكانًا"
+            PluralCategory.OTHER -> "$count مكان"
+        }
+        override val unassigned = "غير محدد"
+        override val finishedToday = "انتهت اليوم"
+        override val inProgress = "جارية الآن"
+        override val categoryGeneral = "عام"
+        override val categoryWomensOnly = "للنساء فقط"
+        override val categoryRecovery = "استشفاء"
+        override val emptyTitle = "لا حصص بعد"
+        override val emptyMessage = "أضف الجدول الأسبوعي للصالة وسيظهر هنا."
+        override fun emptyDayTitle(day: String) = "لا حصص $day"
+        override val emptyDayMessage = "اختر يومًا آخر، أو انتقل إلى عرض الأسبوع."
+        override val loadFailedTitle = "تعذّر تحميل الجدول"
+        override fun weekRange(range: String) = range
+        override val previousWeek = "الأسبوع السابق"
+        override val nextWeek = "الأسبوع التالي"
+        override val today = "اليوم"
+        override val filterAllCoaches = "كل المدربين"
+        override val filterAllRooms = "كل القاعات"
+        override val fieldName = "اسم الحصة"
+        override val fieldCategory = "التصنيف"
+        override val fieldRoom = "القاعة"
+        override val fieldCapacity = "السعة"
+        override val fieldInstructor = "المدرب"
+        override val fieldDay = "اليوم"
+        override val fieldStart = "تبدأ"
+        override val fieldDuration = "المدة"
+        override fun durationMinutes(count: Int) = "$count دقيقة"
+        override val save = "حفظ الحصة"
+        override val errorNameBlank = "اكتب اسمًا للحصة."
+        override val errorRoomBlank = "حدّد القاعة."
+        override val errorCapacity = "السعة بين ١ و٥٠٠."
+        override val errorDuration = "المدة بين ٥ دقائق و٨ ساعات."
+        override fun roomClash(room: String, other: String) =
+            "تم الحفظ، لكن $room محجوزة أيضًا لـ $other في نفس الوقت."
+        override fun saved(name: String) = "تم حفظ $name."
+        override fun deleted(name: String) = "تم حذف $name من الجدول."
+    }
+
     override val checkIn = object : AppStrings.CheckIn {
         override val title = "الحضور"
         override val subtitle = "ابحث عن العضو واسمح له بالدخول."
@@ -497,3 +562,28 @@ object ArabicStrings : AppStrings {
         override fun deniedNotice(name: String) = "تم منع $name."
     }
 }
+
+/** ISO order: index 0 is Monday. Egyptian usage. */
+private val ARABIC_DAYS = listOf(
+    "الاثنين",
+    "الثلاثاء",
+    "الأربعاء",
+    "الخميس",
+    "الجمعة",
+    "السبت",
+    "الأحد",
+)
+
+/**
+ * The same names without the definite article, for a grid column header where the full form does
+ * not fit. Not a truncation: cutting an Arabic word mid-ligature produces something unreadable.
+ */
+private val ARABIC_DAYS_SHORT = listOf(
+    "اثنين",
+    "ثلاثاء",
+    "أربعاء",
+    "خميس",
+    "جمعة",
+    "سبت",
+    "أحد",
+)

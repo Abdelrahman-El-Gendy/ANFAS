@@ -45,6 +45,7 @@ class ReminderQueueComponent(
     private val auth: AuthRepository,
     dispatchers: AppDispatchers,
     private val onOpenMemberClicked: (MemberId) -> Unit,
+    private val onCloseClicked: () -> Unit,
 ) : ComponentContext by componentContext {
 
     private val scope =
@@ -81,6 +82,13 @@ class ReminderQueueComponent(
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = ReminderQueueState(),
     )
+
+    /**
+     * Leaving. The queue is no longer a bottom-bar destination — it is opened from the
+     * dashboard's renewal tile on a phone and from the rail on desktop — so it owns a back
+     * affordance like every other pushed screen.
+     */
+    fun onClose() = onCloseClicked()
 
     fun onStatusSelected(status: ReminderStatus) = ui.update {
         // Selection and the open modal belong to the tab they were made in.

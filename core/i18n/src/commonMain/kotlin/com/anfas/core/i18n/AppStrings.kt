@@ -47,6 +47,16 @@ interface AppStrings {
         /** Longer form used on the renewal sheet: "12 Aug 2026". */
         fun dateLong(day: Int, monthIndex: Int, year: Int): String
 
+        /**
+         * Weekday name for an ISO day number (Monday = 1), and its short form for a grid header.
+         *
+         * An `Int` rather than `DayOfWeek` to match [date]'s `monthIndex` — this interface takes
+         * primitives so a translator's file has no imports, and the caller already holds the
+         * enum's `isoDayNumber`.
+         */
+        fun dayName(isoDayNumber: Int): String
+        fun dayNameShort(isoDayNumber: Int): String
+
         /** Content description for a back affordance. The icon auto-mirrors; this does not. */
         val back: String
 
@@ -406,6 +416,78 @@ interface AppStrings {
     }
 
     val checkIn: CheckIn
+    val classes: Classes
+
+    /** The weekly class timetable: `class-schedule` and `weekly-class-schedule`. */
+    interface Classes {
+        val title: String
+        val subtitle: String
+
+        /** "Today's Schedule" — the mobile screen's own heading. */
+        val todayTitle: String
+        val weekTitle: String
+
+        val addClass: String
+        val editClass: String
+        val deleteClass: String
+
+        val columnTime: String
+        val columnClass: String
+        val columnInstructor: String
+        val columnRoom: String
+        val columnCapacity: String
+
+        /** "20 places" — the limit, never an occupancy. See ClassOccupancy for why. */
+        fun places(count: Int): String
+
+        val unassigned: String
+        val finishedToday: String
+        val inProgress: String
+
+        val categoryGeneral: String
+        val categoryWomensOnly: String
+        val categoryRecovery: String
+
+        val emptyTitle: String
+        val emptyMessage: String
+
+        /** Nothing on today, but the timetable is not empty — a different situation. */
+        fun emptyDayTitle(day: String): String
+        val emptyDayMessage: String
+
+        val loadFailedTitle: String
+
+        /** Week navigation. [range] is already formatted, e.g. "10 – 16 Aug 2026". */
+        fun weekRange(range: String): String
+        val previousWeek: String
+        val nextWeek: String
+        val today: String
+
+        val filterAllCoaches: String
+        val filterAllRooms: String
+
+        // The add/edit form.
+        val fieldName: String
+        val fieldCategory: String
+        val fieldRoom: String
+        val fieldCapacity: String
+        val fieldInstructor: String
+        val fieldDay: String
+        val fieldStart: String
+        val fieldDuration: String
+        fun durationMinutes(count: Int): String
+        val save: String
+
+        val errorNameBlank: String
+        val errorRoomBlank: String
+        val errorCapacity: String
+        val errorDuration: String
+
+        /** Saved anyway — a shared room is legitimate, so this is a warning. */
+        fun roomClash(room: String, other: String): String
+        fun saved(name: String): String
+        fun deleted(name: String): String
+    }
 
     interface CheckIn {
         val title: String

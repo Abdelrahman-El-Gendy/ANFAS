@@ -32,6 +32,7 @@ val dataModule: Module = module {
     single { get<AnfasDatabase>().intakeDao() }
     single { get<AnfasDatabase>().staffDao() }
     single { get<AnfasDatabase>().checkInDao() }
+    single { get<AnfasDatabase>().gymClassDao() }
 
     single<MemberRepository> {
         OfflineFirstMemberRepository(dao = get(), newId = { Uuid.random().toString() })
@@ -59,6 +60,9 @@ val dataModule: Module = module {
             zone = TimeZone.currentSystemDefault(),
             newId = { Uuid.random().toString() },
         )
+    }
+    single<ClassRepository> {
+        OfflineFirstClassRepository(classes = get(), staff = get(), dispatchers = get())
     }
     single<IntakeRepository> {
         OfflineFirstIntakeRepository(
