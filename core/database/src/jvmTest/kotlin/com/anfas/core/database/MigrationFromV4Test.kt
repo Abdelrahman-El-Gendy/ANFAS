@@ -141,6 +141,6 @@ class MigrationFromV4Test {
          * Mirrors AnfasDatabase's @Database(version = ...). Bump both together; the assertion
          * that matters is that the chain *ran*, not what number it landed on.
          */
-        const val CURRENT_SCHEMA_VERSION = 10
+        const val CURRENT_SCHEMA_VERSION = 11
     }
 }

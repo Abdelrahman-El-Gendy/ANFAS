@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
  * Radius is 6dp, not the 12dp base and not a pill: the export uses Tailwind's `rounded-md`
  * here. design.md's prose says status chips "may be pill-shaped", but no screen does that.
  */
-enum class ChipTone { Positive, Critical, Neutral, Recovery, ClassType }
+enum class ChipTone { Positive, Critical, Neutral, Recovery, ClassType, Warning }
 
 @Composable
 fun AnfasStatusChip(label: String, tone: ChipTone, modifier: Modifier = Modifier) {
@@ -29,10 +29,18 @@ fun AnfasStatusChip(label: String, tone: ChipTone, modifier: Modifier = Modifier
     val brand = AnfasTheme.colors
     val (container, content) = when (tone) {
         ChipTone.Positive -> scheme.secondaryContainer to scheme.secondary
+
         ChipTone.Critical -> scheme.errorContainer to scheme.error
+
         ChipTone.Neutral -> scheme.surfaceContainerHighest to scheme.onSurfaceVariant
+
         ChipTone.Recovery -> brand.sage to brand.sage
+
         ChipTone.ClassType -> brand.rose to brand.rose
+
+        // The export's own "Needs service" amber (`surface-tint`) -- distinct from Critical's
+        // red, which is reserved for a unit that is actually out of order.
+        ChipTone.Warning -> scheme.primaryContainer to scheme.primary
     }
     // Neutral is already a solid surface step, so tinting it again would wash it out.
     val containerAlpha = if (tone == ChipTone.Neutral) 1f else 0.20f

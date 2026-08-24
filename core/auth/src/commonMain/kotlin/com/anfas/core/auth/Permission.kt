@@ -66,6 +66,16 @@ enum class Permission {
      * no equivalent need for a coach mid-shift to read draft copy nobody has published yet.
      */
     MANAGE_ANNOUNCEMENTS,
+
+    /**
+     * Add equipment, log maintenance and change a unit's status.
+     *
+     * Separate from viewing, which needs no permission beyond signing in — the same split as
+     * [MANAGE_CLASSES]: a coach on the floor needs to know a treadmill is broken, but recording
+     * what was done about it and moving inventory is reception/operations work, not the coach's
+     * or therapist's job.
+     */
+    MANAGE_EQUIPMENT,
 }
 
 /**
@@ -97,6 +107,7 @@ val Role.permissions: Set<Permission>
             Permission.CHECK_IN_MEMBERS,
             Permission.MANAGE_CLASSES,
             Permission.MANAGE_ANNOUNCEMENTS,
+            Permission.MANAGE_EQUIPMENT,
         )
 
         // Needs to know who is in the room and whether their membership is live. Not payments,

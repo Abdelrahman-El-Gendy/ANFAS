@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-24T08:59:31.679Z
-> Files: 533 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-24T10:38:07.696Z
+> Files: 557 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~7393 tok)
+- `CLAUDE.md` — OpenWolf (~8110 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -27,6 +27,11 @@
 
 - `settings.json` (~441 tok)
 - `settings.local.json` (~102 tok)
+
+## .claude/agents/
+
+- `feature-verifier.md` — What you run, in order (~1052 tok)
+- `git-shipper.md` — Step 0 - orient yourself, every time (~1155 tok)
 
 ## .claude/rules/
 
@@ -487,7 +492,7 @@
 
 ## composeApp/src/commonMain/kotlin/com/anfas/app/
 
-- `App.kt` — App shell. Renders the theme and the navigation host and nothing else — feature UI is a (~293 tok)
+- `App.kt` — App shell: theme, the navigation host, and the top-level nav chrome. (~6610 tok)
 
 ## composeApp/src/commonMain/kotlin/com/anfas/app/di/
 
@@ -495,7 +500,12 @@
 
 ## composeApp/src/commonMain/kotlin/com/anfas/app/navigation/
 
-- `RootComponent.kt` — Decompose navigation root. Now also wires Config.TherapyCase, pushed from a member's profile (~7200 tok)
+- `RootComponent.kt` — Decompose navigation root. (~7685 tok)
+
+## composeApp/src/commonTest/kotlin/com/anfas/app/navigation/
+
+- `ConfigSerializationTest.kt` — Locks the *persisted* form of every navigation [RootComponent.Config] variant. (~860 tok)
+- `NavigationPermissionTest.kt` — What each role actually sees and can reach. (~2983 tok)
 
 ## composeApp/src/iosMain/kotlin/com/anfas/app/
 
@@ -507,6 +517,7 @@
 
 ## core/auth/src/commonMain/kotlin/com/anfas/core/auth/
 
+- `Permission.kt` — What a signed-in member of staff is allowed to do. (~1476 tok)
 - `Session.kt` — Session and RBAC scaffolding. Role definitions and permission checks are a separate task; (~136 tok)
 
 ## core/common/
@@ -558,18 +569,21 @@
 ## core/data/src/commonMain/kotlin/com/anfas/core/data/
 
 - `AnnouncementRepository.kt` — interface + AnnouncementDetail, SaveAnnouncementOutcome(Saved/Invalid), AnnouncementProblem (~600 tok)
-- `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~573 tok)
+- `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~1123 tok)
+- `EquipmentRepository.kt` — The gym floor's equipment inventory and its maintenance history. (~850 tok)
 - `IntakeMappers.kt` — Storage <-> domain for OCR intake. (~889 tok)
 - `IntakeRepository.kt` — Which cell of a row an edit targets. (~644 tok)
 - `MemberMappers.kt` — Storage <-> domain. Deliberately total in one direction only: any row whose [status] string (~453 tok)
 - `MemberRepository.kt` — The only way a feature reaches member data. Reads emit AppResult; no `isEmpty()` by design (~290 tok)
 - `OfflineFirstAnnouncementRepository.kt` — Room-backed. `publish()` freezes `recipientCountAtPublish` by computing AnnouncementReach.count against live members/terms at the moment of publish — never recomputed after (~1400 tok)
+- `OfflineFirstEquipmentRepository.kt` — OfflineFirstEquipmentRepository: observeAll, observeDetail, createEquipment, logMaintenance (~1637 tok)
 - `OfflineFirstIntakeRepository.kt` — Room-backed OCR intake. (~1722 tok)
 - `OfflineFirstMemberRepository.kt` — Room-backed. The error boundary: storage failures become AppError.Storage; CancellationException is rethrown. No network path yet (~560 tok)
 
 ## core/data/src/commonTest/kotlin/com/anfas/core/data/
 
 - `AnnouncementRepositoryTest.kt` — 12 tests: draft validation, publish freezes recipient count, delete only for drafts (~1900 tok)
+- `EquipmentRepositoryTest.kt` — A plain issue report -- no technician -- must not read as a service in the detail. (~2430 tok)
 - `FakeIntakeDao.kt` — In-memory IntakeDao. Mirrors the real thing where it matters: rows are ordered by ordinal, (~1110 tok)
 - `FakeMemberDao.kt` — In-memory stand-in for Room. Query semantics mirror the DAO's SQL — case-insensitive (~690 tok)
 - `OfflineFirstIntakeRepositoryTest.kt` — Only for the create-batch test, which needs a domain row to hand in. (~2806 tok)
@@ -592,6 +606,7 @@
 
 - `1.json` (~294 tok)
 - `10.json` — v10 schema: adds `announcements` table only, verified against 9.json (~350 tok)
+- `11.json` — v11 schema: adds `equipment` and `maintenance_log` tables only, verified against 10.json (~450 tok)
 
 ## core/database/src/androidMain/kotlin/com/anfas/core/database/
 
@@ -599,9 +614,10 @@
 
 ## core/database/src/commonMain/kotlin/com/anfas/core/database/
 
-- `AnfasDatabase.kt` — Required on Kotlin Multiplatform: Room cannot use reflection on native targets, so the (~603 tok)
+- `AnfasDatabase.kt` — Required on Kotlin Multiplatform: Room cannot use reflection on native targets, so the (~1241 tok)
 - `AnnouncementEntity.kt` — flat announcements table, no FKs + AnnouncementDao (observeAll DESC by created_at, findById, upsert, delete) (~500 tok)
 - `DatabaseBuilderFactory.kt` — Resolves the platform database location and hands back a builder. Actuals differ in what (~250 tok)
+- `EquipmentEntity.kt` — A physical asset on the gym floor. No foreign key anywhere in this table — it names no staff, (~787 tok)
 - `IntakeEntity.kt` — A photographed sign-up sheet awaiting review. (~1198 tok)
 - `MemberEntity.kt` — Storage shape for a member. Kept flat and primitive on purpose: no domain enums or (~829 tok)
 - `PlaceholderEntity.kt` — ONE placeholder entity, present only to prove the KSP wiring generates code on every (~178 tok)
@@ -613,6 +629,10 @@
 ## core/database/src/jvmMain/kotlin/com/anfas/core/database/
 
 - `DatabaseBuilderFactory.jvm.kt` — DatabaseBuilderFactory: create (~118 tok)
+
+## core/database/src/jvmTest/kotlin/com/anfas/core/database/
+
+- `MigrationFromV4Test.kt` — Opens a real v4 database file and lets Room migrate it forward to the current schema. (~2478 tok)
 
 ## core/designsystem — added for intake
 
@@ -635,7 +655,7 @@
 - `AnfasEmptyState.kt` — Centred nothing-state. Tone.Invitation (amber badge) vs Tone.Informational (grey) (~600 tok)
 - `AnfasExtendedColors.kt` — M3 *fixed* roles + brand accents (offWhite/sage/rose/charcoal) as a data class + CompositionLocal. sage=therapy, rose=classes (~520 tok)
 - `AnfasIconButton.kt` — Circular borderless icon action; contentDescription is required, not defaulted (~230 tok)
-- `AnfasIcons.kt` — The design specifies Material Symbols Outlined, which we cannot depend on: JetBrains (~2987 tok)
+- `AnfasIcons.kt` — The design specifies Material Symbols Outlined, which we cannot depend on: JetBrains (~5207 tok)
 - `AnfasIdentityRow.kt` — avatar + name + one supporting line, for the rail footer (~380 tok)
 - `AnfasInlineEdit.kt` — A table cell that can be corrected in place. (~1277 tok)
 - `AnfasNavigation.kt` — `NavItem` + `AnfasBottomNav` (<1024dp) and `AnfasNavRail` (>=1024dp) (~900 tok)
@@ -643,13 +663,19 @@
 - `AnfasScreenHeader.kt` — Page title + subtitle + trailing actions (~330 tok)
 - `AnfasSearchField.kt` — Search input on `background`, amber border on focus, clear affordance when non-empty (~520 tok)
 - `AnfasShapes.kt` — 4dp/8dp/12dp/pill. 12dp is the base radius; large/extraLarge deliberately also 12dp (~200 tok)
-- `AnfasStatusChip.kt` — Tinted status pill, 6dp radius. ChipTone: Positive/Critical/Neutral/Recovery/ClassType (~330 tok)
+- `AnfasStatusChip.kt` — The status pill used throughout the staff app. (~691 tok)
 - `AnfasSurfaces.kt` — `AnfasCard`: Layer-1 container, 12dp radius, 1px border, no shadow (~180 tok)
 - `AnfasTable.kt` — Header row/cell, row with 2% hover, 5% divider, footer. Compressed 12dp staff row padding (~700 tok)
 - `AnfasTabs.kt` — Underlined tab strip with count badges; emphasiseCount tints a non-zero failure count (~600 tok)
 - `AnfasTextAction.kt` — Text-only action, Primary/Muted emphasis (~330 tok)
 - `AnfasTheme.kt` — Theme entry point wiring colours/type/shapes; also the `AnfasTheme` accessor object for what M3 has no slot for (~420 tok)
 - `AnfasType.kt` — IBM Plex Sans family (3 static weights), the 7 named roles verbatim, and M3 `Typography`. `dataMono` = tabular figures, not a mono face (~700 tok)
+
+## core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/
+
+- `AppStrings.kt` — Every user-facing string, as a typed interface. (~6375 tok)
+- `ArabicStrings.kt` — Arabic copy. (~10078 tok)
+- `EnglishStrings.kt` — English copy, lifted verbatim from the literals that were previously inline in the screens, so (~8967 tok)
 
 ## core/i18n/src/commonTest/kotlin/com/anfas/core/i18n/
 
@@ -668,7 +694,8 @@
 ## core/model/src/commonMain/kotlin/com/anfas/core/model/
 
 - `Announcement.kt` — Announcement + AnnouncementStatus(DRAFT/PUBLISHED) + AnnouncementAudience(3 segments, 2 declined w/ KDoc) + AnnouncementReach.matching()/count() (~900 tok)
-- `Ids.kt` — Typed identifiers. One value class per aggregate root, so a MemberId can never be passed (~165 tok)
+- `Equipment.kt` — A physical asset on the gym floor — the export's `equipment-detail`. (~825 tok)
+- `Ids.kt` — Typed identifiers. One value class per aggregate root, so a MemberId can never be passed (~271 tok)
 - `Intake.kt` — A photographed sign-up sheet and everything OCR read off it. (~1387 tok)
 - `IntakeValidator.kt` — Decides what is wrong with each row of a batch — the logic behind the export's (~1529 tok)
 - `Member.kt` — A gym member. (~427 tok)
@@ -684,6 +711,7 @@
 
 - `AnnouncementReachTest.kt` — 7 tests covering all three audience segments' matching logic (~800 tok)
 - `IntakeValidatorTest.kt` — Confident by default, so a test only opts into low confidence when that is the point. (~2327 tok)
+- `MaintenanceLogTest.kt` — The bug this pins: a plain issue report logged after the last real service must not push (~524 tok)
 
 ## core/network/
 
@@ -744,7 +772,18 @@
 
 ## feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/
 
-- `EquipmentModule.kt` — Koin module for the equipment feature. Intentionally empty — UI, components and use cases (~86 tok)
+- `AddEquipmentDialog.kt` — AddEquipmentDialog, FieldLabel, ChipRow (~1582 tok)
+- `EquipmentComponent.kt` — The equipment inventory list, its filters, and the detail drawer -- one component for all (~2854 tok)
+- `EquipmentDetailDrawer.kt` — A modal rather than the export's slide-in side panel — the same list-plus-`AnfasDialog` shape (~1993 tok)
+- `EquipmentModule.kt` — Koin module for the equipment feature. Factories only — the component owns a coroutine scope (~274 tok)
+- `EquipmentScreen.kt` — The gym floor's equipment inventory — the export's `equipment-detail`, its own fourth desktop (~2579 tok)
+- `EquipmentState.kt` — [visibleEquipment] is [EquipmentContent.Loaded]'s list narrowed by [statusFilter]/[zoneFilter]/ (~887 tok)
+- `EquipmentUi.kt` — EquipmentStatus, EquipmentStatus, EquipmentStatus, EquipmentZone (~389 tok)
+- `LogMaintenanceDialog.kt` — No date field -- see `MaintenanceLogEntry`'s KDoc on why an entry is always logged "now". (~1103 tok)
+
+## feature/equipment/src/commonTest/kotlin/com/anfas/feature/equipment/
+
+- `EquipmentComponentTest.kt` — Only what this component itself owns: permission gating and the client-side status/zone/ (~2149 tok)
 
 ## feature/intake-ocr/
 

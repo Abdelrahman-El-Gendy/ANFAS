@@ -57,18 +57,21 @@ class NavigationPermissionTest {
                 RootComponent.TopLevel.REMINDERS,
                 RootComponent.TopLevel.INTAKE,
                 RootComponent.TopLevel.ANNOUNCEMENTS,
+                RootComponent.TopLevel.EQUIPMENT,
             ),
             destinationsFor(Role.Receptionist),
         )
     }
 
     /**
-     * A coach sees who is in the room, what is on, and can scan a sheet. No reminders, no staff.
-     * The timetable is *visible* to every role that can sign in — a coach on the floor has to
-     * know what is on next — while changing it needs MANAGE_CLASSES, which a coach does not hold.
+     * A coach sees who is in the room, what is on, can scan a sheet, and can see equipment
+     * status. No reminders, no staff. The timetable and the equipment inventory are both
+     * *visible* to every role that can sign in — a coach on the floor has to know what is on
+     * next and whether a machine is broken — while changing either needs MANAGE_CLASSES or
+     * MANAGE_EQUIPMENT, neither of which a coach holds.
      */
     @Test
-    fun `a coach reaches the dashboard members classes check-in and intake`() {
+    fun `a coach reaches the dashboard members classes check-in intake and equipment`() {
         assertEquals(
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
@@ -76,12 +79,17 @@ class NavigationPermissionTest {
                 RootComponent.TopLevel.CLASSES,
                 RootComponent.TopLevel.CHECK_IN,
                 RootComponent.TopLevel.INTAKE,
+                RootComponent.TopLevel.EQUIPMENT,
             ),
             destinationsFor(Role.Coach),
         )
         assertTrue(
             !Session("s-1", setOf(Role.Coach)).can(Permission.MANAGE_CLASSES),
             "a coach must not be able to move somebody else's class",
+        )
+        assertTrue(
+            !Session("s-1", setOf(Role.Coach)).can(Permission.MANAGE_EQUIPMENT),
+            "a coach must not be able to add or log equipment",
         )
     }
 
@@ -150,13 +158,14 @@ class NavigationPermissionTest {
     }
 
     @Test
-    fun `a therapist reaches members classes and check-in`() {
+    fun `a therapist reaches members classes check-in and equipment`() {
         assertEquals(
             listOf(
                 RootComponent.TopLevel.DASHBOARD,
                 RootComponent.TopLevel.MEMBERS,
                 RootComponent.TopLevel.CLASSES,
                 RootComponent.TopLevel.CHECK_IN,
+                RootComponent.TopLevel.EQUIPMENT,
             ),
             destinationsFor(Role.Therapist),
         )

@@ -181,3 +181,99 @@ found and fixed one real bug (published announcements still showed Delete/Publis
 buglog bug-announcements-publish-guard). Added AnnouncementsComponentTest.kt as the regression test.
 `./gradlew check` green on all platforms including both iOS targets.
 | 11:59 | Edited CLAUDE.md | added 1 condition(s) | ~806 |
+| 12:00 | Session end: 6 writes across 2 files (AnnouncementsComponentTest.kt, CLAUDE.md) | 3 reads | ~6294 tok |
+| 12:33 | Created .claude/agents/feature-verifier.md | — | ~1122 |
+| 12:34 | Created .claude/agents/git-shipper.md | — | ~1232 |
+| 12:34 | Session end: 8 writes across 4 files (AnnouncementsComponentTest.kt, CLAUDE.md, feature-verifier.md, git-shipper.md) | 3 reads | ~8816 tok |
+
+## Session: 2026-08-24 12:43
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-24 12:44
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 12:54 | Edited core/model/src/commonMain/kotlin/com/anfas/core/model/Ids.kt | expanded (+6 lines) | ~46 |
+| 12:54 | Created core/model/src/commonMain/kotlin/com/anfas/core/model/Equipment.kt | — | ~825 |
+| 12:54 | Created core/model/src/commonTest/kotlin/com/anfas/core/model/MaintenanceLogTest.kt | — | ~524 |
+| 12:54 | Created core/database/src/commonMain/kotlin/com/anfas/core/database/EquipmentEntity.kt | — | ~787 |
+| 12:54 | Edited core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt | 3→5 lines | ~36 |
+| 12:55 | Edited core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt | 4→7 lines | ~104 |
+| 12:55 | Edited core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt | modified announcementDao() | ~33 |
+| 12:55 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | 10 → 11 | ~12 |
+| 12:56 | Created core/data/src/commonMain/kotlin/com/anfas/core/data/EquipmentRepository.kt | — | ~850 |
+| 12:56 | Created core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstEquipmentRepository.kt | — | ~1637 |
+| 12:56 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt | 1→2 lines | ~28 |
+| 12:56 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt | 1→4 lines | ~40 |
+| 12:57 | Created core/data/src/commonTest/kotlin/com/anfas/core/data/EquipmentRepositoryTest.kt | — | ~2430 |
+| 12:57 | Edited core/auth/src/commonMain/kotlin/com/anfas/core/auth/Permission.kt | expanded (+10 lines) | ~122 |
+| 12:57 | Edited core/auth/src/commonMain/kotlin/com/anfas/core/auth/Permission.kt | 3→4 lines | ~36 |
+| 12:57 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasStatusChip.kt | inline fix | ~22 |
+| 12:57 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasStatusChip.kt | 3→6 lines | ~95 |
+| 12:57 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasIcons.kt | modified stroked() | ~538 |
+| 12:58 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/AppStrings.kt | 1→2 lines | ~18 |
+| 12:58 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/AppStrings.kt | modified grantedNotice() | ~560 |
+| 12:59 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/EnglishStrings.kt | expanded (+67 lines) | ~877 |
+| 13:00 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/ArabicStrings.kt | expanded (+67 lines) | ~855 |
+| 13:01 | Created feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentState.kt | — | ~887 |
+| 13:02 | Created feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentComponent.kt | — | ~2849 |
+| 13:02 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentComponent.kt | added 1 import(s) | ~34 |
+| 13:02 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentComponent.kt | inline fix | ~8 |
+| 13:02 | Created feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentModule.kt | — | ~274 |
+| 13:02 | Created feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentUi.kt | — | ~389 |
+| 13:03 | Created feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentScreen.kt | — | ~2579 |
+| 13:04 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentScreen.kt | inline fix | ~16 |
+| 13:04 | Created feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt | — | ~2089 |
+| 13:04 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt | removed 10 lines | ~5 |
+| 13:04 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt | 3→2 lines | ~28 |
+| 13:04 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt | added 1 import(s) | ~53 |
+| 13:04 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt | 3→3 lines | ~13 |
+| 13:24 | Created feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/AddEquipmentDialog.kt | — | ~1582 |
+| 13:25 | Created feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/LogMaintenanceDialog.kt | — | ~1103 |
+| 13:26 | Created feature/equipment/src/commonTest/kotlin/com/anfas/feature/equipment/EquipmentComponentTest.kt | — | ~2150 |
+| 13:27 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | added 2 import(s) | ~62 |
+| 13:27 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | 1→2 lines | ~41 |
+| 13:27 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | 2→3 lines | ~45 |
+| 13:27 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | 3→7 lines | ~68 |
+| 13:27 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | 3→7 lines | ~53 |
+| 13:27 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | modified Announcements() | ~41 |
+| 13:28 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | expanded (+10 lines) | ~200 |
+| 13:28 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | 3→5 lines | ~64 |
+| 13:28 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | 3→7 lines | ~96 |
+| 13:28 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt | 5→5 lines | ~102 |
+| 13:28 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/App.kt | 3→4 lines | ~77 |
+| 13:28 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/App.kt | 3→4 lines | ~77 |
+| 13:28 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/App.kt | 3→3 lines | ~73 |
+| 13:28 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/App.kt | added 1 import(s) | ~27 |
+| 13:29 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/App.kt | 2→5 lines | ~65 |
+| 13:29 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/App.kt | 2→3 lines | ~43 |
+| 13:29 | Edited composeApp/src/commonTest/kotlin/com/anfas/app/navigation/ConfigSerializationTest.kt | 2→3 lines | ~48 |
+| 13:30 | Edited composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt | 6→7 lines | ~62 |
+| 13:30 | Edited composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt | 5→6 lines | ~57 |
+| 13:30 | Edited composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt | 5→6 lines | ~58 |
+| 13:30 | Edited composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt | 19→21 lines | ~256 |
+| 13:30 | Edited composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt | 5→9 lines | ~96 |
+| 13:31 | Edited composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt | "a therapist reaches membe" → "a therapist reaches membe" | ~20 |
+| 13:33 | Edited feature/equipment/src/commonTest/kotlin/com/anfas/feature/equipment/EquipmentComponentTest.kt | "search matches name or as" → "search matches name or as" | ~20 |
+
+## Session summary: Equipment feature complete
+Built the Equipment feature end-to-end -- the last of the 23 designed screens without a real
+module. Domain model (Equipment/EquipmentStatus/EquipmentZone/MaintenanceLogEntry/MaintenanceLog)
+with 4 pure-logic tests, Room v10->v11 AutoMigration (equipment + maintenance_log, the latter
+CASCADEs from the former, schema diff verified clean against 10.json), a repository with 7 passing
+tests (duplicate-asset-tag rejection, logMaintenance moving status in the same write, a plain
+report never counting as "last service"), a new MANAGE_EQUIPMENT permission (view needs only
+VIEW_MEMBERS, same split as Classes), 2 new AnfasIcons (LocationOn/Build/Cancel/LocalShipping) and
+a new ChipTone.Warning for the amber "needs service" badge, full bilingual i18n, and a
+grid+dialog UI reusing Placement.DesktopOnly (equipment-detail is `D` in TOKENS.md, same as
+create-announcement) -- documented via KDoc as a departure from the export's slide-in drawer,
+reusing the AnfasDialog list-plus-dialog shape every other feature in this app already uses.
+Caught and fixed the already-known Kotlin/Native "comma in a backtick test name" gotcha
+(bug-069) via `./gradlew check`, not just `:feature:equipment:jvmTest`. `./gradlew check` green
+on all platforms including both iOS targets.
+| 13:38 | Edited CLAUDE.md | expanded (+35 lines) | ~875 |
+| 13:38 | Session end: 63 writes across 30 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 25 reads | ~65985 tok |
+| 10:43 | Independently re-verified Equipment feature (check, both iOS compile targets, desktop smoke run) | feature/equipment, core/data, core/model, core/database | all green, no fixes needed | ~3k |
+| 13:44 | Session end: 63 writes across 30 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 27 reads | ~68834 tok |

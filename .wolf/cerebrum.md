@@ -490,3 +490,41 @@
   `core.auth`. `AuthRepository`'s own return-type sealed interfaces are declared alongside it in
   `core.data`, not in the domain module — check the actual declaring file before importing rather
   than assuming a family of related types share one package.
+
+## Key Learnings — 2026-08-24 (equipment feature)
+
+- **Check `design/stitch/TOKENS.md`'s screen-inventory table before assuming a screen's
+  `Placement`.** `equipment-detail` is listed `D` (desktop), exactly like `create-announcement` —
+  that one lookup settled `Placement.DesktopOnly` immediately rather than needing a fresh
+  argument. The table is the actual source of truth for "did the export draw a mobile screen,"
+  not a guess from the feature's apparent importance.
+- **A `TopLevel` destination's own gating permission and its in-screen management permission can
+  differ on purpose, and the two should be decided independently.** Equipment's route is gated on
+  `VIEW_MEMBERS` (viewing needs only signing in, the same reasoning as Classes) while
+  `MANAGE_EQUIPMENT` gates add/log/status-change inside the screen — a *different* shape from
+  Announcements, whose route itself requires `MANAGE_ANNOUNCEMENTS` because there is no
+  operational reason for a coach mid-shift to read draft copy. Neither is more "correct" in
+  general; the design's own reasoning for *that specific screen* decides which shape fits.
+- **When two log-entry variants are told apart by which optional field is set (a report has no
+  `technician`, a service record does), the derived business fact ("last service") must filter on
+  that field, not on entry order or a separate type tag.** `MaintenanceLog.lastServiceOn` filters
+  to entries with a technician before taking the max `occurredAt` — pinned by a test where a later
+  plain report must not push the last-service date forward.
+- **A new semantic status tone belongs in `:core:designsystem`'s `ChipTone` enum, not approximated
+  with an existing one.** "Needs service" (amber) is neither `Positive` (green, actually working)
+  nor `Critical` (red, reserved for a unit that is fully out of order) — added `ChipTone.Warning`
+  rather than reuse either, since the export itself gives it a visually distinct amber badge.
+- **`AnfasIcons` values can call a `private` helper (`circle()`) declared later in the same
+  `object` body without a forward-reference error** — member declaration order inside a class/
+  object doesn't matter for functions the way top-level property-initializer order does. Useful to
+  remember before assuming new icons must go after the helpers they use.
+- **A screen the export drew as a slide-in side panel can still use this app's established
+  list-plus-`AnfasDialog` shape**, the same way Classes/Therapy/Announcements do for one record's
+  detail — documented via KDoc as a deliberate departure (no reuse case for a one-off sliding-
+  drawer primitive) rather than silently simplified.
+- **Recurrence, not just occurrence, of `bug-021`-style Kotlin/Native comma-in-test-name failures**
+  (see `.wolf/buglog.json` bug-069): even with the lesson already written down in
+  `## Do-Not-Repeat`, a new test name with a comma slipped through because only
+  `:feature:equipment:jvmTest` was run first. `./gradlew check` — which compiles the native test
+  targets — is what actually catches this; a scoped `jvmTest` run is not a substitute for it
+  before calling a KMP feature done.

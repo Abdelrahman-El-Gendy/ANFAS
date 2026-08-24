@@ -1190,5 +1190,23 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-24T12:00:00Z"
+  },
+  {
+    "id": "bug-069",
+    "timestamp": "2026-08-24T13:35:00Z",
+    "error_message": "e: ...EquipmentComponentTest.kt:95:9 Name contains illegal characters: \",\".",
+    "file": "feature/equipment/src/commonTest/kotlin/com/anfas/feature/equipment/EquipmentComponentTest.kt",
+    "root_cause": "Kotlin/Native mangles a backtick-quoted test function name into a symbol name, and a comma in that name produces an illegal Kotlin/Native symbol. Only compileTestKotlinIosSimulatorArm64 catches this -- jvmTest and the JVM compile both pass silently, so it is invisible unless the iOS test target is actually built. This is a recurrence of a previously-logged gotcha (see related_bugs) rediscovered because the earlier lesson wasn't checked before naming a new test.",
+    "fix": "Renamed the test from 'search matches name or asset tag, case-insensitively' to 'search matches name or asset tag case-insensitively' (dropped the comma, keeping the meaning).",
+    "tags": [
+      "kotlin-native",
+      "test-naming",
+      "ios",
+      "equipment",
+      "compile-error"
+    ],
+    "related_bugs": [],
+    "occurrences": 2,
+    "last_seen": "2026-08-24T13:35:00Z"
   }
 ]

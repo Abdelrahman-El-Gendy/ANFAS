@@ -686,6 +686,73 @@ object ArabicStrings : AppStrings {
         override fun grantedNotice(name: String) = "دخل $name."
         override fun deniedNotice(name: String) = "تم منع $name."
     }
+
+    override val equipment = object : AppStrings.Equipment {
+        override val title = "مخزون المعدات"
+        override val subtitle = "الحالة، المناطق، وسجل الصيانة."
+
+        override val filterAll = "الكل"
+        override val statusOperational = "تعمل"
+        override val statusNeedsService = "تحتاج صيانة"
+        override val statusOutOfOrder = "معطلة"
+        override val statusOnOrder = "قيد الطلب"
+
+        override val zoneAll = "كل المناطق"
+        override val zoneCardioFloor = "منطقة الكارديو"
+        override val zoneWeightRoom = "منطقة الأوزان"
+        override val zoneRecovery = "الاستشفاء"
+
+        override val searchPlaceholder = "ابحث عن معدة..."
+        override val addEquipment = "إضافة معدة"
+        override val newEquipment = "معدة جديدة"
+
+        override val fieldName = "الاسم"
+        override val fieldAssetTag = "رقم الجهاز"
+        override val fieldZone = "المنطقة"
+        override val fieldStatus = "الحالة"
+        override val fieldManufacturer = "الشركة المصنّعة"
+        override val fieldSerialNumber = "الرقم التسلسلي"
+        override val fieldPurchasedOn = "تاريخ الشراء"
+        override val fieldWarrantyUntil = "الضمان حتى"
+
+        override val specificationsTitle = "المواصفات"
+        override val specZone = "المنطقة"
+        override val specManufacturer = "الشركة المصنّعة"
+        override val specSerial = "الرقم التسلسلي"
+        override val specPurchased = "تاريخ الشراء"
+        override val specWarrantyUntil = "الضمان حتى"
+        override val specLastService = "آخر صيانة"
+        override val lastServiceNotRecorded = "لم تُصان بعد"
+
+        override val maintenanceLogTitle = "سجل الصيانة"
+        override val noLogEntriesYet = "لا توجد أي إدخالات مسجَّلة بعد."
+        override val markOutOfOrder = "تعطيل الجهاز"
+        override val logMaintenance = "تسجيل صيانة"
+
+        override val fieldSummary = "ماذا حدث"
+        override val fieldDetails = "التفاصيل"
+        override val fieldTechnician = "الفني"
+        override val fieldCost = "التكلفة (بالجنيه)"
+        override val fieldPartsUsed = "القطع المستخدمة"
+        override val resultingStatusTitle = "هذا يجعل حالة الجهاز"
+
+        override fun reportedByPrefix(name: String) = "$name (طاقم العمل)"
+        override fun technicianPrefix(name: String) = "الفني: $name"
+        override fun costLabel(amount: String) = "التكلفة: $amount"
+        override fun partsUsedPrefix(name: String) = "القطع: $name"
+
+        override val emptyTitle = "لا توجد معدات مسجَّلة"
+        override val emptyMessage = "أضف معدة لبدء تتبع حالتها."
+        override val loadFailedTitle = "تعذّر تحميل المعدات"
+
+        override val equipmentSaved = "تمت إضافة المعدة."
+        override val maintenanceLogged = "تم تسجيل الصيانة."
+        override val markedOutOfOrder = "تم تعطيل الجهاز."
+        override val errorNameBlank = "اكتب اسمًا للمعدة."
+        override val errorAssetTagBlank = "أضف رقم الجهاز."
+        override val errorAssetTagDuplicate = "رقم الجهاز هذا مستخدم من قبل."
+        override val errorSummaryBlank = "اكتب ماذا حدث."
+    }
 }
 
 /** ISO order: index 0 is Monday. Egyptian usage. */

@@ -39,3 +39,9 @@ value class TherapySessionId(val value: String)
 
 @JvmInline
 value class AnnouncementId(val value: String)
+
+@JvmInline
+value class EquipmentId(val value: String)
+
+@JvmInline
+value class MaintenanceLogId(val value: String)

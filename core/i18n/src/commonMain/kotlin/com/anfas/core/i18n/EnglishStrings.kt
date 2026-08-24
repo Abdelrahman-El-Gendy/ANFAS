@@ -581,6 +581,73 @@ object EnglishStrings : AppStrings {
         override fun grantedNotice(name: String) = "$name is in."
         override fun deniedNotice(name: String) = "$name was turned away."
     }
+
+    override val equipment = object : AppStrings.Equipment {
+        override val title = "Equipment Inventory"
+        override val subtitle = "Status, zones and maintenance history."
+
+        override val filterAll = "All"
+        override val statusOperational = "Operational"
+        override val statusNeedsService = "Needs service"
+        override val statusOutOfOrder = "Out of order"
+        override val statusOnOrder = "On order"
+
+        override val zoneAll = "All zones"
+        override val zoneCardioFloor = "Cardio floor"
+        override val zoneWeightRoom = "Weight room"
+        override val zoneRecovery = "Recovery"
+
+        override val searchPlaceholder = "Search equipment..."
+        override val addEquipment = "Add equipment"
+        override val newEquipment = "New equipment"
+
+        override val fieldName = "Name"
+        override val fieldAssetTag = "Asset tag"
+        override val fieldZone = "Zone"
+        override val fieldStatus = "Status"
+        override val fieldManufacturer = "Manufacturer"
+        override val fieldSerialNumber = "Serial"
+        override val fieldPurchasedOn = "Purchased"
+        override val fieldWarrantyUntil = "Warranty until"
+
+        override val specificationsTitle = "Specifications"
+        override val specZone = "Zone"
+        override val specManufacturer = "Manufacturer"
+        override val specSerial = "Serial"
+        override val specPurchased = "Purchased"
+        override val specWarrantyUntil = "Warranty until"
+        override val specLastService = "Last service"
+        override val lastServiceNotRecorded = "Not yet serviced"
+
+        override val maintenanceLogTitle = "Maintenance log"
+        override val noLogEntriesYet = "No entries logged yet."
+        override val markOutOfOrder = "Mark out of order"
+        override val logMaintenance = "Log maintenance"
+
+        override val fieldSummary = "What happened"
+        override val fieldDetails = "Details"
+        override val fieldTechnician = "Technician"
+        override val fieldCost = "Cost (EGP)"
+        override val fieldPartsUsed = "Parts used"
+        override val resultingStatusTitle = "This leaves the equipment"
+
+        override fun reportedByPrefix(name: String) = "$name (Staff)"
+        override fun technicianPrefix(name: String) = "Tech: $name"
+        override fun costLabel(amount: String) = "Cost: $amount"
+        override fun partsUsedPrefix(name: String) = "Parts: $name"
+
+        override val emptyTitle = "No equipment on file"
+        override val emptyMessage = "Add a piece of equipment to start tracking its status."
+        override val loadFailedTitle = "Could not load equipment"
+
+        override val equipmentSaved = "Equipment added."
+        override val maintenanceLogged = "Maintenance logged."
+        override val markedOutOfOrder = "Marked out of order."
+        override val errorNameBlank = "Give the equipment a name."
+        override val errorAssetTagBlank = "Give it an asset tag."
+        override val errorAssetTagDuplicate = "That asset tag is already in use."
+        override val errorSummaryBlank = "Say what happened."
+    }
 }
 
 /** ISO order: index 0 is Monday. */

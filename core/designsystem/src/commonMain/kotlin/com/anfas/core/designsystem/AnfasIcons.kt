@@ -544,6 +544,60 @@ object AnfasIcons {
         }
     }
 
+    /** `location_on` — a pin: a ring for the head, a stem for the point. Simplified from
+     * Material's teardrop-with-hole outline, at the same fidelity level as `FitnessCenter`. */
+    val LocationOn: ImageVector by lazy {
+        stroked("LocationOn") {
+            circle(12f, 9.5f, 5f)
+            moveTo(12f, 14.3f)
+            lineTo(12f, 20.5f)
+        }
+    }
+
+    /** A simplified double-ended spanner (a ring at each end, joined by a shaft) rather than
+     * Material's literal `build` wrench glyph — recognisable at this file's outline fidelity,
+     * the same approximation `FitnessCenter` makes for a dumbbell. */
+    val Build: ImageVector by lazy {
+        stroked("Build") {
+            circle(7f, 7f, 3f)
+            moveTo(9.2f, 9.2f)
+            lineTo(15f, 15f)
+            circle(17f, 17f, 3f)
+        }
+    }
+
+    /** `cancel` — a circle with a cross, the same shape family as `CheckCircle`. */
+    val Cancel: ImageVector by lazy {
+        stroked("Cancel") {
+            circle(12f, 12f, 8.5f)
+            moveTo(8.5f, 8.5f)
+            lineTo(15.5f, 15.5f)
+            moveTo(15.5f, 8.5f)
+            lineTo(8.5f, 15.5f)
+        }
+    }
+
+    /** `local_shipping` — a delivery truck: trailer box, cab, two wheels. */
+    val LocalShipping: ImageVector by lazy {
+        stroked("LocalShipping") {
+            // trailer
+            moveTo(2.5f, 7f)
+            lineTo(2.5f, 16f)
+            lineTo(14f, 16f)
+            lineTo(14f, 7f)
+            close()
+            // cab
+            moveTo(14f, 10.5f)
+            lineTo(18f, 10.5f)
+            lineTo(21f, 14f)
+            lineTo(21f, 16f)
+            lineTo(14f, 16f)
+            // wheels
+            circle(6.5f, 18f, 1.7f)
+            circle(17.5f, 18f, 1.7f)
+        }
+    }
+
     /**
      * A full circle as two half arcs. `arcTo` cannot sweep 360 degrees in one call — the start
      * and end points would coincide and the arc collapses to nothing.

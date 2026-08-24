@@ -21,8 +21,10 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         TherapyCaseEntity::class,
         TherapySessionEntity::class,
         AnnouncementEntity::class,
+        EquipmentEntity::class,
+        MaintenanceLogEntryEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
     // v2 adds the `members` table. Adding a table needs no hand-written logic, but the
     // migration is declared rather than falling back to a destructive recreate — the
@@ -61,6 +63,9 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         // v10 adds `announcements`. A new table, no foreign keys: it names an audience segment,
         // not a per-member recipient row.
         AutoMigration(from = 9, to = 10),
+        // v11 adds `equipment` and `maintenance_log`. The latter CASCADEs from the former, the
+        // same shape as therapy_sessions from therapy_cases.
+        AutoMigration(from = 10, to = 11),
     ],
 )
 @ConstructedBy(AnfasDatabaseConstructor::class)
@@ -82,6 +87,8 @@ abstract class AnfasDatabase : RoomDatabase() {
     abstract fun therapyCaseDao(): TherapyCaseDao
 
     abstract fun announcementDao(): AnnouncementDao
+
+    abstract fun equipmentDao(): EquipmentDao
 
     companion object {
         const val FILE_NAME: String = "anfas.db"

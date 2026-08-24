@@ -419,6 +419,7 @@ interface AppStrings {
     val classes: Classes
     val therapy: Therapy
     val announcements: Announcements
+    val equipment: Equipment
 
     /** The weekly class timetable: `class-schedule` and `weekly-class-schedule`. */
     interface Classes {
@@ -652,5 +653,72 @@ interface AppStrings {
 
         fun grantedNotice(name: String): String
         fun deniedNotice(name: String): String
+    }
+
+    interface Equipment {
+        val title: String
+        val subtitle: String
+
+        val filterAll: String
+        val statusOperational: String
+        val statusNeedsService: String
+        val statusOutOfOrder: String
+        val statusOnOrder: String
+
+        val zoneAll: String
+        val zoneCardioFloor: String
+        val zoneWeightRoom: String
+        val zoneRecovery: String
+
+        val searchPlaceholder: String
+        val addEquipment: String
+        val newEquipment: String
+
+        val fieldName: String
+        val fieldAssetTag: String
+        val fieldZone: String
+        val fieldStatus: String
+        val fieldManufacturer: String
+        val fieldSerialNumber: String
+        val fieldPurchasedOn: String
+        val fieldWarrantyUntil: String
+
+        val specificationsTitle: String
+        val specZone: String
+        val specManufacturer: String
+        val specSerial: String
+        val specPurchased: String
+        val specWarrantyUntil: String
+        val specLastService: String
+        val lastServiceNotRecorded: String
+
+        val maintenanceLogTitle: String
+        val noLogEntriesYet: String
+        val markOutOfOrder: String
+        val logMaintenance: String
+
+        val fieldSummary: String
+        val fieldDetails: String
+        val fieldTechnician: String
+        val fieldCost: String
+        val fieldPartsUsed: String
+        val resultingStatusTitle: String
+
+        fun reportedByPrefix(name: String): String
+        fun technicianPrefix(name: String): String
+        fun costLabel(amount: String): String
+        fun partsUsedPrefix(name: String): String
+
+        val emptyTitle: String
+        val emptyMessage: String
+        val loadFailedTitle: String
+
+        val equipmentSaved: String
+        val maintenanceLogged: String
+        val markedOutOfOrder: String
+        val errorNameBlank: String
+        val errorAssetTagBlank: String
+        val errorAssetTagDuplicate: String
+        val errorSummaryBlank: String
     }
 }

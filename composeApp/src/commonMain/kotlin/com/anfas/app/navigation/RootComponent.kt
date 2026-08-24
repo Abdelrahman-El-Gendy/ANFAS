@@ -20,6 +20,8 @@ import com.anfas.feature.classes.ClassesComponent
 import com.anfas.feature.classes.ClassesComponentFactory
 import com.anfas.feature.dashboard.DashboardComponent
 import com.anfas.feature.dashboard.DashboardComponentFactory
+import com.anfas.feature.equipment.EquipmentComponent
+import com.anfas.feature.equipment.EquipmentComponentFactory
 import com.anfas.feature.intakeocr.IntakeReviewComponent
 import com.anfas.feature.intakeocr.IntakeReviewComponentFactory
 import com.anfas.feature.members.MemberProfileComponent
@@ -81,6 +83,7 @@ class RootComponent(componentContext: ComponentContext) :
     private val memberProfileFactory: MemberProfileComponentFactory by inject()
     private val therapyFactory: TherapyComponentFactory by inject()
     private val announcementsFactory: AnnouncementsComponentFactory by inject()
+    private val equipmentFactory: EquipmentComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
     private val renewalSheetFactory: RenewalSheetComponentFactory by inject()
     private val intakeReviewFactory: IntakeReviewComponentFactory by inject()
@@ -193,6 +196,7 @@ class RootComponent(componentContext: ComponentContext) :
                 TopLevel.REMINDERS -> Config.ReminderQueue
                 TopLevel.INTAKE -> Config.IntakeReview
                 TopLevel.ANNOUNCEMENTS -> Config.Announcements
+                TopLevel.EQUIPMENT -> Config.Equipment
                 TopLevel.STAFF -> Config.StaffList
             },
         )
@@ -225,6 +229,10 @@ class RootComponent(componentContext: ComponentContext) :
 
         Config.Announcements -> Child.Announcements(
             announcementsFactory.create(componentContext = context),
+        )
+
+        Config.Equipment -> Child.Equipment(
+            equipmentFactory.create(componentContext = context),
         )
 
         Config.CheckIn -> Child.CheckIn(
@@ -351,6 +359,10 @@ class RootComponent(componentContext: ComponentContext) :
         data object Announcements : Config
 
         @Serializable
+        @SerialName("equipment")
+        data object Equipment : Config
+
+        @Serializable
         @SerialName("reminder-queue")
         data object ReminderQueue : Config
 
@@ -386,6 +398,8 @@ class RootComponent(componentContext: ComponentContext) :
         data class Classes(val component: ClassesComponent) : Child
 
         data class Announcements(val component: AnnouncementsComponent) : Child
+
+        data class Equipment(val component: EquipmentComponent) : Child
 
         data class TherapyCase(val component: TherapyComponent) : Child
 
@@ -458,6 +472,16 @@ class RootComponent(componentContext: ComponentContext) :
          * not have.
          */
         ANNOUNCEMENTS(Permission.MANAGE_ANNOUNCEMENTS, Placement.DesktopOnly),
+
+        /**
+         * Rail only, and also with no mobile equivalent at all — `equipment-detail` is `D`
+         * (desktop) in the export's own screen inventory, the same as `create-announcement`.
+         * Gated on VIEW_MEMBERS, not a new equipment-specific permission: viewing needs no
+         * permission beyond signing in, the same reasoning as [CLASSES] — a coach on the floor
+         * needs to know a treadmill is broken. Adding, logging and status changes are
+         * MANAGE_EQUIPMENT, enforced inside the screen.
+         */
+        EQUIPMENT(Permission.VIEW_MEMBERS, Placement.DesktopOnly),
         STAFF(Permission.MANAGE_STAFF, Placement.Account),
         ;
 
@@ -498,9 +522,9 @@ class RootComponent(componentContext: ComponentContext) :
 
         /**
          * Rail only, and — unlike [WideOnly] — reachable *nowhere* on a phone, because the export
-         * never designed a mobile screen for it at all. `Announcements` is the only user of this
-         * today; if a future feature is designed for desktop only, it belongs here too rather
-         * than being forced into [WideOnly] with an invented mobile entry point.
+         * never designed a mobile screen for it at all. `Announcements` and `Equipment` are its
+         * users today; a future feature designed for desktop only belongs here too rather than
+         * being forced into [WideOnly] with an invented mobile entry point.
          */
         DesktopOnly,
     }
@@ -518,6 +542,8 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
         RootComponent.Config.Classes -> RootComponent.TopLevel.CLASSES
 
         RootComponent.Config.Announcements -> RootComponent.TopLevel.ANNOUNCEMENTS
+
+        RootComponent.Config.Equipment -> RootComponent.TopLevel.EQUIPMENT
 
         RootComponent.Config.ReminderQueue -> RootComponent.TopLevel.REMINDERS
 
@@ -558,6 +584,10 @@ internal val RootComponent.Config.requiredPermission: Permission
         RootComponent.Config.Classes -> Permission.VIEW_MEMBERS
 
         RootComponent.Config.Announcements -> Permission.MANAGE_ANNOUNCEMENTS
+
+        // Viewing the inventory, not managing it -- MANAGE_EQUIPMENT is enforced inside the
+        // screen, the same split as Classes.
+        RootComponent.Config.Equipment -> Permission.VIEW_MEMBERS
 
         is RootComponent.Config.MemberProfile -> Permission.VIEW_MEMBERS
 

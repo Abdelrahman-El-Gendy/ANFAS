@@ -247,6 +247,41 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
   per-record bilingual authoring pattern exists elsewhere in the app, there is no member-facing app
   to preview into, and no background scheduler exists for a "send later" option the export implies.
 
+## Equipment
+
+- **`equipment-detail` is `D` (desktop) in the export's own screen inventory** (`design/stitch/
+  TOKENS.md`), the same as `create-announcement` — so it takes `Placement.DesktopOnly` too, its
+  second user. Checking that table settles the placement question directly rather than arguing
+  it fresh per screen.
+- **Viewing needs only `VIEW_MEMBERS`; `MANAGE_EQUIPMENT` gates everything else**, the same split
+  as Classes and for the same reason: a coach on the floor needs to know a treadmill is broken,
+  but adding inventory, logging maintenance and changing status is reception/operations work.
+  This is the opposite shape from Announcements, whose *route itself* requires
+  `MANAGE_ANNOUNCEMENTS` — the right shape follows from whether there is an operational reason
+  for every role to see the screen, not from a blanket rule either way.
+- **A maintenance-log entry is an issue report or a service record, told apart by whether
+  `technician` is set, not by a separate type field.** `MaintenanceLog.lastServiceOn` filters to
+  entries carrying a technician before taking the most recent `occurredAt` — matching the export's
+  own "Last service" field, which tracks completed work rather than a problem someone noticed.
+  A later plain report must never push that date forward; the case is pinned by a dedicated test.
+- **No date field on the log-maintenance form.** Every entry stamps `occurredAt` as "now" at
+  submission time — the same simplification already made for announcements' `createdAt` and for
+  check-ins — because nothing here needs a person to backdate a repair, unlike a therapy session
+  where the treatment date has clinical meaning and earns its own day-offset picker.
+- **`logMaintenance` writes the log row and moves `Equipment.status` to the caller-supplied
+  `resultingStatus` in the same call**, rather than taking two separate actions — the point of
+  writing up what was done is to say what state it leaves the machine in, the same reasoning
+  `CheckInPolicy` uses for deciding an outcome rather than a caller assembling one.
+- **A duplicate asset tag is refused at creation**, the one piece of real validation beyond
+  blank-field checks: two rows sharing a physical unit's tag would make "which treadmill" ambiguous
+  the moment staff read the tag off the machine instead of the app.
+- **The detail drawer is `AnfasDialog`, not a new sliding-panel primitive**, matching the list-
+  plus-dialog shape Classes, Therapy and Announcements all already use for one record's detail —
+  a dedicated component for the export's slide-in panel would serve no other screen.
+- **`ChipTone.Warning` is a new addition to `:core:designsystem`**, for "needs service" specifically
+  — neither `Positive` (actually operational) nor `Critical` (reserved for fully out of order) fit
+  the export's own distinct amber badge for this status.
+
 ## Navigation
 
 **`TopLevel.placement` is the whole model.** The rail and the bar carry deliberately different
