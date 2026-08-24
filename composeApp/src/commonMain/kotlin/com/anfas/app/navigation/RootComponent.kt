@@ -28,6 +28,8 @@ import com.anfas.feature.subscriptions.ReminderQueueComponent
 import com.anfas.feature.subscriptions.ReminderQueueComponentFactory
 import com.anfas.feature.subscriptions.RenewalSheetComponent
 import com.anfas.feature.subscriptions.RenewalSheetComponentFactory
+import com.anfas.feature.therapy.TherapyComponent
+import com.anfas.feature.therapy.TherapyComponentFactory
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
 import com.arkivanov.decompose.router.stack.ChildStack
@@ -75,6 +77,7 @@ class RootComponent(componentContext: ComponentContext) :
     private val checkInFactory: CheckInComponentFactory by inject()
     private val classesFactory: ClassesComponentFactory by inject()
     private val memberProfileFactory: MemberProfileComponentFactory by inject()
+    private val therapyFactory: TherapyComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
     private val renewalSheetFactory: RenewalSheetComponentFactory by inject()
     private val intakeReviewFactory: IntakeReviewComponentFactory by inject()
@@ -243,6 +246,15 @@ class RootComponent(componentContext: ComponentContext) :
                 // Pushed on top of the profile, so back returns to the member rather than to
                 // the directory — the profile is where you check the result of a renewal.
                 onRenewClicked = { id -> navigation.push(Config.Renewal(id.value)) },
+                onTherapyClicked = { id -> navigation.push(Config.TherapyCase(id.value)) },
+                onBackClicked = { navigation.pop() },
+            ),
+        )
+
+        is Config.TherapyCase -> Child.TherapyCase(
+            therapyFactory.create(
+                componentContext = context,
+                memberId = MemberId(config.memberId),
                 onBackClicked = { navigation.pop() },
             ),
         )
@@ -347,6 +359,10 @@ class RootComponent(componentContext: ComponentContext) :
         data class MemberProfile(val memberId: String) : Config
 
         @Serializable
+        @SerialName("therapy-case")
+        data class TherapyCase(val memberId: String) : Config
+
+        @Serializable
         @SerialName("renewal")
         data class Renewal(val memberId: String) : Config
     }
@@ -356,6 +372,8 @@ class RootComponent(componentContext: ComponentContext) :
         data class Dashboard(val component: DashboardComponent) : Child
 
         data class Classes(val component: ClassesComponent) : Child
+
+        data class TherapyCase(val component: TherapyComponent) : Child
 
         data class MembersList(val component: MembersListComponent) : Child
         data class CheckIn(val component: CheckInComponent) : Child
@@ -478,6 +496,8 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
         // Members staying highlighted tells you where back will take you.
         is RootComponent.Config.MemberProfile -> RootComponent.TopLevel.MEMBERS
 
+        is RootComponent.Config.TherapyCase -> RootComponent.TopLevel.MEMBERS
+
         is RootComponent.Config.Renewal -> null
     }
 
@@ -504,6 +524,8 @@ internal val RootComponent.Config.requiredPermission: Permission
         RootComponent.Config.Classes -> Permission.VIEW_MEMBERS
 
         is RootComponent.Config.MemberProfile -> Permission.VIEW_MEMBERS
+
+        is RootComponent.Config.TherapyCase -> Permission.VIEW_THERAPY
 
         RootComponent.Config.ReminderQueue -> Permission.VIEW_REMINDERS
 

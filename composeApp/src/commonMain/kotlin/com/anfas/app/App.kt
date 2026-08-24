@@ -65,6 +65,7 @@ import com.anfas.feature.members.MemberProfileScreen
 import com.anfas.feature.members.MembersListScreen
 import com.anfas.feature.subscriptions.ReminderQueueScreen
 import com.anfas.feature.subscriptions.RenewalSheetScreen
+import com.anfas.feature.therapy.TherapyScreen
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import org.koin.compose.koinInject
@@ -379,6 +380,9 @@ private fun Host(root: RootComponent, session: Session, modifier: Modifier) {
                 is RootComponent.Child.MemberProfile ->
                     MemberProfileScreen(component = child.component)
 
+                is RootComponent.Child.TherapyCase ->
+                    TherapyScreen(component = child.component)
+
                 is RootComponent.Child.StaffList ->
                     StaffListScreen(component = child.component)
 
@@ -417,7 +421,7 @@ private fun Permission.areaLabel(s: AppStrings): String = when (this) {
     Permission.SCAN_INTAKE, Permission.IMPORT_INTAKE -> s.intake.title
     Permission.CHECK_IN_MEMBERS -> s.checkIn.title
     Permission.MANAGE_CLASSES -> s.classes.title
-    Permission.VIEW_THERAPY -> s.states.fieldStatus
+    Permission.VIEW_THERAPY -> s.therapy.title
     Permission.MANAGE_STAFF -> s.staff.title
 }
 

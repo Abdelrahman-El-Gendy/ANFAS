@@ -27,7 +27,11 @@ sealed interface MemberProfileContent {
     data class Failed(val message: String) : MemberProfileContent
 }
 
-data class MemberProfileState(val content: MemberProfileContent = MemberProfileContent.Loading) {
+data class MemberProfileState(
+    val content: MemberProfileContent = MemberProfileContent.Loading,
+    /** Whether this session holds `Permission.VIEW_THERAPY`. */
+    val mayViewTherapy: Boolean = false,
+) {
     val member: Member? get() = (content as? MemberProfileContent.Loaded)?.member
 
     /**

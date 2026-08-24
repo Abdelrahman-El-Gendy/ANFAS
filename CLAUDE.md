@@ -176,6 +176,45 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - Not built: **capacity**. Knowing who is *inside* needs check-out, and there is none; a percentage
   from entries alone would climb all day and read as a full gym by closing time.
 
+## Therapy
+
+- **No roster screen, on purpose.** The canonical desktop rail lists "Recovery," but the export
+  only ever drew one therapy screen — a single patient's case file — never a caseload list. The
+  entry point is the member's own profile, the same pattern as Renewal: a "Therapy" button, hidden
+  rather than disabled for a session without `VIEW_THERAPY`, pushes straight to the case file for
+  that member. Building a roster the export never drew would be inventing screen structure, not
+  implementing the design.
+- **One permission, not two.** The export's own banner reads "therapist and owner access only" as
+  a single bucket, so `VIEW_THERAPY` gates viewing *and* editing, logging a session, and closing
+  the case. This is the opposite call from Classes' `MANAGE_CLASSES`/view split — that split exists
+  because *everyone on shift* needs to see the timetable but only some may move a class; nothing
+  in the therapy design asks for a coach-can-view tier, so one permission is what the design says.
+- **A case CASCADEs from its member — the opposite FK shape from `check_ins`, for a
+  different reason than the shape looks similar.** A check-in has no FK because a visit's history
+  must survive a deleted member: it answers "did this happen." A therapy case CASCADEs because
+  clinical narrative with no member to attach to isn't a record worth keeping: it answers "is this
+  still relevant." Sessions CASCADE from their case the same way `intake_rows` CASCADE from
+  `intake_batches`.
+- **Only one *open* case per member at a time**, enforced by the repository refusing a second
+  `openCase` while one is `ACTIVE` (`SaveCaseOutcome.AlreadyOpen`) — never by the UI. A closed case
+  is history, not a lock: a new case may always be opened once the old one is closed, and closing
+  never deletes anything.
+- **`therapistStaffId` carries no foreign key**, resolved against `staff` at read time the same way
+  `GymClass.instructorStaffId` is. An id that stops resolving reads as "unassigned" — a real,
+  actionable state — not an error.
+- **Not built, because nothing backs it:** the export's "Next Appointment" card (there is no
+  booking system — `:feature:classes` schedules recurring weekly slots, not per-patient
+  appointments, and check-in is walk-in), "Files" (nothing in this app stores general attachments;
+  `:core:ocr`'s capture is narrow and single-purpose), and the range-of-motion figure ("Shoulder
+  Flexion 115° → 158°" is condition-specific and needs a general named-metric system to do
+  honestly). Pain score is the one measurement every case can report the same way, so it is the
+  one built — plotted as a real `Canvas` sparkline from actually-recorded scores, never a
+  fabricated visual.
+- **A "before → after" trend must not be phrased with a directional arrow in translatable text.**
+  `"$first → $latest"` reads backwards inside an Arabic RTL paragraph. Phrased as real words
+  instead — "from $first to $latest" / "من $first إلى $latest" — which follows each language's own
+  grammar and sidesteps the direction question entirely, the text equivalent of an autoMirror icon.
+
 ## Navigation
 
 **`TopLevel.placement` is the whole model.** The rail and the bar carry deliberately different

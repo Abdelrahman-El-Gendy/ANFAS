@@ -30,3 +30,9 @@ value class CheckInId(val value: String)
 
 @JvmInline
 value class GymClassId(val value: String)
+
+@JvmInline
+value class TherapyCaseId(val value: String)
+
+@JvmInline
+value class TherapySessionId(val value: String)

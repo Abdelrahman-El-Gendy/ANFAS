@@ -102,6 +102,26 @@ object AnfasIcons {
         }
     }
 
+    /**
+     * `lock` — the therapy case file's restricted-record banner. A shackle over a body: a
+     * closed loop above a rounded rectangle.
+     */
+    val Lock: ImageVector by lazy {
+        stroked("Lock") {
+            // body
+            moveTo(6f, 11f)
+            lineTo(18f, 11f)
+            lineTo(18f, 20f)
+            lineTo(6f, 20f)
+            lineTo(6f, 11f)
+            // shackle
+            moveTo(8.5f, 11f)
+            lineTo(8.5f, 7.5f)
+            arcTo(3.5f, 3.5f, 0f, false, true, 15.5f, 7.5f)
+            lineTo(15.5f, 11f)
+        }
+    }
+
     val Add: ImageVector by lazy {
         stroked("Add") {
             moveTo(12f, 5f)

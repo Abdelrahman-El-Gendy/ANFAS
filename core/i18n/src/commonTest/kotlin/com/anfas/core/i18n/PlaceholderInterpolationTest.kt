@@ -70,6 +70,17 @@ class PlaceholderInterpolationTest {
 
             val day = s.classes.emptyDayTitle("الأحد")
             assertTrue(day.contains("الأحد"), "$name.classes.emptyDayTitle dropped the day")
+
+            val therapist = s.therapy.therapistPrefix("Dr. Youssef")
+            assertTrue(
+                therapist.contains("Dr. Youssef"),
+                "$name.therapy.therapistPrefix dropped the name",
+            )
+            val trend = s.therapy.painScoreTrend(7, 3)
+            assertTrue(
+                trend.contains("7") && trend.contains("3"),
+                "$name.therapy.painScoreTrend: $trend",
+            )
         }
     }
 
@@ -93,5 +104,13 @@ class PlaceholderInterpolationTest {
         add("members.showingMembers" to s.members.showingMembers(5))
         add("common.dayName" to s.common.dayName(1))
         add("common.dayNameShort" to s.common.dayNameShort(7))
+
+        val t = s.therapy
+        add("therapy.durationMinutes" to t.durationMinutes(45))
+        add("therapy.therapistPrefix" to t.therapistPrefix("Dr. Youssef"))
+        add("therapy.referredByPrefix" to t.referredByPrefix("Dr. Amira Saleh"))
+        add("therapy.caseOpenedOn" to t.caseOpenedOn("3 Jun 2026"))
+        add("therapy.painScoreTrend" to t.painScoreTrend(7, 3))
+        add("therapy.caseOpened" to t.caseOpened("Right shoulder impingement"))
     }
 }

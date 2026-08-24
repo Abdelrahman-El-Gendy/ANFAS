@@ -27,6 +27,7 @@ import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIcons
 import com.anfas.core.designsystem.AnfasPrimaryButton
 import com.anfas.core.designsystem.AnfasProgressBar
+import com.anfas.core.designsystem.AnfasSecondaryButton
 import com.anfas.core.designsystem.AnfasStatusChip
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.ChipTone
@@ -47,9 +48,9 @@ import com.anfas.core.model.TermProgress
  *
  * Departures from the export's `member-profile`, all because the data does not exist rather than
  * because the design was ignored:
- *  - **No Sessions, Therapy or Payments tabs.** Nothing records a session, a therapy note or a
- *    payment line yet, so three of the four tabs would be permanently empty. The subscription
- *    content is shown directly instead of behind a single-tab strip.
+ *  - **No Sessions or Payments tabs.** Nothing records a check-in-log session or a payment line
+ *    yet, so those two of the four tabs would be permanently empty. The subscription content is
+ *    shown directly instead of behind a single-tab strip. **Therapy is real** — see below.
  *  - **No "Check-ins this month" and no "Recent activity".** There is no check-in log — the only
  *    thing stored is `Member.lastCheckInAt`, so that single fact is shown honestly and the
  *    14-item activity feed is not invented. Both return with the `live-checkin-log` screen.
@@ -58,7 +59,10 @@ import com.anfas.core.model.TermProgress
  *  - **No "Send reminder" button.** The WhatsApp send job does not exist, so it would be dead.
  *
  * What is here is real: identity, status, the current term with its dates and a computed
- * remaining-time bar, and Renew — which routes to the renewal sheet that already works.
+ * remaining-time bar, Renew — which routes to the renewal sheet — and, for a session holding
+ * `VIEW_THERAPY`, a Therapy button routing to `:feature:therapy`'s case file. Hidden rather than
+ * disabled for everyone else, the same reasoning as Add Member: a greyed affordance only
+ * advertises a capability the role does not have.
  */
 @Composable
 fun MemberProfileScreen(component: MemberProfileComponent, modifier: Modifier = Modifier) {
@@ -91,7 +95,9 @@ fun MemberProfileScreen(component: MemberProfileComponent, modifier: Modifier = 
 
             is MemberProfileContent.Loaded -> ProfileBody(
                 content = content,
+                mayViewTherapy = state.mayViewTherapy,
                 onRenew = component::onRenew,
+                onTherapy = component::onTherapy,
                 modifier = Modifier.fillMaxWidth().weight(1f),
             )
         }
@@ -101,7 +107,9 @@ fun MemberProfileScreen(component: MemberProfileComponent, modifier: Modifier = 
 @Composable
 private fun ProfileBody(
     content: MemberProfileContent.Loaded,
+    mayViewTherapy: Boolean,
     onRenew: () -> Unit,
+    onTherapy: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val s = strings
@@ -124,6 +132,17 @@ private fun ProfileBody(
             icon = AnfasIcons.Payments,
             modifier = Modifier.fillMaxWidth(),
         )
+
+        // Hidden, not disabled, for a role that cannot see clinical records -- a coach with no
+        // VIEW_THERAPY should not even learn the button exists.
+        if (mayViewTherapy) {
+            AnfasSecondaryButton(
+                text = s.therapy.title,
+                onClick = onTherapy,
+                icon = AnfasIcons.Group,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 

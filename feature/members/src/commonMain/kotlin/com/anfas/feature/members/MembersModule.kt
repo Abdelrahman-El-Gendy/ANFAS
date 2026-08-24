@@ -15,6 +15,7 @@ val MembersModule: Module = module {
         MemberProfileComponentFactory(
             members = get(),
             subscriptions = get(),
+            auth = get(),
             dispatchers = get(),
         )
     }

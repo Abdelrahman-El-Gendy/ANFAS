@@ -18,8 +18,10 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         StaffEntity::class,
         CheckInEntity::class,
         GymClassEntity::class,
+        TherapyCaseEntity::class,
+        TherapySessionEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
     // v2 adds the `members` table. Adding a table needs no hand-written logic, but the
     // migration is declared rather than falling back to a destructive recreate — the
@@ -51,6 +53,10 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         // carries no foreign key to `staff`, so its creation order does not matter: disabling a
         // coach must never delete next week's classes.
         AutoMigration(from = 7, to = 8),
+        // v9 adds `therapy_cases` and `therapy_sessions`. New tables, but note the FK shape is
+        // the opposite of check-ins: a case CASCADEs from its member, because clinical narrative
+        // with no member to attach to is not a record worth keeping.
+        AutoMigration(from = 8, to = 9),
     ],
 )
 @ConstructedBy(AnfasDatabaseConstructor::class)
@@ -68,6 +74,8 @@ abstract class AnfasDatabase : RoomDatabase() {
     abstract fun checkInDao(): CheckInDao
 
     abstract fun gymClassDao(): GymClassDao
+
+    abstract fun therapyCaseDao(): TherapyCaseDao
 
     companion object {
         const val FILE_NAME: String = "anfas.db"

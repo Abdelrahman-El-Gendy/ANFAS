@@ -1,8 +1,11 @@
 package com.anfas.feature.members
 
+import com.anfas.core.auth.Permission
+import com.anfas.core.auth.can
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
 import com.anfas.core.common.appExceptionHandler
+import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.data.SubscriptionRepository
 import com.anfas.core.model.Member
@@ -35,8 +38,10 @@ class MemberProfileComponent(
     private val memberId: MemberId,
     members: MemberRepository,
     subscriptions: SubscriptionRepository,
+    auth: AuthRepository,
     dispatchers: AppDispatchers,
     private val onRenewClicked: (MemberId) -> Unit,
+    private val onTherapyClicked: (MemberId) -> Unit,
     private val onBackClicked: () -> Unit,
 ) : ComponentContext by componentContext {
 
@@ -46,8 +51,12 @@ class MemberProfileComponent(
     val state: StateFlow<MemberProfileState> = combine(
         members.observeMember(memberId),
         subscriptions.observeCurrentTerm(memberId),
-    ) { memberResult, termResult ->
-        MemberProfileState(content = contentOf(memberResult, termResult))
+        auth.observeSession(),
+    ) { memberResult, termResult, session ->
+        MemberProfileState(
+            content = contentOf(memberResult, termResult),
+            mayViewTherapy = session?.can(Permission.VIEW_THERAPY) == true,
+        )
     }.stateIn(
         scope = scope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
@@ -55,6 +64,8 @@ class MemberProfileComponent(
     )
 
     fun onRenew() = onRenewClicked(memberId)
+
+    fun onTherapy() = onTherapyClicked(memberId)
 
     fun onBack() = onBackClicked()
 

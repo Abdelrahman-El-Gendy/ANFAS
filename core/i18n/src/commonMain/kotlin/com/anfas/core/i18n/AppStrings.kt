@@ -417,6 +417,7 @@ interface AppStrings {
 
     val checkIn: CheckIn
     val classes: Classes
+    val therapy: Therapy
 
     /** The weekly class timetable: `class-schedule` and `weekly-class-schedule`. */
     interface Classes {
@@ -487,6 +488,84 @@ interface AppStrings {
         fun roomClash(room: String, other: String): String
         fun saved(name: String): String
         fun deleted(name: String): String
+    }
+
+    /** The physical-therapy case file: `therapy-case-file`. Therapist- and Owner-only. */
+    interface Therapy {
+        val title: String
+        val subtitle: String
+
+        /** The export's own banner, sage-toned. True today: only Therapist and Owner hold
+         * VIEW_THERAPY. */
+        val restrictedBanner: String
+
+        val statusActive: String
+        val statusClosed: String
+
+        val openCase: String
+        val editCase: String
+        val closeCase: String
+        val save: String
+        val closeCaseConfirmTitle: String
+        val closeCaseConfirmMessage: String
+
+        val fieldCondition: String
+        val fieldReferredBy: String
+        val fieldTherapist: String
+        val fieldOnset: String
+        val fieldMechanism: String
+        val fieldContraindications: String
+        val contraindicationsTitle: String
+        val intakeTitle: String
+        val unassignedTherapist: String
+        fun therapistPrefix(name: String): String
+        fun referredByPrefix(name: String): String
+        fun caseOpenedOn(date: String): String
+
+        val sessionsTitle: String
+        val noSessionsYet: String
+        val logSession: String
+        val fieldDate: String
+        val fieldDuration: String
+        fun durationMinutes(count: Int): String
+        val fieldTreatmentTypes: String
+        val fieldNotes: String
+        val fieldPainScore: String
+        val painScoreNotRecorded: String
+
+        /**
+         * A bare day-offset chip label ("Today", "Yesterday", "3 days ago") for the log-session
+         * form's date picker. Deliberately separate from `Common.today`/`Common.yesterday`,
+         * which format a *timestamp* ("Today, 14:32") and need a time string this picker has
+         * none of, and from `Common.daysAgo`, which is used for describing when something
+         * already happened rather than for choosing a date going in.
+         */
+        val sessionToday: String
+        val sessionYesterday: String
+        fun sessionDaysAgo(days: Int): String
+
+        val treatmentManualTherapy: String
+        val treatmentExercise: String
+        val treatmentDryNeedling: String
+        val treatmentUltrasound: String
+
+        val progressTitle: String
+        val painScoreLabel: String
+        fun painScoreTrend(first: Int, latest: Int): String
+        val notEnoughDataForProgress: String
+
+        val emptyTitle: String
+        val emptyMessage: String
+        val closedCaseMessage: String
+        val loadFailedTitle: String
+
+        fun caseOpened(condition: String): String
+        val caseClosed: String
+        val sessionLogged: String
+        val errorConditionBlank: String
+        val alreadyOpenMessage: String
+        val errorDuration: String
+        val errorPainScore: String
     }
 
     interface CheckIn {

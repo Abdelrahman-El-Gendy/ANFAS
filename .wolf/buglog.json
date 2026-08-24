@@ -1152,5 +1152,25 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-08-24T10:14:00Z"
+  },
+  {
+    "id": "bug-067",
+    "timestamp": "2026-08-24T11:25:00Z",
+    "error_message": "A pain-score trend phrased as \"$first → $latest\" would have read backwards in Arabic RTL",
+    "file": "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/ArabicStrings.kt",
+    "root_cause": "A directional arrow glyph inside bidi text does not reorder with the surrounding paragraph the way the two numbers around it do. In an RTL context the visual result reads as latest-then-first even though the string was authored first-then-latest, the same class of bug documented in bug-062's ancestor issue with the check-in progress bar and with icon autoMirror -- but here it was a text arrow, not a widget property, so there is no autoMirror equivalent to reach for.",
+    "fix": "Rewrote the trend as real words instead of a symbol: \"$first to $latest\" in English, \"من $first إلى $latest\" (\"from X to Y\") in Arabic. Word order in a real sentence follows the language's own grammar and sidesteps the directional-glyph question entirely. Caught by reasoning about RTL semantics before writing device-test seed data, then confirmed correct on an iPad simulator: renders as من 5 إلى 3.",
+    "tags": [
+      "i18n",
+      "arabic",
+      "rtl",
+      "therapy",
+      "bidi"
+    ],
+    "related_bugs": [
+      "bug-062"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-24T11:25:00Z"
   }
 ]

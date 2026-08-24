@@ -418,3 +418,43 @@
   return a specific destination (to reach a new screen quickly on a fresh device) is fine as a
   scratch edit but must be reverted before the branch is considered done — grep the diff for it
   before committing, since it silently breaks sign-in for every other role.
+
+## Key Learnings — 2026-08-24 (therapy feature)
+
+- **A designed rail entry point does not obligate building every screen that entry point implies.**
+  The canonical desktop rail (documented earlier) lists "Recovery," and it would have been easy to
+  read that as "build a caseload roster." The export only ever drew the single-patient case file —
+  no roster — so the roster was not built, and the case file is reached from the member's own
+  profile instead, same pattern as Renewal. Check what was actually *drawn*, not just what a nav
+  label implies exists.
+- **Two aggregate roots can choose opposite foreign-key shapes for principled reasons, not
+  inconsistency.** `check_ins` has no FK to `members` because a visit's history must survive a
+  deleted member. `therapy_cases` CASCADEs from `members` because clinical narrative with no
+  member to attach to isn't a record worth keeping. Both are "no dangling data," just applied to
+  different questions: check-ins ask "did this happen," therapy asks "is this still relevant."
+- **One coarse permission beats two fine ones when the design itself doesn't distinguish them.**
+  The export's own banner says "therapist and owner access only" as a single bucket — no
+  view-only tier — so `VIEW_THERAPY` gates viewing AND editing/logging/closing. Classes needed
+  `MANAGE_CLASSES` separate from viewing because *everyone* on shift needs to see the timetable
+  but only some should move a class; therapy has no such split in the design, so inventing one
+  would add a permission tier nobody asked for.
+- **Fix an RTL wording ambiguity before it ships, by reasoning about it, not by waiting to catch
+  it on device.** A `"$first → $latest"` pain-score trend reads backwards in Arabic RTL with a
+  directional arrow. Rewriting as `"من $first إلى $latest"` (real words: "from X to Y") sidesteps
+  the whole direction question, the same fix pattern as autoMirror icons but applied to text.
+  Caught this by reasoning about RTL semantics *before* writing the device-test seed data, not
+  after seeing it render wrong — worth doing proactively for any "before → after" style string.
+- **A `Canvas` sparkline plotting real recorded values is honest visualization, not the fabricated
+  numbers this codebase has repeatedly refused to ship** (staff-dashboard's 4 invented figures,
+  the "14/20" capacity bar with no booking system). The line is: does every point come from a
+  number a human actually entered? If yes, draw it; if the data to back a designed visual doesn't
+  exist, omit the visual and say why in the KDoc.
+- **`snapshot_ui` (XcodeBuildMCP) has no tap of its own in this environment; pair it with
+  `mcp__mobile-mcp__mobile_click_on_screen_at_coordinates`** using the coordinates the snapshot
+  already reports. Re-run `mobile_list_elements_on_screen` after each tap rather than reusing
+  stale coordinates — a dialog opening changes every coordinate on screen.
+- **Avoid typing into Compose text fields via the simulator/emulator IME during verification** —
+  already known unreliable (autocorrect commits wrong values). Verify data-entry *logic* with unit
+  tests (already thorough here) and use the device only to confirm layout, navigation, RTL, and
+  state transitions that don't require typing — chip selections, button taps, dialog open/close,
+  and reading back rows seeded directly via SQL into the simulator's own sqlite file.

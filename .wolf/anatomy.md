@@ -495,7 +495,7 @@
 
 ## composeApp/src/commonMain/kotlin/com/anfas/app/navigation/
 
-- `RootComponent.kt` — Decompose navigation root. (~6600 tok)
+- `RootComponent.kt` — Decompose navigation root. Now also wires Config.TherapyCase, pushed from a member's profile (~7200 tok)
 
 ## composeApp/src/iosMain/kotlin/com/anfas/app/
 
@@ -557,6 +557,11 @@
 
 ## core/data/src/commonMain/kotlin/com/anfas/core/data/
 
+- `TherapyRepository.kt` — `TherapyRepository` (scoped to one member, no roster — see its KDoc),
+  `TherapyCaseDetail` (case + sessions + resolved staff names), `SaveCaseOutcome`
+  (AlreadyOpen refuses a second simultaneous case per member), `SaveSessionOutcome` (~1300 tok)
+- `OfflineFirstTherapyRepository.kt` — Room-backed. `openCase` checks for an existing ACTIVE
+  case via a one-shot DAO read before writing (~2400 tok)
 - `ClassRepository.kt` — `ClassRepository`, `Timetable` (classes + resolved instructor names),
   `SaveClassOutcome` (Saved/SavedWithRoomClash/Invalid — a room clash is a warning, not a
   rejection), `ClassProblem` (~500 tok)
@@ -573,6 +578,8 @@
 
 ## core/data/src/commonTest/kotlin/com/anfas/core/data/
 
+- `TherapyRepositoryTest.kt` — 20 tests: AlreadyOpen refusal, re-opening after close, therapist
+  rename/unassigned resolution, session ordering, duration/pain-score range validation (~4500 tok)
 - `ClassRepositoryTest.kt` — 16 tests: overlap clash detection, edit-does-not-clash-with-self,
   unresolvable/missing instructor reads as unassigned, all-problems-at-once (~2400 tok)
 - `FakeIntakeDao.kt` — In-memory IntakeDao. Mirrors the real thing where it matters: rows are ordered by ordinal, (~1110 tok)
@@ -603,6 +610,9 @@
 
 ## core/database/src/commonMain/kotlin/com/anfas/core/database/
 
+- `TherapyEntity.kt` — `therapy_cases` (v9, CASCADEs from `members` — the opposite FK shape from
+  `check_ins`, since clinical narrative with no member to attach to is not worth keeping) and
+  `therapy_sessions` (CASCADEs from its case) + `TherapyCaseDao` (~1400 tok)
 - `GymClassEntity.kt` — `scheduled_classes` table (v8) + `GymClassDao`. `day_of_week` stored as
   ISO number, `start_minute_of_day` as minutes since midnight — both sort correctly as integers.
   No FK on `instructor_staff_id`: disabling a coach must not delete next week's classes (~800 tok)
@@ -669,6 +679,9 @@
 
 ## core/model/src/commonMain/kotlin/com/anfas/core/model/
 
+- `Therapy.kt` — `TherapyCase`, `CaseStatus`, `TherapySession`, `TreatmentType` (the export's own
+  4, no more), `TherapyProgress.painScoreTrend` (needs >=2 scored sessions; unscored sessions are
+  skipped, not zeroed) + `PainScoreTrend` (~1400 tok)
 - `GymClass.kt` — `GymClass` (recurring weekly slot, not a dated occurrence), `ClassCategory`
   (GENERAL/WOMENS_ONLY/RECOVERY), `ClassOccupancy` (documents why no "14/20" is ever shown — no
   booking system exists) (~900 tok)
@@ -689,6 +702,8 @@
 
 ## core/model/src/commonTest/kotlin/com/anfas/core/model/
 
+- `TherapyProgressTest.kt` — 7 tests: no trend from 0-1 scored sessions, unscored session skipped
+  not zeroed, chronological (not insertion) order, improving/not-improving (~1400 tok)
 - `ClassScheduleTest.kt` — 17 tests on the grid layout: overlap never shares a lane, transitive
   grouping, lane reuse after a class ends, midnight clamping, grid widen-not-narrow (~2100 tok)
 - `IntakeValidatorTest.kt` — Confident by default, so a test only opts into low confidence when that is the point. (~2327 tok)
@@ -790,12 +805,21 @@
 - `MembersListScreen.kt` — The directory table + the three nothing-states. Two documented departures from the export (~1500 tok)
 - `MembersListState.kt` — `MembersListContent`: Loading/Loaded/DirectoryEmpty/NoMatches/Failed. `query` sits outside content (~280 tok)
 - `MembersModule.kt` — Koin module for the members feature. Intentionally empty — UI, components and use cases (~84 tok)
-- `MembersModule.kt` — Koin: exports MembersListComponentFactory as a `factory`, never a single (~110 tok)
+- `MembersModule.kt` — Koin: exports MembersListComponentFactory + MemberProfileComponentFactory as `factory`s, never a single (~110 tok)
+- `MemberProfileState.kt` — `MemberProfileContent` (Loading/Loaded/Missing/Failed),
+  `MemberProfileState` (+`mayViewTherapy` from `Permission.VIEW_THERAPY`) (~450 tok)
+- `MemberProfileComponent.kt` — combines member + current term + session; `onTherapy()` routes to
+  `:feature:therapy` via a callback, same pattern as `onRenew()` (~900 tok)
+- `MemberProfileComponentFactory.kt` — now also injects `AuthRepository` (~350 tok)
+- `MemberProfileScreen.kt` — identity, membership card, Renew, and (permission-gated, hidden not
+  disabled) a Therapy button routing to the case file (~2000 tok)
 
 ## feature/members/src/commonTest/kotlin/com/anfas/feature/members/
 
 - `LastCheckInTest.kt` — 7 tests, fixed UTC clock (~570 tok)
 - `MembersListComponentTest.kt` — 5 tests: DirectoryEmpty vs NoMatches, clear, failure, search by number (~900 tok)
+- `MemberProfileComponentTest.kt` — 5 tests: mayViewTherapy per role (Therapist/Owner yes, Coach
+  no), onTherapy/onRenew report the right member id (~1600 tok)
 
 ## feature/subscriptions/
 
@@ -827,7 +851,22 @@
 
 ## feature/therapy/src/commonMain/kotlin/com/anfas/feature/therapy/
 
-- `TherapyModule.kt` — Koin module for the therapy feature. Intentionally empty — UI, components and use cases (~84 tok)
+- `TherapyState.kt` — `TherapyContent` (member + nullable `TherapyCaseDetail`), `TherapyState`
+  (canOpenNewCase/canLogSession/canCloseCase derived from CaseStatus), `CaseForm`, `SessionForm`
+  (dayOffset 0-7, not a date picker), `TherapyNotice` (~1100 tok)
+- `TherapyComponent.kt` — reached from a member's profile, not a roster — the export never drew
+  a caseload list. Combines member + latest case + all enabled staff (for the therapist picker,
+  independent of whether a case exists yet). Defaults new-case/new-session therapist to whoever
+  is signed in (~2200 tok)
+- `TherapyModule.kt` — `TherapyComponentFactory` + Koin module (~250 tok)
+- `TherapyScreen.kt` — header (avatar/name/status pill), contraindications box (error-toned,
+  shown only when non-blank), intake card, sessions list, pain-score progress card with a real
+  `Canvas` sparkline plotted from actually-recorded scores (~3200 tok)
+- `CaseFormDialog.kt` — open/edit case: free-text intake fields + therapist chip picker (~1300 tok)
+- `SessionFormDialog.kt` — log a session: day-offset chips (today/yesterday/N days ago, bounded
+  to a week), duration chips, treatment-type multi-select chips, pain score (digits-only input) (~1600 tok)
+- `CloseCaseConfirmDialog.kt` — a confirmation, not a silent action (~350 tok)
+- `TreatmentTypeUi.kt` — `TreatmentType.label(s)` (~200 tok)
 
 ## gradle/
 

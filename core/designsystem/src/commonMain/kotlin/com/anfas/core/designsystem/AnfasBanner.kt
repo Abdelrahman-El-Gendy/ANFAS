@@ -37,10 +37,19 @@ fun AnfasBanner(
     onDismiss: (() -> Unit)? = null,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val brand = AnfasTheme.colors
     val (container, content) = when (tone) {
         BannerTone.Informational -> scheme.surfaceContainerHighest to scheme.onSurfaceVariant
+
         BannerTone.Warning -> scheme.primaryContainer.copy(alpha = 0.22f) to scheme.primary
+
         BannerTone.Critical -> scheme.errorContainer to scheme.error
+
+        // The export's own therapy-record banner: sage, not the primary Warning tint. It is not
+        // a warning about anything going wrong -- it is naming who is allowed to see the screen
+        // at all, and sage is this app's one colour for recovery/therapy content everywhere else
+        // (ChipTone.Recovery, ClassCategory.RECOVERY).
+        BannerTone.Restricted -> brand.sage.copy(alpha = AnfasTheme.alphas.border) to brand.sage
     }
 
     Row(
@@ -69,4 +78,4 @@ fun AnfasBanner(
     }
 }
 
-enum class BannerTone { Informational, Warning, Critical }
+enum class BannerTone { Informational, Warning, Critical, Restricted }
