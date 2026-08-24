@@ -81,6 +81,14 @@ class PlaceholderInterpolationTest {
                 trend.contains("7") && trend.contains("3"),
                 "$name.therapy.painScoreTrend: $trend",
             )
+
+            val createdBy = s.announcements.createdBy("Ahmed Owner")
+            assertTrue(
+                createdBy.contains("Ahmed Owner"),
+                "$name.announcements.createdBy dropped the name",
+            )
+            val reaches = s.announcements.reaches(412)
+            assertTrue(reaches.contains("412"), "$name.announcements.reaches dropped the count")
         }
     }
 
@@ -112,5 +120,15 @@ class PlaceholderInterpolationTest {
         add("therapy.caseOpenedOn" to t.caseOpenedOn("3 Jun 2026"))
         add("therapy.painScoreTrend" to t.painScoreTrend(7, 3))
         add("therapy.caseOpened" to t.caseOpened("Right shoulder impingement"))
+
+        val a = s.announcements
+        add("announcements.reaches(1)" to a.reaches(1))
+        add("announcements.reaches(3)" to a.reaches(3))
+        add("announcements.reaches(11)" to a.reaches(11))
+        add("announcements.publishConfirmMessage" to a.publishConfirmMessage(412))
+        add("announcements.createdBy" to a.createdBy("Ahmed Owner"))
+        add("announcements.createdOn" to a.createdOn("3 Jun 2026"))
+        add("announcements.publishedOn" to a.publishedOn("3 Jun 2026"))
+        add("announcements.reachedAtPublish" to a.reachedAtPublish(412))
     }
 }

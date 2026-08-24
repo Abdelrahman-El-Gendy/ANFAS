@@ -57,6 +57,15 @@ enum class Permission {
      * a coach must not do is move somebody else's class.
      */
     MANAGE_CLASSES,
+
+    /**
+     * Write and publish gym-wide announcements.
+     *
+     * One permission, not a view/manage split: an announcement is authored content for members
+     * to eventually see, not operational information the way the class timetable is — there is
+     * no equivalent need for a coach mid-shift to read draft copy nobody has published yet.
+     */
+    MANAGE_ANNOUNCEMENTS,
 }
 
 /**
@@ -87,6 +96,7 @@ val Role.permissions: Set<Permission>
             Permission.IMPORT_INTAKE,
             Permission.CHECK_IN_MEMBERS,
             Permission.MANAGE_CLASSES,
+            Permission.MANAGE_ANNOUNCEMENTS,
         )
 
         // Needs to know who is in the room and whether their membership is live. Not payments,

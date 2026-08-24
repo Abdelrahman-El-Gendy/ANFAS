@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-24T06:56:37.392Z
-> Files: 514 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-24T08:59:31.679Z
+> Files: 533 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~1975 tok)
+- `CLAUDE.md` — OpenWolf (~7393 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -557,31 +557,19 @@
 
 ## core/data/src/commonMain/kotlin/com/anfas/core/data/
 
-- `TherapyRepository.kt` — `TherapyRepository` (scoped to one member, no roster — see its KDoc),
-  `TherapyCaseDetail` (case + sessions + resolved staff names), `SaveCaseOutcome`
-  (AlreadyOpen refuses a second simultaneous case per member), `SaveSessionOutcome` (~1300 tok)
-- `OfflineFirstTherapyRepository.kt` — Room-backed. `openCase` checks for an existing ACTIVE
-  case via a one-shot DAO read before writing (~2400 tok)
-- `ClassRepository.kt` — `ClassRepository`, `Timetable` (classes + resolved instructor names),
-  `SaveClassOutcome` (Saved/SavedWithRoomClash/Invalid — a room clash is a warning, not a
-  rejection), `ClassProblem` (~500 tok)
-- `OfflineFirstClassRepository.kt` — Room-backed. Joins `scheduled_classes` with `staff` for
-  instructor names via `combine`. Clash check reads back *after* the write so editing a class
-  never reports it clashing with its own previous version (~1400 tok)
+- `AnnouncementRepository.kt` — interface + AnnouncementDetail, SaveAnnouncementOutcome(Saved/Invalid), AnnouncementProblem (~600 tok)
 - `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~573 tok)
 - `IntakeMappers.kt` — Storage <-> domain for OCR intake. (~889 tok)
 - `IntakeRepository.kt` — Which cell of a row an edit targets. (~644 tok)
 - `MemberMappers.kt` — Storage <-> domain. Deliberately total in one direction only: any row whose [status] string (~453 tok)
 - `MemberRepository.kt` — The only way a feature reaches member data. Reads emit AppResult; no `isEmpty()` by design (~290 tok)
+- `OfflineFirstAnnouncementRepository.kt` — Room-backed. `publish()` freezes `recipientCountAtPublish` by computing AnnouncementReach.count against live members/terms at the moment of publish — never recomputed after (~1400 tok)
 - `OfflineFirstIntakeRepository.kt` — Room-backed OCR intake. (~1722 tok)
 - `OfflineFirstMemberRepository.kt` — Room-backed. The error boundary: storage failures become AppError.Storage; CancellationException is rethrown. No network path yet (~560 tok)
 
 ## core/data/src/commonTest/kotlin/com/anfas/core/data/
 
-- `TherapyRepositoryTest.kt` — 20 tests: AlreadyOpen refusal, re-opening after close, therapist
-  rename/unassigned resolution, session ordering, duration/pain-score range validation (~4500 tok)
-- `ClassRepositoryTest.kt` — 16 tests: overlap clash detection, edit-does-not-clash-with-self,
-  unresolvable/missing instructor reads as unassigned, all-problems-at-once (~2400 tok)
+- `AnnouncementRepositoryTest.kt` — 12 tests: draft validation, publish freezes recipient count, delete only for drafts (~1900 tok)
 - `FakeIntakeDao.kt` — In-memory IntakeDao. Mirrors the real thing where it matters: rows are ordered by ordinal, (~1110 tok)
 - `FakeMemberDao.kt` — In-memory stand-in for Room. Query semantics mirror the DAO's SQL — case-insensitive (~690 tok)
 - `OfflineFirstIntakeRepositoryTest.kt` — Only for the create-batch test, which needs a domain row to hand in. (~2806 tok)
@@ -603,6 +591,7 @@
 ## core/database/schemas/com.anfas.core.database.AnfasDatabase/
 
 - `1.json` (~294 tok)
+- `10.json` — v10 schema: adds `announcements` table only, verified against 9.json (~350 tok)
 
 ## core/database/src/androidMain/kotlin/com/anfas/core/database/
 
@@ -610,13 +599,8 @@
 
 ## core/database/src/commonMain/kotlin/com/anfas/core/database/
 
-- `TherapyEntity.kt` — `therapy_cases` (v9, CASCADEs from `members` — the opposite FK shape from
-  `check_ins`, since clinical narrative with no member to attach to is not worth keeping) and
-  `therapy_sessions` (CASCADEs from its case) + `TherapyCaseDao` (~1400 tok)
-- `GymClassEntity.kt` — `scheduled_classes` table (v8) + `GymClassDao`. `day_of_week` stored as
-  ISO number, `start_minute_of_day` as minutes since midnight — both sort correctly as integers.
-  No FK on `instructor_staff_id`: disabling a coach must not delete next week's classes (~800 tok)
 - `AnfasDatabase.kt` — Required on Kotlin Multiplatform: Room cannot use reflection on native targets, so the (~603 tok)
+- `AnnouncementEntity.kt` — flat announcements table, no FKs + AnnouncementDao (observeAll DESC by created_at, findById, upsert, delete) (~500 tok)
 - `DatabaseBuilderFactory.kt` — Resolves the platform database location and hands back a builder. Actuals differ in what (~250 tok)
 - `IntakeEntity.kt` — A photographed sign-up sheet awaiting review. (~1198 tok)
 - `MemberEntity.kt` — Storage shape for a member. Kept flat and primitive on purpose: no domain enums or (~829 tok)
@@ -667,6 +651,10 @@
 - `AnfasTheme.kt` — Theme entry point wiring colours/type/shapes; also the `AnfasTheme` accessor object for what M3 has no slot for (~420 tok)
 - `AnfasType.kt` — IBM Plex Sans family (3 static weights), the 7 named roles verbatim, and M3 `Typography`. `dataMono` = tabular figures, not a mono face (~700 tok)
 
+## core/i18n/src/commonTest/kotlin/com/anfas/core/i18n/
+
+- `PlaceholderInterpolationTest.kt` — Every quantified or parameterised string must actually substitute its argument. (~1610 tok)
+
 ## core/model — OCR intake
 
 - `commonTest/IntakeValidatorTest.kt` — 18 tests, including a reconstruction of the export's "6 of 8 rows ready" (~1900 tok)
@@ -679,15 +667,7 @@
 
 ## core/model/src/commonMain/kotlin/com/anfas/core/model/
 
-- `Therapy.kt` — `TherapyCase`, `CaseStatus`, `TherapySession`, `TreatmentType` (the export's own
-  4, no more), `TherapyProgress.painScoreTrend` (needs >=2 scored sessions; unscored sessions are
-  skipped, not zeroed) + `PainScoreTrend` (~1400 tok)
-- `GymClass.kt` — `GymClass` (recurring weekly slot, not a dated occurrence), `ClassCategory`
-  (GENERAL/WOMENS_ONLY/RECOVERY), `ClassOccupancy` (documents why no "14/20" is ever shown — no
-  booking system exists) (~900 tok)
-- `ClassSchedule.kt` — Pure grid arithmetic: `layoutDay` (transitive overlap grouping + greedy
-  lane reuse), `gridStartHour`/`gridEndHour` (widen-never-narrow), `splitByProgress`
-  (~1600 tok)
+- `Announcement.kt` — Announcement + AnnouncementStatus(DRAFT/PUBLISHED) + AnnouncementAudience(3 segments, 2 declined w/ KDoc) + AnnouncementReach.matching()/count() (~900 tok)
 - `Ids.kt` — Typed identifiers. One value class per aggregate root, so a MemberId can never be passed (~165 tok)
 - `Intake.kt` — A photographed sign-up sheet and everything OCR read off it. (~1387 tok)
 - `IntakeValidator.kt` — Decides what is wrong with each row of a batch — the logic behind the export's (~1529 tok)
@@ -702,10 +682,7 @@
 
 ## core/model/src/commonTest/kotlin/com/anfas/core/model/
 
-- `TherapyProgressTest.kt` — 7 tests: no trend from 0-1 scored sessions, unscored session skipped
-  not zeroed, chronological (not insertion) order, improving/not-improving (~1400 tok)
-- `ClassScheduleTest.kt` — 17 tests on the grid layout: overlap never shares a lane, transitive
-  grouping, lane reuse after a class ends, midnight clamping, grid widen-not-narrow (~2100 tok)
+- `AnnouncementReachTest.kt` — 7 tests covering all three audience segments' matching logic (~800 tok)
 - `IntakeValidatorTest.kt` — Confident by default, so a test only opts into low confidence when that is the point. (~2327 tok)
 
 ## core/network/
@@ -741,7 +718,17 @@
 
 ## feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/
 
+- `AnnouncementFormDialog.kt` — Compose or edit an announcement. [state]'s `liveReach` reflects [form]'s currently selected (~2160 tok)
+- `AnnouncementsComponent.kt` — Compose, edit, publish and delete gym-wide bulletins. (~3089 tok)
 - `AnnouncementsModule.kt` — Koin module for the announcements feature. Intentionally empty — UI, components and use cases (~89 tok)
+- `AnnouncementsScreen.kt` — List screen; extensive KDoc on departures from the Stitch export's split editor+preview (~1800 tok)
+- `AnnouncementsState.kt` — AnnouncementsState/AnnouncementsContent/AnnouncementForm/AnnouncementsNotice (~700 tok)
+- `DeleteConfirmDialog.kt` — confirmation before deleting a draft (~350 tok)
+- `PublishConfirmDialog.kt` — confirmation before publishing; shows the frozen-at-publish reach count (~450 tok)
+
+## feature/announcements/src/commonTest/kotlin/com/anfas/feature/announcements/
+
+- `AnnouncementsComponentTest.kt` — Only what this component itself owns: permission gating and the publish-once guard. Save, (~2502 tok)
 
 ## feature/classes/
 
@@ -750,19 +737,6 @@
 ## feature/classes/src/commonMain/kotlin/com/anfas/feature/classes/
 
 - `ClassesModule.kt` — `ClassesComponentFactory` + Koin module (~200 tok)
-- `ClassesState.kt` — `ClassesContent`, `ClassesState` (visibleClasses/rooms/instructors derived
-  from filters), `ClassForm`, `ClassesNotice` (~750 tok)
-- `ClassesComponent.kt` — Decompose component backing both the mobile day view and the desktop
-  week grid. Samples the clock once per state build (not polled); owns the add/edit/delete flow
-  and the instructor/room filters (~1400 tok)
-- `ClassesScreen.kt` — `ClassesScreen`, day view (`DayView`/`DayPicker`/`ClassRow`) for compact,
-  week grid (`WeekGrid`/`DayColumn`/`ClassBlockCard`) for wide. Breakpoint is `GRID_MIN_WIDTH`,
-  derived from grid content width — NOT `AnfasBreakpoints.tabletMax`, which is the rail/bar
-  breakpoint and left the grid unreachable on a 1032pt iPad (~2200 tok)
-- `ClassFormDialog.kt` — add/edit dialog. Chip-based time/duration pickers, not text fields —
-  a gym timetable runs on the half hour (~900 tok)
-- `ClassCategoryUi.kt` — `ClassCategory.accent()`/`.label()`: sage=Recovery, rose=Women's Only,
-  primary=General, from design.md's prose palette (~250 tok)
 
 ## feature/equipment/
 
@@ -799,6 +773,7 @@
 ## feature/members/src/commonMain/kotlin/com/anfas/feature/members/
 
 - `LastCheckIn.kt` — Relative check-in label; `now`/`zone` are parameters so tests are timezone-independent (~480 tok)
+- `MemberProfileComponentFactory.kt` — now also injects `AuthRepository` (~350 tok)
 - `MembershipStatusUi.kt` — MembershipStatus -> ChipTone + label. Lives here because designsystem must not know the domain (~230 tok)
 - `MembersListComponent.kt` — Decompose component. Debounced search via flatMapLatest; navigation is callbacks, not routing (~700 tok)
 - `MembersListComponentFactory.kt` — Lets :composeApp build the component without seeing its dependencies (~280 tok)
@@ -806,20 +781,11 @@
 - `MembersListState.kt` — `MembersListContent`: Loading/Loaded/DirectoryEmpty/NoMatches/Failed. `query` sits outside content (~280 tok)
 - `MembersModule.kt` — Koin module for the members feature. Intentionally empty — UI, components and use cases (~84 tok)
 - `MembersModule.kt` — Koin: exports MembersListComponentFactory + MemberProfileComponentFactory as `factory`s, never a single (~110 tok)
-- `MemberProfileState.kt` — `MemberProfileContent` (Loading/Loaded/Missing/Failed),
-  `MemberProfileState` (+`mayViewTherapy` from `Permission.VIEW_THERAPY`) (~450 tok)
-- `MemberProfileComponent.kt` — combines member + current term + session; `onTherapy()` routes to
-  `:feature:therapy` via a callback, same pattern as `onRenew()` (~900 tok)
-- `MemberProfileComponentFactory.kt` — now also injects `AuthRepository` (~350 tok)
-- `MemberProfileScreen.kt` — identity, membership card, Renew, and (permission-gated, hidden not
-  disabled) a Therapy button routing to the case file (~2000 tok)
 
 ## feature/members/src/commonTest/kotlin/com/anfas/feature/members/
 
 - `LastCheckInTest.kt` — 7 tests, fixed UTC clock (~570 tok)
 - `MembersListComponentTest.kt` — 5 tests: DirectoryEmpty vs NoMatches, clear, failure, search by number (~900 tok)
-- `MemberProfileComponentTest.kt` — 5 tests: mayViewTherapy per role (Therapist/Owner yes, Coach
-  no), onTherapy/onRenew report the right member id (~1600 tok)
 
 ## feature/subscriptions/
 
@@ -851,21 +817,9 @@
 
 ## feature/therapy/src/commonMain/kotlin/com/anfas/feature/therapy/
 
-- `TherapyState.kt` — `TherapyContent` (member + nullable `TherapyCaseDetail`), `TherapyState`
-  (canOpenNewCase/canLogSession/canCloseCase derived from CaseStatus), `CaseForm`, `SessionForm`
-  (dayOffset 0-7, not a date picker), `TherapyNotice` (~1100 tok)
-- `TherapyComponent.kt` — reached from a member's profile, not a roster — the export never drew
-  a caseload list. Combines member + latest case + all enabled staff (for the therapist picker,
-  independent of whether a case exists yet). Defaults new-case/new-session therapist to whoever
-  is signed in (~2200 tok)
-- `TherapyModule.kt` — `TherapyComponentFactory` + Koin module (~250 tok)
-- `TherapyScreen.kt` — header (avatar/name/status pill), contraindications box (error-toned,
-  shown only when non-blank), intake card, sessions list, pain-score progress card with a real
-  `Canvas` sparkline plotted from actually-recorded scores (~3200 tok)
 - `CaseFormDialog.kt` — open/edit case: free-text intake fields + therapist chip picker (~1300 tok)
-- `SessionFormDialog.kt` — log a session: day-offset chips (today/yesterday/N days ago, bounded
-  to a week), duration chips, treatment-type multi-select chips, pain score (digits-only input) (~1600 tok)
 - `CloseCaseConfirmDialog.kt` — a confirmation, not a silent action (~350 tok)
+- `TherapyModule.kt` — `TherapyComponentFactory` + Koin module (~250 tok)
 - `TreatmentTypeUi.kt` — `TreatmentType.label(s)` (~200 tok)
 
 ## gradle/
@@ -893,9 +847,3 @@
 ## server/src/test/kotlin/com/anfas/app/
 
 - `ApplicationTest.kt` — ApplicationTest: healthEndpointReportsOk (~188 tok)
-
-## core/i18n/src/commonTest/kotlin/com/anfas/core/i18n/
-
-- `PlaceholderInterpolationTest.kt` — Asserts no rendered string contains a literal `$` (catches
-  Kotlin's `${'$'}count` escape mistake — shipped once, invisible until run in Arabic) and that
-  every quantified/parameterised string actually contains its argument (~1100 tok)

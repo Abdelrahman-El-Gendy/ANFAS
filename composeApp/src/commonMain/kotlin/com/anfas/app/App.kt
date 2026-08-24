@@ -54,6 +54,7 @@ import com.anfas.core.i18n.AppStrings
 import com.anfas.core.i18n.LanguageController
 import com.anfas.core.i18n.ProvideLocalization
 import com.anfas.core.i18n.strings
+import com.anfas.feature.announcements.AnnouncementsScreen
 import com.anfas.feature.auth.SignInScreen
 import com.anfas.feature.auth.StaffListScreen
 import com.anfas.feature.auth.label
@@ -161,6 +162,7 @@ fun App(root: RootComponent) {
                                 RootComponent.TopLevel.CHECK_IN -> s.checkIn.title
                                 RootComponent.TopLevel.REMINDERS -> s.reminders.title
                                 RootComponent.TopLevel.INTAKE -> s.intake.title
+                                RootComponent.TopLevel.ANNOUNCEMENTS -> s.announcements.title
                                 RootComponent.TopLevel.STAFF -> s.staff.title
                             },
                             icon = when (destination) {
@@ -170,6 +172,7 @@ fun App(root: RootComponent) {
                                 RootComponent.TopLevel.CHECK_IN -> AnfasIcons.CheckCircle
                                 RootComponent.TopLevel.REMINDERS -> AnfasIcons.Payments
                                 RootComponent.TopLevel.INTAKE -> AnfasIcons.DocumentScanner
+                                RootComponent.TopLevel.ANNOUNCEMENTS -> AnfasIcons.Campaign
                                 RootComponent.TopLevel.STAFF -> AnfasIcons.Group
                             },
                             selected = selection == destination,
@@ -187,11 +190,14 @@ fun App(root: RootComponent) {
                 // stays lit.
                 val items: List<NavItem> = reachable(RootComponent.Placement.Primary)
                     .map { navItem(it, active?.bottomBarSelection) }
-                // The rail: Primary plus WideOnly, each lighting itself.
+                // The rail: Primary plus WideOnly plus DesktopOnly, each lighting itself. The
+                // desktop-only entries (Announcements) exist only here -- there is no mobile
+                // path to fold them onto, unlike Intake and Reminders.
                 val railItems: List<NavItem> =
                     (
                         reachable(RootComponent.Placement.Primary) +
-                            reachable(RootComponent.Placement.WideOnly)
+                            reachable(RootComponent.Placement.WideOnly) +
+                            reachable(RootComponent.Placement.DesktopOnly)
                         ).map { navItem(it, active) }
                 // Below the rail's divider, with sign-out. Rendered as rows rather than as the
                 // compact overflow because 256dp has room to spell them out.
@@ -374,6 +380,9 @@ private fun Host(root: RootComponent, session: Session, modifier: Modifier) {
                 is RootComponent.Child.Classes ->
                     ClassesScreen(component = child.component)
 
+                is RootComponent.Child.Announcements ->
+                    AnnouncementsScreen(component = child.component)
+
                 is RootComponent.Child.CheckIn ->
                     CheckInScreen(component = child.component)
 
@@ -421,6 +430,7 @@ private fun Permission.areaLabel(s: AppStrings): String = when (this) {
     Permission.SCAN_INTAKE, Permission.IMPORT_INTAKE -> s.intake.title
     Permission.CHECK_IN_MEMBERS -> s.checkIn.title
     Permission.MANAGE_CLASSES -> s.classes.title
+    Permission.MANAGE_ANNOUNCEMENTS -> s.announcements.title
     Permission.VIEW_THERAPY -> s.therapy.title
     Permission.MANAGE_STAFF -> s.staff.title
 }

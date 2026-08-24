@@ -56,6 +56,7 @@ class NavigationPermissionTest {
                 RootComponent.TopLevel.CHECK_IN,
                 RootComponent.TopLevel.REMINDERS,
                 RootComponent.TopLevel.INTAKE,
+                RootComponent.TopLevel.ANNOUNCEMENTS,
             ),
             destinationsFor(Role.Receptionist),
         )

@@ -46,6 +46,9 @@ fun AnfasTextField(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isPassword: Boolean = false,
+    /** False for a multi-line body -- the announcement composer's only user so far. Every
+     * other field in this app is one line, so this defaults to preserve that. */
+    singleLine: Boolean = true,
     errorMessage: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Next,
@@ -71,12 +74,13 @@ fun AnfasTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 // heightIn rather than height: a larger system font size must be able to grow
-                // the field instead of clipping the text inside it.
-                .heightIn(min = FIELD_HEIGHT)
+                // the field instead of clipping the text inside it. A multi-line field's floor
+                // is four text rows, matching the export's `rows="4"` body textarea.
+                .heightIn(min = if (singleLine) FIELD_HEIGHT else MULTILINE_FIELD_HEIGHT)
                 .background(scheme.background, AnfasShapes.base)
                 .border(1.dp, borderColor, AnfasShapes.base)
-                .padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(horizontal = 12.dp, vertical = if (singleLine) 0.dp else 12.dp),
+            verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(modifier = Modifier.weight(1f)) {
@@ -84,7 +88,7 @@ fun AnfasTextField(
                     value = value,
                     onValueChange = onValueChange,
                     enabled = enabled,
-                    singleLine = true,
+                    singleLine = singleLine,
                     interactionSource = interaction,
                     textStyle = AnfasTheme.textStyles.bodyMedium.copy(color = scheme.onSurface),
                     cursorBrush = androidx.compose.ui.graphics.SolidColor(scheme.primary),
@@ -121,3 +125,4 @@ fun AnfasTextField(
 }
 
 private val FIELD_HEIGHT = 46.dp
+private val MULTILINE_FIELD_HEIGHT = 112.dp

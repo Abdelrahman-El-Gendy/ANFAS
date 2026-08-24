@@ -122,6 +122,32 @@ object AnfasIcons {
         }
     }
 
+    /**
+     * `campaign` — a megaphone: a cone opening toward the trailing edge with a handle, and two
+     * small sound-wave arcs in front of it. Auto-mirrored, the same reasoning as [Logout]: the
+     * megaphone should face the language's own "outward" direction.
+     */
+    val Campaign: ImageVector by lazy {
+        stroked("Campaign", autoMirror = true) {
+            // cone
+            moveTo(6f, 10f)
+            lineTo(6f, 15f)
+            lineTo(14f, 18f)
+            lineTo(14f, 7f)
+            lineTo(6f, 10f)
+            // handle
+            moveTo(6f, 10f)
+            lineTo(4.5f, 10f)
+            lineTo(4.5f, 15f)
+            lineTo(6f, 15f)
+            // sound waves
+            moveTo(17f, 9.5f)
+            arcTo(4f, 4f, 0f, true, true, 17f, 15.5f)
+            moveTo(19.3f, 7.5f)
+            arcTo(7f, 7f, 0f, true, true, 19.3f, 17.5f)
+        }
+    }
+
     val Add: ImageVector by lazy {
         stroked("Add") {
             moveTo(12f, 5f)

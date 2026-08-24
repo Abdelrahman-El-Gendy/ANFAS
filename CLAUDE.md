@@ -215,6 +215,38 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
   instead — "from $first to $latest" / "من $first إلى $latest" — which follows each language's own
   grammar and sidesteps the direction question entirely, the text equivalent of an autoMirror icon.
 
+## Announcements
+
+- **`create-announcement` is the export's own fourth bottom-bar-equivalent, and it never drew a
+  mobile screen at all.** `deviceType: DESKTOP` only, no phone/tablet counterpart anywhere in the
+  export — unlike every other feature so far, which had at least a phone-reachable path. That is
+  what earns `Placement.DesktopOnly`: rail only, with genuinely no mobile entry point, as opposed
+  to `WideOnly` (rail + reachable from a mobile parent screen), which would claim a mobile path
+  that does not exist.
+- **Publishing repeats the WhatsApp Reminder Queue's pattern: build the real staff-facing
+  composition and audience-targeting layer even though delivery has nobody to reach.**
+  `AnnouncementRepository.publish()` computes and freezes a real `recipientCountAtPublish` against
+  live `members`/`current subscriptions` at the moment of publish — never a placeholder — but no
+  push or WhatsApp channel exists to actually notify anyone. The number is honest; the audience
+  just never sees it yet.
+- **Only 3 of the export's 5 audience segments are honestly computable, and the other two are
+  named in `AnnouncementAudience`'s own KDoc rather than silently omitted.** `ALL_MEMBERS`,
+  `ACTIVE_ONLY`, and `EXPIRING_THIS_MONTH` (sharing `TermProgress.EXPIRING_SOON_DAYS` with the
+  dashboard's renewal queue, so "soon" never disagrees with itself) are backed by real member/term
+  data. "By class attendance" and "by therapy status" would need attendance history and clinical
+  data joined in ways nothing in this app currently supports.
+- **There is no unpublish, so the guard against re-publishing lives in the component, not just the
+  dialog.** The form dialog withholds the Publish/Delete actions once `AnnouncementForm.wasPublished`
+  is true, but `AnnouncementsComponent.onRequestPublish()` also refuses directly
+  (`if (form.wasPublished) return`) — a component method is callable from anywhere, so hiding a
+  button is UX, not enforcement. Same principle as `CheckInPolicy` deciding the outcome instead of
+  the caller. A published announcement's dialog offers only Cancel and "Save changes" (a distinct
+  i18n string from "Save draft" — the wording must not imply a draft still exists).
+- **The list+dialog UI is a deliberate departure from the export's split editor-with-live-preview**,
+  documented via KDoc rather than silently simplified: no rich text or image storage exists, no
+  per-record bilingual authoring pattern exists elsewhere in the app, there is no member-facing app
+  to preview into, and no background scheduler exists for a "send later" option the export implies.
+
 ## Navigation
 
 **`TopLevel.placement` is the whole model.** The rail and the bar carry deliberately different

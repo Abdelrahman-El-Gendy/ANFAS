@@ -8,6 +8,8 @@ import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.data.AuthRepository
 import com.anfas.core.model.MemberId
+import com.anfas.feature.announcements.AnnouncementsComponent
+import com.anfas.feature.announcements.AnnouncementsComponentFactory
 import com.anfas.feature.auth.SignInComponent
 import com.anfas.feature.auth.SignInComponentFactory
 import com.anfas.feature.auth.StaffListComponent
@@ -78,6 +80,7 @@ class RootComponent(componentContext: ComponentContext) :
     private val classesFactory: ClassesComponentFactory by inject()
     private val memberProfileFactory: MemberProfileComponentFactory by inject()
     private val therapyFactory: TherapyComponentFactory by inject()
+    private val announcementsFactory: AnnouncementsComponentFactory by inject()
     private val reminderQueueFactory: ReminderQueueComponentFactory by inject()
     private val renewalSheetFactory: RenewalSheetComponentFactory by inject()
     private val intakeReviewFactory: IntakeReviewComponentFactory by inject()
@@ -189,6 +192,7 @@ class RootComponent(componentContext: ComponentContext) :
                 TopLevel.CHECK_IN -> Config.CheckIn
                 TopLevel.REMINDERS -> Config.ReminderQueue
                 TopLevel.INTAKE -> Config.IntakeReview
+                TopLevel.ANNOUNCEMENTS -> Config.Announcements
                 TopLevel.STAFF -> Config.StaffList
             },
         )
@@ -217,6 +221,10 @@ class RootComponent(componentContext: ComponentContext) :
 
         Config.Classes -> Child.Classes(
             classesFactory.create(componentContext = context),
+        )
+
+        Config.Announcements -> Child.Announcements(
+            announcementsFactory.create(componentContext = context),
         )
 
         Config.CheckIn -> Child.CheckIn(
@@ -339,6 +347,10 @@ class RootComponent(componentContext: ComponentContext) :
         data object Classes : Config
 
         @Serializable
+        @SerialName("announcements")
+        data object Announcements : Config
+
+        @Serializable
         @SerialName("reminder-queue")
         data object ReminderQueue : Config
 
@@ -372,6 +384,8 @@ class RootComponent(componentContext: ComponentContext) :
         data class Dashboard(val component: DashboardComponent) : Child
 
         data class Classes(val component: ClassesComponent) : Child
+
+        data class Announcements(val component: AnnouncementsComponent) : Child
 
         data class TherapyCase(val component: TherapyComponent) : Child
 
@@ -434,6 +448,16 @@ class RootComponent(componentContext: ComponentContext) :
          */
         REMINDERS(Permission.VIEW_REMINDERS, Placement.WideOnly),
         INTAKE(Permission.SCAN_INTAKE, Placement.WideOnly),
+
+        /**
+         * Rail only, with no mobile equivalent at all — not even a mobile screen reached from a
+         * parent, the way Intake and Reminders are. The export itself never designed a mobile
+         * `create-announcement`: it drew this as a desktop-only screen. [Placement.DesktopOnly]
+         * says that plainly rather than overloading [Placement.WideOnly]'s meaning, which
+         * documents a real "reached from its parent screen" mobile path this destination does
+         * not have.
+         */
+        ANNOUNCEMENTS(Permission.MANAGE_ANNOUNCEMENTS, Placement.DesktopOnly),
         STAFF(Permission.MANAGE_STAFF, Placement.Account),
         ;
 
@@ -471,6 +495,14 @@ class RootComponent(componentContext: ComponentContext) :
          * you work, so it does not compete with the screens used on every shift.
          */
         Account,
+
+        /**
+         * Rail only, and — unlike [WideOnly] — reachable *nowhere* on a phone, because the export
+         * never designed a mobile screen for it at all. `Announcements` is the only user of this
+         * today; if a future feature is designed for desktop only, it belongs here too rather
+         * than being forced into [WideOnly] with an invented mobile entry point.
+         */
+        DesktopOnly,
     }
 }
 
@@ -484,6 +516,8 @@ internal val RootComponent.Config.topLevel: RootComponent.TopLevel?
         RootComponent.Config.CheckIn -> RootComponent.TopLevel.CHECK_IN
 
         RootComponent.Config.Classes -> RootComponent.TopLevel.CLASSES
+
+        RootComponent.Config.Announcements -> RootComponent.TopLevel.ANNOUNCEMENTS
 
         RootComponent.Config.ReminderQueue -> RootComponent.TopLevel.REMINDERS
 
@@ -522,6 +556,8 @@ internal val RootComponent.Config.requiredPermission: Permission
         // Viewing the timetable, not managing it. MANAGE_CLASSES is enforced inside the screen,
         // because add/edit and view live on one route -- the same split as scan/import.
         RootComponent.Config.Classes -> Permission.VIEW_MEMBERS
+
+        RootComponent.Config.Announcements -> Permission.MANAGE_ANNOUNCEMENTS
 
         is RootComponent.Config.MemberProfile -> Permission.VIEW_MEMBERS
 

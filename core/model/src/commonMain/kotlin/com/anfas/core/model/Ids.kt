@@ -36,3 +36,6 @@ value class TherapyCaseId(val value: String)
 
 @JvmInline
 value class TherapySessionId(val value: String)
+
+@JvmInline
+value class AnnouncementId(val value: String)

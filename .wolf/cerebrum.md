@@ -458,3 +458,35 @@
   tests (already thorough here) and use the device only to confirm layout, navigation, RTL, and
   state transitions that don't require typing — chip selections, button taps, dialog open/close,
   and reading back rows seeded directly via SQL into the simulator's own sqlite file.
+
+## Key Learnings — 2026-08-24 (announcements feature)
+
+- **A new `Placement` category is justified the same way a new permission is: check what the
+  export actually drew, not what feels analogous.** `create-announcement` has `deviceType: DESKTOP`
+  only, with no mobile screen anywhere in the export — unlike every other feature so far, which had
+  at least a phone-reachable path. That is what earned `Placement.DesktopOnly` (rail only, zero
+  mobile path), rather than reusing `WideOnly` (rail + reachable from a mobile parent) which would
+  have implied a mobile entry point that doesn't exist.
+- **"Publish" repeats the WhatsApp Reminder Queue precedent: build the real staff-facing
+  composition/audience layer even when delivery has nobody to reach.** `publish()` computes and
+  freezes a real `recipientCountAtPublish` against live members/terms — never a placeholder number
+  — but there is no push/WhatsApp channel wired to actually notify anyone. The number is honest
+  even though nothing downstream consumes it yet.
+- **A "no unpublish" rule must be enforced in the component, not just hidden in the UI** — see
+  `bug-announcements-publish-guard` in buglog. A dialog withholding a button is a good UX signal but
+  not a guarantee; `onRequestPublish()`/`onRequestDelete` themselves must refuse the illegal
+  transition, because a component method is callable from anywhere (a future screen, a test, a
+  future contributor who reuses the component). Same principle as `CheckInPolicy` deciding the
+  outcome instead of the caller.
+- **Turbine + a component whose `StateFlow` has two independent `combine` sources feeding off the
+  same upstream `ui` state (here: the form itself, and `ui.flatMapLatest { repository.observeReach
+  (audience) }`) emits twice per mutation** — once with the old value from the second source, once
+  after that source's flow delivers its real value. A test that calls a mutator once and then
+  `awaitItem()`s once will see the *stale* intermediate emission, not the settled one. Drain to the
+  settled state (loop `awaitItem()` while the field you care about is still catching up) rather than
+  assuming one mutation = one emission.
+- **`CreateAccountOutcome`/`StaffChangeOutcome` live in `com.anfas.core.data`, not
+  `com.anfas.core.auth`**, even though `Role`/`Session`/`StaffAccount`/`SignInResult` are in
+  `core.auth`. `AuthRepository`'s own return-type sealed interfaces are declared alongside it in
+  `core.data`, not in the domain module — check the actual declaring file before importing rather
+  than assuming a family of related types share one package.

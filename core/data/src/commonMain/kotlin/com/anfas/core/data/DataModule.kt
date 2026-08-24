@@ -34,6 +34,7 @@ val dataModule: Module = module {
     single { get<AnfasDatabase>().checkInDao() }
     single { get<AnfasDatabase>().gymClassDao() }
     single { get<AnfasDatabase>().therapyCaseDao() }
+    single { get<AnfasDatabase>().announcementDao() }
 
     single<MemberRepository> {
         OfflineFirstMemberRepository(dao = get(), newId = { Uuid.random().toString() })
@@ -67,6 +68,15 @@ val dataModule: Module = module {
     }
     single<TherapyRepository> {
         OfflineFirstTherapyRepository(cases = get(), staff = get(), dispatchers = get())
+    }
+    single<AnnouncementRepository> {
+        OfflineFirstAnnouncementRepository(
+            announcements = get(),
+            members = get(),
+            subscriptions = get(),
+            staff = get(),
+            dispatchers = get(),
+        )
     }
     single<IntakeRepository> {
         OfflineFirstIntakeRepository(

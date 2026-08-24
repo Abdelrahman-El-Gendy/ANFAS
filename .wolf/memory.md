@@ -139,3 +139,45 @@
 | 11:15 | Added a real pain-score sparkline via Canvas, plotting only actually-recorded scores — the one measurement every case can report the same way | feature/therapy/TherapyScreen.kt | honest visualization, not fabricated | ~small |
 | 11:20 | Verified end to end on iPad Pro 13" simulator seeded with the export's own Mariam Fouad case: opened case, logged a session (defaulted therapist to the signed-in Owner), closed the case, confirmed history and progress trend survive closing, confirmed canOpenNewCase/canLogSession/canCloseCase all flip correctly | app/iosApp | fully correct in Arabic RTL, first-try — no bugs found on this pass | ~large |
 | 11:25 | Fixed the pain-score trend's RTL wording before device testing (not after): "$first → $latest" reads backwards in Arabic RTL with a directional arrow; changed to "من $first إلى $latest" using real words, which sidesteps the ambiguity entirely | core/i18n/ArabicStrings.kt, EnglishStrings.kt | confirmed correct on device: "من 5 إلى 3" | ~small |
+| 10:59 | Session end: 1 writes across 1 files (RootComponent.kt) | 0 reads | ~56 tok |
+| 11:01 | Session end: 1 writes across 1 files (RootComponent.kt) | 0 reads | ~56 tok |
+| 11:14 | Edited core/i18n/src/commonTest/kotlin/com/anfas/core/i18n/PlaceholderInterpolationTest.kt | expanded (+10 lines) | ~210 |
+
+## Session: 2026-08-24 11:36
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-24 11:37
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:46 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementFormDialog.kt | added 2 condition(s) | ~404 |
+| 11:46 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementFormDialog.kt | modified if() | ~278 |
+| 11:46 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsComponent.kt | added 1 condition(s) | ~149 |
+
+## Session: 2026-08-24 11:51
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:52 | Edited feature/announcements/src/commonTest/kotlin/com/anfas/feature/announcements/AnnouncementsComponentTest.kt | 13→13 lines | ~145 |
+| 11:53 | Edited feature/announcements/src/commonTest/kotlin/com/anfas/feature/announcements/AnnouncementsComponentTest.kt | 31→36 lines | ~349 |
+| 11:54 | Edited feature/announcements/src/commonTest/kotlin/com/anfas/feature/announcements/AnnouncementsComponentTest.kt | 36→36 lines | ~351 |
+| 11:54 | Edited feature/announcements/src/commonTest/kotlin/com/anfas/feature/announcements/AnnouncementsComponentTest.kt | added 1 import(s) | ~27 |
+| 11:54 | Edited feature/announcements/src/commonTest/kotlin/com/anfas/feature/announcements/AnnouncementsComponentTest.kt | modified awaitSettled() | ~211 |
+| 11:58 | Fixed AnnouncementsComponentTest.kt: turbine tests must await twice after a `ui` mutation (combine's flatMapLatest reach source emits separately) — added awaitSettled() helper | feature/announcements/src/commonTest/kotlin/com/anfas/feature/announcements/AnnouncementsComponentTest.kt | 4/4 tests pass | ~2k |
+| 11:59 | Ran spotlessApply on core:i18n (blank-line-before-KDoc violation from earlier saveChanges addition) and feature:announcements (test file formatting) | core/i18n, feature/announcements | ./gradlew check BUILD SUCCESSFUL | ~1k |
+| 12:00 | Verified full ./gradlew check green (all modules, layering, iosSimulatorArm64Test) + compileKotlinIosArm64 green | whole repo | BUILD SUCCESSFUL both | ~3k |
+
+## Session summary: Announcements feature complete
+Built the Announcements feature end-to-end: domain model (Announcement/AnnouncementAudience/AnnouncementReach)
+with 7 reach tests, Room v9→v10 AutoMigration (announcements table, schema diff verified clean), repository
+with 12 passing tests, full bilingual i18n with CLDR-correct Arabic plurals, a new `Placement.DesktopOnly`
+navigation category (justified — `create-announcement` has no mobile counterpart in the Stitch export), and
+a list+dialog UI (not the export's split editor+live-preview — documented via KDoc why: no rich text/image
+storage, no bilingual per-record authoring, no member-facing app to preview, only 3/5 audience segments are
+honestly computable, no push/WhatsApp channels, no scheduler). Device-verified on iPad Pro 13" simulator;
+found and fixed one real bug (published announcements still showed Delete/Publish in the form footer — see
+buglog bug-announcements-publish-guard). Added AnnouncementsComponentTest.kt as the regression test.
+`./gradlew check` green on all platforms including both iOS targets.
+| 11:59 | Edited CLAUDE.md | added 1 condition(s) | ~806 |

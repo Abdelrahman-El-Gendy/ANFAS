@@ -418,6 +418,7 @@ interface AppStrings {
     val checkIn: CheckIn
     val classes: Classes
     val therapy: Therapy
+    val announcements: Announcements
 
     /** The weekly class timetable: `class-schedule` and `weekly-class-schedule`. */
     interface Classes {
@@ -491,6 +492,60 @@ interface AppStrings {
     }
 
     /** The physical-therapy case file: `therapy-case-file`. Therapist- and Owner-only. */
+
+    /** Staff bulletins: `create-announcement`. Creates and tracks; delivers nothing yet — see
+     * `Announcement`'s KDoc in :core:model. */
+    interface Announcements {
+        val title: String
+        val subtitle: String
+
+        val newAnnouncement: String
+        val editAnnouncement: String
+
+        val fieldTitle: String
+        val fieldBody: String
+        val fieldEventDate: String
+        val fieldEventTime: String
+
+        val audienceTitle: String
+        val audienceAll: String
+        val audienceActive: String
+        val audienceExpiring: String
+        fun reaches(count: Int): String
+
+        val statusDraft: String
+        val statusPublished: String
+
+        val saveDraft: String
+
+        /** Editing an already-published announcement -- "Save draft" would be wrong wording
+         * for something already live. */
+        val saveChanges: String
+        val publish: String
+        val publishConfirmTitle: String
+        fun publishConfirmMessage(count: Int): String
+        val deleteDraft: String
+        val deleteConfirmTitle: String
+        val deleteConfirmMessage: String
+
+        fun createdBy(name: String): String
+        val createdByUnknown: String
+        fun createdOn(date: String): String
+        fun publishedOn(date: String): String
+        fun reachedAtPublish(count: Int): String
+
+        val emptyTitle: String
+        val emptyMessage: String
+        val loadFailedTitle: String
+
+        val draftSaved: String
+        val published: String
+        val deleted: String
+        val errorTitleBlank: String
+        val errorBodyBlank: String
+        val errorEventDateUnreadable: String
+    }
+
     interface Therapy {
         val title: String
         val subtitle: String

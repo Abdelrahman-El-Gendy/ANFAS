@@ -445,6 +445,53 @@ object EnglishStrings : AppStrings {
         override fun deleted(name: String) = "$name removed from the timetable."
     }
 
+    override val announcements = object : AppStrings.Announcements {
+        override val title = "Announcements"
+        override val subtitle = "Gym-wide bulletins."
+        override val newAnnouncement = "New announcement"
+        override val editAnnouncement = "Edit announcement"
+        override val fieldTitle = "Announcement title"
+        override val fieldBody = "Body"
+        override val fieldEventDate = "Event date"
+        override val fieldEventTime = "Event time"
+        override val audienceTitle = "Audience"
+        override val audienceAll = "All members"
+        override val audienceActive = "Active only"
+        override val audienceExpiring = "Expiring this month"
+        override fun reaches(count: Int) =
+            if (count == 1) "Reaches 1 member" else "Reaches $count members"
+        override val statusDraft = "Draft"
+        override val statusPublished = "Published"
+        override val saveDraft = "Save draft"
+        override val saveChanges = "Save changes"
+        override val publish = "Publish"
+        override val publishConfirmTitle = "Publish this announcement?"
+        override fun publishConfirmMessage(count: Int) = if (count == 1) {
+            "This freezes the audience at 1 member. There is no unpublish."
+        } else {
+            "This freezes the audience at $count members. There is no unpublish."
+        }
+        override val deleteDraft = "Delete draft"
+        override val deleteConfirmTitle = "Delete this draft?"
+        override val deleteConfirmMessage = "This cannot be undone."
+        override fun createdBy(name: String) = "By $name"
+        override val createdByUnknown = "By an account that no longer exists"
+        override fun createdOn(date: String) = "Created $date"
+        override fun publishedOn(date: String) = "Published $date"
+        override fun reachedAtPublish(count: Int) =
+            if (count == 1) "Reached 1 member" else "Reached $count members"
+        override val emptyTitle = "No announcements yet"
+        override val emptyMessage = "Write one to start a record of what the gym has told members."
+        override val loadFailedTitle = "Could not load announcements"
+        override val draftSaved = "Draft saved."
+        override val published = "Announcement published."
+        override val deleted = "Draft deleted."
+        override val errorTitleBlank = "Give the announcement a title."
+        override val errorBodyBlank = "Write the body."
+        override val errorEventDateUnreadable =
+            "Could not read that date. Try \"1 Nov 2026\" or \"2026-11-01\"."
+    }
+
     override val therapy = object : AppStrings.Therapy {
         override val title = "Recovery"
         override val subtitle = "Physical therapy case file."

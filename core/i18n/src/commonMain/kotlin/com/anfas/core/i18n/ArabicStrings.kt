@@ -532,6 +532,68 @@ object ArabicStrings : AppStrings {
         override fun deleted(name: String) = "تم حذف $name من الجدول."
     }
 
+    override val announcements = object : AppStrings.Announcements {
+        override val title = "الإعلانات"
+        override val subtitle = "بلاغات عامة للصالة."
+        override val newAnnouncement = "إعلان جديد"
+        override val editAnnouncement = "تعديل الإعلان"
+        override val fieldTitle = "عنوان الإعلان"
+        override val fieldBody = "النص"
+        override val fieldEventDate = "تاريخ الفعالية"
+        override val fieldEventTime = "وقت الفعالية"
+        override val audienceTitle = "الفئة المستهدفة"
+        override val audienceAll = "كل الأعضاء"
+        override val audienceActive = "النشطون فقط"
+        override val audienceExpiring = "تنتهي عضويتهم هذا الشهر"
+        override fun reaches(count: Int) = when (arabicPlural(count)) {
+            PluralCategory.ZERO -> "لا يصل إلى أحد"
+            PluralCategory.ONE -> "يصل إلى عضو واحد"
+            PluralCategory.TWO -> "يصل إلى عضوين"
+            PluralCategory.FEW -> "يصل إلى $count أعضاء"
+            PluralCategory.MANY -> "يصل إلى $count عضوًا"
+            PluralCategory.OTHER -> "يصل إلى $count عضو"
+        }
+        override val statusDraft = "مسودة"
+        override val statusPublished = "منشور"
+        override val saveDraft = "حفظ المسودة"
+        override val saveChanges = "حفظ التغييرات"
+        override val publish = "نشر"
+        override val publishConfirmTitle = "نشر هذا الإعلان؟"
+        override fun publishConfirmMessage(count: Int) = when (arabicPlural(count)) {
+            PluralCategory.ONE ->
+                "سيتم تثبيت الفئة المستهدفة عند عضو واحد. لا يمكن التراجع عن النشر."
+
+            PluralCategory.TWO -> "سيتم تثبيت الفئة المستهدفة عند عضوين. لا يمكن التراجع عن النشر."
+
+            else ->
+                "سيتم تثبيت الفئة المستهدفة عند $count أعضاء. لا يمكن التراجع عن النشر."
+        }
+        override val deleteDraft = "حذف المسودة"
+        override val deleteConfirmTitle = "حذف هذه المسودة؟"
+        override val deleteConfirmMessage = "لا يمكن التراجع عن هذا الإجراء."
+        override fun createdBy(name: String) = "بواسطة $name"
+        override val createdByUnknown = "بواسطة حساب لم يعد موجودًا"
+        override fun createdOn(date: String) = "أُنشئ في $date"
+        override fun publishedOn(date: String) = "نُشر في $date"
+        override fun reachedAtPublish(count: Int) = when (arabicPlural(count)) {
+            PluralCategory.ONE -> "وصل إلى عضو واحد"
+            PluralCategory.TWO -> "وصل إلى عضوين"
+            PluralCategory.FEW -> "وصل إلى $count أعضاء"
+            PluralCategory.MANY -> "وصل إلى $count عضوًا"
+            else -> "وصل إلى $count عضو"
+        }
+        override val emptyTitle = "لا توجد إعلانات بعد"
+        override val emptyMessage = "اكتب إعلانًا لبدء سجل بما أُبلغ الأعضاء به."
+        override val loadFailedTitle = "تعذّر تحميل الإعلانات"
+        override val draftSaved = "تم حفظ المسودة."
+        override val published = "تم نشر الإعلان."
+        override val deleted = "تم حذف المسودة."
+        override val errorTitleBlank = "اكتب عنوانًا للإعلان."
+        override val errorBodyBlank = "اكتب نص الإعلان."
+        override val errorEventDateUnreadable =
+            "تعذّرت قراءة هذا التاريخ. جرّب \"1 نوفمبر 2026\" أو \"2026-11-01\"."
+    }
+
     override val therapy = object : AppStrings.Therapy {
         override val title = "الاستشفاء"
         override val subtitle = "ملف العلاج الطبيعي."
