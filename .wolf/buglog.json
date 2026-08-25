@@ -1265,5 +1265,27 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-25T11:12:00Z"
+  },
+  {
+    "id": "bug-073",
+    "timestamp": "2026-08-25T11:45:00Z",
+    "error_message": "User report: 'the add class button on simulator iphone not properly rendered' -- the Classes title ran flush into the Add class button with no gap, reading as clipped text",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasScreenHeader.kt",
+    "root_cause": "AnfasScreenHeader's Row used Arrangement.SpaceBetween with the title Column taking Modifier.weight(1f, fill = false). SpaceBetween can only distribute space that is left OVER, and a weight(1f) child claims the entire remaining share -- so once the title is long enough to fill that share there is no space left to distribute and the title lands flush against the first action, with zero separation. It only showed on the narrower iPhone (~402dp): on the Pixel (~427dp) 'Today's schedule' had just enough room that the absence of a gutter was not obvious. Not a clipping bug -- the glyphs were complete, there was simply no gap, which reads as clipping.",
+    "fix": "Gave the actions Row a Modifier.padding(start = 16.dp) gutter. Padding rather than an Arrangement gap on purpose: it becomes part of the actions' MEASURED width, which is what shrinks the title's weighted share, so an over-long title now wraps instead of colliding. Verified on iPhone 17 (title wraps to two lines, clear space around the button), on the Pixel 9 Pro (still one line, now with breathing room), and on Members, which is the two-action worst case.",
+    "tags": [
+      "designsystem",
+      "compose-layout",
+      "ios",
+      "responsive",
+      "weight",
+      "space-between"
+    ],
+    "related_bugs": [
+      "bug-070",
+      "bug-071"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T11:45:00Z"
   }
 ]

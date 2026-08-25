@@ -384,3 +384,7 @@ Not done: clicking through the desktop date picker -- osascript lacks Accessibil
 blind Robot clicks were hitting the user's own windows, so I stopped. Desktop shares the identical
 skiko dialog actual with iOS, which is verified.
 | 11:32 | Session end: 100 writes across 42 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 53 reads | ~98445 tok |
+| 11:35 | Session end: 100 writes across 42 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 53 reads | ~98445 tok |
+| 11:43 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasScreenHeader.kt | modified if() | ~632 |
+| 11:46 | Fixed AnfasScreenHeader: title ran flush into the actions button (SpaceBetween has no leftover space to distribute when the title takes weight(1f)); added a 16dp measured gutter on the actions so a long title wraps instead of colliding | core/designsystem/.../AnfasScreenHeader.kt | verified iPhone 17 + Pixel 9 Pro + Members two-action case; check green | ~3k |
+| 11:49 | Session end: 101 writes across 43 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 61 reads | ~99452 tok |

@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T08:29:51.512Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T08:43:18.797Z
 > Files: 562 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -672,7 +672,7 @@
 - `AnfasInlineEdit.kt` — A table cell that can be corrected in place. (~1277 tok)
 - `AnfasNavigation.kt` — `NavItem` + `AnfasBottomNav` (<1024dp) and `AnfasNavRail` (>=1024dp) (~900 tok)
 - `AnfasPalette.kt` — GENERATED from design/stitch/export. 47 M3 colour tokens + 4 brand accents. The only file with hex literals (~560 tok)
-- `AnfasScreenHeader.kt` — Page title + subtitle + trailing actions (~330 tok)
+- `AnfasScreenHeader.kt` — Page title, one line of supporting text, and trailing actions — the block every staff screen (~804 tok)
 - `AnfasSearchField.kt` — Search input on `background`, amber border on focus, clear affordance when non-empty (~520 tok)
 - `AnfasShapes.kt` — 4dp/8dp/12dp/pill. 12dp is the base radius; large/extraLarge deliberately also 12dp (~200 tok)
 - `AnfasStatusChip.kt` — The status pill used throughout the staff app. (~691 tok)
