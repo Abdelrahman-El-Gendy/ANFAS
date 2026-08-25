@@ -77,8 +77,10 @@ import com.anfas.core.ocr.rememberImageSource
  * Departures from `ocr-intake-review`, all documented rather than silent:
  *  - **No pan-tool button.** The export has a mode toggle; the source view is directly
  *    draggable and pinch-zoomable instead, which is fewer controls and works on touch.
- *  - **The split becomes stacked below 1024dp.** The export is desktop-only at 2560px; a 40/60
- *    split of a phone screen would make both halves useless.
+ *  - **The split becomes stacked below 1024dp**, source pane above the table, same 40/60 ratio.
+ *    The export is desktop-only at 2560px; side-by-side on a phone would make both halves
+ *    useless, but dropping the photo altogether is worse — a phone is where a sheet is actually
+ *    photographed, and the pane is zoomable and pannable so a small one is still usable.
  *  - **No "Merge" action on a duplicate.** The export offers it, but merging two member records
  *    is a destructive operation with no defined semantics anywhere in the design — which
  *    fields win, what happens to the other's history. Correcting the phone number is offered
@@ -210,15 +212,26 @@ private fun ReviewBody(
                 )
             }
         } else {
+            // The same 40/60 split, stacked. The source pane used to be dropped entirely here,
+            // which left the photo unreachable on the very device that took it -- a phone is
+            // where a sheet actually gets photographed. A 40%-height pane is small, but it is
+            // pinch-zoomable and pannable, so it works as "glance at the paper to check a
+            // garbled name", which is the whole reason the pane exists.
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+                SourceDocumentPane(
+                    batch = batch,
+                    state = state,
+                    component = component,
+                    modifier = Modifier.fillMaxWidth().weight(SOURCE_PANE_WEIGHT),
+                )
                 ValidationPane(
                     batch = batch,
                     state = state,
                     component = component,
-                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    modifier = Modifier.fillMaxWidth().weight(TABLE_PANE_WEIGHT),
                 )
             }
         }
