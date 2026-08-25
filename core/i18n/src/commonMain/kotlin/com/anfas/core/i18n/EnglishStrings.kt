@@ -38,6 +38,10 @@ object EnglishStrings : AppStrings {
         override fun dayNameShort(isoDayNumber: Int) = dayName(isoDayNumber).take(3).uppercase()
         override val back = "Back"
         override val moreOptions = "Account and settings"
+        override val chooseDate = "Choose a date"
+        override val openDatePicker = "Open the calendar"
+        override val confirmDate = "Select"
+        override val clearDate = "Clear"
     }
 
     override val members = object : AppStrings.Members {
@@ -488,8 +492,6 @@ object EnglishStrings : AppStrings {
         override val deleted = "Draft deleted."
         override val errorTitleBlank = "Give the announcement a title."
         override val errorBodyBlank = "Write the body."
-        override val errorEventDateUnreadable =
-            "Could not read that date. Try \"1 Nov 2026\" or \"2026-11-01\"."
     }
 
     override val therapy = object : AppStrings.Therapy {

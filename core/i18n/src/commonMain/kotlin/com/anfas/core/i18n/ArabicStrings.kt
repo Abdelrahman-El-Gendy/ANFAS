@@ -62,6 +62,10 @@ object ArabicStrings : AppStrings {
             .getOrElse(isoDayNumber - 1) { "" }
         override val back = "رجوع"
         override val moreOptions = "الحساب والإعدادات"
+        override val chooseDate = "اختر تاريخًا"
+        override val openDatePicker = "افتح التقويم"
+        override val confirmDate = "اختيار"
+        override val clearDate = "مسح"
     }
 
     override val members = object : AppStrings.Members {
@@ -590,8 +594,6 @@ object ArabicStrings : AppStrings {
         override val deleted = "تم حذف المسودة."
         override val errorTitleBlank = "اكتب عنوانًا للإعلان."
         override val errorBodyBlank = "اكتب نص الإعلان."
-        override val errorEventDateUnreadable =
-            "تعذّرت قراءة هذا التاريخ. جرّب \"1 نوفمبر 2026\" أو \"2026-11-01\"."
     }
 
     override val therapy = object : AppStrings.Therapy {

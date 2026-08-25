@@ -18,20 +18,30 @@ Never run a destructive command (`git checkout --`, `git restore`, `git reset --
 clean`) without being explicitly told to discard something. If in doubt, stash (`git stash -u`)
 rather than discard.
 
-# Step 1 - branch
+# Step 1 - branch: one descriptively-named branch per feature
 
-This repo's branches follow `hardening/phase-N-<short-slug>` (e.g. `hardening/phase-3-ocr`,
-`hardening/phase-2-localization`) for the current hardening effort, or plain feature-style names
-when work isn't part of that numbered sequence. Look at `git branch -a` and recent commit subjects
-(`git log --oneline -15`) to infer the right pattern before inventing a new one.
+**Every feature gets its own branch, named for what it actually is.** Do not pile unrelated work
+onto whatever branch happens to be checked out - that is how `hardening/phase-3-ocr` ended up
+carrying an equipment feature, a CI setup, and an image-rendering fix, none of which are OCR.
+A branch name is read later by someone deciding whether to care about it.
 
-- If you were told which branch to use, use it (`git checkout <branch>` or
-  `git checkout -b <branch>` if it doesn't exist yet).
-- If not told, and the current branch is `main`, ask the user (via AskUserQuestion) whether to
-  commit directly to `main` or cut a new branch - don't decide this silently, since it's a
-  structural choice that outlives this one commit.
-- If the current branch already looks like the right home for this change (e.g. you're continuing
-  the same phase), just commit there - don't create a new branch for every commit.
+Naming: `<type>/<kebab-case-what-it-is>`, where type is `feature`, `fix`, `chore`, or `docs`.
+Name the *subject*, not the mechanism - `feature/calendar-date-picker`, not
+`feature/replace-textfield`; `fix/intake-source-pane-on-phone`, not `fix/layout-bug`. Keep it
+short enough to read in a branch list. Look at `git branch -a` and `git log --oneline -15` for
+the house style before inventing something novel, but prefer a clear new name over extending a
+stale one.
+
+- If you were told which branch to use, use it.
+- Otherwise create one from the current HEAD: `git checkout -b <type>/<slug>`. Stacking on the
+  current branch is correct and normal here - this repo's history is a sequence of branches each
+  built on the last, so do NOT switch to `main` first unless told to.
+- **If the work spans more than one distinct feature, say so and split it** into a branch and
+  commit per feature, stacked in dependency order, rather than one commit with a vague name. If
+  a single file genuinely carries hunks belonging to two features, note that in your report
+  rather than silently lumping them.
+- If the current branch is `main`, still cut a named branch rather than committing to `main`
+  directly, unless the user explicitly said to commit to `main`.
 
 # Step 2 - stage deliberately
 
@@ -75,8 +85,32 @@ authorization for *this* change, not a standing permission:
   push to `main`.
 - If the branch has no upstream yet, use `git push -u origin <branch>`.
 
+# Step 5 - merge the delivered feature into `main`
+
+**A successfully delivered feature ends up on `main`.** This is a standing instruction, so it does
+not need re-asking per feature - but it applies only to work that is actually finished: committed,
+pushed, and verified green (`./gradlew check` plus the per-platform run that `feature-verifier`
+does). Never merge something still being iterated on, and never merge to get around a failing gate.
+
+```
+git checkout main
+git merge --ff-only <feature-branch>     # prefer this; main trails the feature branches here
+git push origin main
+git checkout <feature-branch>            # leave the user where they were working
+```
+
+- `--ff-only` first. This repo's branches stack in sequence on top of each other, so `main` is
+  normally a plain ancestor and the merge is a fast-forward with no merge commit. If `--ff-only`
+  is refused, `main` has diverged - **stop and report that** rather than reaching for a merge
+  commit or a rebase on your own judgment.
+- **Heads-up worth stating in your report:** `main` has been left far behind (it sat at the
+  pre-hardening commit while ten-plus phases accumulated on branches), so the first merge carries
+  a large amount of history. That is expected, not a mistake - but say so plainly, and give the
+  commit range, so nobody is surprised by the size of it.
+- If the push to `main` is rejected, do not force. Report it.
+
 # Reporting
 
-Report back: the branch you ended up on (and whether you created it), the commit hash and
-subject, and whether the push happened, is pending confirmation, or was intentionally skipped
-(and why).
+Report back: the branch you created (and its name), the commit hash and subject, whether the push
+happened, and whether the merge into `main` succeeded - with the commit range it carried. If any
+step was skipped, say which and why.

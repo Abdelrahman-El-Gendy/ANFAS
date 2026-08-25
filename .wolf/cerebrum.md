@@ -8,6 +8,44 @@
 
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
 
+- **[2026-08-25] Every feature must be RUN on every platform before it is committed** — Android,
+  iOS and desktop, not just `./gradlew check` plus a compile check. Stated directly: "i need you
+  to check every feature first on each platform before commiting them." This corrects the prior
+  habit of treating a green `check` plus `compileKotlinIosArm64` as sufficient and committing on
+  that basis. It is a well-earned correction: the Equipment publish-guard bug and the intake
+  source-photo placeholder were both invisible to the entire test suite and only visible on a
+  screen. Compilation is not behaviour. `.claude/agents/feature-verifier.md` now carries this as
+  a mandatory second gate, including how to handle `Placement.DesktopOnly`/`WideOnly` screens that
+  are legitimately unreachable on a phone (confirm the absence; check the iPad, where the rail
+  actually appears).
+- **Prefers the phased, ship-it-properly loop** — implement, verify, bookkeep (`.wolf/` +
+  `CLAUDE.md`), then commit with a real explanatory message. Has asked for dedicated subagents for
+  the verify step and the branch/commit/push step rather than doing either inline.
+- **[2026-08-25] One descriptively-named branch per feature.** Stated as "choose a convinant name
+  for every branch descripting feature developed!" — a correction to having stacked Equipment, CI
+  and the intake photo fix all onto `hardening/phase-3-ocr`, a branch whose name describes none of
+  them. Convention now `<type>/<kebab-slug>` naming the subject, not the mechanism
+  (`feature/calendar-date-picker`, `fix/intake-source-pane-on-phone`). Recorded in
+  `.claude/agents/git-shipper.md`, which also now says to split work spanning several features
+  into a branch+commit each rather than one vaguely-named commit.
+- **[2026-08-25] Every successfully delivered feature gets merged into `main`.** Standing
+  instruction ("after each successful feature delevely merge it with main too and so on"), so it
+  is part of the ship step rather than something to ask about each time. Applies only to finished
+  work — committed, pushed, and green on both gates. `main` had been left at the pre-hardening
+  commit while 10+ phases accumulated on stacked branches, so it is normally a plain ancestor and
+  `--ff-only` is the right merge; a refusal means real divergence and should be reported, not
+  worked around. Encoded in `.claude/agents/git-shipper.md` step 5.
+- **[2026-08-25] Wants free-text dates replaced with a real date picker** — "i need to make the
+  date entered to be a date piker not a string as it is." Built as `AnfasDateField` wrapping
+  Material 3's calendar. The general principle behind it: a typed date needs a parser, a parser
+  can fail, and every screen then carries an "unreadable date" error path — a picker deletes all
+  three. The one place free text stays correct is correcting a date read off a photographed
+  sheet, where the text is a transcription and the confidence stripe is the point.
+- **[2026-08-25] Also wants UI *rendering* verified per platform**, not just behaviour — "check
+  the rendering ui component is properly set on each platform (ios, android and desktop)". So a
+  per-platform pass covers fonts/glyphs (Arabic must not tofu), theme colours, spacing, clipping,
+  RTL mirroring and breakpoint branches, not merely "the feature works".
+
 ## Key Learnings
 
 - **Project:** ANFAS

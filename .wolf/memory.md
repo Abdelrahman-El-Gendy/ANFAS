@@ -323,3 +323,64 @@ feature modules existed. ./gradlew check green on all platforms including iOS.
 | 10:28 | Session end: 73 writes across 33 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 36 reads | ~79545 tok |
 | 10:31 | feature-verifier: re-verified OCR intake image-render fix. gradlew check green, iosSimulatorArm64+iosArm64 compose compile green, no defects found. Verified Coil3 SubcomposeAsyncImage(model,contentDescription,contentScale,error) signature against sources jar, sourceImageUri file:// population on Android/iOS, overlay-box coordinate alignment with FillBounds. Skipped live desktop-render check (judged not worth setup effort). | feature/intake-ocr/.../IntakeReviewScreen.kt, CLAUDE.md | pass | ~0 tok |
 | 10:32 | Session end: 73 writes across 33 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 36 reads | ~83438 tok |
+| 10:34 | Session end: 73 writes across 33 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 36 reads | ~83438 tok |
+| 10:38 | Created .claude/agents/feature-verifier.md | — | ~2031 |
+| 10:48 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt | expanded (+11 lines) | ~304 |
+| 10:48 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt | 2→4 lines | ~100 |
+| 10:54 | Created core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDateField.kt | — | ~1954 |
+| 10:55 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/AppStrings.kt | expanded (+10 lines) | ~174 |
+| 10:55 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/EnglishStrings.kt | 1→5 lines | ~67 |
+| 10:55 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/ArabicStrings.kt | 1→5 lines | ~64 |
+| 10:56 | Created core/model/src/commonMain/kotlin/com/anfas/core/model/DatePickerBoundary.kt | — | ~387 |
+| 10:56 | Created core/model/src/commonTest/kotlin/com/anfas/core/model/DatePickerBoundaryTest.kt | — | ~392 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsState.kt | 5→5 lines | ~79 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsState.kt | added 1 import(s) | ~47 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsComponent.kt | modified onSubmitForm() | ~112 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsComponent.kt | inline fix | ~15 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsComponent.kt | 3→2 lines | ~37 |
+| 10:58 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementFormDialog.kt | added optional chaining | ~236 |
+| 10:58 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentState.kt | 4→4 lines | ~63 |
+| 10:59 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentComponent.kt | 6→6 lines | ~86 |
+| 10:59 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/AddEquipmentDialog.kt | added optional chaining | ~454 |
+| 11:05 | Edited .claude/agents/git-shipper.md | expanded (+10 lines) | ~447 |
+| 11:08 | Edited .claude/agents/git-shipper.md | expanded (+24 lines) | ~441 |
+| 11:09 | Edited .github/workflows/ci.yml | expanded (+14 lines) | ~349 |
+| 11:09 | Edited .github/workflows/ci.yml | expanded (+8 lines) | ~217 |
+| 11:12 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | modified Window() | ~434 |
+| 11:12 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | added 4 import(s) | ~151 |
+| 11:29 | Edited CLAUDE.md | expanded (+23 lines) | ~497 |
+| 11:29 | Edited CLAUDE.md | expanded (+8 lines) | ~218 |
+| 11:29 | Edited CLAUDE.md | 4→4 lines | ~101 |
+
+## Session summary: per-platform verification, date picker, and two real bugs it found
+Acted on four standing instructions from the user: verify every feature on every platform before
+committing; verify UI *rendering* per platform too; replace free-text dates with a real picker;
+one descriptively-named branch per feature, merged to main after delivery. Encoded all four in
+.claude/agents/{feature-verifier,git-shipper}.md and cerebrum User Preferences.
+
+Built AnfasDateField (Material 3 calendar, epoch-millis boundary via DatePickerBoundary in
+:core:model, 5 tests) and wired it into the announcement event date and equipment
+purchased/warranty dates, deleting AnnouncementProblem.EVENT_DATE_UNREADABLE and its string as
+now-unreachable. Verified the picker end-to-end on Android (androidMain dialog actual) and iOS
+(skikoMain actual): picks 12 Aug 2026, formats via i18n, no off-by-one.
+
+Ran all three platforms against a seeded database (staff/members/subs/equipment/maintenance log/
+intake batch + a synthetic A4 sheet PNG with orientation markers, pushed per-platform with the
+right image URI). Three real findings:
+  1. Intake's source pane was DROPPED entirely below 1024dp, so the sheet photo was unreachable on
+     the very device that takes it. The KDoc claimed "becomes stacked". Completed the stacked
+     layout (same 40/60 split, vertical) and fixed the KDoc.
+  2. desktopApp opened at Compose's default 800x600 -- under the 1024dp breakpoint -- so the
+     DESKTOP app showed the phone bottom bar and Announcements/Equipment (DesktopOnly, rail-only)
+     were unreachable. Added rememberWindowState 1280x840 + AWT minimumSize 1060x680.
+  3. CI's Apple jobs were failing on GitHub: macos-15's Xcode 16.4 lacks the iOS 26 SDK symbols
+     CMP 1.11.1 needs (UIViewLayoutRegion/UIUtilities). Moved both macOS jobs to macos-26 and made
+     them print the selected Xcode version.
+Also confirmed correct: Arabic RTL on Android (full mirror, real glyphs, no clipping), all four
+EquipmentStatus chip tones incl. the new amber Warning, duplicate-phone detection (my first seed
+had the wrong phone_normalised -- normalisePhone folds the EG country code -- not an app bug), and
+that the iOS calendar's Saturday-first week is correct for an Egyptian locale, not a bug.
+Not done: clicking through the desktop date picker -- osascript lacks Accessibility permission and
+blind Robot clicks were hitting the user's own windows, so I stopped. Desktop shares the identical
+skiko dialog actual with iOS, which is verified.
+| 11:32 | Session end: 100 writes across 42 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 53 reads | ~98445 tok |

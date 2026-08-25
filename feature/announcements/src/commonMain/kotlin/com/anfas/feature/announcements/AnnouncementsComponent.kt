@@ -6,12 +6,10 @@ import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
 import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.data.AnnouncementDetail
-import com.anfas.core.data.AnnouncementProblem
 import com.anfas.core.data.AnnouncementRepository
 import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.SaveAnnouncementOutcome
 import com.anfas.core.model.AnnouncementId
-import com.anfas.core.model.IntakeValidator
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -108,7 +106,7 @@ class AnnouncementsComponent(
                     title = announcement.title,
                     body = announcement.body,
                     audience = announcement.audience,
-                    eventDateText = announcement.eventDate?.toString().orEmpty(),
+                    eventDate = announcement.eventDate,
                     eventHour = announcement.eventTime?.hour,
                     eventMinute = announcement.eventTime?.minute ?: 0,
                 ),
@@ -127,18 +125,9 @@ class AnnouncementsComponent(
         val form = state.value.form ?: return
         if (!form.canSubmit) return
 
-        val trimmedDate = form.eventDateText.trim()
-        val eventDate = if (trimmedDate.isEmpty()) null else IntakeValidator.parseDate(trimmedDate)
-        if (trimmedDate.isNotEmpty() && eventDate == null) {
-            ui.update {
-                it.copy(
-                    form = it.form?.copy(
-                        problems = setOf(AnnouncementProblem.EVENT_DATE_UNREADABLE),
-                    ),
-                )
-            }
-            return
-        }
+        // No parse, so no unreadable-date branch: the field is a calendar picker and cannot
+        // hand back anything but a real date or null.
+        val eventDate = form.eventDate
         val eventTime = eventDate?.let {
             form.eventHour?.let { h -> LocalTime(h, form.eventMinute) }
         }
@@ -218,8 +207,7 @@ class AnnouncementsComponent(
                     title = form.title,
                     body = form.body,
                     audience = form.audience,
-                    eventDate = form.eventDateText.trim().takeIf { it.isNotEmpty() }
-                        ?.let(IntakeValidator::parseDate),
+                    eventDate = form.eventDate,
                     eventTime = form.eventHour?.let { LocalTime(it, form.eventMinute) },
                     createdByStaffId = currentStaffId.value,
                     createdAt = clock.now(),

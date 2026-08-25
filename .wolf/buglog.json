@@ -1208,5 +1208,62 @@
     "related_bugs": [],
     "occurrences": 2,
     "last_seen": "2026-08-24T13:35:00Z"
+  },
+  {
+    "id": "bug-070",
+    "timestamp": "2026-08-25T10:55:00Z",
+    "error_message": "The photographed sign-up sheet was not visible at all on a phone: intake's source pane was omitted below 1024dp",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+    "root_cause": "ReviewBody's narrow branch rendered only ValidationPane, inside a Column with verticalArrangement=spacedBy(16.dp) wrapping a single child -- a vestigial container showing the intent was two stacked panes. The screen KDoc said 'the split becomes stacked below 1024dp', which is not what the code did. Net effect: the source photo was unreachable on a phone, the very device that captures it, so the photo-rendering feature shipped one commit earlier was invisible on Android and iPhone.",
+    "fix": "Added SourceDocumentPane to the narrow branch above ValidationPane using the same SOURCE_PANE_WEIGHT/TABLE_PANE_WEIGHT 40/60 split, vertically; corrected the KDoc to describe what it now does and why dropping the photo was worse than a small zoomable pane. Verified on the Pixel 9 Pro emulator: the sheet renders correctly oriented with overlay boxes aligned.",
+    "tags": [
+      "intake-ocr",
+      "responsive-layout",
+      "breakpoint",
+      "reachability",
+      "device-testing"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T10:55:00Z"
+  },
+  {
+    "id": "bug-071",
+    "timestamp": "2026-08-25T11:10:00Z",
+    "error_message": "The desktop app opened on the mobile bottom-bar layout, making Announcements and Equipment unreachable on desktop",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/main.kt",
+    "root_cause": "Window() was created with no state and no minimum size, so it used Compose's 800x600 default -- below AnfasBreakpoints.tabletMax (1024dp), the point where App.kt switches to the phone layout. The phone layout's bottom bar carries only the four Placement.Primary destinations, so both Placement.DesktopOnly features (Announcements, Equipment) had no entry point at all in the desktop app unless the user manually dragged the window wider.",
+    "fix": "rememberWindowState(width=1280.dp, height=840.dp) plus an AWT window.minimumSize of 1060x680 set in a LaunchedEffect (Compose's Window has no minimumSize parameter). Past the breakpoint rather than exactly on it so chrome/rounding cannot land back on the phone layout. Confirmed by relaunching: the full rail with Announcements and Equipment Inventory now renders.",
+    "tags": [
+      "desktop",
+      "window-state",
+      "breakpoint",
+      "reachability",
+      "navigation"
+    ],
+    "related_bugs": [
+      "bug-070"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T11:10:00Z"
+  },
+  {
+    "id": "bug-072",
+    "timestamp": "2026-08-25T11:12:00Z",
+    "error_message": "CI: Undefined symbols for architecture arm64: _OBJC_CLASS_$_UIViewLayoutRegion, referenced from CMPLayoutRegion.o; framework 'UIUtilities' not found",
+    "file": ".github/workflows/ci.yml",
+    "root_cause": "Both macOS jobs ran on the macos-15 runner image, whose Xcode is 16.4. Compose Multiplatform 1.11.1's UIKit layer references iOS 26 SDK symbols, so Kotlin/Native linking of the test binary and the release framework fails there. Local development is on Xcode 26.6 with the iOS 26.5 SDK, which is why the workflow's commands passed locally and failed only on the runner -- the failure was invisible until the first real CI run.",
+    "fix": "Moved the `apple` and `ios-app` jobs to runs-on: macos-26, and added a step to both that selects the newest installed Xcode and prints `xcodebuild -version` (plus the simulator SDK list on the apple job), so a future runner-image regression surfaces as one readable line instead of hundreds of linker errors.",
+    "tags": [
+      "ci",
+      "github-actions",
+      "ios",
+      "kotlin-native",
+      "compose-multiplatform",
+      "xcode"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T11:12:00Z"
   }
 ]

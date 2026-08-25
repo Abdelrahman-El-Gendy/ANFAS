@@ -3,6 +3,7 @@ package com.anfas.feature.announcements
 import com.anfas.core.data.AnnouncementDetail
 import com.anfas.core.data.AnnouncementProblem
 import com.anfas.core.model.AnnouncementAudience
+import kotlinx.datetime.LocalDate
 
 sealed interface AnnouncementsContent {
     data object Loading : AnnouncementsContent
@@ -35,9 +36,9 @@ data class AnnouncementForm(
     val title: String = "",
     val body: String = "",
     val audience: AnnouncementAudience = AnnouncementAudience.ALL_MEMBERS,
-    /** Free text, parsed the same way `IntakeValidator.parseDate` parses everywhere else in
-     * this app -- blank means no event, and an unreadable date is a review item, not a guess. */
-    val eventDateText: String = "",
+    /** Chosen from `AnfasDateField`'s calendar, so it cannot be unreadable. Null means no event,
+     * which is what hides the event-time chips. */
+    val eventDate: LocalDate? = null,
     val eventHour: Int? = null,
     val eventMinute: Int = 0,
     val isSubmitting: Boolean = false,

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T07:27:46.292Z
-> Files: 559 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T08:29:51.512Z
+> Files: 562 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~8996 tok)
+- `CLAUDE.md` — OpenWolf (~9817 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -30,8 +30,8 @@
 
 ## .claude/agents/
 
-- `feature-verifier.md` — What you run, in order (~1052 tok)
-- `git-shipper.md` — Step 0 - orient yourself, every time (~1155 tok)
+- `feature-verifier.md` — Gate 1 - build and test (~1904 tok)
+- `git-shipper.md` — Step 0 - orient yourself, every time (~1701 tok)
 
 ## .claude/rules/
 
@@ -43,7 +43,7 @@
 
 ## .github/workflows/
 
-- `ci.yml` — CI: CI (~818 tok)
+- `ci.yml` — CI: CI (~1195 tok)
 
 ## .gradle/
 
@@ -661,6 +661,7 @@
 - `AnfasCheckbox.kt` — 4dp-radius checkbox + tri-state variant for header select-all (~700 tok)
 - `AnfasChoice.kt` — `AnfasChoiceChip` (single-choice) + `AnfasSelectableRow` (radio card for plans) (~700 tok)
 - `AnfasColorScheme.kt` — Maps the palette onto M3 `darkColorScheme()`. Dark only; the design has no light mode (~380 tok)
+- `AnfasDateField.kt` — A labelled date input backed by the Material 3 calendar picker. (~1954 tok)
 - `AnfasDialog.kt` — Layer-2 modal: titled header, scrollable body, footer bar. The only shadow in the design (~650 tok)
 - `AnfasDimens.kt` — Spacing, border/rule/hover alphas, breakpoints + column counts, elevation (cards 0dp, modals 8dp) (~470 tok)
 - `AnfasEmptyState.kt` — Centred nothing-state. Tone.Invitation (amber badge) vs Tone.Informational (grey) (~600 tok)
@@ -684,9 +685,9 @@
 
 ## core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/
 
-- `AppStrings.kt` — Every user-facing string, as a typed interface. (~6375 tok)
-- `ArabicStrings.kt` — Arabic copy. (~10078 tok)
-- `EnglishStrings.kt` — English copy, lifted verbatim from the literals that were previously inline in the screens, so (~8967 tok)
+- `AppStrings.kt` — Every user-facing string, as a typed interface. (~6483 tok)
+- `ArabicStrings.kt` — Arabic copy. (~10128 tok)
+- `EnglishStrings.kt` — English copy, lifted verbatim from the literals that were previously inline in the screens, so (~9019 tok)
 
 ## core/i18n/src/commonTest/kotlin/com/anfas/core/i18n/
 
@@ -705,6 +706,7 @@
 ## core/model/src/commonMain/kotlin/com/anfas/core/model/
 
 - `Announcement.kt` — Announcement + AnnouncementStatus(DRAFT/PUBLISHED) + AnnouncementAudience(3 segments, 2 declined w/ KDoc) + AnnouncementReach.matching()/count() (~900 tok)
+- `DatePickerBoundary.kt` — The boundary between `AnfasDateField` and this app's date type. (~387 tok)
 - `Equipment.kt` — A physical asset on the gym floor — the export's `equipment-detail`. (~825 tok)
 - `Ids.kt` — Typed identifiers. One value class per aggregate root, so a MemberId can never be passed (~271 tok)
 - `Intake.kt` — A photographed sign-up sheet and everything OCR read off it. (~1387 tok)
@@ -721,6 +723,7 @@
 ## core/model/src/commonTest/kotlin/com/anfas/core/model/
 
 - `AnnouncementReachTest.kt` — 7 tests covering all three audience segments' matching logic (~800 tok)
+- `DatePickerBoundaryTest.kt` — The picker hands back UTC midnight, so that exact value must map to the same day. (~392 tok)
 - `IntakeValidatorTest.kt` — Confident by default, so a test only opts into low confidence when that is the point. (~2327 tok)
 - `MaintenanceLogTest.kt` — The bug this pins: a plain issue report logged after the last real service must not push (~524 tok)
 
@@ -749,7 +752,7 @@
 
 ## desktopApp/src/main/kotlin/com/anfas/app/
 
-- `main.kt` — Thin launcher. All shared behaviour lives in :composeApp — do not add logic here. (~327 tok)
+- `main.kt` — Thin launcher. All shared behaviour lives in :composeApp — do not add logic here. (~825 tok)
 
 ## feature/announcements/
 
@@ -757,11 +760,11 @@
 
 ## feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/
 
-- `AnnouncementFormDialog.kt` — Compose or edit an announcement. [state]'s `liveReach` reflects [form]'s currently selected (~2160 tok)
-- `AnnouncementsComponent.kt` — Compose, edit, publish and delete gym-wide bulletins. (~3089 tok)
+- `AnnouncementFormDialog.kt` — Compose or edit an announcement. [state]'s `liveReach` reflects [form]'s currently selected (~2236 tok)
+- `AnnouncementsComponent.kt` — Compose, edit, publish and delete gym-wide bulletins. (~2980 tok)
 - `AnnouncementsModule.kt` — Koin module for the announcements feature. Intentionally empty — UI, components and use cases (~89 tok)
 - `AnnouncementsScreen.kt` — List screen; extensive KDoc on departures from the Stitch export's split editor+preview (~1800 tok)
-- `AnnouncementsState.kt` — AnnouncementsState/AnnouncementsContent/AnnouncementForm/AnnouncementsNotice (~700 tok)
+- `AnnouncementsState.kt` — The live "Reaches N members" figure for [AnnouncementForm.audience] as it stands right (~618 tok)
 - `DeleteConfirmDialog.kt` — confirmation before deleting a draft (~350 tok)
 - `PublishConfirmDialog.kt` — confirmation before publishing; shows the frozen-at-publish reach count (~450 tok)
 
@@ -783,12 +786,12 @@
 
 ## feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/
 
-- `AddEquipmentDialog.kt` — AddEquipmentDialog, FieldLabel, ChipRow (~1582 tok)
-- `EquipmentComponent.kt` — The equipment inventory list, its filters, and the detail drawer -- one component for all (~2854 tok)
+- `AddEquipmentDialog.kt` — AddEquipmentDialog, FieldLabel, ChipRow (~1828 tok)
+- `EquipmentComponent.kt` — The equipment inventory list, its filters, and the detail drawer -- one component for all (~2869 tok)
 - `EquipmentDetailDrawer.kt` — A modal rather than the export's slide-in side panel — the same list-plus-`AnfasDialog` shape (~1993 tok)
 - `EquipmentModule.kt` — Koin module for the equipment feature. Factories only — the component owns a coroutine scope (~274 tok)
 - `EquipmentScreen.kt` — The gym floor's equipment inventory — the export's `equipment-detail`, its own fourth desktop (~2579 tok)
-- `EquipmentState.kt` — [visibleEquipment] is [EquipmentContent.Loaded]'s list narrowed by [statusFilter]/[zoneFilter]/ (~887 tok)
+- `EquipmentState.kt` — [visibleEquipment] is [EquipmentContent.Loaded]'s list narrowed by [statusFilter]/[zoneFilter]/ (~881 tok)
 - `EquipmentUi.kt` — EquipmentStatus, EquipmentStatus, EquipmentStatus, EquipmentZone (~389 tok)
 - `LogMaintenanceDialog.kt` — No date field -- see `MaintenanceLogEntry`'s KDoc on why an entry is always logged "now". (~1103 tok)
 
@@ -807,7 +810,7 @@
 - `IntakeOcrModule.kt` — IntakeReviewComponentFactory + Koin `factory` (~230 tok)
 - `IntakeReviewComponent.kt` — Reviewing a scanned sign-up sheet: correct what OCR misread, then import the rows that pass. (~1904 tok)
 - `IntakeReviewComponent.kt` — Shows the OLDEST sheet still REVIEWING. Edits write through; import notices name the leftovers (~1300 tok)
-- `IntakeReviewScreen.kt` — Reviewing a scanned sign-up sheet. (~8403 tok)
+- `IntakeReviewScreen.kt` — Reviewing a scanned sign-up sheet. (~8651 tok)
 - `IntakeReviewScreen.kt` — Split source/table view (stacks <1024dp), normalised overlay boxes, inline editing, import/discard footer (~2300 tok)
 - `IntakeReviewState.kt` — The batch-review screen. (~462 tok)
 - `IntakeReviewState.kt` — Content Loading/NoBatches/Loaded/Failed; zoom+pan live in state, not the composable (~330 tok)

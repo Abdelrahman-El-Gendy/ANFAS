@@ -65,6 +65,16 @@ interface AppStrings {
          * reader would announce with no hint of what is inside, so this names the group.
          */
         val moreOptions: String
+
+        /**
+         * `AnfasDateField`'s own chrome. In [Common] rather than per-feature because every date
+         * field in the app shares one picker, and four copies of "Choose a date" is four chances
+         * for one of them to be translated differently.
+         */
+        val chooseDate: String
+        val openDatePicker: String
+        val confirmDate: String
+        val clearDate: String
     }
 
     interface Members {
@@ -544,7 +554,6 @@ interface AppStrings {
         val deleted: String
         val errorTitleBlank: String
         val errorBodyBlank: String
-        val errorEventDateUnreadable: String
     }
 
     interface Therapy {

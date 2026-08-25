@@ -64,12 +64,4 @@ sealed interface SaveAnnouncementOutcome {
 enum class AnnouncementProblem {
     TITLE_BLANK,
     BODY_BLANK,
-
-    /**
-     * Never returned by the repository — [AnnouncementRepository.createDraft] and
-     * [updateDraft] take an already-parsed [LocalDate]. This exists so the composer can mark
-     * the event-date field the same way a repository-side problem is marked, for a free-text
-     * date it parses client-side with `IntakeValidator.parseDate`.
-     */
-    EVENT_DATE_UNREADABLE,
 }

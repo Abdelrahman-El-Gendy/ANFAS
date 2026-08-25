@@ -423,6 +423,29 @@ as screens — none belongs to a feature, because any screen can be interrupted 
   RTL surroundings and migrate to the wrong end — `#10003` read as `10003#`.
 - Verify in Arabic on a device. Neither of the above fails a test or looks wrong in English.
 
+## Dates the user enters
+
+- **A date a human enters comes from `AnfasDateField`, never a text field.** A typed date needs a
+  parser, a parser can fail, and every screen then has to carry an "unreadable date" error path —
+  the picker deletes all three. `AnnouncementProblem.EVENT_DATE_UNREADABLE` and its string were
+  removed rather than left as unreachable code when the announcement composer moved over.
+- **The exception is correcting a date read off a photographed sheet.** There the text is a
+  transcription of what a human wrote, and the per-cell confidence stripe is the whole point, so
+  intake's date cells stay `AnfasInlineEditField`. `IntakeValidator.parseDate` therefore stays too
+  — it parses OCR output, not user input.
+- **`AnfasDateField` works in UTC start-of-day epoch millis, converted via
+  `DatePickerBoundary`.** That is what `DatePickerState` stores natively, so nothing is converted
+  twice. The conversion is **always UTC, never the device zone**: a picker selection is a calendar
+  date someone pointed at, and running it through `TimeZone.currentSystemDefault()` turns
+  "1 September" into 31 August for anyone west of Greenwich.
+- **`:core:designsystem` still has no `kotlinx.datetime` dependency.** The field takes `Long?` plus
+  a caller-formatted `formattedValue`, because formatting a date is i18n's job and designsystem
+  must not depend on `:core:i18n` — the same reason `AnfasSearchField` takes its own placeholder.
+- The calendar is stock Material 3, deliberately: the export never drew one, and a hand-restyled
+  calendar that is subtly wrong is worse than a correct standard one. It picks up the app's own
+  colours from the theme, and its first-day-of-week follows the device locale — on an Egyptian
+  device that is Saturday-first, which is correct and differs from a Sunday-first US emulator.
+
 ## Release configuration
 
 - **Every navigation `Config` variant carries an explicit `@SerialName`.** Decompose serialises
@@ -446,6 +469,14 @@ as screens — none belongs to a feature, because any screen can be interrupted 
 - **The bundle/package ids differ on purpose:** iOS and Android are `com.anfas.app`; desktop is
   `com.anfas.app.desktop`, so an iPad build on the same Apple-silicon Mac cannot collide in
   LaunchServices. `linux.packageName` must stay lowercase -- dpkg rejects uppercase.
+- **The desktop window has a size floor, and it is a reachability rule rather than a cosmetic
+  one.** Compose's default window is 800x600, below `AnfasBreakpoints.tabletMax` (1024dp) — so the
+  desktop app used to open on the *phone* layout, whose bottom bar carries only the four
+  `Placement.Primary` destinations. Announcements and Equipment (`Placement.DesktopOnly`, rail-only
+  by design) were therefore unreachable in the desktop app unless you happened to drag the window
+  wider. `desktopApp/main.kt` now opens at 1280x840 and sets an AWT `minimumSize` of 1060x680, past
+  the breakpoint rather than exactly on it. A feature that vanishes when a window is dragged
+  narrower is a bug, not a responsive layout.
 - **jpackage cannot cross-build**, so `targetFormats` is derived from `OperatingSystem.current()`.
   Declaring Dmg+Msi+Deb together means every host fails on two of three.
 - The Room database is excluded from cloud backup and device transfer: the whole domain is PII.
@@ -455,12 +486,20 @@ as screens — none belongs to a feature, because any screen can be interrupted 
 - **`.github/workflows/ci.yml` is PR-validation only — no release/signing workflows yet.**
   Those need the keystore and Apple Team ID this project still doesn't have (see Release
   configuration above); adding a tag-triggered release workflow before signing material exists
-  would just be dead YAML. Three jobs, because one runner cannot do it all: `jvm` on
-  ubuntu-latest (`check :androidApp:assembleStage`), `apple` on macos-15
+  would just be dead YAML. Three jobs after a wrapper-validation gate, because one runner cannot
+  do it all: `jvm` on ubuntu-latest (`check :androidApp:assembleStage`), `apple` on macos-26
   (`iosSimulatorArm64Test linkReleaseFrameworkIosArm64`) — Apple targets silently *skip* on a
   Linux host, which is why this job exists — and `ios-app` (`xcodebuild build`), which catches
   pbxproj/xcconfig breakage no Gradle task sees. All three verified to actually pass by running
   their exact commands locally before committing the workflow, not just by eyeballing YAML.
+- **The Apple jobs need `macos-26`, not `macos-15`.** Compose Multiplatform 1.11.1's UIKit layer
+  references iOS 26 SDK symbols (`UIViewLayoutRegion`, the `UIUtilities` framework), so linking on
+  the macos-15 image's Xcode 16.4 fails with "Undefined symbols for architecture arm64" out of
+  `CMPLayoutRegion.o`. This passed locally (Xcode 26.6) and failed only on the runner — the first
+  real CI run is what caught it, which is exactly why the workflow's own commands were also run
+  locally before committing. Both macOS jobs additionally select the newest installed Xcode and
+  **print the version**, so a future image regression reads as one line rather than 800 lines of
+  linker output.
 - **`xcodebuild` needs a *shared* scheme, and none was committed.** Xcode had only ever written
   `iosApp.xcscheme` under the per-user `xcuserdata/` (correctly gitignored, so invisible to any
   other checkout). Copied verbatim to `app/iosApp/iosApp.xcodeproj/xcshareddata/xcschemes/` — the

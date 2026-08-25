@@ -15,12 +15,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.anfas.core.data.EquipmentProblem
 import com.anfas.core.designsystem.AnfasChoiceChip
+import com.anfas.core.designsystem.AnfasDateField
 import com.anfas.core.designsystem.AnfasDialog
 import com.anfas.core.designsystem.AnfasPrimaryButton
 import com.anfas.core.designsystem.AnfasSecondaryButton
 import com.anfas.core.designsystem.AnfasTextField
 import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.i18n.AppStrings
+import com.anfas.core.i18n.formatLong
+import com.anfas.core.model.DatePickerBoundary
 import com.anfas.core.model.EquipmentStatus
 import com.anfas.core.model.EquipmentZone
 
@@ -116,22 +119,38 @@ internal fun AddEquipmentDialog(
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            AnfasTextField(
-                value = form.purchasedOnText,
-                onValueChange = { value ->
-                    component.onAddFormChanged { it.copy(purchasedOnText = value) }
-                },
+            AnfasDateField(
                 label = s.equipment.fieldPurchasedOn,
+                formattedValue = form.purchasedOn?.let { s.formatLong(it) },
+                placeholder = s.common.chooseDate,
+                selectedDateMillis = DatePickerBoundary.toEpochMillis(form.purchasedOn),
+                onDateSelected = { millis ->
+                    component.onAddFormChanged {
+                        it.copy(purchasedOn = DatePickerBoundary.toLocalDate(millis))
+                    }
+                },
+                confirmLabel = s.common.confirmDate,
+                cancelLabel = s.common.cancel,
+                clearLabel = s.common.clearDate,
+                openContentDescription = s.common.openDatePicker,
                 enabled = !form.isSubmitting,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            AnfasTextField(
-                value = form.warrantyUntilText,
-                onValueChange = { value ->
-                    component.onAddFormChanged { it.copy(warrantyUntilText = value) }
-                },
+            AnfasDateField(
                 label = s.equipment.fieldWarrantyUntil,
+                formattedValue = form.warrantyUntil?.let { s.formatLong(it) },
+                placeholder = s.common.chooseDate,
+                selectedDateMillis = DatePickerBoundary.toEpochMillis(form.warrantyUntil),
+                onDateSelected = { millis ->
+                    component.onAddFormChanged {
+                        it.copy(warrantyUntil = DatePickerBoundary.toLocalDate(millis))
+                    }
+                },
+                confirmLabel = s.common.confirmDate,
+                cancelLabel = s.common.cancel,
+                clearLabel = s.common.clearDate,
+                openContentDescription = s.common.openDatePicker,
                 enabled = !form.isSubmitting,
                 modifier = Modifier.fillMaxWidth(),
             )
