@@ -553,3 +553,27 @@
   project's hardening plan explicitly listed "blocked on you creating the GitHub repo" for its CI
   phase. Once `git branch -vv` shows a real `[origin/...]` upstream (not just a local branch
   name), that specific gate is lifted and CI setup can proceed without asking again.
+
+## Key Learnings — 2026-08-25 (intake source image)
+
+- **When "continue with the next feature" has no obvious target** (all designed screens built,
+  CI just shipped), don't guess — audit the persisted hardening plan against actual current repo
+  state before picking something. A fork spot-checking the plan's remaining phases found most of
+  it silently already done across earlier sessions (OCR capture/recognition, Android R8/signing,
+  desktop and iOS release config) that the plan file itself, written when only 3 feature slices
+  existed, still lists as open. The plan file is a historical snapshot, not a live task list —
+  treat gaps in it as "check first," not "assume true."
+- **Coil 3's `SubcomposeAsyncImage` takes named `loading`/`success`/`error` composable slots
+  directly** (`coil3.compose.SingletonSubcomposeAsyncImage.kt`) — no need to reach for the
+  lower-level `content: @Composable SubcomposeAsyncImageScope.() -> Unit` overload with manual
+  `when (state)` branching unless you need something beyond simple per-state content. Works for
+  local `file://` URIs with zero extra wiring — Coil 3's core fetchers handle local files without
+  registering a network engine; `coil-networkKtor3` is only needed for http/https loading.
+  `feature/intake-ocr/build.gradle.kts` already declared `libs.bundles.coil` before any code used
+  it — check existing build files for already-declared-but-unused dependencies before adding one.
+- **A rendered photo and hand-positioned overlay boxes must scale from the exact same rect.**
+  Where overlay boxes are already positioned against a fixed assumed aspect ratio (here,
+  `SHEET_ASPECT_RATIO`, an A4 stand-in with no per-photo aspect ratio stored), rendering the real
+  image into that same box needs `ContentScale.FillBounds`, not `Fit` — `Fit` letterboxes the
+  image at its own true aspect ratio inside the box, which visually detaches it from boxes
+  positioned against the box's full extent.

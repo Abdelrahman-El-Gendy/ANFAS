@@ -34,12 +34,16 @@ app/iosApp/   Xcode project. Links the "ComposeApp" static framework.
 :core:model         pure Kotlin domain types. depends on NOTHING.
 :core:common        Result types, dispatchers, validation
 :core:designsystem  theme, tokens, shared components
+:core:i18n          typed AppStrings, EN/AR, CompositionLocal-driven (not Compose Resources)
 :core:database      Room KMP (androidx.room3)
+:core:data          repositories — the only way a feature reaches storage
 :core:network       Ktor client
+:core:ocr           camera capture + text recognition; declared only by :feature:intake-ocr
 :core:auth          session, RBAC
 
-:feature:members :feature:subscriptions :feature:intake-ocr :feature:therapy
-:feature:classes :feature:announcements :feature:equipment
+:feature:auth :feature:dashboard :feature:members :feature:subscriptions
+:feature:intake-ocr :feature:checkin :feature:therapy :feature:classes
+:feature:announcements :feature:equipment
 
 :server       plain JVM Ktor. NOT a KMP module.
 ```
@@ -281,6 +285,19 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
 - **`ChipTone.Warning` is a new addition to `:core:designsystem`**, for "needs service" specifically
   — neither `Positive` (actually operational) nor `Critical` (reserved for fully out of order) fit
   the export's own distinct amber badge for this status.
+
+## Intake / OCR
+
+- **The source pane renders the actual photo with `SubcomposeAsyncImage` (Coil 3), scaled with
+  `ContentScale.FillBounds` rather than `Fit`.** `IntakeBatch` stores no per-photo aspect ratio —
+  the overlay boxes are already positioned against a fixed `SHEET_ASPECT_RATIO` (A4) rect rather
+  than the photo's true dimensions, a pre-existing simplification. `Fit` would letterbox the real
+  image inside that rect at its own aspect ratio, pulling the rendered photo out of alignment with
+  overlay boxes computed against the rect's full extent; `FillBounds` keeps both aligned to the
+  same coordinate space, at the cost of a small stretch when the photo isn't quite A4 — the same
+  trade the overlay boxes already made. The Coil `error` slot reuses `sourceImageNotRendered`
+  (previously the only text ever shown here) for the real case where the file has gone missing
+  from disk; `noSourceImage` still covers a batch with no photo at all.
 
 ## Navigation
 

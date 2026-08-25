@@ -298,3 +298,28 @@ Verified all three jobs' exact commands succeed locally (this environment is mac
 | 10:10 | Session end: 66 writes across 32 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 28 reads | ~71866 tok |
 | 07:14 | Verified CI config (ci.yml, dependabot.yml, shared xcscheme): ./gradlew check pass, both iOS Kotlin targets compile, exact xcodebuild ios-app command BUILD SUCCEEDED, YAML valid, gitignore un-ignore confirmed; fixed missing anatomy.md entry for the new xcshareddata scheme file | .wolf/anatomy.md | all gates green | ~1k |
 | 10:14 | Session end: 66 writes across 32 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 30 reads | ~72862 tok |
+| 10:16 | Session end: 66 writes across 32 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 30 reads | ~72862 tok |
+| 10:20 | Session end: 66 writes across 32 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 34 reads | ~72862 tok |
+| 10:24 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt | added 1 import(s) | ~42 |
+| 10:25 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt | added 1 import(s) | ~34 |
+| 10:25 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt | 3→2 lines | ~23 |
+| 10:25 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt | added 1 import(s) | ~34 |
+| 10:25 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt | added 1 condition(s) | ~643 |
+| 10:27 | Edited CLAUDE.md | modified driven() | ~196 |
+| 10:27 | Edited CLAUDE.md | expanded (+13 lines) | ~328 |
+
+## Session summary: intake source photo now actually renders
+Audited the full hardening plan against current repo state (via a fork) since all 23 screens
+and CI were already done and "next feature" had no obvious target. Found most of the plan
+already executed across prior sessions (OCR capture, Android signing/R8, desktop/iOS release
+config) -- the one genuine remaining user-facing gap was Phase 3.4's "render the captured image
+in the left pane," never done: IntakeReviewScreen's source pane showed literal placeholder text
+instead of the photo. Fixed with Coil 3's SubcomposeAsyncImage (already an unused dependency in
+feature/intake-ocr/build.gradle.kts) using ContentScale.FillBounds so the rendered photo stays
+aligned with the pre-existing overlay boxes (which are positioned against a fixed A4
+SHEET_ASPECT_RATIO rect, not the photo's true dimensions -- no per-batch aspect ratio is stored).
+Also fixed CLAUDE.md's module graph, stale since before :core:i18n/:core:data/:core:ocr and three
+feature modules existed. ./gradlew check green on all platforms including iOS.
+| 10:28 | Session end: 73 writes across 33 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 36 reads | ~79545 tok |
+| 10:31 | feature-verifier: re-verified OCR intake image-render fix. gradlew check green, iosSimulatorArm64+iosArm64 compose compile green, no defects found. Verified Coil3 SubcomposeAsyncImage(model,contentDescription,contentScale,error) signature against sources jar, sourceImageUri file:// population on Android/iOS, overlay-box coordinate alignment with FillBounds. Skipped live desktop-render check (judged not worth setup effort). | feature/intake-ocr/.../IntakeReviewScreen.kt, CLAUDE.md | pass | ~0 tok |
+| 10:32 | Session end: 73 writes across 33 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 36 reads | ~83438 tok |

@@ -123,8 +123,8 @@
       "first_read": "2026-08-24T10:30:32.396Z"
     },
     "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md": {
-      "count": 2,
-      "tokens": 8110,
+      "count": 4,
+      "tokens": 8756,
       "first_read": "2026-08-24T10:37:49.857Z"
     },
     "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt": {
@@ -151,6 +151,36 @@
       "count": 1,
       "tokens": 178,
       "first_read": "2026-08-25T07:10:45.659Z"
+    },
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/OcrContracts.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-25T07:18:41.849Z"
+    },
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/ImageSource.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-25T07:18:47.447Z"
+    },
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeIngestion.kt": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-25T07:19:09.337Z"
+    },
+    "/Users/abdelrahmanelgendy/.claude/plans/plan-what-is-remaining-abundant-elephant.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-25T07:20:37.434Z"
+    },
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt": {
+      "count": 3,
+      "tokens": 8403,
+      "first_read": "2026-08-25T07:22:24.339Z"
+    },
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/build.gradle.kts": {
+      "count": 1,
+      "tokens": 133,
+      "first_read": "2026-08-25T07:24:47.611Z"
     }
   },
   "files_written": [
@@ -549,6 +579,48 @@
       "action": "edit",
       "tokens": 681,
       "at": "2026-08-25T07:08:40.913Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+      "action": "edit",
+      "tokens": 45,
+      "at": "2026-08-25T07:24:55.974Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+      "action": "edit",
+      "tokens": 37,
+      "at": "2026-08-25T07:25:01.497Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+      "action": "edit",
+      "tokens": 25,
+      "at": "2026-08-25T07:25:14.011Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+      "action": "edit",
+      "tokens": 36,
+      "at": "2026-08-25T07:25:19.565Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+      "action": "edit",
+      "tokens": 689,
+      "at": "2026-08-25T07:25:30.504Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md",
+      "action": "edit",
+      "tokens": 210,
+      "at": "2026-08-25T07:27:26.926Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md",
+      "action": "edit",
+      "tokens": 352,
+      "at": "2026-08-25T07:27:46.299Z"
     }
   ],
   "edit_counts": {
@@ -581,13 +653,14 @@
     "composeApp/src/commonMain/kotlin/com/anfas/app/App.kt": 6,
     "composeApp/src/commonTest/kotlin/com/anfas/app/navigation/ConfigSerializationTest.kt": 1,
     "composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt": 6,
-    "CLAUDE.md": 2,
+    "CLAUDE.md": 4,
     ".github/workflows/ci.yml": 1,
-    ".github/dependabot.yml": 1
+    ".github/dependabot.yml": 1,
+    "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt": 5
   },
-  "anatomy_hits": 24,
-  "anatomy_misses": 6,
-  "repeated_reads_warned": 10,
+  "anatomy_hits": 26,
+  "anatomy_misses": 10,
+  "repeated_reads_warned": 14,
   "cerebrum_warnings": 0,
-  "stop_count": 5
+  "stop_count": 9
 }

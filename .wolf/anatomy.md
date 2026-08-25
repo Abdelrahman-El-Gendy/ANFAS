@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T07:08:40.899Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T07:27:46.292Z
 > Files: 559 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~8679 tok)
+- `CLAUDE.md` — OpenWolf (~8996 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -428,8 +428,6 @@
 
 ## app/iosApp/iosApp.xcodeproj/xcshareddata/xcschemes/
 
-- `iosApp.xcscheme` — committed (unlike the per-user copy below) so `xcodebuild -scheme iosApp`
-  resolves on a fresh checkout; the `ios-app` CI job depends on this file existing (~638 tok)
 
 ## app/iosApp/iosApp.xcodeproj/xcuserdata/abdelrahmanelgendy.xcuserdatad/xcschemes/
 
@@ -809,7 +807,7 @@
 - `IntakeOcrModule.kt` — IntakeReviewComponentFactory + Koin `factory` (~230 tok)
 - `IntakeReviewComponent.kt` — Reviewing a scanned sign-up sheet: correct what OCR misread, then import the rows that pass. (~1904 tok)
 - `IntakeReviewComponent.kt` — Shows the OLDEST sheet still REVIEWING. Edits write through; import notices name the leftovers (~1300 tok)
-- `IntakeReviewScreen.kt` — Reviewing a scanned sign-up sheet. (~4510 tok)
+- `IntakeReviewScreen.kt` — Reviewing a scanned sign-up sheet. (~8403 tok)
 - `IntakeReviewScreen.kt` — Split source/table view (stacks <1024dp), normalised overlay boxes, inline editing, import/discard footer (~2300 tok)
 - `IntakeReviewState.kt` — The batch-review screen. (~462 tok)
 - `IntakeReviewState.kt` — Content Loading/NoBatches/Loaded/Failed; zoom+pan live in state, not the composable (~330 tok)

@@ -34,11 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import coil3.compose.SubcomposeAsyncImage
 import com.anfas.core.data.IntakeFieldKey
 import com.anfas.core.designsystem.AnfasBreakpoints
 import com.anfas.core.designsystem.AnfasCard
@@ -305,18 +307,45 @@ private fun SourceDocumentPane(
                         val imageWidth = maxWidth
                         val imageHeight = maxHeight
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .border(1.dp, scheme.outlineVariant),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                text = batch.sourceImageUri
-                                    ?.let { s.intake.sourceImageNotRendered }
-                                    ?: s.intake.noSourceImage,
-                                style = AnfasTheme.textStyles.bodyMedium,
-                                color = scheme.onSurfaceVariant,
+                        val sourceImageUri = batch.sourceImageUri
+                        if (sourceImageUri == null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .border(1.dp, scheme.outlineVariant),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = s.intake.noSourceImage,
+                                    style = AnfasTheme.textStyles.bodyMedium,
+                                    color = scheme.onSurfaceVariant,
+                                )
+                            }
+                        } else {
+                            // FillBounds, not Fit: the overlay boxes below are positioned against
+                            // this exact imageWidth/imageHeight rect, computed from the fixed
+                            // SHEET_ASPECT_RATIO pane rather than the photo's own true aspect
+                            // ratio (never stored per batch). Letterboxing with Fit would put the
+                            // rendered photo and its overlay boxes at different scales.
+                            SubcomposeAsyncImage(
+                                model = sourceImageUri,
+                                contentDescription = null,
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .border(1.dp, scheme.outlineVariant),
+                                error = {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = s.intake.sourceImageNotRendered,
+                                            style = AnfasTheme.textStyles.bodyMedium,
+                                            color = scheme.onSurfaceVariant,
+                                        )
+                                    }
+                                },
                             )
                         }
 
