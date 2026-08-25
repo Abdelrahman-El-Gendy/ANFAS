@@ -23,7 +23,7 @@ composeMultiplatform = "1.11.1"
 # material3 for Compose Multiplatform is versioned separately from the rest of
 # Compose MP. 1.11.0-alpha07 is the NEWEST release in the 1.11 line — there is
 # no stable. Bump only when a 1.11.x stable or 1.12 line appears.
-composeMaterial3 = "1.11.0-alpha07"
+composeMaterial3 = "1.12.0-alpha03"
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
 # 1.19.0 requires AGP 9.1 / compileSdk 37 and fails checkAarMetadata on our AGP 9.0.1 ceiling —
