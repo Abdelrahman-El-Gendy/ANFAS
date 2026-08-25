@@ -40,7 +40,12 @@ jobs:
   apple:
     name: Kotlin/Native tests + release framework (Apple)
     needs: wrapper
-    runs-on: macos-15
+    # macos-26, not macos-15. Compose Multiplatform 1.11.1's UIKit layer references iOS 26 SDK
+    # symbols (`UIViewLayoutRegion`, the `UIUtilities` framework), so linking against the
+    # macos-15 image's Xcode 16.4 fails with "Undefined symbols for architecture arm64" out of
+    # `CMPLayoutRegion.o` -- which is what the first real CI run did. Local dev is on Xcode 26.6,
+    # which is why this only ever failed on the runner.
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -48,6 +53,15 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Select the newest Xcode and record it
+        # Printed rather than assumed: if a future image drops back below the SDK CMP needs, the
+        # log says so in one line instead of 800 lines of linker errors.
+        run: |
+          LATEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selecting $LATEST"
+          sudo xcode-select -s "$LATEST"
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i iphonesimulator || true
       # macOS runners have far less RAM than a dev machine. Override in $GRADLE_USER_HOME, not
       # the project's gradle.properties -- release framework linking for two iOS targets needs
       # org.gradle.jvmargs=-Xmx8192M locally, and lowering that project-wide would break local
@@ -62,7 +76,9 @@ jobs:
   ios-app:
     name: Xcode build (catches pbxproj/xcconfig breakage Gradle can't see)
     needs: wrapper
-    runs-on: macos-15
+    # Same iOS 26 SDK requirement as the `apple` job -- this one links the framework too, via
+    # the project's embedAndSignAppleFrameworkForXcode build phase.
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -70,6 +86,12 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Select the newest Xcode and record it
+        run: |
+          LATEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selecting $LATEST"
+          sudo xcode-select -s "$LATEST"
+          xcodebuild -version
       - name: xcodebuild
         working-directory: app/iosApp
         run: |
