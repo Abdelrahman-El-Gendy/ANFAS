@@ -277,3 +277,24 @@ on all platforms including both iOS targets.
 | 13:38 | Session end: 63 writes across 30 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 25 reads | ~65985 tok |
 | 10:43 | Independently re-verified Equipment feature (check, both iOS compile targets, desktop smoke run) | feature/equipment, core/data, core/model, core/database | all green, no fixes needed | ~3k |
 | 13:44 | Session end: 63 writes across 30 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 27 reads | ~68834 tok |
+| 13:46 | Session end: 63 writes across 30 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 27 reads | ~68834 tok |
+| 10:02 | Created .github/workflows/ci.yml | — | ~818 |
+| 10:02 | Created .github/dependabot.yml | — | ~178 |
+| 10:08 | Edited CLAUDE.md | expanded (+29 lines) | ~636 |
+| 10:12 | Copied iosApp.xcscheme from user-only xcuserdata/ into shared xcshareddata/xcschemes/ so xcodebuild resolves -scheme iosApp on a fresh CI checkout | app/iosApp/iosApp.xcodeproj | xcodebuild -list shows the scheme; xcodebuild build BUILD SUCCEEDED | ~1k |
+
+## Session summary: CI unblocked and configured (Phase 5)
+The GitHub remote now exists (`origin` -> Abdelrahman-El-Gendy/ANFAS, hardening/phase-3-ocr
+pushed and tracked), which was the explicit blocker noted for Phase 5 in the hardening plan.
+Added `.github/workflows/ci.yml` (3 jobs: jvm/apple/ios-app, PR-validation only -- no
+release/signing workflow yet, since the keystore and Apple Team ID are still outstanding) and
+`.github/dependabot.yml` (gradle + github-actions, weekly). Found and fixed a real gap along the
+way: no shared Xcode scheme was ever committed (only the per-user xcuserdata one, correctly
+gitignored), which would have made the `ios-app` job's `xcodebuild -scheme iosApp` fail on a
+clean checkout with no local Xcode history. Fixed by copying it into
+`xcshareddata/xcschemes/iosApp.xcscheme` -- the `.gitignore` already special-cases that path.
+Verified all three jobs' exact commands succeed locally (this environment is macOS, so
+`xcodebuild build ... BUILD SUCCEEDED` was actually run, not just inspected) before committing.
+| 10:10 | Session end: 66 writes across 32 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 28 reads | ~71866 tok |
+| 07:14 | Verified CI config (ci.yml, dependabot.yml, shared xcscheme): ./gradlew check pass, both iOS Kotlin targets compile, exact xcodebuild ios-app command BUILD SUCCEEDED, YAML valid, gitignore un-ignore confirmed; fixed missing anatomy.md entry for the new xcshareddata scheme file | .wolf/anatomy.md | all gates green | ~1k |
+| 10:14 | Session end: 66 writes across 32 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 30 reads | ~72862 tok |

@@ -1,0 +1,17 @@
+version: 2
+updates:
+  # Full dependency verification is deferred (see CLAUDE.md's hardening plan) -- for a KMP
+  # project this size the metadata file runs to thousands of entries and every bump needs
+  # regeneration. Dependabot earns its place on its own: composeMaterial3 is pinned to an alpha
+  # in production UI on all three platforms, and a PR the day a stable release lands is worth
+  # having regardless.
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

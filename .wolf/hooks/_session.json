@@ -123,8 +123,8 @@
       "first_read": "2026-08-24T10:30:32.396Z"
     },
     "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md": {
-      "count": 1,
-      "tokens": 7393,
+      "count": 2,
+      "tokens": 8110,
       "first_read": "2026-08-24T10:37:49.857Z"
     },
     "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt": {
@@ -136,6 +136,21 @@
       "count": 1,
       "tokens": 371,
       "first_read": "2026-08-24T10:42:58.275Z"
+    },
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/app/iosApp/iosApp.xcodeproj/xcuserdata/abdelrahmanelgendy.xcuserdatad/xcschemes/iosApp.xcscheme": {
+      "count": 1,
+      "tokens": 638,
+      "first_read": "2026-08-25T07:01:49.607Z"
+    },
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/.github/workflows/ci.yml": {
+      "count": 1,
+      "tokens": 818,
+      "first_read": "2026-08-25T07:10:45.023Z"
+    },
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/.github/dependabot.yml": {
+      "count": 1,
+      "tokens": 178,
+      "first_read": "2026-08-25T07:10:45.659Z"
     }
   },
   "files_written": [
@@ -516,6 +531,24 @@
       "action": "edit",
       "tokens": 937,
       "at": "2026-08-24T10:38:07.714Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/.github/workflows/ci.yml",
+      "action": "create",
+      "tokens": 818,
+      "at": "2026-08-25T07:02:19.625Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/.github/dependabot.yml",
+      "action": "create",
+      "tokens": 178,
+      "at": "2026-08-25T07:02:26.137Z"
+    },
+    {
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md",
+      "action": "edit",
+      "tokens": 681,
+      "at": "2026-08-25T07:08:40.913Z"
     }
   ],
   "edit_counts": {
@@ -548,11 +581,13 @@
     "composeApp/src/commonMain/kotlin/com/anfas/app/App.kt": 6,
     "composeApp/src/commonTest/kotlin/com/anfas/app/navigation/ConfigSerializationTest.kt": 1,
     "composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt": 6,
-    "CLAUDE.md": 1
+    "CLAUDE.md": 2,
+    ".github/workflows/ci.yml": 1,
+    ".github/dependabot.yml": 1
   },
-  "anatomy_hits": 21,
+  "anatomy_hits": 24,
   "anatomy_misses": 6,
-  "repeated_reads_warned": 9,
+  "repeated_reads_warned": 10,
   "cerebrum_warnings": 0,
-  "stop_count": 2
+  "stop_count": 5
 }

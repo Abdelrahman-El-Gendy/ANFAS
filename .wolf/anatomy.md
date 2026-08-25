@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-24T10:38:07.696Z
-> Files: 557 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T07:08:40.899Z
+> Files: 559 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~8110 tok)
+- `CLAUDE.md` — OpenWolf (~8679 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -36,6 +36,14 @@
 ## .claude/rules/
 
 - `openwolf.md` (~313 tok)
+
+## .github/
+
+- `dependabot.yml` (~178 tok)
+
+## .github/workflows/
+
+- `ci.yml` — CI: CI (~818 tok)
 
 ## .gradle/
 
@@ -417,6 +425,11 @@
 ## app/iosApp/iosApp.xcodeproj/project.xcworkspace/xcuserdata/abdelrahmanelgendy.xcuserdatad/xcschemes/
 
 - `xcschememanagement.plist` (~49 tok)
+
+## app/iosApp/iosApp.xcodeproj/xcshareddata/xcschemes/
+
+- `iosApp.xcscheme` — committed (unlike the per-user copy below) so `xcodebuild -scheme iosApp`
+  resolves on a fresh checkout; the `ios-app` CI job depends on this file existing (~638 tok)
 
 ## app/iosApp/iosApp.xcodeproj/xcuserdata/abdelrahmanelgendy.xcuserdatad/xcschemes/
 

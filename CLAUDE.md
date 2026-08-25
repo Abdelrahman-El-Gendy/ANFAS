@@ -433,6 +433,35 @@ as screens — none belongs to a feature, because any screen can be interrupted 
   Declaring Dmg+Msi+Deb together means every host fails on two of three.
 - The Room database is excluded from cloud backup and device transfer: the whole domain is PII.
 
+## CI
+
+- **`.github/workflows/ci.yml` is PR-validation only — no release/signing workflows yet.**
+  Those need the keystore and Apple Team ID this project still doesn't have (see Release
+  configuration above); adding a tag-triggered release workflow before signing material exists
+  would just be dead YAML. Three jobs, because one runner cannot do it all: `jvm` on
+  ubuntu-latest (`check :androidApp:assembleStage`), `apple` on macos-15
+  (`iosSimulatorArm64Test linkReleaseFrameworkIosArm64`) — Apple targets silently *skip* on a
+  Linux host, which is why this job exists — and `ios-app` (`xcodebuild build`), which catches
+  pbxproj/xcconfig breakage no Gradle task sees. All three verified to actually pass by running
+  their exact commands locally before committing the workflow, not just by eyeballing YAML.
+- **`xcodebuild` needs a *shared* scheme, and none was committed.** Xcode had only ever written
+  `iosApp.xcscheme` under the per-user `xcuserdata/` (correctly gitignored, so invisible to any
+  other checkout). Copied verbatim to `app/iosApp/iosApp.xcodeproj/xcshareddata/xcschemes/` — the
+  `.gitignore` already carries `!*.xcodeproj/xcshareddata/` specifically to allow this. Do this
+  once per Xcode target; a scheme created later must be marked "Shared" in Xcode (or copied the
+  same way) or CI silently can't find it.
+- **The macOS runner's heap override lives in `$HOME/.gradle/gradle.properties`, appended by a CI
+  step — never in the committed `gradle.properties`.** Local dev needs
+  `org.gradle.jvmargs=-Xmx8192M` for release framework linking across two iOS targets; a
+  constrained CI runner needs less. Lowering the committed value to fit CI would starve local
+  builds instead. `org.gradle.parallel` stays unset in both places — parallel execution plus
+  Kotlin/Native linking inside one Gradle daemon is how a constrained runner OOMs.
+- **Dependency verification is still deferred** (thousands of entries for a KMP project this
+  size, regenerated on every bump) — `dependabot.yml` covers gradle + github-actions ecosystems
+  instead, weekly. It earns its place on one dependency specifically: `composeMaterial3` is an
+  **alpha** shipping in production UI on all three platforms, and a PR the day a stable version
+  lands is worth having.
+
 ## Commands
 
 ```
