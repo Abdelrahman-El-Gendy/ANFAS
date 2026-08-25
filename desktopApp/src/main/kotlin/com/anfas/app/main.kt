@@ -1,13 +1,17 @@
 package com.anfas.app
 
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import com.anfas.app.di.initKoin
 import com.anfas.app.navigation.RootComponent
 import com.anfas.core.common.configureLogging
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import com.arkivanov.essenty.lifecycle.resume
+import java.awt.Dimension
 import javax.swing.SwingUtilities
 
 /**
@@ -33,11 +37,41 @@ fun main() {
     val root = requireNotNull(rootRef) { "RootComponent was not created on the EDT" }
 
     application {
+        val windowState = rememberWindowState(
+            width = INITIAL_WINDOW_WIDTH,
+            height = INITIAL_WINDOW_HEIGHT,
+        )
         Window(
             onCloseRequest = ::exitApplication,
             title = "ANFAS",
+            state = windowState,
         ) {
+            // Compose's Window has no minimumSize parameter, so the resize floor is set on the
+            // underlying AWT frame.
+            LaunchedEffect(Unit) {
+                window.minimumSize = Dimension(MIN_WINDOW_WIDTH_PX, MIN_WINDOW_HEIGHT_PX)
+            }
             App(root)
         }
     }
 }
+
+/**
+ * Wide enough that the app opens on its **rail** layout, not its phone layout.
+ *
+ * Compose's default window is 800x600, which is below `AnfasBreakpoints.tabletMax` (1024dp) --
+ * so the desktop app opened showing the mobile bottom bar. That is not merely off-design: the
+ * bar carries only the four `Placement.Primary` destinations, so Equipment and Announcements
+ * (both `Placement.DesktopOnly`, rail-only, with no mobile entry point by design) were
+ * unreachable in the desktop app unless the user happened to drag the window wider.
+ */
+private val INITIAL_WINDOW_WIDTH = 1280.dp
+private val INITIAL_WINDOW_HEIGHT = 840.dp
+
+/**
+ * The resize floor, for the same reason: a feature that disappears when a window is dragged
+ * narrower is a bug, not a responsive layout. Comfortably past the 1024dp breakpoint rather than
+ * exactly on it, so rounding and window chrome cannot land us back on the phone layout.
+ */
+private const val MIN_WINDOW_WIDTH_PX = 1060
+private const val MIN_WINDOW_HEIGHT_PX = 680
