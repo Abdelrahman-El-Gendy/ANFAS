@@ -388,3 +388,13 @@ skiko dialog actual with iOS, which is verified.
 | 11:43 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasScreenHeader.kt | modified if() | ~632 |
 | 11:46 | Fixed AnfasScreenHeader: title ran flush into the actions button (SpaceBetween has no leftover space to distribute when the title takes weight(1f)); added a 16dp measured gutter on the actions so a long title wraps instead of colliding | core/designsystem/.../AnfasScreenHeader.kt | verified iPhone 17 + Pixel 9 Pro + Members two-action case; check green | ~3k |
 | 11:49 | Session end: 101 writes across 43 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 61 reads | ~99452 tok |
+| 11:51 | Session end: 101 writes across 43 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 61 reads | ~99452 tok |
+| 11:54 | Edited gradle/libs.versions.toml | 2→7 lines | ~168 |
+| 11:54 | Edited gradle/libs.versions.toml | 2→3 lines | ~49 |
+| 11:54 | Created core/designsystem/build.gradle.kts | — | ~301 |
+| 11:55 | Created core/designsystem/src/jvmTest/kotlin/com/anfas/core/designsystem/AnfasScreenHeaderTest.kt | — | ~1364 |
+| 12:00 | Created core/designsystem/src/jvmTest/kotlin/com/anfas/core/designsystem/AnfasScreenHeaderTest.kt | — | ~1579 |
+| 12:05 | Edited CLAUDE.md | expanded (+22 lines) | ~487 |
+| 12:05 | Set up Compose UI test infra (:core:designsystem jvmTest, ui-test + ui-test-junit4 + compose.desktop.currentOs, catalog bundle test-composeUi) and wrote AnfasScreenHeaderTest (3 tests, 4 widths) | core/designsystem, gradle/libs.versions.toml | 3 tests pass; PROVEN to fail without the gutter (0dp at 300/340dp) | ~6k |
+| 12:06 | Two vacuous-test mistakes caught before shipping: asserted gap>0 when the real bug was a 1dp gap, and used device width 402dp instead of the 370dp the header actually gets | core/designsystem/src/jvmTest/.../AnfasScreenHeaderTest.kt | fixed via an empirical geometry probe across 6 widths | ~4k |
+| 12:06 | Session end: 107 writes across 46 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 62 reads | ~107265 tok |

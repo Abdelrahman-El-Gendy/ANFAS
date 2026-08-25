@@ -87,6 +87,11 @@ compose-components-resources = { module = "org.jetbrains.compose.components:comp
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 compose-uiTooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "composeMultiplatform" }
 
+# Compose layout tests. ui-test carries the multiplatform `runComposeUiTest`; ui-test-junit4 is
+# the JVM runner that actually executes it, so a desktop-target test needs both.
+compose-uiTest = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "composeMultiplatform" }
+compose-uiTestJunit4 = { module = "org.jetbrains.compose.ui:ui-test-junit4", version.ref = "composeMultiplatform" }
+
 # --- Lifecycle (JetBrains multiplatform port) -----------------------------
 androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
@@ -204,6 +209,7 @@ coil = ["coil-compose", "coil-networkKtor3"]
 settings = ["multiplatformSettings", "multiplatformSettings-coroutines"]
 test-common = ["kotlin-test", "turbine", "koin-test", "kotlinx-coroutines-test"]
 test-jvm = ["kotlin-testJunit", "mockk"]
+test-composeUi = ["compose-uiTest", "compose-uiTestJunit4"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

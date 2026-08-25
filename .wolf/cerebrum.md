@@ -615,3 +615,29 @@
   image into that same box needs `ContentScale.FillBounds`, not `Fit` — `Fit` letterboxes the
   image at its own true aspect ratio inside the box, which visually detaches it from boxes
   positioned against the box's full extent.
+
+## Key Learnings — 2026-08-25 (Compose layout tests)
+
+- **A layout regression test must be proven to fail without its fix, and twice here it did not.**
+  First draft asserted `gap > 0` — but the real bug left a **1dp** gap (visually flush, technically
+  not overlapping), so it passed against the broken component. Second draft used the *device* width
+  (402dp) instead of the width the component is actually handed (370dp, after each screen's 16dp
+  page margin), where the title fits with 33dp to spare and no collision exists at all. Both drafts
+  were confidently green and worthless. Revert the fix, watch it go red, restore.
+- **When a layout assertion is hard to pin, probe the real numbers first.** A throwaway test that
+  printed `titleRight / actionLeft / gap` across six widths turned guesswork into a table: 0dp at
+  300-340dp, 1dp at 370dp, 26dp+ above. That is what revealed both mistakes and gave the 12dp
+  threshold an actual basis. Delete the probe afterwards.
+- **Compose UI tests on the JVM target need `compose.desktop.currentOs` on top of
+  `org.jetbrains.compose.ui:ui-test` + `ui-test-junit4`.** The runner really composes and measures,
+  so it needs Skiko's native renderer for the host; without it the failure is a class-load link
+  error, not an assertion. Both coordinates exist at the project's `composeMultiplatform` version
+  (checked against Maven Central rather than assumed).
+- **Keep these on `jvmTest`, not `commonTest`.** Layout is common Compose code and identical on
+  every target, so a common test would run three times for no extra coverage and pull a renderer
+  into the iOS test binary.
+- **`DpRect` from `getBoundsInRoot()` has no `.width` member in scope** — derive it as
+  `right - left` rather than hunting for the extension import.
+- **A suspiciously fast green (`BUILD SUCCESSFUL in 2s`) usually means nothing ran.** Confirm with
+  `--rerun` and by reading the JUnit XML's `tests=` count, not the exit code.
+

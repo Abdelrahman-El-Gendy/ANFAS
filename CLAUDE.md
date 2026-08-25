@@ -423,6 +423,28 @@ as screens — none belongs to a feature, because any screen can be interrupted 
   RTL surroundings and migrate to the wrong end — `#10003` read as `10003#`.
 - Verify in Arabic on a device. Neither of the above fails a test or looks wrong in English.
 
+## Compose layout tests
+
+- **`:core:designsystem` has `jvmTest` Compose UI tests, and they assert *geometry*.** Three layout
+  bugs in a row were caught only by looking at a screen — the screen header running its title into
+  its action button, intake dropping its source pane below the breakpoint, and the desktop window
+  opening on the phone layout. A test cannot tell you a screen looks wrong, but it can tell you two
+  things that must not touch are touching. Deps are `libs.bundles.test.composeUi` plus
+  `compose.desktop.currentOs`, which is **required** — these really compose and measure, so without
+  Skiko's native renderer they fail at class-load rather than on an assertion.
+- **JVM target only, deliberately.** Layout is decided by common Compose code and is identical on
+  every target, so running these three times buys nothing and would drag a Skiko renderer into the
+  iOS test binary. They go green inside `./gradlew check` with no emulator or simulator.
+- **Assert a minimum *readable* gap, never `> 0`.** The header bug left a **1dp** gap at the real
+  iPhone width — not overlapping, but visually flush — and a first draft asserting `gap > 0` passed
+  against the bug. `AnfasScreenHeaderTest` requires 12dp.
+- **Test the width the component is actually handed, not the device width.** Every screen wraps its
+  header in `padding(horizontal = 16.dp)`, so an iPhone 17 header gets 370dp, not 402dp. The first
+  draft used 402dp, where the title fits with 33dp to spare — the collision only exists at 370dp.
+  Getting this wrong is the difference between a regression test and a decoration.
+- **Prove a new layout test fails without its fix.** Both of the mistakes above produced a
+  confidently green test that caught nothing. Revert the fix, watch it go red, put the fix back.
+
 ## Dates the user enters
 
 - **A date a human enters comes from `AnfasDateField`, never a text field.** A typed date needs a
