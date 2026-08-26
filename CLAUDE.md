@@ -308,16 +308,18 @@ row, whereas the bar divides a phone equally between its items.
 
 | `Placement` | Where | Today |
 |---|---|---|
-| `Primary` | bar **and** rail | Dashboard, Members, Check-in, Reminders |
-| `WideOnly` | rail only; on a phone, reached from its parent screen | Intake |
+| `Primary` | bar **and** rail | Dashboard, Members, Classes, Check-in |
+| `WideOnly` | rail only; on a phone, reached from its parent screen | Reminders, Intake |
+| `DesktopOnly` | rail only, and reachable **nowhere** on a phone — the export drew no mobile screen | Announcements, Equipment |
 | `Account` | never a destination row — rail footer group, compact overflow | Staff |
 
 - **At most four `Primary`, and that is a ceiling rather than a preference.** Material caps a bottom
   bar at five and iOS at five-plus-More. There were six here, which on a 448dp screen in Arabic
   ellipsised every label — a row of stubs whose only job was to say which is which. A fifth needs a
-  real argument, and `NavigationPermissionTest` fails until someone makes it. Note the export's
-  fourth is **Schedule**; ours is Reminders only because `:feature:classes` is a stub, so Classes is
-  a *designed* bar destination and ranks above the other stubs.
+  real argument, and `NavigationPermissionTest` fails until someone makes it. The export's fourth is
+  **Schedule** and so is ours: once `:feature:classes` was built it took that slot, and Reminders
+  moved to `WideOnly` — still one tap from the dashboard's "needs renewal" tile, which is where you
+  would look for it anyway.
 - **Cut the bar by asking which entries are *places*.** Three kinds of thing get conflated into
   tabs: destinations; **screen actions** — "scan a sheet" belongs to the directory, since intake is
   a task whose product is members, and `members-empty` says so; and **account-level things** —
@@ -401,7 +403,7 @@ as screens — none belongs to a feature, because any screen can be interrupted 
 
 | Screen | What backs it |
 |---|---|
-| `permission-denied` | **Live** for iOS camera denial via `CameraPermissions`. The design's own copy is about a staff *role*, so `States.permissionDenied*` and `Intake.cameraDenied*` are separate string sets — telling someone to ask the gym owner about an OS toggle they control is useless advice. |
+| `permission-denied` | **Live twice, via two deliberately separate string sets.** `States.permissionDenied*` is the route guard: `App.kt`'s `Host` checks `session.can(config.requiredPermission)` before composing any screen and renders the denial instead — the second line of defence behind hiding unreachable nav entries, and what stops a restored back stack landing a coach on the renewal sheet. `Intake.cameraDenied*` is the iOS camera denial via `CameraPermissions`. They are separate because telling someone to ask the gym owner about an OS toggle they control themselves is useless advice. |
 | `session-expired` | Strings only. It is `AnfasEmptyState` plus copy; `staff-login` will wire it. |
 | `sync-conflict` | `AnfasConflictRow`/`AnfasConflictHeader` plus `MemberConflict` in `:core:model` (tested). No sync exists, so no caller. |
 | `offline-banner` | `AnfasBanner`. **Not wired, deliberately** — the export says "changes will sync when you reconnect" and nothing syncs, so that banner would be a promise the app cannot keep. |
