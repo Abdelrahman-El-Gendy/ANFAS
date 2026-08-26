@@ -1,15 +1,16 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T18:14:40.459Z
-> Files: 587 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T22:20:35.185Z
+> Files: 589 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/
 
+- `sync-layer.html` — ANFAS Sync Layer (~12843 tok)
 - `whatsapp-send-system.html` — WhatsApp Send System (~9146 tok)
 
 ## ../../.claude/plans/
 
-- `plan-what-is-remaining-abundant-elephant.md` — WhatsApp Phase 1 — make the reminder queue real (~1456 tok)
+- `plan-what-is-remaining-abundant-elephant.md` — The sync layer — design on paper (~2045 tok)
 
 ## ../../.claude/projects/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/memory/
 
@@ -764,6 +765,7 @@
 
 ## design/
 
+- `sync-layer.md` — The sync layer — design (~5739 tok)
 - `whatsapp-send-system.md` — The WhatsApp send system — design (~4591 tok)
 
 ## design/stitch/

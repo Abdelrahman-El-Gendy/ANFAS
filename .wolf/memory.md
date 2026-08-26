@@ -523,3 +523,17 @@ skiko dialog actual with iOS, which is verified.
 | 21:01 | Session end: 62 writes across 33 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 63 reads | ~83265 tok |
 | 21:14 | Created feature/subscriptions/src/jvmTest/kotlin/com/anfas/feature/subscriptions/ReminderQueueLayoutTest.kt | — | ~1336 |
 | 22:00 | Queue table/cards branch for phones, plus two bugs it exposed: invisible error stripe (fillMaxHeight in a wrap-content Row) and the Arabic date reordered by dataMonoLtr (latent in the table) | feature/subscriptions/.../ReminderQueueScreen.kt, ReminderQueueLayoutTest.kt (new), TestDoubles.kt, build.gradle.kts, core/i18n x3, CLAUDE.md | 3 layout tests falsified both directions; check + both iOS targets green; verified on device in English and Arabic RTL -- stripe visible, chip on one line, "17 أغسطس 2026" correct | ~38000 |
+| 21:41 | Session end: 63 writes across 34 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 67 reads | ~85077 tok |
+| 21:43 | Session end: 63 writes across 34 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 67 reads | ~85077 tok |
+| 00:30 | Created ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | — | ~1532 |
+| 00:44 | Created ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | — | ~2182 |
+| 01:14 | Created design/sync-layer.md | — | ~6121 |
+
+## Session: 2026-08-26 01:17
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 01:20 | Created ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/sync-layer.html | — | ~12851 |
+| 01:20 | Edited ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/sync-layer.html | 2→1 lines | ~8 |
+| 01:25 | Sync layer designed on paper: server-assigned sequence cursor (not updated_at), sync_outbox + sync_tombstones (not a deleted column), server-leased membership numbers, reminders never synced, tenancy scopes decided, 6-stage plan durability-first. Retracted 3 of my own premises in §1, incl. "sync unblocks desktop OCR" | design/sync-layer.md | written + published as artifact | ~13000 |
+| 01:21 | Session end: 2 writes across 1 files (sync-layer.html) | 0 reads | ~13776 tok |
