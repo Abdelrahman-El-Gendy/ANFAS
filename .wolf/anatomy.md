@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T08:09:36.750Z
-> Files: 568 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T08:45:24.963Z
+> Files: 571 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~11211 tok)
+- `CLAUDE.md` — OpenWolf (~12105 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -378,8 +378,17 @@
 
 ## androidApp/
 
-- `build.gradle.kts` — Gradle Kotlin build configuration (~450 tok)
+- `build.gradle.kts` — Thin Android launcher. AGP 9 no longer allows the KMP plugin in the same module as (~1727 tok)
+- `proguard-rules-stage.pro` — R8 rules added to the `stage` app APK only -- never to `release`. (~428 tok)
+- `proguard-rules-test.pro` — R8 rules for the androidTest APK only, wired via `testProguardFiles`. (~569 tok)
 - `proguard-rules.pro` — Add project specific ProGuard rules here. (~200 tok)
+
+## androidApp/src/androidTest/kotlin/com/anfas/app/
+
+- `R8SmokeTest.kt` — Instrumented smoke tests against the R8-minified `stage` APK:
+  theMinifiedAppStarts, theMinifiedAppSurvivesSaveAndRestore. Drives the app only through
+  ActivityScenario + org.junit.Assert -- any library API a test calls is absent from a
+  shrunk build. (~1467 tok)
 
 ## androidApp/src/main/
 

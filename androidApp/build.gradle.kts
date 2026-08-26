@@ -28,6 +28,12 @@ dependencies {
 
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)
+
+    // Deliberately the whole list: androidx.test and JUnit, nothing else. The smoke tests drive
+    // the app only through its own entry points, so they need no project dependency and no
+    // kotlin.test — see R8SmokeTest's KDoc for why reaching past that cannot work against a
+    // shrunk APK.
+    androidTestImplementation(libs.bundles.test.androidInstrumented)
 }
 
 /**
@@ -62,6 +68,14 @@ android {
         // (MARKETING_VERSION / CURRENT_PROJECT_VERSION) and desktop (packageVersion).
         versionCode = appVersion().get().versionCode
         versionName = appVersion().get().versionName
+
+        // Instrumented tests run against `stage` (see testBuildType below), which is R8-minified.
+        // That is the whole point: they verify what the shrinker left behind.
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Because `stage` is minified, the *test* APK is shrunk as well. Its rules live in their
+        // own file so a test dependency's needs never loosen the shipped app's configuration.
+        testProguardFiles("proguard-rules-test.pro")
 
         // Only the languages the app actually ships. Without this every AndroidX translation
         // for ~70 locales rides along in the APK.
@@ -114,6 +128,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             isDebuggable = true
+            // Additive on top of the rules initWith copied from release. Holds only what the
+            // instrumented tests need present in the app APK -- release never sees this file.
+            proguardFile("proguard-rules-stage.pro")
             applicationIdSuffix = ".stage"
             versionNameSuffix = "-stage"
             signingConfig = signingConfigs.getByName("debug")

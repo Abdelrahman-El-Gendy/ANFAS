@@ -1343,5 +1343,88 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-25T13:35:00Z"
+  },
+  {
+    "id": "bug-077",
+    "timestamp": "2026-08-26T12:05:00Z",
+    "error_message": "R8SmokeTest: all 5 instrumented tests failed with NoSuchMethodError / NoClassDefFoundError (BuildersKt.runBlocking, kotlin.collections.CollectionsKt, GlobalContext.getOrNull, DefaultComponentContext.<init>)",
+    "file": "androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt",
+    "root_cause": "The tests called library APIs that the production app never calls, so R8 correctly shrank them out of the app APK. Anything a test reaches for from outside is by definition unreachable from the app, so it is absent from a minified build.",
+    "fix": "Rewrote the suite to drive the app only through its own entry points (ActivityScenario.launch / recreate) and to assert with org.junit.Assert instead of kotlin.test. Dropped all project dependencies and kotlin.test from androidTest.",
+    "tags": [
+      "r8",
+      "instrumented-test",
+      "androidTest",
+      "shrinking",
+      "minify",
+      "test-design"
+    ],
+    "related_bugs": [
+      "bug-078",
+      "bug-079"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:05:00Z"
+  },
+  {
+    "id": "bug-078",
+    "timestamp": "2026-08-26T12:05:00Z",
+    "error_message": "AndroidJUnitRunner crashed in onCreate: NoClassDefFoundError: Failed resolution of: Lkotlin/LazyKt; at androidx.test.platform.io.TestDirCalculator",
+    "file": "androidApp/proguard-rules-stage.pro",
+    "root_cause": "kotlin-stdlib is a dependency of both the app and the androidTest APK, and AGP ships a shared dependency in the app APK only. The app inlines every `lazy` call so retains no kotlin.LazyKt, while androidx.test's own Kotlin code calls it. -dontshrink in testProguardFiles cannot help: stdlib is not the test APK's program input.",
+    "fix": "New proguard-rules-stage.pro with `-keep class kotlin.LazyKt* { *; }`, applied via proguardFile() on the `stage` build type only so release is untouched. Verified: release's mapping still shows kotlin.LazyKt__LazyKt -> R8$$REMOVED$$CLASS$$766.",
+    "tags": [
+      "r8",
+      "proguard",
+      "kotlin-stdlib",
+      "androidx-test",
+      "minify",
+      "stage-build-type"
+    ],
+    "related_bugs": [
+      "bug-077"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:05:00Z"
+  },
+  {
+    "id": "bug-079",
+    "timestamp": "2026-08-26T12:05:00Z",
+    "error_message": "Missing classes detected while running R8: com.google.errorprone.annotations.CanIgnoreReturnValue / MustBeClosed (task :androidApp:minifyStageAndroidTestWithR8)",
+    "file": "androidApp/proguard-rules-test.pro",
+    "root_cause": "Because `stage` is minified, the androidTest APK is minified too. androidx.test's Checks/Tracer carry ErrorProne annotations that are compile-time only and ship in a module nothing here depends on.",
+    "fix": "New proguard-rules-test.pro wired via testProguardFiles, holding -dontwarn com.google.errorprone.annotations.** (plus -dontshrink, since the test APK is not the artifact under test). Kept out of proguard-rules.pro so a test dependency never loosens the shipped app's config.",
+    "tags": [
+      "r8",
+      "proguard",
+      "androidx-test",
+      "errorprone",
+      "testProguardFiles"
+    ],
+    "related_bugs": [
+      "bug-078"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:05:00Z"
+  },
+  {
+    "id": "bug-080",
+    "timestamp": "2026-08-26T12:05:00Z",
+    "error_message": "Could not resolve org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0 -- constraint {strictly 1.8.0} from stageRuntimeClasspath by consistent resolution",
+    "file": "androidApp/build.gradle.kts",
+    "root_cause": "AGP applies consistent resolution: an androidTest configuration must resolve the same versions as the production runtime. The Android classpath never declares serialization-json directly, so the transitively-supplied kotlinx BOM pins everything to 1.8.0, and the catalog's 1.11.0 is excluded by the strict constraint.",
+    "fix": "Removed the androidTestImplementation declaration entirely and redesigned the test not to need serialization-json (ActivityScenario.recreate exercises the serializers through the app instead).",
+    "tags": [
+      "gradle",
+      "consistent-resolution",
+      "version-catalog",
+      "kotlinx-serialization",
+      "androidTest"
+    ],
+    "related_bugs": [
+      "bug-077"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:05:00Z"
   }
 ]

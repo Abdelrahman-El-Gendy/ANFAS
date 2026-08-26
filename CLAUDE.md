@@ -542,6 +542,47 @@ as screens — none belongs to a feature, because any screen can be interrupted 
   Declaring Dmg+Msi+Deb together means every host fails on two of three.
 - The Room database is excluded from cloud backup and device transfer: the whole domain is PII.
 
+## Android instrumented tests
+
+`androidApp/src/androidTest/.../R8SmokeTest.kt`, run with
+`./gradlew :androidApp:connectedStageAndroidTest`. Two tests, and they exist for one reason: R8
+output was previously verified only by installing an APK by hand and reading logcat.
+
+- **A test running against a shrunk APK may only touch the app's own entry points.** This is the
+  whole lesson, and it cost five failing tests to learn. The first version called `runBlocking`,
+  `GlobalContext.getOrNull()`, a `DefaultComponentContext` constructor and `kotlin.test`'s
+  assertions; every one failed with `NoSuchMethodError`/`NoClassDefFoundError`, because the app
+  never calls them, so **R8 was right to remove them**. Any library API a test reaches for is by
+  definition outside the app's reachable graph, so a keep rule bringing it back proves only that
+  the keep rule works. What survives: `ActivityScenario.launch` / `recreate`, and
+  `org.junit.Assert` (Java, ships inside the test APK, touches nothing shrunk) instead of
+  `kotlin.test`, whose asserter lookup needs `kotlin.collections.CollectionsKt`.
+- **`recreate()` is the real test of the documented Config-discriminator hazard**, better than any
+  assertion about serial names: it drives a genuine save-then-restore of instance state inside the
+  minified app, so Decompose's `StateKeeper`, the serializers and their descriptors all have to
+  survive shrinking for it to return. It also carries an identity check on the activity instance —
+  without it, a `recreate()` that silently did nothing would leave the test green and vacuous.
+- **`stage` verifies shrinking, not obfuscation.** AGP disables obfuscation and optimization for
+  debuggable build types and says so at configuration time. Verified rather than believed: every
+  non-identity entry in `build/outputs/mapping/stage/mapping.txt` is an `R8$$REMOVED$$CLASS$$n`,
+  a deletion — not one class is renamed. Shrinking is the failure mode that has actually bitten
+  this project (the ML Kit/`ComponentDiscovery` strip), so it is the one covered; a rename
+  regression would need a non-debuggable build and a different harness. Don't claim more than this.
+- **Two extra rule files, and neither may touch `release`.** `proguard-rules-test.pro`
+  (`testProguardFiles`) carries `-dontwarn com.google.errorprone.annotations.**`, which
+  `androidx.test` references and nothing here provides. `proguard-rules-stage.pro` (added to the
+  `stage` build type only, on top of what `initWith(release)` copied) keeps `kotlin.LazyKt*`:
+  kotlin-stdlib is shared between app and test APK so AGP ships it in the app only, the app inlines
+  every `lazy` and thus retains no `LazyKt`, and `AndroidJUnitRunner.onCreate` died on it before a
+  single test ran. `-dontshrink` in the *test* rules cannot fix that — stdlib is not the test APK's
+  program input. Confirm the scoping the same way it was confirmed here: `release`'s mapping still
+  shows `kotlin.LazyKt__LazyKt -> R8$$REMOVED$$CLASS$$766` while `stage`'s keeps it.
+- **Emulator storage, not correctness, is the usual failure.** Pass
+  `-Pandroid.injected.build.abi=arm64-v8a` so one ABI is installed instead of all of them.
+- Not in CI yet: `connectedAndroidTest` needs an emulator on the runner. The `jvm` job already
+  builds `:androidApp:assembleStage`, so the minified APK is proven to *build* on every PR; proving
+  it *runs* is still a local step.
+
 ## CI
 
 - **`.github/workflows/ci.yml` is PR-validation only — no release/signing workflows yet.**
@@ -585,6 +626,8 @@ as screens — none belongs to a feature, because any screen can be interrupted 
 ./gradlew build                                    everything
 ./gradlew check                                    tests + layering rules
 ./gradlew :androidApp:assembleDebug                Android
+./gradlew :androidApp:connectedStageAndroidTest -Pandroid.injected.build.abi=arm64-v8a
+                                                   R8 smoke tests, needs an emulator
 ./gradlew :composeApp:compileKotlinIosSimulatorArm64   iOS compile check
 ./gradlew :desktopApp:run                          desktop
 ./gradlew :server:run                              server → GET /health

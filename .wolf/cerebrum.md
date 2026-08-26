@@ -666,3 +666,38 @@
   refactoring the screen to be testable, and it exercises the real composable rather than a
   simplified stand-in.
 
+
+## Key Learnings — 2026-08-26 (Android instrumented smoke tests)
+
+- **A test running against an R8-shrunk APK may only touch the app's own entry points.** The first
+  `R8SmokeTest` called `runBlocking`, `GlobalContext.getOrNull()`, a `DefaultComponentContext`
+  constructor and `kotlin.test`'s assertions. All five tests failed with
+  `NoSuchMethodError`/`NoClassDefFoundError` — the app never calls those, so R8 correctly removed
+  them. Any library API a test reaches for is by definition outside the app's reachable graph, so a
+  keep rule bringing it back proves only that the keep rule works. Use `ActivityScenario` plus
+  `org.junit.Assert` (Java, in the test APK) and nothing else.
+- **`kotlin.test` is unusable in an androidTest against a minified app** — its asserter lookup needs
+  `kotlin.collections.CollectionsKt`, which the app does not retain. `org.junit.Assert` has no
+  Kotlin dependency at all.
+- **`stage` shrinks but does NOT obfuscate.** AGP disables obfuscation and optimization for
+  debuggable build types. Verified in `build/outputs/mapping/stage/mapping.txt`: every non-identity
+  entry is `R8$$REMOVED$$CLASS$$n`, a deletion; zero renames. So `stage` cannot test a rename
+  hazard — don't write a test claiming it does.
+- **`ActivityScenario.recreate()` is the right way to test the Config-discriminator hazard**: a real
+  save-then-restore inside the minified app exercises Decompose's `StateKeeper` and the serializers
+  for real, instead of asserting about serial names. Pair it with an activity-identity assertion or
+  the test is vacuous if `recreate()` no-ops.
+- **AGP consistent resolution pins androidTest to the production runtime's versions.** Declaring
+  `libs.kotlinx.serialization.json` (catalog 1.11.0) on `androidTestImplementation` failed to
+  resolve, because `stageRuntimeClasspath` resolves `{strictly 1.8.0}` — the Android classpath never
+  asks for 1.11.0 and the transitively-supplied kotlinx BOM pins 1.8.0. Don't add a version to an
+  androidTest configuration; design the test not to need the dependency.
+- **Minifying the app means the test APK is minified too, and that needs two extra rule files** —
+  `testProguardFiles` for `-dontwarn com.google.errorprone.annotations.**`, and a build-type-scoped
+  file on `stage` for `-keep class kotlin.LazyKt*`. Never put either in `proguard-rules.pro`:
+  a production keep rule motivated by a test is one nobody can later justify. Prove the scoping —
+  `release`'s mapping still shows `kotlin.LazyKt__LazyKt -> R8$$REMOVED$$CLASS$$766`.
+- **`-dontshrink` in `testProguardFiles` does not solve a missing stdlib class.** Shared
+  dependencies ship in the app APK only, so stdlib is never the test APK's program input; the keep
+  rule has to be on the app side.
+- Emulator installs need `-Pandroid.injected.build.abi=arm64-v8a` on this machine (93% full /data).

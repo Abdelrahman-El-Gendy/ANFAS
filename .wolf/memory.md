@@ -427,3 +427,25 @@ skiko dialog actual with iOS, which is verified.
 | 11:09 | Edited CLAUDE.md | expanded (+16 lines) | ~423 |
 | 09:20 | Pinned the two remaining layout bugs: WindowSizeTest (desktopApp, 4 tests, asserts window width vs AnfasBreakpoints.tabletMax) and IntakeReviewLayoutTest (feature/intake-ocr jvmTest, 3 tests, source pane present at 300/370/395dp and at desktop width) | desktopApp/src/test, feature/intake-ocr/src/jvmTest, both build.gradle.kts | both PROVEN to fail on revert; check green + iOS arm64 | ~11k |
 | 09:22 | Caught a third vacuous-layout-test variant: Modifier.size is clamped by the test surface, so the desktop-width case was exercising the narrow branch. Switched to requiredSize | feature/intake-ocr/src/jvmTest/.../IntakeReviewLayoutTest.kt | revert now fails exactly the 2 phone tests, desktop passes | ~3k |
+| 11:12 | Session end: 129 writes across 54 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 87 reads | ~147448 tok |
+| 11:16 | Edited androidApp/build.gradle.kts | 2→6 lines | ~97 |
+| 11:16 | Edited androidApp/build.gradle.kts | 3→7 lines | ~84 |
+| 11:17 | Created androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt | — | ~2511 |
+| 11:21 | Edited androidApp/build.gradle.kts | expanded (+9 lines) | ~215 |
+
+## Session: 2026-08-26 11:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:28 | Edited androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt | modified configDiscriminatorsSurviveShrinking() | ~608 |
+| 11:29 | Created androidApp/proguard-rules-test.pro | — | ~274 |
+| 11:29 | Edited androidApp/build.gradle.kts | 3→7 lines | ~134 |
+| 11:31 | Edited androidApp/proguard-rules-test.pro | expanded (+15 lines) | ~420 |
+| 11:32 | Created androidApp/proguard-rules-stage.pro | — | ~428 |
+| 11:32 | Edited androidApp/build.gradle.kts | 2→5 lines | ~85 |
+| 11:35 | Created androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt | — | ~1291 |
+| 11:37 | Edited androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt | modified theMinifiedAppSurvivesSaveAndRestore() | ~306 |
+| 11:45 | Edited CLAUDE.md | expanded (+41 lines) | ~935 |
+| 11:45 | Edited CLAUDE.md | 1→3 lines | ~62 |
+| 12:05 | Instrumented R8 smoke tests: rewrote to app-entry-points only (ActivityScenario launch/recreate, org.junit.Assert) after 5 tests failed on shrunk-away library APIs | androidApp/src/androidTest/.../R8SmokeTest.kt, androidApp/build.gradle.kts, proguard-rules-test.pro, proguard-rules-stage.pro | 2/2 green on Pixel 9 Pro against the minified stage APK; falsified by injecting a startup crash; check + both iOS targets + assembleRelease green | ~9000 |
+| 11:47 | Session end: 10 writes across 5 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 0 reads | ~4867 tok |
