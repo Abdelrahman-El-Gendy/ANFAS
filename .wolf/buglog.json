@@ -1485,5 +1485,111 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-08-26T12:30:00Z"
+  },
+  {
+    "id": "bug-084",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "User: 'when entering in the input texts in signin and signup the screen not responsive with the keyboard the input components shown under the keyboard'",
+    "file": "androidApp/src/main/AndroidManifest.xml",
+    "root_cause": "MainActivity calls enableEdgeToEdge() but the activity declared no windowSoftInputMode, so the system used adjustPan: the whole window slid up by a fixed amount instead of the IME being reported as an inset. The ANFAS top bar was pushed under the status bar and whether a field cleared the keyboard depended on the pan distance.",
+    "fix": "Added android:windowSoftInputMode=\"adjustResize\" to the MainActivity declaration, with a comment explaining that edge-to-edge requires it.",
+    "tags": [
+      "android",
+      "ime",
+      "keyboard",
+      "insets",
+      "manifest",
+      "edge-to-edge"
+    ],
+    "related_bugs": [
+      "bug-085",
+      "bug-086",
+      "bug-087"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-085",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "Focused text field remained two-thirds under the keyboard on a landscape phone even with a correctly inset scroll container",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt",
+    "root_cause": "Compose brings a newly-focused field into view at the moment focus arrives, when the keyboard is not yet open and the field is usually already visible, so nothing scrolls. The viewport then shrinks by the keyboard height and no second bring-into-view is issued.",
+    "fix": "AnfasTextField now holds a BringIntoViewRequester with a LaunchedEffect keyed on both `focused` and WindowInsets.ime.getBottom(density), so it re-requests on every keyboard height change. Fixes every screen and dialog using the component.",
+    "tags": [
+      "compose",
+      "ime",
+      "keyboard",
+      "bringIntoView",
+      "designsystem",
+      "scroll"
+    ],
+    "related_bugs": [
+      "bug-084"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-086",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "The keyboard's Next key did nothing; focus stayed on the current field",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt",
+    "root_cause": "KeyboardActions(onNext = { onImeAction?.invoke() }) supplies a non-null handler, which replaces Compose's default focus-advance even when onImeAction is null and the body does nothing. Every field except the last one has no onImeAction.",
+    "fix": "Built `imeActionHandler` only when onImeAction != null and passed it (or null) to onDone/onGo/onNext, so the platform default applies where there is no submit action.",
+    "tags": [
+      "compose",
+      "keyboard",
+      "KeyboardActions",
+      "focus",
+      "designsystem"
+    ],
+    "related_bugs": [
+      "bug-085"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-087",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "AnfasDialog KDoc claimed 'a scrollable body' but the body Column had no verticalScroll; a tall form pushed its own footer (Save/Cancel) off the bottom edge",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDialog.kt",
+    "root_cause": "The body Column was unbounded and unscrollable, so with a keyboard-shrunk window the six form dialogs could be neither submitted nor dismissed. The component's own documentation asserted otherwise.",
+    "fix": "Body Column now has weight(1f, fill = false) + verticalScroll, and the dialog has imePadding(). Extracted AnfasDialogPanel (internal) because Dialog opens its own window and ignores composing constraints, making the invariant untestable via the public composable; pinned by AnfasDialogTest, verified to fail when the fix is reverted.",
+    "tags": [
+      "compose",
+      "dialog",
+      "scroll",
+      "ime",
+      "designsystem",
+      "stale-doc"
+    ],
+    "related_bugs": [
+      "bug-084",
+      "bug-085"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-088",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "Self-inflicted: changed App.kt from safeDrawing to systemBars.union(displayCutout) on the theory that safeDrawing's IME component was being consumed, with a comment asserting it fixed the bug. It changed nothing.",
+    "file": "composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
+    "root_cause": "Diagnosed by reasoning instead of measurement. windowInsetsPadding(x.only(sides)) limits its consumption to the sides it pads, so the bottom/IME inset was never consumed. A temporary debug Text printing WindowInsets.ime.getBottom() showed ime=1008 and the layout clipping at exactly screen-1008, proving imePadding was already working.",
+    "fix": "Reverted App.kt entirely. Measure the inset before editing layout code on a consumption hunch.",
+    "tags": [
+      "diagnosis",
+      "insets",
+      "compose",
+      "self-correction"
+    ],
+    "related_bugs": [
+      "bug-084",
+      "bug-085"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
   }
 ]

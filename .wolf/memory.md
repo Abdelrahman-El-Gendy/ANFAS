@@ -466,3 +466,20 @@ skiko dialog actual with iOS, which is verified.
 | 12:20 | Edited CLAUDE.md | expanded (+28 lines) | ~723 |
 | 12:30 | Desktop window position/size persistence with screen-bounds clamping; 19 unit tests + end-to-end verification against the packaged app | desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt (new), main.kt, desktopApp/src/test/.../WindowGeometryTest.kt (new), CLAUDE.md | seed→launch→exact restore (150,80 1100x700); detached-monitor seed recentred; 800x600 raised to the 1060x680 floor; falsified by neutering the resolver (8/19 red, exactly the resolver branches); check + iOS compile green | ~14000 |
 | 12:22 | Session end: 24 writes across 8 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 4 reads | ~13023 tok |
+| 12:25 | Edited .claude/agents/git-shipper.md | expanded (+6 lines) | ~152 |
+| 12:26 | Session end: 25 writes across 9 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 4 reads | ~13186 tok |
+| 12:33 | Edited androidApp/src/main/AndroidManifest.xml | expanded (+12 lines) | ~264 |
+| 12:34 | Edited androidApp/src/main/AndroidManifest.xml | 2→2 lines | ~51 |
+| 12:39 | Edited feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/SignInScreen.kt | expanded (+8 lines) | ~294 |
+| 12:46 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/App.kt | expanded (+9 lines) | ~422 |
+| 13:42 | Edited feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/SignInScreen.kt | Box() → BoxWithConstraints() | ~664 |
+| 13:42 | Edited feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/SignInScreen.kt | added 1 condition(s) | ~319 |
+| 13:45 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt | added 1 condition(s) | ~414 |
+| 13:48 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt | expanded (+6 lines) | ~207 |
+| 13:49 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt | added optional chaining | ~106 |
+| 13:55 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDialog.kt | modified Dialog() | ~151 |
+| 13:56 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDialog.kt | expanded (+9 lines) | ~247 |
+| 13:57 | Created core/designsystem/src/jvmTest/kotlin/com/anfas/core/designsystem/AnfasDialogTest.kt | — | ~1226 |
+| 13:58 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDialog.kt | modified Dialog() | ~308 |
+| 14:08 | Edited CLAUDE.md | added optional chaining | ~1015 |
+| 14:20 | Fixed keyboard handling on sign-in/first-run setup: adjustResize, imePadding on container, bring-into-view on IME change, dead Next key, scrollable dialog body | androidApp/src/main/AndroidManifest.xml, feature/auth/.../SignInScreen.kt, core/designsystem/.../AnfasTextField.kt, core/designsystem/.../AnfasDialog.kt, core/designsystem/src/jvmTest/.../AnfasDialogTest.kt, CLAUDE.md | verified on emulator portrait AND landscape before/after; dialog test falsified by reverting; check + both iOS targets green; iOS keyboard interaction NOT verified (idb absent) | ~30000 |

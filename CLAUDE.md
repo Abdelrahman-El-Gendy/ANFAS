@@ -463,6 +463,52 @@ as screens — none belongs to a feature, because any screen can be interrupted 
   copied `1024` — so moving the breakpoint fails there instead of silently making two
   `DesktopOnly` features unreachable again.
 
+## The keyboard
+
+Every fix here came from watching a device, and each earlier attempt looked right in the source.
+
+- **`android:windowSoftInputMode="adjustResize"` is required, not a preference.** `MainActivity`
+  calls `enableEdgeToEdge()`, so the app is expected to handle the keyboard itself through
+  `WindowInsets.ime` — but the platform only reports that inset when the activity asks to be
+  resized. Left unspecified the system chose **adjustPan**, which slides the whole window up by a
+  fixed amount: the "ANFAS" top bar went *under the status bar*, and whether a given field cleared
+  the keyboard was luck. The tell is chrome moving that should never move.
+- **`imePadding()` belongs on the container, never on a centred child.** As a modifier on the form
+  `Column` inside a `Box(contentAlignment = Center)` it made the *child* taller by the keyboard's
+  height, and centring then split the difference — content rose by half the keyboard and the
+  child's scroll viewport still extended behind it.
+- **Compose does not re-scroll a focused field when the keyboard changes the viewport.** It brings
+  a field into view when focus *arrives* — at which point the keyboard is not up yet and the field
+  is usually already visible, so nothing scrolls. The viewport then shrinks and no second request
+  is made. `AnfasTextField` therefore holds a `BringIntoViewRequester` whose `LaunchedEffect` is
+  keyed on **`WindowInsets.ime.getBottom(density)` as well as focus**, so it re-runs on every
+  keyboard height change. This is what actually fixed it; the two items above were necessary but
+  not sufficient, which is why all three are listed.
+- **A supplied `KeyboardActions` handler replaces the platform default even when its body is
+  empty.** `onNext = { onImeAction?.invoke() }` killed the keyboard's Next key on every field that
+  does not submit — which is all of them but the last. Pass **null** to keep the default; hence
+  `imeActionHandler`, built only when `onImeAction != null`.
+- **`WindowInsets.ime` reporting a real height does not mean `imePadding()` is applying it** — an
+  ancestor may have consumed it. Reading the raw inset in a debug `Text` is the only way to tell
+  the two apart, and it is worth doing before changing layout code on a hunch. (Here nothing was
+  consuming it: `windowInsetsPadding(safeDrawing.only(Horizontal + Top))` in `App.kt` correctly
+  limits its consumption to the sides it pads, so it is fine as it stands.)
+- **`SignInScreen` drops its heading below `SHORT_VIEWPORT` (400dp),** measured from its own
+  `BoxWithConstraints` rather than the window. On a landscape phone with the keyboard up the form
+  is handed roughly **80dp** — one field — and spending it on a title and tagline is what pushed
+  the fields off the bottom. A window-sized breakpoint would call that case "a phone" and keep the
+  heading.
+- **`AnfasDialog`'s body is now actually scrollable, which its KDoc had always claimed.** Every
+  dialog in this app is a form, so a keyboard-shrunk window is the normal case, not the edge one;
+  with the body unbounded a tall form pushed its own footer — Save and Cancel — off the bottom, so
+  the dialog could be neither submitted nor dismissed. `weight(1f, fill = false)` pins the header
+  and footer, and `fill = false` keeps a short confirm dialog from stretching to full height.
+  `AnfasDialogPanel` is split out `internal` for exactly one reason: `Dialog` opens its own window
+  and ignores the constraints of whatever composes it, so the invariant is untestable through the
+  public entry point. `AnfasDialogTest` pins it.
+- **Verify in landscape, not just portrait.** Portrait had enough slack to hide two of these three
+  bugs. Landscape is where a 780px keyboard on a 1280px screen leaves no margin for error.
+
 ## Dates the user enters
 
 - **A date a human enters comes from `AnfasDateField`, never a text field.** A typed date needs a

@@ -736,3 +736,36 @@
   user's apps has focus — this session captured their Outlook calendar, work timesheet and browser
   tabs before I stopped. Verify desktop geometry numerically (seed prefs, launch, read back from a
   fresh JVM) and say plainly that a content screenshot was not possible.
+
+## Key Learnings — 2026-08-26 (keyboard / IME handling)
+
+- **`enableEdgeToEdge()` requires `android:windowSoftInputMode="adjustResize"` in the manifest.**
+  Without it the system picks adjustPan and slides the whole window up — the app's own top bar ends
+  up under the status bar. If chrome that should be fixed is moving when the keyboard opens, that is
+  adjustPan.
+- **`imePadding()` on a child that a parent centres is wrong.** Padding makes the child taller and
+  centring splits the difference, so content rises by half the keyboard height. Put the inset on the
+  container so the space the child is centred in shrinks.
+- **Compose does not re-run bring-into-view when the keyboard resizes the viewport.** It scrolls on
+  focus arrival, before the keyboard is up. Fix: a `BringIntoViewRequester` with a `LaunchedEffect`
+  keyed on `WindowInsets.ime.getBottom(density)` as well as focus. This was the actual fix; the
+  container/inset changes were necessary but not sufficient.
+- **`KeyboardActions(onNext = { maybeNull?.invoke() })` disables the keyboard's Next key.** A
+  supplied handler replaces the platform default even when its body does nothing. Pass null to keep
+  the default (advance focus / dismiss).
+- **A non-zero `WindowInsets.ime` does not prove `imePadding()` is applying it.** Print the raw
+  inset in a temporary `Text` to separate "inset not reported" from "inset consumed by an ancestor"
+  before touching layout. I changed `App.kt` on the consumption hunch, found it made no difference,
+  and reverted it — `windowInsetsPadding(x.only(sides))` does limit its consumption correctly.
+- **Test the keyboard in landscape.** Portrait had enough slack to mask two of three bugs; landscape
+  leaves ~80dp of form area on a phone, which is where every mistake shows.
+- `Dialog` opens its own window and ignores the constraints of whatever composes it, so a dialog's
+  internal layout cannot be measured through the public composable. Split an `internal` panel
+  composable out and test that.
+
+## Do-Not-Repeat — 2026-08-26 (second entry)
+
+- **Do not conclude an inset is being consumed without measuring it.** I edited `App.kt` to swap
+  `safeDrawing` for `systemBars.union(displayCutout)` on the theory that safeDrawing's IME component
+  was being consumed, wrote a confident comment saying so, and it changed nothing — the real cause
+  was the missing bring-into-view. Reverted. Measure first, then edit.

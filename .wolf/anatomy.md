@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T09:20:26.194Z
-> Files: 572 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T11:08:57.827Z
+> Files: 573 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~12740 tok)
+- `CLAUDE.md` — OpenWolf (~13685 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -32,7 +32,7 @@
 ## .claude/agents/
 
 - `feature-verifier.md` — Gate 1 - build and test (~1904 tok)
-- `git-shipper.md` — Step 0 - orient yourself, every time (~1701 tok)
+- `git-shipper.md` — Step 0 - orient yourself, every time (~1816 tok)
 
 ## .claude/rules/
 
@@ -388,7 +388,7 @@
 
 ## androidApp/src/main/
 
-- `AndroidManifest.xml` (~229 tok)
+- `AndroidManifest.xml` (~567 tok)
 
 ## androidApp/src/main/kotlin/com/anfas/app/
 
@@ -509,7 +509,7 @@
 
 ## composeApp/src/commonMain/kotlin/com/anfas/app/
 
-- `App.kt` — App shell: theme, the navigation host, and the top-level nav chrome. (~6610 tok)
+- `App.kt` — App shell: theme, the navigation host, and the top-level nav chrome. (~6830 tok)
 
 ## composeApp/src/commonMain/kotlin/com/anfas/app/di/
 
@@ -670,7 +670,7 @@
 - `AnfasChoice.kt` — `AnfasChoiceChip` (single-choice) + `AnfasSelectableRow` (radio card for plans) (~700 tok)
 - `AnfasColorScheme.kt` — Maps the palette onto M3 `darkColorScheme()`. Dark only; the design has no light mode (~380 tok)
 - `AnfasDateField.kt` — A labelled date input backed by the Material 3 calendar picker. (~1954 tok)
-- `AnfasDialog.kt` — Layer-2 modal: titled header, scrollable body, footer bar. The only shadow in the design (~650 tok)
+- `AnfasDialog.kt` — A Layer-2 modal: `surface-container-low`, a titled header with a close affordance, a (~1719 tok)
 - `AnfasDimens.kt` — Spacing, border/rule/hover alphas, breakpoints + column counts, elevation (cards 0dp, modals 8dp) (~470 tok)
 - `AnfasEmptyState.kt` — Centred nothing-state. Tone.Invitation (amber badge) vs Tone.Informational (grey) (~600 tok)
 - `AnfasExtendedColors.kt` — M3 *fixed* roles + brand accents (offWhite/sage/rose/charcoal) as a data class + CompositionLocal. sage=therapy, rose=classes (~520 tok)
@@ -688,11 +688,13 @@
 - `AnfasTable.kt` — Header row/cell, row with 2% hover, 5% divider, footer. Compressed 12dp staff row padding (~700 tok)
 - `AnfasTabs.kt` — Underlined tab strip with count badges; emphasiseCount tints a non-zero failure count (~600 tok)
 - `AnfasTextAction.kt` — Text-only action, Primary/Muted emphasis (~330 tok)
+- `AnfasTextField.kt` — A labelled single-line input. (~2279 tok)
 - `AnfasTheme.kt` — Theme entry point wiring colours/type/shapes; also the `AnfasTheme` accessor object for what M3 has no slot for (~420 tok)
 - `AnfasType.kt` — IBM Plex Sans family (3 static weights), the 7 named roles verbatim, and M3 `Typography`. `dataMono` = tabular figures, not a mono face (~700 tok)
 
 ## core/designsystem/src/jvmTest/kotlin/com/anfas/core/designsystem/
 
+- `AnfasDialogTest.kt` — Geometry, not appearance — the same reason [AnfasScreenHeaderTest] exists. (~1226 tok)
 - `AnfasScreenHeaderTest.kt` — Geometry, not appearance. (~1579 tok)
 
 ## core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/
@@ -765,16 +767,9 @@
 ## desktopApp/src/main/kotlin/com/anfas/app/
 
 - `main.kt` — Thin launcher. All shared *app* behaviour lives in :composeApp — do not add feature logic here. (~2678 tok)
-- `WindowGeometry.kt` — Desktop window position/size persistence. WindowGeometry,
-  resolveWindowGeometry (clamps a restore against the screens that exist NOW),
-  read/writeWindowGeometry (java.util.prefs, same node as Settings), availableScreenBounds.
-  (~2132 tok)
 
 ## desktopApp/src/test/kotlin/com/anfas/app/
 
-- `WindowGeometryTest.kt` — 19 tests over resolveWindowGeometry and the preferences round-trip:
-  detached monitor, negative coords on a left-hand monitor, title bar above the screen, the
-  resize floor, screen-smaller-than-floor, edge nudging. (~2114 tok)
 - `WindowSizeTest.kt` — The desktop window must open — and must stay — above the layout breakpoint. (~782 tok)
 
 ## feature/announcements/
@@ -794,6 +789,10 @@
 ## feature/announcements/src/commonTest/kotlin/com/anfas/feature/announcements/
 
 - `AnnouncementsComponentTest.kt` — Only what this component itself owns: permission gating and the publish-once guard. Save, (~2502 tok)
+
+## feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/
+
+- `SignInScreen.kt` — Staff sign-in, and first-run owner setup. (~2435 tok)
 
 ## feature/classes/
 

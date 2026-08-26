@@ -19,9 +19,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Anfas">
+        <!--
+          windowSoftInputMode=adjustResize is required, not a preference. MainActivity calls
+          enableEdgeToEdge(), so the window no longer fits system windows and Compose is expected
+          to handle the keyboard itself through WindowInsets.ime. But the platform only reports
+          that inset when the activity asks to be resized. Left unspecified, the system chose
+          adjustPan instead: it slid the whole window up by a fixed amount, which pushed the
+          "ANFAS" top bar underneath the status bar and left whether a given field cleared the
+          keyboard down to luck. With adjustResize the inset is dispatched, imePadding() in
+          SignInScreen shrinks its own scroll viewport, the focused field is scrolled into it, and
+          the chrome above stays where it belongs.
+        -->
         <activity
             android:exported="true"
-            android:name=".MainActivity">
+            android:name=".MainActivity"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
