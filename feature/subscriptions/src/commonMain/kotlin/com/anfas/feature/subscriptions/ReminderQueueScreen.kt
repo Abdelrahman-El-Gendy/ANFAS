@@ -142,6 +142,36 @@ fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = 
                     NoticeBar(text = notice.render(s), onDismiss = component::onNoticeShown)
                 }
 
+                // Only on the Queued tab, and only when something is queued -- sending is
+                // meaningless on the Sent and Failed tabs, and an always-present button on an
+                // empty queue is a control that does nothing.
+                if (state.selectedStatus == ReminderStatus.QUEUED &&
+                    state.counts.queued > 0 &&
+                    state.maySend
+                ) {
+                    if (state.gatewayConnected) {
+                        AnfasPrimaryButton(
+                            text = if (state.isSending) {
+                                s.reminders.running
+                            } else {
+                                s.reminders.runQueue
+                            },
+                            onClick = component::onRunQueue,
+                            enabled = !state.isSending,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    } else {
+                        // Explained rather than hidden. Staff should learn the feature exists and
+                        // why it is inert; a run against no gateway would fail every row and spend
+                        // its attempts, so the button genuinely must not be offered.
+                        Text(
+                            text = s.reminders.notConnected,
+                            style = AnfasTheme.textStyles.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
                 when (val content = state.content) {
                     ReminderQueueContent.Loading -> Box(Modifier.fillMaxSize())
 
@@ -497,6 +527,10 @@ private fun QueueNotice.render(s: AppStrings): String = when (this) {
 
     is QueueNotice.QueueBuiltNothing ->
         s.reminders.queueBuiltNothing(noConsent, noPhone, alreadyQueued)
+
+    is QueueNotice.RunFinished -> s.reminders.runFinished(sent, failed)
+
+    is QueueNotice.RunStoppedEarly -> s.reminders.runStoppedEarly(sent)
 
     is QueueNotice.Failed -> message
 }

@@ -204,6 +204,13 @@ interface AppStrings {
         val building: String
         fun queueBuilt(queued: Int): String
         fun queueBuiltNothing(noConsent: Int, noPhone: Int, alreadyQueued: Int): String
+
+        /** Running the queue: the action, its in-flight label, and what one run did. */
+        val runQueue: String
+        val running: String
+        val notConnected: String
+        fun runFinished(sent: Int, failed: Int): String
+        fun runStoppedEarly(sent: Int): String
     }
 
     interface Renewal {

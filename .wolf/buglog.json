@@ -1705,5 +1705,42 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-26T19:10:00Z"
+  },
+  {
+    "id": "bug-095",
+    "timestamp": "2026-08-26T21:00:00Z",
+    "error_message": "PhoneE164Test > a foreign country code is preserved FAILED -- 966501234567 became 20966501234567",
+    "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/PhoneE164.kt",
+    "root_cause": "The else branch prepended the default country code to any number without a leading 0 or 00, so every already-international foreign number got 20 stuck on the front. A member with a Saudi or Emirati number would have had their renewal notice sent to whoever owns the resulting Egyptian number.",
+    "fix": "Use length to tell the cases apart: <=10 digits is a bare national subscriber number and gets the country code; anything longer already carries one. Prefix alone cannot distinguish them.",
+    "tags": [
+      "phone",
+      "e164",
+      "whatsapp",
+      "test-caught",
+      "data-correctness"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T21:00:00Z"
+  },
+  {
+    "id": "bug-096",
+    "timestamp": "2026-08-26T21:00:00Z",
+    "error_message": "The reminder queue's empty state claimed 'Reminders appear here once the daily job schedules them' -- there is no daily job",
+    "file": "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/EnglishStrings.kt",
+    "root_cause": "Copy written when the queue could never be populated, so nobody had read it against reality. Phase 1 made the queue real and the sentence became false. The sent tab also said 'Delivered', which overstates SENT -- Meta accepting a message is not a delivery receipt.",
+    "fix": "The queued empty state now names Build queue; the sent one says 'sent' rather than 'delivered'. Both languages. Spotted from a device screenshot, not from reading code.",
+    "tags": [
+      "i18n",
+      "stale-copy",
+      "honesty",
+      "whatsapp"
+    ],
+    "related_bugs": [
+      "bug-095"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T21:00:00Z"
   }
 ]

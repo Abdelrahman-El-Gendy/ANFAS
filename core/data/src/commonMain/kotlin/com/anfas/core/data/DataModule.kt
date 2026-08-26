@@ -49,6 +49,12 @@ val dataModule: Module = module {
         OfflineFirstMemberRepository(dao = get(), newId = { Uuid.random().toString() })
     }
     single<ReminderRepository> { OfflineFirstReminderRepository(dao = get()) }
+    // No live gateway yet (Phase 3). Bound rather than left absent so opening the queue is a
+    // truthful "not connected" instead of a Koin resolution failure.
+    single<WhatsAppGateway> { NoWhatsAppGateway }
+    single<ReminderSender> {
+        DefaultReminderSender(reminders = get(), gateway = get(), dispatchers = get())
+    }
     // Three DAOs, because deciding who is owed a reminder needs members, their current terms and
     // the reminders already written. That breadth is why it is not a method on ReminderRepository.
     single<ReminderScheduler> {

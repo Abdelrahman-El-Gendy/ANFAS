@@ -135,10 +135,16 @@ object EnglishStrings : AppStrings {
             "The queue is clear. Last $delivered messages delivered."
         override val noFailedMessage = "The queue is clear and running without interruptions."
         override val nothingQueuedTitle = "Nothing queued"
+
+        // Was "once the daily job schedules them" -- there is no daily job, and now that Build
+        // queue exists the honest copy names the thing the user can actually press.
         override val nothingQueuedMessage =
-            "Reminders appear here once the daily job schedules them."
+            "Build the queue to find members whose membership is expiring."
         override val nothingSentTitle = "Nothing sent yet"
-        override val nothingSentMessage = "Delivered reminders will be listed here."
+
+        // Not "delivered": SENT means WhatsApp accepted the message. Delivery receipts need
+        // webhooks, which do not exist -- see design/whatsapp-send-system.md §8.
+        override val nothingSentMessage = "Reminders that have been sent will be listed here."
         override val filteredEmptyTitle = "No reminders match these filters"
         override val filteredEmptyMessage = "Try a different template, or clear the search."
         override val clearFilters = "CLEAR FILTERS"
@@ -193,6 +199,19 @@ object EnglishStrings : AppStrings {
                 "Nothing to queue: " + reasons.joinToString(", ")
             }
         }
+        override val runQueue = "Run queue"
+        override val running = "Sending…"
+        override val notConnected =
+            "WhatsApp is not connected yet, so these cannot be sent."
+
+        override fun runFinished(sent: Int, failed: Int): String {
+            val sentText = if (sent == 1) "Sent 1 message" else "Sent $sent messages"
+            return if (failed == 0) sentText else "$sentText, $failed failed"
+        }
+
+        override fun runStoppedEarly(sent: Int) =
+            "Stopped after $sent: WhatsApp is limiting how fast we can send. " +
+                "The rest are still queued."
     }
 
     override val renewal = object : AppStrings.Renewal {

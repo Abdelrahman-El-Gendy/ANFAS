@@ -581,6 +581,53 @@ no network. **Nothing sends.** What exists now is the piece that was missing: so
   to two lines). Pre-existing — the queue was always empty, so nobody had ever seen a row — and it
   wants the card/table branch `IntakeReviewScreen` already has.
 
+## WhatsApp reminders — Phase 2 (the send path)
+
+The logic of sending, complete and tested. **There is still no live gateway** — that is Phase 3 —
+so nothing leaves the device.
+
+- **`WhatsAppGateway.isConfigured` is the load-bearing part of this phase.** Production binds
+  `NoWhatsAppGateway`, and the Run queue action is *withheld with an explanation* rather than
+  offered: a run against nothing would mark every row FAILED and spend each reminder's four
+  attempts, so the queue would be poisoned before WhatsApp was ever connected. Bound rather than
+  left absent, because an absent Koin binding is a crash the first time someone opens the queue,
+  whereas this is a truthful "not connected yet" the screen can say out loud.
+- **`GatewayResult.Unreachable` is deliberately not a `Rejected`.** A rejection is a decision; an
+  unreachable provider means **we do not know whether the message was sent**. Both end as a failed
+  row, but only the second is why `TemplateMessage.idempotencyKey` exists — and the key is the
+  reminder's own id, so the same message can never acquire two identities.
+- **Attempts are incremented before the call, never after.** A crash mid-send must not leave a row
+  looking untried, or it is retried forever. `MAX_ATTEMPTS = 4` then stops it consuming runs.
+- **Rate limiting stops the whole run**, leaving the remainder `QUEUED` rather than spending an
+  attempt on each. `SendRunOutcome.stoppedEarly` is its own field because "sent 12 and stopped" and
+  "sent 12 of 12" are different things to tell someone at a desk.
+- **`PhoneE164` is a second function, not a change to `normalisePhone`.** That one folds to the
+  *local* Egyptian form because it is what the indexed duplicate-detection column stores and what
+  OCR intake compares against; two normalisations of one number would silently stop matching. A bug
+  caught by its own test: without a leading `0` or `00`, length is the **only** thing distinguishing
+  a Saudi number from an Egyptian one missing its trunk zero, and prepending `20` unconditionally
+  turned every foreign number into an Egyptian one — sending a member's notice to a stranger.
+- **Provider codes map in one function with a test per row** (`failureReasonFor`). The codes must be
+  re-confirmed against the API version pinned when the live gateway lands. Template-authoring
+  errors (132000/132001/132012) deliberately degrade to `UNKNOWN` carrying the provider's own text:
+  they are maintenance mistakes, not operational ones, and inventing a friendly reason would hide
+  them from the person who can fix them.
+- **`SEND_REMINDERS` is separate from `RETRY_REMINDERS`** — retrying one message a member is
+  expecting is a different act from dispatching two hundred. Reception holds both. Adding it forced
+  a branch in `App.kt`'s `areaLabel`, which is the guard rail working as intended.
+- **One parameter per template, the member's name.** The real parameter list is fixed when Meta
+  approves the templates (Phase 3), so committing to a second value now would be guessing at a
+  template that does not exist — and the name is the one value every candidate will carry.
+- **Deferred to Phase 3, deliberately:** the Ktor client and the `:server` relay route. Neither can
+  be verified end-to-end without a Meta token, and wiring `:core:network` into `:composeApp` has
+  documented costs (engines in every release artifact) worth paying only when something real is on
+  the other end. The wire contract — `TemplateMessage` — is defined now so that work is mechanical.
+- **"Send test message" is also deferred**, and for a reason rather than by omission: a test send
+  against a fake gateway proves nothing, so it only becomes meaningful once the live one exists.
+- Corrected while verifying: the queued empty state said "Reminders appear here once the daily job
+  schedules them". There is no daily job — it now names Build queue. And the sent tab said
+  "Delivered", which overstates `SENT`: WhatsApp accepting a message is not a delivery receipt.
+
 ## Dates the user enters
 
 - **A date a human enters comes from `AnfasDateField`, never a text field.** A typed date needs a

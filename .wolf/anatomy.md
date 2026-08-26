@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T15:25:21.832Z
-> Files: 581 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T17:30:00.889Z
+> Files: 586 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/
 
@@ -602,6 +602,8 @@
 - `OfflineFirstIntakeRepository.kt` — Room-backed OCR intake. (~1722 tok)
 - `OfflineFirstMemberRepository.kt` — Room-backed. The error boundary: storage failures become AppError.Storage; CancellationException is rethrown. No network path yet (~560 tok)
 - `ReminderScheduler.kt` — What one queue build did, itemised. (~1999 tok)
+- `ReminderSender.kt` — What one run of the queue did. (~1943 tok)
+- `WhatsAppGateway.kt` — One template message, ready to hand over. (~1135 tok)
 
 ## core/data/src/commonTest/kotlin/com/anfas/core/data/
 
@@ -613,6 +615,7 @@
 - `OfflineFirstIntakeRepositoryTest.kt` — Only for the create-batch test, which needs a domain row to hand in. (~2806 tok)
 - `OfflineFirstMemberRepositoryTest.kt` — 6 tests: ordering, number search, bad-status degradation, error boundary, round trip, delete (~900 tok)
 - `ReminderSchedulerTest.kt` — The scheduler is the only thing in the app that creates a reminder, so every rule it applies is (~3111 tok)
+- `ReminderSenderTest.kt` — Every branch here decides whether a member gets messaged, gets messaged twice, or is quietly (~2609 tok)
 
 ## core/database — added in v3
 
@@ -734,6 +737,7 @@
 - `Intake.kt` — A photographed sign-up sheet and everything OCR read off it. (~1387 tok)
 - `IntakeValidator.kt` — Decides what is wrong with each row of a batch — the logic behind the export's (~1529 tok)
 - `Member.kt` — A gym member. (~717 tok)
+- `PhoneE164.kt` — The phone number in the form a messaging provider wants: international digits, no `+`. (~879 tok)
 
 ## core/model/src/commonMain/kotlin/com/anfas/core/model/ (subscriptions)
 
@@ -748,6 +752,7 @@
 - `DatePickerBoundaryTest.kt` — The picker hands back UTC midnight, so that exact value must map to the same day. (~392 tok)
 - `IntakeValidatorTest.kt` — Confident by default, so a test only opts into low confidence when that is the point. (~2327 tok)
 - `MaintenanceLogTest.kt` — The bug this pins: a plain issue report logged after the last real service must not push (~524 tok)
+- `PhoneE164Test.kt` — A wrong number here is worse than no number: the send is charged, counts against the business's (~816 tok)
 
 ## core/network/
 

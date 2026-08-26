@@ -845,3 +845,27 @@
 - Found while verifying: the reminder queue's only phone entry point was the *failed reminders* tile,
   gated on `failedReminders > 0` — so it was unreachable exactly when empty. CLAUDE.md had already
   claimed the renewal tile was the route; now it is.
+
+## Key Learnings — 2026-08-26 (WhatsApp Phase 2)
+
+- **A "not configured" flag on an integration seam is worth more than a hidden button.** Binding a
+  null gateway with `isConfigured = false` lets the UI explain itself, and stops a run from marking
+  every row FAILED and spending its attempts before the integration exists. An absent Koin binding
+  would instead crash on first use.
+- **Distinguish "rejected" from "unreachable".** Unreachable means we do not know whether it sent,
+  which is precisely when an idempotency key earns its place. Same row outcome, different meaning.
+- **Increment the attempt counter BEFORE the call.** A crash mid-send otherwise leaves the row
+  looking untried and it is retried forever.
+- **Phone normalisation cannot be told apart by prefix alone.** Without a leading 0 or 00, only
+  length distinguishes a foreign international number from a local one missing its trunk zero.
+  Prepending the default country code unconditionally silently redirects every foreign number to a
+  stranger. My own test caught this.
+- **Backtick test names with commas fail Kotlin/Native only in `commonTest`.** `jvmTest` names may
+  keep their commas (DesktopDataDirTest has two, legitimately) — Kotlin/Native never compiles them.
+  That sharpens the rule I had been over-generalising. `./gradlew check` catches it; running only
+  `jvmTest` does not.
+- **Making a parked feature real turns its placeholder copy into a lie.** The queue's empty state
+  promised "once the daily job schedules them"; there is no daily job. Re-read the copy of any
+  screen a feature newly populates.
+- To exercise a `isConfigured = true` branch on a device without shipping a fake: flip the null
+  object temporarily, install, verify, revert. Same falsification discipline as reverting a fix.

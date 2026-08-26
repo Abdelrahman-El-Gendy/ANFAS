@@ -5,7 +5,9 @@ import app.cash.turbine.test
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
 import com.anfas.core.data.ReminderScheduler
+import com.anfas.core.data.ReminderSender
 import com.anfas.core.data.ScheduleOutcome
+import com.anfas.core.data.SendRunOutcome
 import com.anfas.core.model.FailureReason
 import com.anfas.core.model.ReminderId
 import com.anfas.core.model.ReminderStatus
@@ -207,6 +209,7 @@ class ReminderQueueComponentTest {
             ),
             repository = repository,
             scheduler = FakeScheduler(),
+            sender = FakeSender(),
             auth = FakeAuth(mayRetry = false),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onCloseClicked = {},
@@ -306,17 +309,79 @@ class ReminderQueueComponentTest {
         }
     }
 
+    @Test
+    fun `running the queue reports what was sent`() = runTest {
+        val sender = FakeSender(outcome = AppResult.Success(SendRunOutcome(sent = 3, failed = 1)))
+        val component = component(reminders = emptyList(), sender = sender)
+
+        component.state.test {
+            awaitSettled { it.maySend && it.gatewayConnected }
+
+            component.onRunQueue()
+
+            assertEquals(1, sender.runs)
+            assertEquals(
+                QueueNotice.RunFinished(sent = 3, failed = 1),
+                awaitSettled { it.notice != null }.notice,
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /** Stopping early is its own notice: the remainder are still queued, not lost. */
+    @Test
+    fun `a rate-limited run says it stopped early`() = runTest {
+        val sender = FakeSender(
+            outcome = AppResult.Success(SendRunOutcome(sent = 2, failed = 1, stoppedEarly = true)),
+        )
+        val component = component(reminders = emptyList(), sender = sender)
+
+        component.state.test {
+            awaitSettled { it.maySend && it.gatewayConnected }
+
+            component.onRunQueue()
+
+            assertEquals(
+                QueueNotice.RunStoppedEarly(sent = 2),
+                awaitSettled { it.notice != null }.notice,
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /**
+     * The guard that protects the queue before WhatsApp exists. Running against no gateway would
+     * fail every row and spend its attempts, so the component must refuse even if something calls
+     * the method directly.
+     */
+    @Test
+    fun `the queue cannot be run with no gateway connected`() = runTest {
+        val sender = FakeSender(isConfigured = false)
+        val component = component(reminders = emptyList(), sender = sender)
+
+        component.state.test {
+            awaitSettled { it.maySend && !it.gatewayConnected }
+
+            component.onRunQueue()
+
+            assertEquals(0, sender.runs, "the run must not reach the sender")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun TestScope.component(
         reminders: List<com.anfas.core.model.Reminder>,
         forced: AppResult<List<com.anfas.core.model.Reminder>>? = null,
         mayRetry: Boolean = true,
         scheduler: FakeScheduler = FakeScheduler(),
+        sender: FakeSender = FakeSender(),
     ): ReminderQueueComponent {
         val lifecycle = LifecycleRegistry()
         val component = ReminderQueueComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
             repository = FakeReminderRepository(reminders, forced),
             scheduler = scheduler,
+            sender = sender,
             auth = FakeAuth(mayRetry = mayRetry),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onCloseClicked = {},
@@ -362,6 +427,23 @@ private class FakeScheduler(
 
     override suspend fun buildQueue(): AppResult<ScheduleOutcome> {
         builds++
+        return outcome
+    }
+}
+
+/**
+ * The send path itself is covered by `ReminderSenderTest` in `:core:data`; what matters here is
+ * whether the component asks, and whether it refuses when there is no gateway or no permission.
+ */
+private class FakeSender(
+    override val isConfigured: Boolean = true,
+    private val outcome: AppResult<SendRunOutcome> = AppResult.Success(SendRunOutcome(sent = 3)),
+) : ReminderSender {
+    var runs = 0
+        private set
+
+    override suspend fun runQueue(): AppResult<SendRunOutcome> {
+        runs++
         return outcome
     }
 }

@@ -509,3 +509,13 @@ skiko dialog actual with iOS, which is verified.
 | 18:00 | Edited feature/members/src/commonMain/kotlin/com/anfas/feature/members/MemberProfileState.kt | expanded (+7 lines) | ~128 |
 | 18:25 | Edited feature/dashboard/src/commonMain/kotlin/com/anfas/feature/dashboard/DashboardScreen.kt | modified if() | ~417 |
 | 19:10 | WhatsApp Phase 1: ReminderScheduler + consent fields (schema v12) + Build queue action; the queue is no longer permanently empty | core/model/Member.kt, core/database/{MemberEntity,ReminderEntity,AnfasDatabase}.kt, core/data/{ReminderScheduler,MemberMappers,DataModule}.kt, feature/{members,subscriptions,dashboard}, core/i18n x3, CLAUDE.md | 11 scheduler tests + 3 component tests + migration assertion, all falsified; check + iOS green; verified on emulator: 3 expiring members -> "Queued 1 reminder" (1 no consent, 1 no phone), second press -> "Nothing to queue: 1 not opted in, 1 without a phone number, 1 already reminded" | ~52000 |
+| 19:11 | Session end: 55 writes across 28 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 60 reads | ~72442 tok |
+| 19:13 | Session end: 55 writes across 28 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 60 reads | ~72442 tok |
+| 20:20 | Created core/model/src/commonMain/kotlin/com/anfas/core/model/PhoneE164.kt | — | ~760 |
+| 20:21 | Created core/data/src/commonMain/kotlin/com/anfas/core/data/WhatsAppGateway.kt | — | ~949 |
+| 20:22 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/WhatsAppGateway.kt | modified failureReasonFor() | ~371 |
+| 20:22 | Created core/data/src/commonMain/kotlin/com/anfas/core/data/ReminderSender.kt | — | ~1943 |
+| 20:26 | Created core/data/src/commonTest/kotlin/com/anfas/core/data/ReminderSenderTest.kt | — | ~2609 |
+| 20:28 | Created core/model/src/commonTest/kotlin/com/anfas/core/model/PhoneE164Test.kt | — | ~816 |
+| 20:30 | Edited core/model/src/commonMain/kotlin/com/anfas/core/model/PhoneE164.kt | digits() → dropped() | ~414 |
+| 21:00 | WhatsApp Phase 2: gateway seam + null gateway, error mapping, PhoneE164, ReminderSender (attempts-before-call, rate-limit stop, ceiling), SEND_REMINDERS, Run queue UI | core/data/{WhatsAppGateway,ReminderSender}.kt (new), core/model/PhoneE164.kt (new), core/auth/Permission.kt, composeApp/App.kt, feature/subscriptions/*, core/i18n x3, CLAUDE.md | 12 sender + 9 e164 + 17 component tests; check + iOS green; on device: not-connected line renders (also verified in Arabic RTL), and with the gateway temporarily flipped to accept, Run queue -> "Sent 1 message", Queued 0/Sent 1 | ~46000 |

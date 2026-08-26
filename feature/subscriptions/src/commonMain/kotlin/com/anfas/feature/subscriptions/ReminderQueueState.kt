@@ -52,6 +52,15 @@ data class ReminderQueueState(
     val mayBuildQueue: Boolean = false,
     /** True while a build is in flight, so the action cannot be pressed twice. */
     val isBuilding: Boolean = false,
+    /** Whether this session holds `SEND_REMINDERS`. */
+    val maySend: Boolean = false,
+    /**
+     * Whether a WhatsApp gateway exists at all. False until Phase 3, and the reason the Run queue
+     * action is replaced by an explanation rather than simply hidden: staff should learn the
+     * feature is there and why it is inert, not wonder where it went.
+     */
+    val gatewayConnected: Boolean = false,
+    val isSending: Boolean = false,
 ) {
     val visibleReminders: List<Reminder>
         get() = (content as? ReminderQueueContent.Loaded)?.reminders ?: emptyList()
@@ -81,5 +90,10 @@ sealed interface QueueNotice {
 
     data class QueueBuiltNothing(val noConsent: Int, val noPhone: Int, val alreadyQueued: Int) :
         QueueNotice
+
+    /** One send run. [RunStoppedEarly] is separate: it means the rest are still waiting. */
+    data class RunFinished(val sent: Int, val failed: Int) : QueueNotice
+
+    data class RunStoppedEarly(val sent: Int) : QueueNotice
     data class Failed(val message: String) : QueueNotice
 }
