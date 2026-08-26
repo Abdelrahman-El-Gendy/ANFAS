@@ -1742,5 +1742,65 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-08-26T21:00:00Z"
+  },
+  {
+    "id": "bug-097",
+    "timestamp": "2026-08-26T22:00:00Z",
+    "error_message": "The reminder queue rendered its six-column desktop table on a phone: headers squeezed to 'MEM\u2026'/'TEM\u2026' and the status chip wrapped to two lines (three in Arabic)",
+    "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueScreen.kt",
+    "root_cause": "The screen had no narrow branch -- unlike IntakeReviewScreen, which already switches to one card per row below AnfasTableMinWidth. It went unnoticed because the queue was always empty until the WhatsApp scheduler landed, so no row had ever been rendered.",
+    "fix": "Added ReminderCardList/ReminderCard behind a BoxWithConstraints at the same threshold, keeping bulk selection (with a labelled select-all) and the export's error stripe. Pinned by ReminderQueueLayoutTest, falsified in both directions.",
+    "tags": [
+      "compose",
+      "responsive",
+      "rtl",
+      "reminders",
+      "layout-test"
+    ],
+    "related_bugs": [
+      "bug-098",
+      "bug-099"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:00:00Z"
+  },
+  {
+    "id": "bug-098",
+    "timestamp": "2026-08-26T22:00:00Z",
+    "error_message": "The 4dp error stripe on a failed reminder card was invisible",
+    "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueScreen.kt",
+    "root_cause": "fillMaxHeight() inside a wrap-content Row has no height to fill and resolves to zero. The construct was copied from the table row, which works only because that row sets its own height.",
+    "fix": "Modifier.height(IntrinsicSize.Min) on the card's Row, so the stripe fills the Column's height. Spotted from a device screenshot.",
+    "tags": [
+      "compose",
+      "layout",
+      "intrinsic-size",
+      "design-fidelity"
+    ],
+    "related_bugs": [
+      "bug-097"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:00:00Z"
+  },
+  {
+    "id": "bug-099",
+    "timestamp": "2026-08-26T22:00:00Z",
+    "error_message": "In Arabic the scheduled date rendered as '\u0623\u063a\u0633\u0637\u0633 17 2026' instead of '17 \u0623\u063a\u0633\u0637\u0633 2026'",
+    "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueScreen.kt",
+    "root_cause": "scheduledLabel() was styled dataMonoLtr in the table (and copied into the new card). That style is for Latin-only runs; a localised date carries a translated month name and its runs get reordered. Exactly the rule CLAUDE.md documents. Latent in the table since it was written -- only visible once a reminder was old enough to print an absolute date rather than 'Today'.",
+    "fix": "bodyMedium for the date in both the table and the card; dataMonoLtr kept for the phone number only. Verified on device: '17 \u0623\u063a\u0633\u0637\u0633 2026'.",
+    "tags": [
+      "rtl",
+      "i18n",
+      "dataMonoLtr",
+      "latent-bug",
+      "reminders"
+    ],
+    "related_bugs": [
+      "bug-097"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:00:00Z"
   }
 ]

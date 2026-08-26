@@ -577,9 +577,21 @@ no network. **Nothing sends.** What exists now is the piece that was missing: so
 - **"Build queue" is gated on `RETRY_REMINDERS`**, the existing "may change the reminder queue"
   permission, and enforced in the component as well as hidden in the UI. Building is not sending;
   Phase 2 introduces `SEND_REMINDERS` when there is an actual send to gate.
-- Known and not fixed: the queue's table truncates badly on a phone (`MEM…`, a status chip wrapping
-  to two lines). Pre-existing — the queue was always empty, so nobody had ever seen a row — and it
-  wants the card/table branch `IntakeReviewScreen` already has.
+- **The queue branches table/cards at `AnfasTableMinWidth`**, the same threshold and the same shape
+  `IntakeReviewScreen` uses. Six columns squeezed to `MEM…`/`TEM…` on a phone and wrapped the status
+  chip onto two lines — three in Arabic. Nobody had seen it because the queue was always empty until
+  the scheduler landed. `ReminderQueueLayoutTest` pins both branches, falsified in both directions.
+  Two things the cards had to keep that a naive card list loses: bulk selection (so the select-all
+  checkbox gains a label, there being no header row to make a bare one legible) and the export's 4dp
+  error stripe.
+- **A stripe using `fillMaxHeight()` needs `Modifier.height(IntrinsicSize.Min)` on its Row.** In a
+  wrap-content Row there is no height to fill, so it resolves to zero and the stripe silently
+  vanishes. The table row got away with the identical construct because its row sets a height.
+- **`scheduledLabel()` must not be styled `dataMonoLtr`** — in either the table or the cards. It is a
+  *localised* date, and that style reorders its runs: Arabic rendered `17 أغسطس 2026` as
+  `أغسطس 17 2026`. This was latent in the table from the day it was written and only became visible
+  once a reminder was old enough to print an absolute date instead of "Today" — a reminder that the
+  RTL rule in this file is about which *strings* go through the style, not which screens.
 
 ## WhatsApp reminders — Phase 2 (the send path)
 

@@ -34,6 +34,7 @@ interface AppStrings {
         val zoomIn: String
         val zoomOut: String
         val selected: String
+        val selectAll: String
 
         /** "Today 08:15" / "Yesterday, 17:30" — [separator] differs per table in the design. */
         fun today(time: String, separator: String): String

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T17:30:00.889Z
-> Files: 586 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T18:14:40.459Z
+> Files: 587 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/
 
@@ -911,6 +911,10 @@
 - `ReminderQueueComponentTest.kt` — 10 tests: tab default, empty vs filtered, selection pruning, partial retry notices (~1500 tok)
 - `RenewalSheetComponentTest.kt` — 8 tests with a FixedClock: preselection, date math, discount, confirm passes the shown quote (~1500 tok)
 - `TestDoubles.kt` — Fake reminder/subscription/member repositories + TestDispatchers (~1300 tok)
+
+## feature/subscriptions/src/jvmTest/kotlin/com/anfas/feature/subscriptions/
+
+- `ReminderQueueLayoutTest.kt` — Six columns do not fit on a phone. (~1336 tok)
 
 ## feature/therapy/
 

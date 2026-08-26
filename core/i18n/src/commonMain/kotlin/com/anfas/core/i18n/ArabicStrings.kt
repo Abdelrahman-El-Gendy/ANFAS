@@ -34,6 +34,7 @@ object ArabicStrings : AppStrings {
         override val zoomIn = "تكبير"
         override val zoomOut = "تصغير"
         override val selected = "محدد"
+        override val selectAll = "تحديد الكل"
 
         override fun today(time: String, separator: String) = "اليوم$separator$time"
         override fun yesterday(time: String, separator: String) = "أمس$separator$time"

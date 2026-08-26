@@ -22,6 +22,7 @@ object EnglishStrings : AppStrings {
         override val zoomIn = "Zoom in"
         override val zoomOut = "Zoom out"
         override val selected = "selected"
+        override val selectAll = "Select all"
 
         override fun today(time: String, separator: String) = "Today$separator$time"
         override fun yesterday(time: String, separator: String) = "Yesterday$separator$time"

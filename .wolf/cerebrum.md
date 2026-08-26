@@ -869,3 +869,22 @@
   screen a feature newly populates.
 - To exercise a `isConfigured = true` branch on a device without shipping a fake: flip the null
   object temporarily, install, verify, revert. Same falsification discipline as reverting a fix.
+
+## Key Learnings — 2026-08-26 (queue table on a phone)
+
+- **`fillMaxHeight()` on a leading-edge stripe needs `Modifier.height(IntrinsicSize.Min)` on the
+  parent Row.** In a wrap-content Row there is no height to fill, so it silently resolves to zero
+  and the stripe disappears. Copying the construct from a row that sets its own height does not
+  carry the height with it.
+- **`dataMonoLtr` on `scheduledLabel()` was a latent RTL bug in the table**, invisible until the
+  queue held a reminder old enough to print an absolute date rather than "Today". Arabic rendered
+  `17 أغسطس 2026` as `أغسطس 17 2026`. The rule is about the *string*, not the screen: a localised
+  date is never a Latin-only run, however numeric it looks.
+- **A layout test's boundary case must be stated in the width the component receives.** Asserting
+  the table appears at exactly `AnfasTableMinWidth` of *window* failed, because the screen's own
+  horizontal padding means the table is handed less. I turned the failure into the assertion — the
+  padding effect is now documented by a passing test rather than lying in wait.
+- **Falsify a responsive branch in both directions.** Forcing always-table reddened the two card
+  tests; forcing always-cards reddened the wide test. Neither alone proves the branch is real.
+- Reuse the module's `TestDoubles.kt`: promoting file-private fakes to `internal` there is what lets
+  a `jvmTest` layout test use them, instead of declaring rivals that collide across source sets.

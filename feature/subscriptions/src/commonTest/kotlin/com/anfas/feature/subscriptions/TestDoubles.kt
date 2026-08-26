@@ -1,5 +1,6 @@
 package com.anfas.feature.subscriptions
 
+import app.cash.turbine.TurbineTestContext
 import com.anfas.core.auth.Role
 import com.anfas.core.auth.Session
 import com.anfas.core.auth.SignInResult
@@ -12,6 +13,10 @@ import com.anfas.core.data.CreateAccountOutcome
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.data.ReminderCounts
 import com.anfas.core.data.ReminderRepository
+import com.anfas.core.data.ReminderScheduler
+import com.anfas.core.data.ReminderSender
+import com.anfas.core.data.ScheduleOutcome
+import com.anfas.core.data.SendRunOutcome
 import com.anfas.core.data.StaffChangeOutcome
 import com.anfas.core.data.SubscriptionRepository
 import com.anfas.core.model.FailureReason
@@ -242,4 +247,60 @@ internal class FakeAuth(mayRetry: Boolean) : AuthRepository {
         id: String,
         newPassword: String,
     ): AppResult<StaffChangeOutcome> = AppResult.Success(StaffChangeOutcome.NotFound)
+}
+
+/**
+ * Records whether a build was asked for, and what to answer with.
+ *
+ * The scheduler's own rules are covered by `ReminderSchedulerTest` in `:core:data`; what matters
+ * here is only that the component asks -- or, for a role without the permission, does not.
+ */
+
+/**
+ * Drains emissions until [predicate] holds.
+ *
+ * The state is a `combine` of four sources, so one change surfaces as several frames -- and it is
+ * `stateIn(WhileSubscribed)`, so nothing at all is populated until something collects. Both are why
+ * these tests subscribe before acting rather than reading `state.value`.
+ */
+internal suspend fun TurbineTestContext<ReminderQueueState>.awaitSettled(
+    predicate: (ReminderQueueState) -> Boolean,
+): ReminderQueueState {
+    repeat(SETTLE_EMISSIONS) {
+        val item = awaitItem()
+        if (predicate(item)) return item
+    }
+    error("state never settled to the expected shape")
+}
+
+/**
+ * The send path itself is covered by `ReminderSenderTest` in `:core:data`; what matters here is
+ * whether the component asks, and whether it refuses when there is no gateway or no permission.
+ */
+internal class FakeSender(
+    override val isConfigured: Boolean = true,
+    private val outcome: AppResult<SendRunOutcome> = AppResult.Success(SendRunOutcome(sent = 3)),
+) : ReminderSender {
+    var runs = 0
+        private set
+
+    override suspend fun runQueue(): AppResult<SendRunOutcome> {
+        runs++
+        return outcome
+    }
+}
+
+internal const val SETTLE_EMISSIONS = 12
+
+internal class FakeScheduler(
+    private val outcome: AppResult<ScheduleOutcome> =
+        AppResult.Success(ScheduleOutcome(queued = 2)),
+) : ReminderScheduler {
+    var builds = 0
+        private set
+
+    override suspend fun buildQueue(): AppResult<ScheduleOutcome> {
+        builds++
+        return outcome
+    }
 }
