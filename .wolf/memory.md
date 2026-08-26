@@ -398,3 +398,24 @@ skiko dialog actual with iOS, which is verified.
 | 12:05 | Set up Compose UI test infra (:core:designsystem jvmTest, ui-test + ui-test-junit4 + compose.desktop.currentOs, catalog bundle test-composeUi) and wrote AnfasScreenHeaderTest (3 tests, 4 widths) | core/designsystem, gradle/libs.versions.toml | 3 tests pass; PROVEN to fail without the gutter (0dp at 300/340dp) | ~6k |
 | 12:06 | Two vacuous-test mistakes caught before shipping: asserted gap>0 when the real bug was a 1dp gap, and used device width 402dp instead of the 370dp the header actually gets | core/designsystem/src/jvmTest/.../AnfasScreenHeaderTest.kt | fixed via an empirical geometry probe across 6 widths | ~4k |
 | 12:06 | Session end: 107 writes across 46 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 62 reads | ~107265 tok |
+| 12:08 | Session end: 107 writes across 46 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 62 reads | ~107265 tok |
+| 12:21 | Created ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | — | ~2791 |
+| 12:21 | Edited ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | inline fix | ~186 |
+| 12:22 | Edited ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | expanded (+27 lines) | ~1024 |
+| 12:22 | Edited ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | expanded (+6 lines) | ~396 |
+| 12:24 | Edited CLAUDE.md | 5→6 lines | ~114 |
+| 12:24 | Edited CLAUDE.md | 3→4 lines | ~87 |
+| 12:24 | Edited CLAUDE.md | inline fix | ~160 |
+| 12:24 | Edited design/stitch/TOKENS.md | 4→4 lines | ~60 |
+| 12:25 | Edited design/stitch/TOKENS.md | modified note() | ~197 |
+| 12:25 | Session end: 116 writes across 48 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 85 reads | ~137207 tok |
+| 13:04 | Created core/database/src/jvmMain/kotlin/com/anfas/core/database/DatabaseBuilderFactory.jvm.kt | — | ~1008 |
+| 13:04 | Created core/database/src/jvmTest/kotlin/com/anfas/core/database/DesktopDataDirTest.kt | — | ~1347 |
+| 13:05 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt | added optional chaining | ~144 |
+| 13:26 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt | 3→2 lines | ~35 |
+| 13:26 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | expanded (+9 lines) | ~178 |
+| 13:27 | Created keystore.properties.template | — | ~235 |
+| 13:30 | Created core/data/src/commonTest/kotlin/com/anfas/core/data/KoinOnCloseContractTest.kt | — | ~690 |
+| 13:31 | Edited CLAUDE.md | added optional chaining | ~528 |
+| 13:40 | Fixed the three open defects from the inventory: per-OS desktop DB path + conservative legacy migration (9 tests), DB close on quit via Koin onClose + lifecycle teardown (2 contract tests), and the missing keystore.properties.template | core/database, core/data, desktopApp, keystore.properties.template | check green + iOS arm64; real 135KB DB migrated with integrity_check ok | ~9k |
+| 13:34 | Session end: 124 writes across 52 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 85 reads | ~142719 tok |

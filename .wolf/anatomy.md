@@ -1,11 +1,11 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T09:05:51.050Z
-> Files: 563 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T10:31:37.338Z
+> Files: 566 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
-- `plan-what-is-remaining-abundant-elephant.md` — ANFAS — Remaining work and production readiness (~4907 tok)
+- `plan-what-is-remaining-abundant-elephant.md` — ANFAS — what is built, and what remains (~3342 tok)
 
 ## ../../.claude/projects/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/memory/
 
@@ -15,10 +15,11 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~10267 tok)
+- `CLAUDE.md` — OpenWolf (~10862 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
+- `keystore.properties.template` — Copy to keystore.properties and fill in. keystore.properties is gitignored — never commit it, (~235 tok)
 - `local.properties` — # This file must *NOT* be checked into Version Control Systems, (~96 tok)
 - `README.md` — Project documentation (~614 tok)
 - `settings.gradle.kts` — Gradle Kotlin settings (~433 tok)
@@ -580,7 +581,7 @@
 ## core/data/src/commonMain/kotlin/com/anfas/core/data/
 
 - `AnnouncementRepository.kt` — interface + AnnouncementDetail, SaveAnnouncementOutcome(Saved/Invalid), AnnouncementProblem (~600 tok)
-- `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~1123 tok)
+- `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~1249 tok)
 - `EquipmentRepository.kt` — The gym floor's equipment inventory and its maintenance history. (~850 tok)
 - `IntakeMappers.kt` — Storage <-> domain for OCR intake. (~889 tok)
 - `IntakeRepository.kt` — Which cell of a row an edit targets. (~644 tok)
@@ -597,6 +598,7 @@
 - `EquipmentRepositoryTest.kt` — A plain issue report -- no technician -- must not read as a service in the detail. (~2430 tok)
 - `FakeIntakeDao.kt` — In-memory IntakeDao. Mirrors the real thing where it matters: rows are ordered by ordinal, (~1110 tok)
 - `FakeMemberDao.kt` — In-memory stand-in for Room. Query semantics mirror the DAO's SQL — case-insensitive (~690 tok)
+- `KoinOnCloseContractTest.kt` — Pins the Koin contract that `dataModule` relies on to close the Room connection. (~690 tok)
 - `OfflineFirstIntakeRepositoryTest.kt` — Only for the create-batch test, which needs a domain row to hand in. (~2806 tok)
 - `OfflineFirstMemberRepositoryTest.kt` — 6 tests: ordering, number search, bad-status degradation, error boundary, round trip, delete (~900 tok)
 
@@ -639,10 +641,11 @@
 
 ## core/database/src/jvmMain/kotlin/com/anfas/core/database/
 
-- `DatabaseBuilderFactory.jvm.kt` — DatabaseBuilderFactory: create (~118 tok)
+- `DatabaseBuilderFactory.jvm.kt` — OS-idiomatic data location, mirroring `AppLog.desktopLogFile` one module over — same injectable (~1008 tok)
 
 ## core/database/src/jvmTest/kotlin/com/anfas/core/database/
 
+- `DesktopDataDirTest.kt` — The path resolution is pure and branchy, and the migration touches user data — both are worth (~1347 tok)
 - `MigrationFromV4Test.kt` — Opens a real v4 database file and lets Room migrate it forward to the current schema. (~2478 tok)
 
 ## core/designsystem — added for intake
@@ -745,7 +748,7 @@
 - `design.md` — Stitch theme spec: front-matter tokens + prose brand/component guidance. Its prose palette contradicts its own token block — see TOKENS.md (~1900 tok)
 - `README.md` — Project documentation (~353 tok)
 - `README.md` — What to drop here and why; the export/derive workflow (~330 tok)
-- `TOKENS.md` — GENERATED inventory: 47 M3 colours, 4 brand accents, type ramp, radii, spacing, elevation, 6 resolved conflicts, and the 23-screen → module mapping (~2200 tok)
+- `TOKENS.md` — TOKENS.md — extracted design tokens (~2083 tok)
 
 ## design/stitch/export/
 
@@ -756,7 +759,7 @@
 
 ## desktopApp/src/main/kotlin/com/anfas/app/
 
-- `main.kt` — Thin launcher. All shared behaviour lives in :composeApp — do not add logic here. (~825 tok)
+- `main.kt` — Thin launcher. All shared behaviour lives in :composeApp — do not add logic here. (~966 tok)
 
 ## feature/announcements/
 

@@ -1287,5 +1287,61 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-08-25T11:45:00Z"
+  },
+  {
+    "id": "bug-074",
+    "timestamp": "2026-08-25T13:20:00Z",
+    "error_message": "Desktop database was written to ~/.anfas on every OS, which is wrong on macOS and Windows",
+    "file": "core/database/src/jvmMain/kotlin/com/anfas/core/database/DatabaseBuilderFactory.jvm.kt",
+    "root_cause": "create() hardcoded File(System.getProperty(\"user.home\"), \".anfas\"). macOS has a standard Application Support directory that Migration Assistant and backup tooling understand; a dot-directory in a Windows profile can end up synced to OneDrive, which for SQLite means a .db being copied out from under an open connection and away from its -wal. The correct per-OS pattern already existed one module over for logs (core/common/.../AppLog.jvm.kt) with injectable params and a unit test -- the database was simply the odd one out.",
+    "fix": "Added resolveDesktopDataDir(osName, userHome, localAppData, xdgDataHome) mirroring AppLog.desktopLogFile's shape: macOS Library/Application Support/ANFAS, Windows %LOCALAPPDATA%/ANFAS, Linux $XDG_DATA_HOME/anfas (data locations, deliberately not the log ones). Plus adoptLegacyDatabase(from,to): never overwrites an existing newer DB, moves -wal/-shm as a set before the .db so an interrupted move leaves the legacy dir authoritative, and never throws so a permissions problem cannot become a failure to start. 9 tests in DesktopDataDirTest; verified against a real 135KB database which moved with integrity_check clean and the v11 identity hash unchanged.",
+    "tags": [
+      "desktop",
+      "database",
+      "per-os-paths",
+      "data-migration",
+      "sqlite"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T13:20:00Z"
+  },
+  {
+    "id": "bug-075",
+    "timestamp": "2026-08-25T13:30:00Z",
+    "error_message": "Quitting the desktop app abandoned the Room connection: anfas.db-wal/-shm left behind, Decompose lifecycle never torn down",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/main.kt, core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt",
+    "root_cause": "onCloseRequest was ::exitApplication only -- no AnfasDatabase.close() and no lifecycle teardown, so the LifecycleRegistry was resume()d and never stopped. SQLite recovers from an uncheckpointed WAL on next open, but a .db copied by a backup tool while the WAL still holds recent commits is an incomplete database.",
+    "fix": "Declared the close on the Koin definition that opens it -- single<AnfasDatabase> { ... }.withOptions { onClose { it?.close() } } in dataModule -- so no platform launcher has to remember. main.kt now does lifecycle.destroy() then stopKoin() then exitApplication(), in that order, so components cancel their scopes before the connection closes. NOTE: `single { } onClose { }` reads naturally and does NOT compile; in Koin 4.2 onClose is an extension on BeanDefinition reachable only inside withOptions. KoinOnCloseContractTest pins that contract (2 tests) using an isolated koinApplication rather than the global context, because the real dataModule resolves the user's actual data directory.",
+    "tags": [
+      "desktop",
+      "koin",
+      "room",
+      "lifecycle",
+      "shutdown",
+      "api-misuse"
+    ],
+    "related_bugs": [
+      "bug-074"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T13:30:00Z"
+  },
+  {
+    "id": "bug-076",
+    "timestamp": "2026-08-25T13:35:00Z",
+    "error_message": ".gitignore un-ignored keystore.properties.template, but that file never existed",
+    "file": "keystore.properties.template",
+    "root_cause": "A negation rule (!keystore.properties.template) was added alongside the keystore.properties ignore, following the Local.xcconfig.template precedent, but the template itself was never created -- so anyone cloning the repo had no idea what keys the signing config expects.",
+    "fix": "Created it with the four keys androidApp/build.gradle.kts actually reads (storeFile, storePassword, keyAlias, keyPassword), the keytool command to generate a keystore, a warning that losing it means never updating the app under the same package, and the apksigner command to verify what signed an APK. Confirmed trackable via `git add --dry-run` while keystore.properties itself stays ignored.",
+    "tags": [
+      "release",
+      "signing",
+      "documentation",
+      "gitignore"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T13:35:00Z"
   }
 ]
