@@ -10,7 +10,9 @@ import com.anfas.app.navigation.RootComponent
 import com.anfas.core.common.configureLogging
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
+import com.arkivanov.essenty.lifecycle.destroy
 import com.arkivanov.essenty.lifecycle.resume
+import org.koin.core.context.stopKoin
 import java.awt.Dimension
 import javax.swing.SwingUtilities
 
@@ -42,7 +44,16 @@ fun main() {
             height = INITIAL_WINDOW_HEIGHT,
         )
         Window(
-            onCloseRequest = ::exitApplication,
+            // Ordered, and the order matters: stop the Decompose lifecycle so components cancel
+            // their scopes and no coroutine is mid-write, THEN close Koin (which closes the Room
+            // connection via the `onClose` on its definition), and only then let the process go.
+            // Quitting used to do none of this -- the database was simply abandoned with its
+            // write-ahead log uncheckpointed.
+            onCloseRequest = {
+                lifecycle.destroy()
+                stopKoin()
+                exitApplication()
+            },
             title = "ANFAS",
             state = windowState,
         ) {

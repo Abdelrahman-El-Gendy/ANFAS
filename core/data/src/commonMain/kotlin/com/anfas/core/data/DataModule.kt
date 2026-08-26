@@ -12,6 +12,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.onClose
+import org.koin.core.module.dsl.withOptions
 import org.koin.dsl.module
 import kotlin.uuid.Uuid
 
@@ -25,7 +27,13 @@ import kotlin.uuid.Uuid
 val dataModule: Module = module {
     includes(platformDatabaseModule())
 
+    // `onClose` rather than a teardown call in each launcher: the definition that opens the
+    // connection is the right place to close it, so no platform entry point has to remember.
+    // Without this, quitting the desktop app left `anfas.db-wal`/`-shm` behind — SQLite recovers
+    // from them on next open, but an uncheckpointed WAL is also what makes a file copied by a
+    // backup tool an incomplete database.
     single<AnfasDatabase> { buildDatabase(factory = get(), dispatchers = get()) }
+        .withOptions { onClose { it?.close() } }
     single { get<AnfasDatabase>().memberDao() }
     single { get<AnfasDatabase>().reminderDao() }
     single { get<AnfasDatabase>().subscriptionDao() }

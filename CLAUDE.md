@@ -493,6 +493,27 @@ as screens — none belongs to a feature, because any screen can be interrupted 
 - **The bundle/package ids differ on purpose:** iOS and Android are `com.anfas.app`; desktop is
   `com.anfas.app.desktop`, so an iPad build on the same Apple-silicon Mac cannot collide in
   LaunchServices. `linux.packageName` must stay lowercase -- dpkg rejects uppercase.
+- **The desktop database lives in an OS-idiomatic directory, and moves itself there once.** It used
+  to be `~/.anfas` on every OS, which is wrong on two of three: macOS has an Application Support
+  directory that Migration Assistant and backup tools understand, and a dot-directory in a Windows
+  profile can end up synced to OneDrive — which for SQLite means a `.db` being copied out from under
+  an open connection, away from its `-wal`. `resolveDesktopDataDir` mirrors
+  `AppLog.desktopLogFile`'s injectable-parameter shape so the branching is unit-tested rather than
+  discovered on a user's machine. Note **data, not logs**: macOS gets `Application Support` (not
+  `Library/Logs`) and Linux `XDG_DATA_HOME` (not `XDG_STATE_HOME`).
+- **`adoptLegacyDatabase` is deliberately timid, because every failure mode beats doing nothing.**
+  It never overwrites an existing database at the new path (that one is by definition newer), moves
+  `-wal`/`-shm` as a set before the `.db` so an interrupted move still leaves the legacy directory
+  looking authoritative, and never throws — a permissions problem must not become a failure to
+  start. Verified against a real 135KB database: moved with `integrity_check` clean and the schema
+  identity hash unchanged.
+- **Quitting closes the database, and the close lives on the Koin definition, not in the launcher.**
+  `dataModule` declares `single<AnfasDatabase> { … }.withOptions { onClose { it?.close() } }`, so no
+  platform entry point has to remember; `desktopApp/main.kt` only has to `lifecycle.destroy()` then
+  `stopKoin()` then `exitApplication()`, in that order, so components cancel their scopes before
+  the connection goes. Note `onClose` is an extension on `BeanDefinition` reachable only inside
+  `withOptions` — the natural-reading `single { } onClose { }` does not compile, which
+  `KoinOnCloseContractTest` now pins.
 - **The desktop window has a size floor, and it is a reachability rule rather than a cosmetic
   one.** Compose's default window is 800x600, below `AnfasBreakpoints.tabletMax` (1024dp) — so the
   desktop app used to open on the *phone* layout, whose bottom bar carries only the four
