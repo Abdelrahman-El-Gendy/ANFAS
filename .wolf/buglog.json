@@ -44,8 +44,8 @@
     "timestamp": "2026-08-21T09:36:19Z",
     "error_message": "e: Cannot access 'androidx.room3.RoomDatabase' which is a supertype of 'AnfasDatabase'. Check your module classpath for missing or conflicting dependencies.",
     "file": "core/database/build.gradle.kts",
-    "root_cause": ":core:database declared `implementation(libs.bundles.room)`, but AnfasDatabase extends RoomDatabase and DatabaseBuilderFactory returns RoomDatabase.Builder \u2014 room3-runtime is part of the module's ABI, so a consumer (:core:data) could not compile against it.",
-    "fix": "Split the bundle: `api(libs.androidx.room3.runtime)` because it is in the ABI, `implementation(libs.androidx.sqlite.bundled)` because the driver is internal to buildDatabase(). Features still never see Room \u2014 anfas.kmp.feature withholds :core:database.",
+    "root_cause": ":core:database declared `implementation(libs.bundles.room)`, but AnfasDatabase extends RoomDatabase and DatabaseBuilderFactory returns RoomDatabase.Builder — room3-runtime is part of the module's ABI, so a consumer (:core:data) could not compile against it.",
+    "fix": "Split the bundle: `api(libs.androidx.room3.runtime)` because it is in the ABI, `implementation(libs.androidx.sqlite.bundled)` because the driver is internal to buildDatabase(). Features still never see Room — anfas.kmp.feature withholds :core:database.",
     "tags": [
       "gradle",
       "kmp",
@@ -63,7 +63,7 @@
     "error_message": "e: Name contains illegal characters: \",\". (core/data + feature/members commonTest, only on compileTestKotlinIosSimulatorArm64)",
     "file": "core/data/src/commonTest/.../OfflineFirstMemberRepositoryTest.kt",
     "root_cause": "Backtick-quoted test function names containing a comma. The JVM target accepts them, so `:core:data:jvmTest` passed and the failure only appeared when `check` reached the Kotlin/Native test compilation.",
-    "fix": "Stripped , ; : . from all backticked test names. Lesson: run `./gradlew check` (which compiles native test targets) before believing a KMP test suite is green \u2014 a jvmTest pass proves nothing about iOS.",
+    "fix": "Stripped , ; : . from all backticked test names. Lesson: run `./gradlew check` (which compiles native test targets) before believing a KMP test suite is green — a jvmTest pass proves nothing about iOS.",
     "tags": [
       "kmp",
       "kotlin-native",
@@ -128,7 +128,7 @@
   {
     "id": "bug-008",
     "timestamp": "2026-08-21T12:13:45Z",
-    "error_message": "e: Unresolved reference 'datetime' in core/common/RelativeTime.kt \u2014 only during :core:common:compileCommonMainKotlinMetadata",
+    "error_message": "e: Unresolved reference 'datetime' in core/common/RelativeTime.kt — only during :core:common:compileCommonMainKotlinMetadata",
     "file": "core/common/build.gradle.kts",
     "root_cause": "kotlinx-datetime was reached transitively via api(project(\":core:model\")). Platform compilations (jvmTest) resolved it, but commonMain *metadata* compilation did not, so `:core:common:jvmTest` passed while `check` failed later.",
     "fix": "Declared api(libs.kotlinx.datetime) directly in :core:common. Do not rely on a transitive api dependency in commonMain metadata compilation; declare ABI deps explicitly.",
@@ -149,7 +149,7 @@
     "timestamp": "2026-08-21T12:13:45Z",
     "error_message": "app.cash.turbine.TurbineAssertionError: Unconsumed events found (3 ReminderQueueComponentTest failures)",
     "file": "feature/subscriptions/src/commonTest/.../ReminderQueueComponentTest.kt",
-    "root_cause": "A StateFlow keeps emitting after the assertion of interest \u2014 combine() re-emits when any upstream changes. Turbine treats leftover emissions at the end of a test() block as a failure.",
+    "root_cause": "A StateFlow keeps emitting after the assertion of interest — combine() re-emits when any upstream changes. Turbine treats leftover emissions at the end of a test() block as a failure.",
     "fix": "End each state.test { } block with cancelAndIgnoreRemainingEvents() once the interesting emission has been asserted.",
     "tags": [
       "tests",
@@ -181,7 +181,7 @@
     "timestamp": "2026-08-21T12:30:42.512Z",
     "error_message": "Missing error handling in unknown",
     "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/Member.kt",
-    "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
+    "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
     "fix": "Added try/catch block",
     "tags": [
       "auto-detected",
@@ -214,7 +214,7 @@
     "error_message": "Significant refactor of ",
     "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
     "root_cause": "6 lines replaced/restructured",
-    "fix": "Rewrote 11\u21926 lines (6 removed) | Also: /** Sentinel for \"no particular batch\"; the query ; const val BATCH_ANY = \"\"",
+    "fix": "Rewrote 11→6 lines (6 removed) | Also: /** Sentinel for \"no particular batch\"; the query ; const val BATCH_ANY = \"\"",
     "tags": [
       "auto-detected",
       "refactor",
@@ -230,7 +230,7 @@
     "error_message": "Wrong reference: AppError should be AppResult",
     "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt",
     "root_cause": "Used \"AppError\" instead of \"AppResult\"",
-    "fix": "Changed AppError \u2192 AppResult",
+    "fix": "Changed AppError → AppResult",
     "tags": [
       "auto-detected",
       "wrong-reference",
@@ -246,7 +246,7 @@
     "error_message": "Significant refactor of ",
     "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
     "root_cause": "28 lines replaced/restructured",
-    "fix": "Rewrote 37\u219217 lines (28 removed)",
+    "fix": "Rewrote 37→17 lines (28 removed)",
     "tags": [
       "auto-detected",
       "refactor",
@@ -262,7 +262,7 @@
     "error_message": "Wrong reference: width should be size",
     "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
     "root_cause": "Used \"width\" instead of \"size\"",
-    "fix": "Changed width \u2192 size",
+    "fix": "Changed width → size",
     "tags": [
       "auto-detected",
       "wrong-reference",
@@ -275,7 +275,7 @@
   {
     "id": "bug-011",
     "timestamp": "2026-08-21T13:36:02Z",
-    "error_message": "AssertionError: expected:<[#88393, #88394]> but was:<[#88394]> \u2014 only one member imported instead of two",
+    "error_message": "AssertionError: expected:<[#88393, #88394]> but was:<[#88394]> — only one member imported instead of two",
     "file": "core/data/src/commonTest/.../OfflineFirstIntakeRepositoryTest.kt",
     "root_cause": "The test fixture's newId lambda returned a constant string, so every imported row got the same member primary key and the Room upsert collapsed them into a single row. The repository was correct; the double-checked assertion caught the fixture.",
     "fix": "Made the fixture's newId a counter. Lesson: any injected id generator in a test must be unique per call, or upserts silently merge records and the test looks like a product bug.",
@@ -311,7 +311,7 @@
     "error_message": "Significant refactor of ",
     "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
     "root_cause": "2 lines replaced/restructured",
-    "fix": "Rewrote 3\u219242 lines (2 removed)",
+    "fix": "Rewrote 3→42 lines (2 removed)",
     "tags": [
       "auto-detected",
       "refactor",
@@ -326,7 +326,7 @@
     "timestamp": "2026-08-21T14:08:19.737Z",
     "error_message": "Missing error handling in unknown",
     "file": "../../.claude/plans/plan-what-is-remaining-abundant-elephant.md",
-    "root_cause": "Code path had no error handling \u2014 exceptions would propagate uncaught",
+    "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
     "fix": "Added try/catch block",
     "tags": [
       "auto-detected",
@@ -424,7 +424,7 @@
   {
     "id": "bug-018",
     "timestamp": "2026-08-21T23:07:44Z",
-    "error_message": "expected:<[01001234567]> but was:<[\u0660\u0661\u0660\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667]> -- duplicate phone detection silently failing",
+    "error_message": "expected:<[01001234567]> but was:<[٠١٠٠١٢٣٤٥٦٧]> -- duplicate phone detection silently failing",
     "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/IntakeValidator.kt",
     "root_cause": "Char.isDigit() returns TRUE for Arabic-Indic digits (U+0660..U+0669), so filter { it.isDigit() } kept them and the same phone number in Arabic numerals produced a different normalisation key. All 18 existing tests used Latin digits.",
     "fix": "Fold Arabic-Indic and Eastern Arabic digits to ASCII BEFORE filtering (TextNormalisation.foldDigitsToAscii). Rule: never use isDigit() as a filter when non-Latin input is possible -- fold first.",
@@ -664,7 +664,7 @@
     "timestamp": "2026-08-22T13:35:00Z",
     "error_message": "iOS: white bands above the status bar and below the home indicator, framing a #141311 app",
     "file": "app/iosApp/iosApp/ContentView.swift",
-    "root_cause": "ContentView applied .ignoresSafeArea(.keyboard) only, so SwiftUI inset the Compose view by the top and bottom safe areas and the window's own white background showed through. App.kt already applies its own safe padding, so the insets were being handled twice \u2014 once in the wrong layer.",
+    "root_cause": "ContentView applied .ignoresSafeArea(.keyboard) only, so SwiftUI inset the Compose view by the top and bottom safe areas and the window's own white background showed through. App.kt already applies its own safe padding, so the insets were being handled twice — once in the wrong layer.",
     "fix": "Changed to .ignoresSafeArea() with no arguments so Compose owns every edge and paints the background full-bleed. Also set UIUserInterfaceStyle=Dark in Info.plist so the status bar draws light glyphs and system sheets arrive in dark mode.",
     "tags": [
       "ios",
@@ -682,7 +682,7 @@
     "timestamp": "2026-08-22T13:35:00Z",
     "error_message": "Android: full-screen white flash on every cold start before the dark app appeared",
     "file": "androidApp/src/main/AndroidManifest.xml",
-    "root_cause": "The launch window used the wizard's @android:style/Theme.Material.Light.NoActionBar. That theme only paints the starting window, but that window is the first thing shown on every cold start \u2014 white, against a #141311 app.",
+    "root_cause": "The launch window used the wizard's @android:style/Theme.Material.Light.NoActionBar. That theme only paints the starting window, but that window is the first thing shown on every cold start — white, against a #141311 app.",
     "fix": "Added Theme.Anfas (parent Theme.Material.NoActionBar) with windowBackground set to the app background and transparent system bars, and pointed the manifest at it. windowLight*Bar entries were dropped: false is already the default and windowLightNavigationBar needs API 27 against minSdk 24, which fails lint.",
     "tags": [
       "android",
@@ -700,7 +700,7 @@
     "timestamp": "2026-08-22T13:35:00Z",
     "error_message": "Renewal sheet content was cut off in landscape with no way to scroll to it",
     "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/RenewalSheetScreen.kt",
-    "root_cause": "The root Column had only fillMaxWidth(), so its height was wrap-content. Modifier.weight divides a BOUNDED height, so the weighted child fell back to its intrinsic height, verticalScroll measured its content unbounded, and the column grew taller than the window \u2014 the scroll never engaged. In portrait the content happened to fit, which is why it looked fine.",
+    "root_cause": "The root Column had only fillMaxWidth(), so its height was wrap-content. Modifier.weight divides a BOUNDED height, so the weighted child fell back to its intrinsic height, verticalScroll measured its content unbounded, and the column grew taller than the window — the scroll never engaged. In portrait the content happened to fit, which is why it looked fine.",
     "fix": "Root is fillMaxSize() and the scroll region uses weight(1f) with fill=true, which bounds the viewport and pins the action footer below it. Verified by rotating a Pixel 9 emulator: the sheet scrolls and Confirm/Cancel stay reachable.",
     "tags": [
       "compose",
@@ -719,7 +719,7 @@
     "timestamp": "2026-08-22T13:35:00Z",
     "error_message": "Bottom navigation had unequal tap targets that moved when the language changed",
     "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasNavigation.kt",
-    "root_cause": "Items were laid out with Arrangement.SpaceEvenly over intrinsically-sized children, so each destination's tap target was sized by its own label \u2014 'Reminders' was visibly larger than 'Intake', and every target shifted between English and Arabic. The selected state also filled the whole cell, so it changed shape per label, and there was no minimum touch target.",
+    "root_cause": "Items were laid out with Arrangement.SpaceEvenly over intrinsically-sized children, so each destination's tap target was sized by its own label — 'Reminders' was visibly larger than 'Intake', and every target shifted between English and Arabic. The selected state also filled the whole cell, so it changed shape per label, and there was no minimum touch target.",
     "fix": "Rewrote as equal weight(1f) columns with a 56dp minimum height (clears Material's 48dp and Apple's 44pt), an animated pill indicator behind the icon only, 24dp icons, animated colour transitions, ripple clipped to the cell, and maxLines=1 with ellipsis on the label.",
     "tags": [
       "compose",
@@ -739,7 +739,7 @@
     "error_message": "Table column heading rendered as 'ACTIO / NS', taller than the cells beneath it",
     "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTable.kt",
     "root_cause": "AnfasTableHeaderCell had no line limit, so a heading narrower than its text wrapped and pushed the header row taller than its own columns.",
-    "fix": "maxLines = 1 with TextOverflow.Ellipsis \u2014 a heading that cannot fit should shorten rather than reflow.",
+    "fix": "maxLines = 1 with TextOverflow.Ellipsis — a heading that cannot fit should shorten rather than reflow.",
     "tags": [
       "compose",
       "designsystem",
@@ -806,9 +806,9 @@
   {
     "id": "bug-047",
     "timestamp": "2026-08-22T15:15:00Z",
-    "error_message": "Arabic member profile rendered the date as '22 2026 \u0623\u063a\u0633\u0637\u0633' and the member id as '10003#'",
+    "error_message": "Arabic member profile rendered the date as '22 2026 أغسطس' and the member id as '10003#'",
     "file": "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/BidiIsolate.kt",
-    "root_cause": "Both strings were rendered with the dataMonoLtr style, which forces TextDirection.Ltr. That style is correct for Latin-only data, but these strings CONTAIN Arabic \u2014 a translated month name, and the '\u0631\u0642\u0645 \u0627\u0644\u0639\u0636\u0648\u064a\u0629' label \u2014 so forcing LTR reordered those runs. Separately, the direction-neutral '#' resolves its direction from its surroundings, so in an RTL paragraph it migrated to the far side of the number.",
+    "root_cause": "Both strings were rendered with the dataMonoLtr style, which forces TextDirection.Ltr. That style is correct for Latin-only data, but these strings CONTAIN Arabic — a translated month name, and the 'رقم العضوية' label — so forcing LTR reordered those runs. Separately, the direction-neutral '#' resolves its direction from its surroundings, so in an RTL paragraph it migrated to the far side of the number.",
     "fix": "Added String.asLtrIsolate() using LRI/PDI (U+2066/U+2069) and wrapped only the NUMBER inside the Arabic id string, leaving the label to follow the paragraph. Dates and money now use dataMono rather than dataMonoLtr, since they are localised strings containing script. dataMonoLtr is reserved for Latin-only runs such as phone numbers.",
     "tags": [
       "i18n",
@@ -824,7 +824,7 @@
   {
     "id": "bug-048",
     "timestamp": "2026-08-22T16:00:00Z",
-    "error_message": "Denying camera access on iOS did nothing \u2014 requestCameraAccess() and openAppSettings() were built in Phase 3 and never called from anywhere",
+    "error_message": "Denying camera access on iOS did nothing — requestCameraAccess() and openAppSettings() were built in Phase 3 and never called from anywhere",
     "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponent.kt",
     "root_cause": "The iOS capture path presented UIImagePickerController without first checking authorisation, so a denied camera produced a black picker and no explanation. A repo-wide grep showed both permission APIs had zero callers outside the module that declared them.",
     "fix": "onCaptureRequested(launch) checks access before handing control to the screen's launcher, and a denial becomes sticky state showing the camera-denied empty state with an Open Settings action plus the still-valid Choose photo fallback. A `when` guard makes the denial outrank the normal empty state so 'New scan' is never offered while the OS is refusing.",
@@ -842,9 +842,9 @@
   {
     "id": "bug-049",
     "timestamp": "2026-08-22T16:00:00Z",
-    "error_message": "The CameraAccess.Denied branch was untestable \u2014 no test could ever reach it",
+    "error_message": "The CameraAccess.Denied branch was untestable — no test could ever reach it",
     "file": "core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/OcrContracts.kt",
-    "root_cause": "requestCameraAccess() and openAppSettings() were top-level `expect` functions. A top-level expect has no substitution point, so on the JVM test target it always returned NotRequired \u2014 meaning the only branch the denial UI exists for could never be exercised.",
+    "root_cause": "requestCameraAccess() and openAppSettings() were top-level `expect` functions. A top-level expect has no substitution point, so on the JVM test target it always returned NotRequired — meaning the only branch the denial UI exists for could never be exercised.",
     "fix": "Introduced a CameraPermissions interface with PlatformCameraPermissions delegating to the expect functions, registered in ocrModule and injected into the component. Same reasoning as AppDispatchers existing rather than reaching for Dispatchers.IO. Three tests now cover denied, granted and open-settings.",
     "tags": [
       "testability",
@@ -861,7 +861,7 @@
     "timestamp": "2026-08-22T18:20:00Z",
     "error_message": "After signing out, the app showed 'Set up this device' instead of the login form, with the previous user's name and username still in the fields",
     "file": "feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/SignInComponent.kt",
-    "root_cause": "The component decided its mode once in init. The shell creates it eagerly at startup \u2014 before any account exists \u2014 so it latched FirstRun and never re-evaluated. Submitting would have self-healed via AlreadyInitialised, but the user was shown the wrong form. Retaining the fields also left the previous person's details on screen, which matters on a shared reception device.",
+    "root_cause": "The component decided its mode once in init. The shell creates it eagerly at startup — before any account exists — so it latched FirstRun and never re-evaluated. Submitting would have self-healed via AlreadyInitialised, but the user was shown the wrong form. Retaining the fields also left the previous person's details on screen, which matters on a shared reception device.",
     "fix": "The component now collects observeSession() and re-runs hasAnyAccount() whenever the session becomes null, replacing the whole state so the form is cleared too. Regression test added.",
     "tags": [
       "auth",
@@ -879,7 +879,7 @@
     "timestamp": "2026-08-22T18:20:00Z",
     "error_message": "MigrationV4ToV5Test FAILED: schema version should now be 5 expected:<5> but was:<6>",
     "file": "core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt",
-    "root_cause": "The test hardcoded the target schema version and was named for it. Adding the staff table for sign-in took the database to v6, so opening a v4 file now migrates all the way forward \u2014 the test broke for a reason unconnected to what it verifies.",
+    "root_cause": "The test hardcoded the target schema version and was named for it. Adding the staff table for sign-in took the database to v6, so opening a v4 file now migrates all the way forward — the test broke for a reason unconnected to what it verifies.",
     "fix": "Renamed to MigrationFromV4Test and generalised: it now asserts the whole chain ran (placeholder dropped by v5, staff added by v6, the member row survived) and that migrating never invents a staff account. The version number moved to a named constant with a note that the assertion which matters is that the chain applied.",
     "tags": [
       "room",
@@ -928,7 +928,7 @@
   {
     "id": "bug-054",
     "timestamp": "2026-08-22T21:00:00Z",
-    "error_message": "The validation message in an inline edit field was drawn on top of the value it was complaining about \u2014 'Duplicate' over '01001234567'",
+    "error_message": "The validation message in an inline edit field was drawn on top of the value it was complaining about — 'Duplicate' over '01001234567'",
     "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasInlineEdit.kt",
     "root_cause": "The value and the error were both children of a Box, which stacks its children. The component's own KDoc said the message goes 'underneath', so this was wrong from the start; the table's narrow cells made the overlap read as clutter rather than as a bug.",
     "fix": "Changed the Box to a Column. Found immediately once the intake row cards gave the field full width.",
@@ -1136,7 +1136,7 @@
   {
     "id": "bug-066",
     "timestamp": "2026-08-24T10:14:00Z",
-    "error_message": "The Arabic week grid showed the literal text '$count \u0645\u0643\u0627\u0646\u064b\u0627' under every class block instead of the actual capacity number",
+    "error_message": "The Arabic week grid showed the literal text '$count مكانًا' under every class block instead of the actual capacity number",
     "file": "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/ArabicStrings.kt",
     "root_cause": "The new Classes strings were written using Kotlin's escaped ${'$'} form (to keep '$' literal text inside a raw string elsewhere in the file), but that escape was carried into places that needed real interpolation. ${'$'}count in Kotlin produces the LITERAL text \"$count\", not the value of the variable - it compiles cleanly and no existing test caught it because nothing asserted the rendered CONTENT of a translated string, only that the interface was implemented.",
     "fix": "Replaced every ${'$'}param with plain $param (9 occurrences: places, emptyDayTitle, durationMinutes, roomClash, saved, deleted). Added PlaceholderInterpolationTest in :core:i18n that renders every Classes string in both languages and asserts (a) no '$' survives into the output and (b) the given argument actually appears in the result - a permanent regression guard, since only running the built UI in the target language would otherwise catch this.",
@@ -1156,10 +1156,10 @@
   {
     "id": "bug-067",
     "timestamp": "2026-08-24T11:25:00Z",
-    "error_message": "A pain-score trend phrased as \"$first \u2192 $latest\" would have read backwards in Arabic RTL",
+    "error_message": "A pain-score trend phrased as \"$first → $latest\" would have read backwards in Arabic RTL",
     "file": "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/ArabicStrings.kt",
     "root_cause": "A directional arrow glyph inside bidi text does not reorder with the surrounding paragraph the way the two numbers around it do. In an RTL context the visual result reads as latest-then-first even though the string was authored first-then-latest, the same class of bug documented in bug-062's ancestor issue with the check-in progress bar and with icon autoMirror -- but here it was a text arrow, not a widget property, so there is no autoMirror equivalent to reach for.",
-    "fix": "Rewrote the trend as real words instead of a symbol: \"$first to $latest\" in English, \"\u0645\u0646 $first \u0625\u0644\u0649 $latest\" (\"from X to Y\") in Arabic. Word order in a real sentence follows the language's own grammar and sidesteps the directional-glyph question entirely. Caught by reasoning about RTL semantics before writing device-test seed data, then confirmed correct on an iPad simulator: renders as \u0645\u0646 5 \u0625\u0644\u0649 3.",
+    "fix": "Rewrote the trend as real words instead of a symbol: \"$first to $latest\" in English, \"من $first إلى $latest\" (\"from X to Y\") in Arabic. Word order in a real sentence follows the language's own grammar and sidesteps the directional-glyph question entirely. Caught by reasoning about RTL semantics before writing device-test seed data, then confirmed correct on an iPad simulator: renders as من 5 إلى 3.",
     "tags": [
       "i18n",
       "arabic",
@@ -1746,7 +1746,7 @@
   {
     "id": "bug-097",
     "timestamp": "2026-08-26T22:00:00Z",
-    "error_message": "The reminder queue rendered its six-column desktop table on a phone: headers squeezed to 'MEM\u2026'/'TEM\u2026' and the status chip wrapped to two lines (three in Arabic)",
+    "error_message": "The reminder queue rendered its six-column desktop table on a phone: headers squeezed to 'MEM…'/'TEM…' and the status chip wrapped to two lines (three in Arabic)",
     "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueScreen.kt",
     "root_cause": "The screen had no narrow branch -- unlike IntakeReviewScreen, which already switches to one card per row below AnfasTableMinWidth. It went unnoticed because the queue was always empty until the WhatsApp scheduler landed, so no row had ever been rendered.",
     "fix": "Added ReminderCardList/ReminderCard behind a BoxWithConstraints at the same threshold, keeping bulk selection (with a labelled select-all) and the export's error stripe. Pinned by ReminderQueueLayoutTest, falsified in both directions.",
@@ -1786,10 +1786,10 @@
   {
     "id": "bug-099",
     "timestamp": "2026-08-26T22:00:00Z",
-    "error_message": "In Arabic the scheduled date rendered as '\u0623\u063a\u0633\u0637\u0633 17 2026' instead of '17 \u0623\u063a\u0633\u0637\u0633 2026'",
+    "error_message": "In Arabic the scheduled date rendered as 'أغسطس 17 2026' instead of '17 أغسطس 2026'",
     "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueScreen.kt",
     "root_cause": "scheduledLabel() was styled dataMonoLtr in the table (and copied into the new card). That style is for Latin-only runs; a localised date carries a translated month name and its runs get reordered. Exactly the rule CLAUDE.md documents. Latent in the table since it was written -- only visible once a reminder was old enough to print an absolute date rather than 'Today'.",
-    "fix": "bodyMedium for the date in both the table and the card; dataMonoLtr kept for the phone number only. Verified on device: '17 \u0623\u063a\u0633\u0637\u0633 2026'.",
+    "fix": "bodyMedium for the date in both the table and the card; dataMonoLtr kept for the phone number only. Verified on device: '17 أغسطس 2026'.",
     "tags": [
       "rtl",
       "i18n",
@@ -1802,5 +1802,134 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-08-26T22:00:00Z"
+  },
+  {
+    "id": "bug-100",
+    "timestamp": "2026-08-27T02:00:00Z",
+    "error_message": "An unreviewed intake sheet can vanish silently: captures were written to context.cacheDir/intake, which the OS deletes under memory pressure with no notification",
+    "file": "core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/Ocr.android.kt",
+    "root_cause": "cacheDir was chosen so the OS could reclaim the space. But a captured sheet is the only copy of a member's handwritten details until the batch is imported, and there is no upload_pending state and no re-capture path -- so a cache purge loses it and the review pane just shows an empty source pane with no explanation.",
+    "fix": "IntakeCaptureFiles.directory moved to context.filesDir/intake; res/xml/intake_file_paths.xml switched from <cache-path> to <files-path> (a mismatch makes FileProvider.getUriForFile throw and breaks camera capture outright); IntakeImageStore.adoptLegacyCaptures() moves any file left in cacheDir/intake and reports old->new uris so the rows naming them can be repointed.",
+    "tags": [
+      "intake",
+      "ocr",
+      "android",
+      "data-loss",
+      "filesystem",
+      "fileprovider",
+      "stage-0",
+      "sync"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-27T02:00:00Z"
+  },
+  {
+    "id": "bug-101",
+    "timestamp": "2026-08-27T02:05:00Z",
+    "error_message": "IntakeImageStore.purgeExcept had no production caller, so an image whose batch vanished without cleanup stayed on disk forever",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt",
+    "root_cause": "purgeExcept is documented as a 'startup safety net' but nothing ran at startup that used it. Written with its callers assumed rather than wired.",
+    "fix": "New IntakeHousekeeping, registered single(createdAtStart = true) in IntakeOcrModule on its own IO scope with appExceptionHandler, mirroring DataModule's plan seed. Placed in :feature:intake-ocr because it needs both the batches table and the platform file store. Needed two new DAO queries (sourceImageUris, relocateSourceImage) -- queries only, so no schema change and no migration.",
+    "tags": [
+      "intake",
+      "ocr",
+      "housekeeping",
+      "koin",
+      "startup",
+      "dead-code",
+      "stage-0"
+    ],
+    "related_bugs": [
+      "bug-100"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-27T02:05:00Z"
+  },
+  {
+    "id": "bug-102",
+    "timestamp": "2026-08-27T02:10:00Z",
+    "error_message": "A purge running before legacy adoption deletes exactly the sheets adoption exists to rescue",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt",
+    "root_cause": "An adopted file has been moved into the current directory but no row names it yet, so a keep-set built from the batches table at that moment does not include it and the purge treats it as orphaned. Also: a failed keep-set read falling through to purgeExcept(emptySet()) would delete every sheet awaiting review, because an empty keep-set and 'the database could not be read' are indistinguishable to purgeExcept.",
+    "fix": "run() calls adoptRelocatedCaptures() then purgeOrphanedCaptures(), sequentially in one function rather than as two independent startup jobs. A failed sourceImageUris() read logs and SKIPS the purge. IntakeHousekeepingTest pins both, asserting the keep-set's contents rather than only the call order (the order alone still reads correct if the repoint silently failed). Falsified in two directions: reversing the calls fails exactly the 2 ordering tests; making a failed read purge everything fails exactly the 1 asymmetry test.",
+    "tags": [
+      "intake",
+      "ocr",
+      "ordering",
+      "destructive",
+      "testing",
+      "falsification",
+      "stage-0"
+    ],
+    "related_bugs": [
+      "bug-100",
+      "bug-101"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-27T02:10:00Z"
+  },
+  {
+    "id": "bug-103",
+    "timestamp": "2026-08-27T02:15:00Z",
+    "error_message": "iOS purgeExcept was a do-nothing stub commented 'nothing writes there yet', and iOS delete had no root confinement",
+    "file": "core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/Ocr.ios.kt",
+    "root_cause": "The stub's comment stopped being true the day ImageSource.ios.kt started writing to Application Support/intake, so the safety net silently did not exist on iOS. Separately, delete() called removeItemAtPath on whatever the DB row said, while Android deliberately confined to its own intake directory -- tolerable for one delete, much worse once purge deletes in a loop.",
+    "fix": "Implemented purgeExcept against intakeDirectory() (made internal in ImageSource.ios.kt so writer and purge cannot disagree, the same mistake Android had three copies of); added a toLocalPath() root confinement matching Android; store now takes AppDispatchers so disk work leaves the caller's thread.",
+    "tags": [
+      "intake",
+      "ocr",
+      "ios",
+      "stale-comment",
+      "dead-code",
+      "data-loss",
+      "stage-0"
+    ],
+    "related_bugs": [
+      "bug-100",
+      "bug-101"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-27T02:15:00Z"
+  },
+  {
+    "id": "bug-104",
+    "timestamp": "2026-08-26T22:36:47Z",
+    "error_message": "core:ocr:parseAndroidMainLocalResources FAILED -- [Fatal Error] intake_file_paths.xml:9:21: The string \"--\" is not permitted within comments.",
+    "file": "core/ocr/src/androidMain/res/xml/intake_file_paths.xml",
+    "root_cause": "The new explanatory XML comment used the project's own prose convention of '--' as an em-dash substitute (the same style used throughout CLAUDE.md and KDoc). XML forbids a literal '--' anywhere inside a comment body, so the resource parser failed the whole core:ocr module before any Kotlin compiled.",
+    "fix": "Reworded the one offending sentence to use a comma instead of '--'. No behavioural change; XML/HTML comments must never carry this prose convention -- use commas or parentheses in .xml files instead.",
+    "tags": [
+      "xml",
+      "build-failure",
+      "android-resources",
+      "fileprovider",
+      "intake"
+    ],
+    "related_bugs": [
+      "bug-100"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:36:47Z"
+  },
+  {
+    "id": "bug-105",
+    "timestamp": "2026-08-26T22:37:37Z",
+    "error_message": "core:data:compileTestKotlinJvm FAILED -- Class 'FakeIntakeDao' is not abstract and does not implement abstract members: sourceImageUris(), relocateSourceImage(from, to)",
+    "file": "core/data/src/commonTest/kotlin/com/anfas/core/data/FakeIntakeDao.kt",
+    "root_cause": "IntakeDao gained two new abstract methods (sourceImageUris, relocateSourceImage) for the Stage 0 capture-storage housekeeping feature, but the commonTest in-memory fake implementing IntakeDao was not updated to match, so the whole core:data test source set failed to compile.",
+    "fix": "Added both methods to FakeIntakeDao: sourceImageUris() maps non-null sourceImageUri off the in-memory batch list; relocateSourceImage(from, to) rewrites matching batches' sourceImageUri, mirroring the real UPDATE ... WHERE source_image_uri = :from.",
+    "tags": [
+      "kotlin",
+      "compile-error",
+      "test-fake",
+      "intake",
+      "interface-drift"
+    ],
+    "related_bugs": [
+      "bug-100"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:37:37Z"
   }
 ]

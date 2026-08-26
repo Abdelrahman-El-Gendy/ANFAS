@@ -119,4 +119,26 @@ interface IntakeDao {
 
     @Query("DELETE FROM intake_batches WHERE id = :id")
     suspend fun deleteBatch(id: String)
+
+    /**
+     * Every capture still referenced by a batch — the keep-set for
+     * `IntakeImageStore.purgeExcept`.
+     *
+     * One column rather than `observeBatches()`, deliberately: the keep-set needs uris and nothing
+     * else, and loading whole batches would pull every parsed cell of every sheet into memory to
+     * read one string from each.
+     */
+    @Query("SELECT source_image_uri FROM intake_batches WHERE source_image_uri IS NOT NULL")
+    suspend fun sourceImageUris(): List<String>
+
+    /**
+     * Repoints the rows naming a capture that has moved on disk.
+     *
+     * Matched on the uri rather than on a batch id because the mover is the file system, which
+     * knows paths and not batches. Two batches sharing one path is not a state this app can
+     * produce (every capture gets a fresh `Uuid`), but if one ever existed both should follow the
+     * file, so this deliberately does not restrict to a single row.
+     */
+    @Query("UPDATE intake_batches SET source_image_uri = :to WHERE source_image_uri = :from")
+    suspend fun relocateSourceImage(from: String, to: String)
 }

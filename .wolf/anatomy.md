@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T22:20:35.185Z
-> Files: 589 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T23:26:06.698Z
+> Files: 598 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/
 
@@ -20,7 +20,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~14294 tok)
+- `CLAUDE.md` — OpenWolf (~17676 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -594,13 +594,13 @@
 - `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~1380 tok)
 - `EquipmentRepository.kt` — The gym floor's equipment inventory and its maintenance history. (~850 tok)
 - `IntakeMappers.kt` — Storage <-> domain for OCR intake. (~889 tok)
-- `IntakeRepository.kt` — Which cell of a row an edit targets. (~644 tok)
+- `IntakeRepository.kt` — Which cell of a row an edit targets. (~785 tok)
 - `MemberMappers.kt` — Storage <-> domain. Deliberately total in one direction only: any row whose [status] string (~453 tok)
 - `MemberRepository.kt` — The only way a feature reaches member data. Reads emit AppResult; no `isEmpty()` by design (~290 tok)
 - `OfflineFirstAnnouncementRepository.kt` — Room-backed. `publish()` freezes `recipientCountAtPublish` by computing AnnouncementReach.count against live members/terms at the moment of publish — never recomputed after (~1400 tok)
 - `OfflineFirstAuthRepository.kt` — The stored session, **re-derived from the `staff` row it names** rather than trusted as (~3813 tok)
 - `OfflineFirstEquipmentRepository.kt` — OfflineFirstEquipmentRepository: observeAll, observeDetail, createEquipment, logMaintenance (~1637 tok)
-- `OfflineFirstIntakeRepository.kt` — Room-backed OCR intake. (~1722 tok)
+- `OfflineFirstIntakeRepository.kt` — Room-backed OCR intake. (~1720 tok)
 - `OfflineFirstMemberRepository.kt` — Room-backed. The error boundary: storage failures become AppError.Storage; CancellationException is rethrown. No network path yet (~560 tok)
 - `ReminderScheduler.kt` — What one queue build did, itemised. (~1999 tok)
 - `ReminderSender.kt` — What one run of the queue did. (~1943 tok)
@@ -610,7 +610,7 @@
 
 - `AnnouncementRepositoryTest.kt` — 12 tests: draft validation, publish freezes recipient count, delete only for drafts (~1900 tok)
 - `EquipmentRepositoryTest.kt` — A plain issue report -- no technician -- must not read as a service in the detail. (~2430 tok)
-- `FakeIntakeDao.kt` — In-memory IntakeDao. Mirrors the real thing where it matters: rows are ordered by ordinal, (~1110 tok)
+- `FakeIntakeDao.kt` — In-memory IntakeDao. Mirrors the real thing where it matters: rows are ordered by ordinal, (~1221 tok)
 - `FakeMemberDao.kt` — In-memory stand-in for Room. Query semantics mirror the DAO's SQL — case-insensitive (~690 tok)
 - `KoinOnCloseContractTest.kt` — Pins the Koin contract that `dataModule` relies on to close the Room connection. (~690 tok)
 - `OfflineFirstIntakeRepositoryTest.kt` — Only for the create-batch test, which needs a domain row to hand in. (~2806 tok)
@@ -647,7 +647,7 @@
 - `AnnouncementEntity.kt` — flat announcements table, no FKs + AnnouncementDao (observeAll DESC by created_at, findById, upsert, delete) (~500 tok)
 - `DatabaseBuilderFactory.kt` — Resolves the platform database location and hands back a builder. Actuals differ in what (~250 tok)
 - `EquipmentEntity.kt` — A physical asset on the gym floor. No foreign key anywhere in this table — it names no staff, (~787 tok)
-- `IntakeEntity.kt` — A photographed sign-up sheet awaiting review. (~1198 tok)
+- `IntakeEntity.kt` — A photographed sign-up sheet awaiting review. (~1494 tok)
 - `MemberEntity.kt` — Storage shape for a member. Kept flat and primitive on purpose: no domain enums or (~1091 tok)
 - `PlaceholderEntity.kt` — ONE placeholder entity, present only to prove the KSP wiring generates code on every (~178 tok)
 - `ReminderEntity.kt` — A queued/sent/failed WhatsApp reminder. (~1099 tok)
@@ -763,6 +763,27 @@
 
 - `HttpClientFactory.kt` — The engine is supplied per platform (OkHttp on Android, Darwin on iOS, CIO on desktop), (~228 tok)
 
+## core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/
+
+- `Ocr.android.kt` — Nothing to request. See the comment in androidMain/AndroidManifest.xml: ACTION_IMAGE_CAPTURE (~3179 tok)
+
+## core/ocr/src/androidMain/res/xml/
+
+- `intake_file_paths.xml` (~240 tok)
+
+## core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/
+
+- `OcrContracts.kt` — A captured photograph on disk. (~1251 tok)
+
+## core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/
+
+- `ImageSource.ios.kt` — Capture via `UIImagePickerController`, presented from the top-most view controller. (~1654 tok)
+- `Ocr.ios.kt` — Vision-backed recognition. (~2175 tok)
+
+## core/ocr/src/jvmMain/kotlin/com/anfas/core/ocr/
+
+- `Ocr.jvm.kt` — Desktop has no capture and no OCR, deliberately and visibly. (~798 tok)
+
 ## design/
 
 - `sync-layer.md` — The sync layer — design (~5739 tok)
@@ -851,7 +872,8 @@
 ## feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/
 
 - `commonTest/IntakeReviewComponentTest.kt` — 12 tests: batch selection, edit-unblocks-row, import notices, zoom clamping (~2000 tok)
-- `IntakeOcrModule.kt` — Lets :composeApp construct the review component without seeing its dependencies. Same pattern (~317 tok)
+- `IntakeHousekeeping.kt` — Reconciles the captures on disk with the batches that reference them, once at startup. (~899 tok)
+- `IntakeOcrModule.kt` — Lets :composeApp construct the review component without seeing its dependencies. Same pattern (~779 tok)
 - `IntakeOcrModule.kt` — IntakeReviewComponentFactory + Koin `factory` (~230 tok)
 - `IntakeReviewComponent.kt` — Reviewing a scanned sign-up sheet: correct what OCR misread, then import the rows that pass. (~1904 tok)
 - `IntakeReviewComponent.kt` — Shows the OLDEST sheet still REVIEWING. Edits write through; import notices name the leftovers (~1300 tok)
@@ -862,7 +884,9 @@
 
 ## feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/
 
-- `IntakeReviewComponentTest.kt` — Fake that revalidates on read the way the real repository does — without that, an edit test (~3630 tok)
+- `IntakeHousekeepingTest.kt` — `purgeExcept` deletes files. Every test here exists because a wrong answer costs a sheet (~1387 tok)
+- `IntakeReviewComponentTest.kt` — State is a combine of three flows, so the first useful value can be a few emissions in. (~5722 tok)
+- `OcrFakes.kt` — Returns whatever the test hands it, so ingestion can be exercised without a camera. (~647 tok)
 
 ## feature/intake-ocr/src/jvmTest/kotlin/com/anfas/feature/intakeocr/
 

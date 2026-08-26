@@ -111,6 +111,14 @@ internal class OfflineFirstIntakeRepository(
             intakeDao.setStatus(id.value, IntakeBatchStatus.DISCARDED.name)
         }
 
+    override suspend fun sourceImageUris(): AppResult<List<String>> =
+        runStorage("Could not read the captured sheets") { intakeDao.sourceImageUris() }
+
+    override suspend fun relocateSourceImage(from: String, to: String): AppResult<Unit> =
+        runStorage("Could not repoint a captured sheet") {
+            intakeDao.relocateSourceImage(from = from, to = to)
+        }
+
     private fun IntakeRow.toMember(id: String, membershipNumber: String) = Member(
         id = MemberId(id),
         fullName = name.value.trim(),

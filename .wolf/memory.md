@@ -537,3 +537,37 @@ skiko dialog actual with iOS, which is verified.
 | 01:20 | Edited ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/sync-layer.html | 2→1 lines | ~8 |
 | 01:25 | Sync layer designed on paper: server-assigned sequence cursor (not updated_at), sync_outbox + sync_tombstones (not a deleted column), server-leased membership numbers, reminders never synced, tenancy scopes decided, 6-stage plan durability-first. Retracted 3 of my own premises in §1, incl. "sync unblocks desktop OCR" | design/sync-layer.md | written + published as artifact | ~13000 |
 | 01:21 | Session end: 2 writes across 1 files (sync-layer.html) | 0 reads | ~13776 tok |
+| 01:22 | Session end: 2 writes across 1 files (sync-layer.html) | 0 reads | ~13776 tok |
+| 01:28 | Edited core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/OcrContracts.kt | modified adoptLegacyCaptures() | ~370 |
+| 01:28 | Edited core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/Ocr.android.kt | modified IntakeCaptureFiles() | ~398 |
+| 01:28 | Edited core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/Ocr.android.kt | added 2 condition(s) | ~875 |
+| 01:28 | Created core/ocr/src/androidMain/res/xml/intake_file_paths.xml | — | ~240 |
+| 01:29 | Edited core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/ImageSource.ios.kt | modified intakeDirectory() | ~90 |
+| 01:29 | Edited core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/Ocr.ios.kt | added 2 condition(s) | ~558 |
+| 01:29 | Edited core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/Ocr.ios.kt | 3→2 lines | ~19 |
+| 01:29 | Edited core/ocr/src/jvmMain/kotlin/com/anfas/core/ocr/Ocr.jvm.kt | modified adoptLegacyCaptures() | ~174 |
+| 01:30 | Edited core/database/src/commonMain/kotlin/com/anfas/core/database/IntakeEntity.kt | modified sourceImageUris() | ~355 |
+| 01:30 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/IntakeRepository.kt | modified createBatch() | ~57 |
+| 01:30 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/IntakeRepository.kt | modified discardBatch() | ~227 |
+| 01:30 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt | modified discardBatch() | ~160 |
+| 01:31 | Created feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt | — | ~899 |
+| 01:31 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeOcrModule.kt | modified single() | ~284 |
+| 01:31 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeOcrModule.kt | added 4 import(s) | ~119 |
+| 01:31 | Edited feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/OcrFakes.kt | modified delete() | ~259 |
+| 01:31 | Edited feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponentTest.kt | expanded (+9 lines) | ~236 |
+| 01:31 | Edited feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponentTest.kt | added optional chaining | ~244 |
+| 01:32 | Created feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/IntakeHousekeepingTest.kt | — | ~1387 |
+| 01:33 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt | modified run() | ~26 |
+| 01:34 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt | 3→4 lines | ~56 |
+| 01:36 | Edited CLAUDE.md | expanded (+39 lines) | ~953 |
+| 01:36 | Edited core/ocr/src/androidMain/res/xml/intake_file_paths.xml | inline fix | ~23 |
+| 01:36 | intake_file_paths.xml comment used "--" as em-dash, illegal in XML comments, failed core:ocr resource parsing before check even reached compile | core/ocr/src/androidMain/res/xml/intake_file_paths.xml | fixed, reran check | ~1200 |
+| 02:20 | Sync Stage 0: Android intake captures moved cacheDir->filesDir (OS cache purge was silently losing unreviewed sheets), files-path in FileProvider xml, adoptLegacyCaptures + IntakeHousekeeping as purgeExcept's first production caller, iOS purge stub implemented + delete root-confined. 5 new tests, falsified both directions. No schema change | core/ocr/*, core/data/*, core/database/IntakeEntity.kt, feature/intake-ocr/* | verifying | ~35000 |
+| 01:37 | Session end: 25 writes across 16 files (sync-layer.html, OcrContracts.kt, Ocr.android.kt, intake_file_paths.xml, ImageSource.ios.kt) | 15 reads | ~56882 tok |
+| 01:37 | Edited core/data/src/commonTest/kotlin/com/anfas/core/data/FakeIntakeDao.kt | added 1 condition(s) | ~186 |
+| 01:37 | FakeIntakeDao missing two new IntakeDao abstract members caused core:data test compile failure | core/data/src/commonTest/.../FakeIntakeDao.kt | fixed, reran check | ~900 |
+| 01:50 | Edited desktopApp/build.gradle.kts | added optional chaining | ~172 |
+| 02:21 | Edited desktopApp/build.gradle.kts | removed 6 lines | ~11 |
+| 02:24 | Verified Stage 0 intake-capture storage change end to end: check + both iOS targets green (2 real bugs fixed), Android FileProvider capture confirmed crash-free on emulator (highest-risk item), iOS build+launch verified via simctl (session seeded via NSUserDefaults, no typing needed), desktop verified via isolated scratch user.home | core/ocr, core/data, feature/intake-ocr, core/database | all platforms pass; android capture end-to-end incl. delete() confinement exercised; ios/desktop UI-navigation automation abandoned after a stray click landed in an unrelated Android Studio terminal window in this multi-display sandbox | ~large |
+| 02:26 | Edited CLAUDE.md | 4→8 lines | ~187 |
+| 02:26 | Session end: 29 writes across 18 files (sync-layer.html, OcrContracts.kt, Ocr.android.kt, intake_file_paths.xml, ImageSource.ios.kt) | 37 reads | ~57611 tok |

@@ -80,6 +80,18 @@ internal class FakeIntakeDao(
         // The real table has ON DELETE CASCADE.
         rowRows.value = rowRows.value.filterNot { it.batchId == id }
     }
+
+    override suspend fun sourceImageUris(): List<String> {
+        failure?.let { throw it }
+        return batchRows.value.mapNotNull { it.sourceImageUri }
+    }
+
+    override suspend fun relocateSourceImage(from: String, to: String) {
+        failure?.let { throw it }
+        batchRows.value = batchRows.value.map {
+            if (it.sourceImageUri == from) it.copy(sourceImageUri = to) else it
+        }
+    }
 }
 
 internal fun batchEntity(

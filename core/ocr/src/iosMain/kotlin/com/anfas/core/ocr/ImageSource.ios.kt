@@ -121,7 +121,12 @@ private class PickerDelegate(private val onResult: (AppResult<CapturedImage>) ->
     }
 }
 
-private fun intakeDirectory(): String? {
+/**
+ * Internal rather than private so [AppleIntakeImageStore] resolves the same path this writes to.
+ * Android learned this the hard way: it had the intake directory spelled out in three separate
+ * places, so a change to where captures live could leave the purge rooted at the old one.
+ */
+internal fun intakeDirectory(): String? {
     val base = NSSearchPathForDirectoriesInDomains(
         NSApplicationSupportDirectory,
         NSUserDomainMask,

@@ -34,12 +34,8 @@ interface IntakeRepository {
     fun observeBatch(id: IntakeBatchId): Flow<AppResult<IntakeBatch?>>
 
     /**
-     * The ingestion seam. An OCR pipeline calls this with what it read off a photograph;
+     * The ingestion seam. `IntakeIngestion` calls this with what it read off a photograph;
      * nothing else in the app creates batches.
-     *
-     * There is no OCR engine wired up yet — no camera capture, no text recognition. This
-     * exists so the review, edit and import path is complete and testable, and so adding the
-     * pipeline later touches nothing above this line.
      */
     suspend fun createBatch(batch: IntakeBatch): AppResult<Unit>
 
@@ -59,4 +55,18 @@ interface IntakeRepository {
     suspend fun importBatch(id: IntakeBatchId): AppResult<ImportOutcome>
 
     suspend fun discardBatch(id: IntakeBatchId): AppResult<Unit>
+
+    /**
+     * Every capture a batch still references — the keep-set for `IntakeImageStore.purgeExcept`.
+     *
+     * Unvalidated, unlike every other read here, and that is the point: this answers "which files
+     * are still spoken for", so it must report the uri of a batch whose rows are currently
+     * unimportable exactly as readily as a clean one. Running it through validation would risk a
+     * revalidation failure being read as "nothing to keep", and the keep-set is the one place
+     * where an under-report is destructive.
+     */
+    suspend fun sourceImageUris(): AppResult<List<String>>
+
+    /** Repoints the batches naming [from] at [to], for a capture that has moved on disk. */
+    suspend fun relocateSourceImage(from: String, to: String): AppResult<Unit>
 }

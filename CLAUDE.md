@@ -298,6 +298,49 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
   trade the overlay boxes already made. The Coil `error` slot reuses `sourceImageNotRendered`
   (previously the only text ever shown here) for the real case where the file has gone missing
   from disk; `noSourceImage` still covers a batch with no photo at all.
+- **Android captures live in `filesDir/intake`, not `cacheDir/intake`, and that is a data-loss fix
+  rather than a tidy-up.** Cache was chosen so the OS could reclaim the space; it reclaims it
+  without notice, and there is no `upload_pending` state and no re-capture path — so the only copy
+  of a member's handwritten details could disappear between the desk and the review pane, showing
+  an empty source pane with no explanation. Space is still bounded, just by this app (delete on
+  import/discard, plus `purgeExcept`) rather than by the OS.
+- **`res/xml/intake_file_paths.xml` must name the same directory, and a mismatch breaks capture
+  outright rather than degrading.** `<files-path>` now, not `<cache-path>`:
+  `FileProvider.getUriForFile` throws `IllegalArgumentException` when the target is not covered, so
+  the camera cannot be launched at all. Verify capture on a device after touching either side.
+- **Never write `--` inside an XML comment.** This file's prose style uses it as an em-dash, which
+  is fine in Kotlin and Markdown and *illegal* in XML — `parseAndroidMainLocalResources` fails with
+  a fatal parser error. It bit `intake_file_paths.xml` the first time an Android resource here
+  carried a real explanatory comment.
+- **The intake directory had been spelled out in three places in `Ocr.android.kt`** — the writer,
+  the purge listing and `toLocalFile`'s root confinement. That is how a half-done move leaves the
+  purge rooted at the old directory while writes go to the new one: it deletes nothing, forever,
+  and looks fine. Centralised on `IntakeCaptureFiles`, and `intakeDirectory()` on iOS was made
+  `internal` for the same reason.
+- **`IntakeHousekeeping` is `purgeExcept`'s first production caller**, `createdAtStart = true` in
+  `IntakeOcrModule` on its own IO scope — the same shape as `DataModule`'s plan seed, and for the
+  same reason (Koin builds singletons on whichever thread first resolves them, which on Android is
+  the main one). It lives in `:feature:intake-ocr` because it needs both the batches table and the
+  platform file store, exactly like `IntakeIngestion`.
+- **Adopt before purge. The ordering is the invariant, not a preference.** `adoptLegacyCaptures()`
+  moves a file into the current directory *before* any row names it, so a purge in between deletes
+  precisely the sheets adoption exists to rescue. `IntakeHousekeepingTest` asserts the keep-set's
+  *contents*, not just the call order — the order alone still reads correct if the repoint silently
+  failed. Falsified by reversing the two calls: exactly the two ordering tests go red.
+- **A failed keep-set read skips the purge; it must never fall through to an empty set.** An empty
+  keep-set and "the database could not be read" are indistinguishable to `purgeExcept`, and
+  conflating them deletes every sheet awaiting review. Skipping a purge costs disk. This asymmetry
+  is why `IntakeRepository.sourceImageUris()` is the one read here that is **not** validated: this
+  answers "which files are still spoken for", so a batch whose rows are currently unimportable must
+  count exactly as much as a clean one.
+- **`adoptLegacyCaptures` is timid in the same way `adoptLegacyDatabase` is** — never overwrites a
+  file already at the new path, reports only the moves that actually succeeded so a row is never
+  repointed at a file that is not there, and never throws, because a permissions problem in startup
+  housekeeping must not become a failure to start.
+- **iOS's `purgeExcept` had been a stub whose comment said nothing wrote there yet** — untrue from
+  the day capture landed, so the safety net silently did not exist on iOS. Its `delete` also had no
+  root confinement while Android's carefully did; harmless-looking for a single delete, considerably
+  worse once something deletes in a loop.
 
 ## Navigation
 

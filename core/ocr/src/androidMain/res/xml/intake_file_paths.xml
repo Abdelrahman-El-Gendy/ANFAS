@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Sheet photographs are member PII: names, phone numbers and plan dates. They live in
-  internal cache (getCacheDir) rather than external storage so no other app can read them
-  and the OS can reclaim the space, and they are deleted as soon as a batch is imported
-  or discarded.
+  internal files (getFilesDir) rather than external storage so no other app can read them,
+  and they are deleted as soon as a batch is imported or discarded.
+
+  files-path, NOT cache-path. This has to name the same directory IntakeCaptureFiles writes
+  to or FileProvider.getUriForFile throws IllegalArgumentException and the camera cannot be
+  launched at all, so a half-done move breaks capture outright rather than degrading.
+  Cache was the original choice, on the reasoning that the OS could reclaim the space; it
+  reclaims it without notice, which for an unreviewed sheet means the only copy of someone's
+  handwritten details disappearing silently. See IntakeCaptureFiles.
 -->
 <paths>
-    <cache-path
+    <files-path
         name="intake"
         path="intake/" />
 </paths>

@@ -87,4 +87,23 @@ interface IntakeImageStore {
 
     /** Startup safety net for images whose batch vanished without cleanup. */
     suspend fun purgeExcept(keep: Set<String>)
+
+    /**
+     * Moves captures written to an older location into the current one, returning old uri -> new
+     * uri for everything moved so the caller can repoint the rows that reference them.
+     *
+     * Exists because Android's captures used to live in `getCacheDir()`, which the OS deletes
+     * under pressure with no notification — an unreviewed sheet could simply vanish. The rows
+     * naming those files are already in the database, so changing where captures are written is
+     * not enough on its own: without this, every existing batch keeps a `file://…/cache/intake/…`
+     * uri that is now a non-null broken path.
+     *
+     * Returns an empty map where there is no older location, which is every platform but Android.
+     * Deliberately never throws — this runs at startup, and a permissions problem in housekeeping
+     * must not become a failure to start. Same reasoning as `adoptLegacyDatabase` on desktop.
+     *
+     * **Must run before [purgeExcept], not after.** An adopted file is not yet named by any row,
+     * so a purge in between would delete exactly the sheets this was written to save.
+     */
+    suspend fun adoptLegacyCaptures(): Map<String, String>
 }
