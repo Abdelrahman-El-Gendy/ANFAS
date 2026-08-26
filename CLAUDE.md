@@ -391,6 +391,27 @@ row, whereas the bar divides a phone equally between its items.
   Distinguishing them lets whoever holds the device enumerate staff.
 - **`SettingsSessionStore` holds no secret** — a staff id and role names. `Settings` is unencrypted
   on every platform, so a token there would be readable on a rooted device.
+- **A stored session is a *claim*, re-derived from the `staff` row it names on every emission —
+  never trusted as written.** `Settings` and the database do not survive together: the Room file is
+  deliberately excluded from cloud backup and device transfer because the whole domain is PII, while
+  SharedPreferences/NSUserDefaults are not. So a restored or transferred install arrives holding a
+  session id for a row that was never copied, and reading the store alone put it **straight onto the
+  dashboard as an authenticated nobody** — reproduced on both platforms, not a simulator quirk.
+  `observeSession()` collapses three states to "not signed in": no row, row disabled, and no
+  resolvable role (the same rule `SettingsSessionStore` already applies to its own stored roles).
+- **Roles come from the row, never from the stored copy, and that half is a privilege bug rather
+  than a restore bug.** The stored list is a snapshot from whenever the person signed in, so an
+  Owner demoted to Coach kept every Owner permission until they happened to sign out. Disabling an
+  account now also ends its live session, rather than only refusing the next sign-in —
+  `SignInResult.AccountDisabled` guards the front door, this closes the window someone is already
+  through.
+- **The stale keys are deliberately not cleared** when validation fails. Writing to storage from
+  inside a cold flow would fire once per collector, and one unreadable read would then sign someone
+  out permanently instead of transiently. Nothing leaks by leaving them, and both signing in and
+  signing out overwrite them.
+- **No new screen was needed, which is why `session-expired` still has no caller.** An install with
+  no database has no staff rows either, so the user meets first-run setup — the truth. The disabled
+  and demoted cases meet the sign-in form — also the truth.
 - **`Settings` is registered once, in `:core:common`.** Both `:core:i18n` (language) and
   `:core:data` (session) resolve it; two `single<Settings>` registrations is a Koin duplicate.
 - Not built, deliberately: **"Forgot password?"** needs a server round trip, and **"Remember me"**

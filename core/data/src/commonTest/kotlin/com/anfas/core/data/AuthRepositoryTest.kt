@@ -23,6 +23,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -298,6 +299,106 @@ class AuthRepositoryTest {
             StaffChangeOutcome.NotFound,
             repository.setStaffEnabled("nope", enabled = false).valueOrFail(),
         )
+    }
+
+    /**
+     * The restore case, and the reason it is not contrived: the Room file is deliberately excluded
+     * from cloud backup and device transfer because the whole domain is PII, while the
+     * SharedPreferences / NSUserDefaults the session lives in are not. A transferred install
+     * therefore arrives holding a session id for a staff row that was never copied. Reading the
+     * store alone put it on the dashboard as an authenticated nobody.
+     */
+    @Test
+    fun `a session whose staff row does not exist is not restored`() = runTest {
+        val store = FakeSessionStore()
+        store.save(Session(userId = "s-gone", roles = setOf(Role.Owner)))
+        val repository = repository(dao = FakeStaffDao(), sessionStore = store)
+
+        assertNull(
+            repository.observeSession().first(),
+            "restored a session for a staff row that does not exist",
+        )
+    }
+
+    /**
+     * Revoking an account has to take effect on the device it is signed in on. `AccountDisabled`
+     * already refuses the front door; this closes the window someone is already through.
+     */
+    @Test
+    fun `disabling a staff row ends its live session`() = runTest {
+        val dao = FakeStaffDao()
+        val store = FakeSessionStore()
+        val repository = repository(dao = dao, sessionStore = store)
+        repository.createFirstOwner("Fahd", "correct-horse", "Fahd Owner").valueOrFail()
+        assertNotNull(repository.observeSession().first(), "should be signed in to begin with")
+
+        dao.setEnabled(false)
+
+        assertNull(
+            repository.observeSession().first(),
+            "a disabled account kept its session until the next sign-in",
+        )
+    }
+
+    /**
+     * The privilege half of this, and the part that is a security bug rather than a restore bug:
+     * the stored role list is a snapshot from whenever the person signed in, so a demoted Owner
+     * kept every Owner permission until they happened to sign out.
+     */
+    @Test
+    fun `roles come from the staff row rather than the stored session`() = runTest {
+        val dao = FakeStaffDao()
+        val store = FakeSessionStore()
+        val repository = repository(dao = dao, sessionStore = store)
+        val created = repository
+            .createFirstOwner("Fahd", "correct-horse", "Fahd Owner")
+            .valueOrFail()
+        val session = assertIs<CreateAccountOutcome.Created>(created).session
+        assertEquals(setOf(Role.Owner), session.roles)
+
+        // Demoted in the database; the store still holds "Owner".
+        val row = assertNotNull(dao.findById(session.userId))
+        dao.upsert(row.copy(roles = Role.Coach.name))
+
+        assertEquals(
+            setOf(Role.Coach),
+            repository.observeSession().first()?.roles,
+            "the session kept its stored roles after the row was demoted",
+        )
+        assertEquals(
+            setOf(Role.Owner),
+            store.current()?.roles,
+            "the stored copy is expected to stay stale -- that is why it must not be trusted",
+        )
+    }
+
+    /** A row that resolves no role at all is treated as absent, not as a session denied everywhere. */
+    @Test
+    fun `a staff row with no resolvable role does not restore a session`() = runTest {
+        val dao = FakeStaffDao()
+        val store = FakeSessionStore()
+        val repository = repository(dao = dao, sessionStore = store)
+        val created = repository
+            .createFirstOwner("Fahd", "correct-horse", "Fahd Owner")
+            .valueOrFail()
+        val session = assertIs<CreateAccountOutcome.Created>(created).session
+
+        val row = assertNotNull(dao.findById(session.userId))
+        dao.upsert(row.copy(roles = "Sorcerer"))
+
+        assertNull(repository.observeSession().first())
+    }
+
+    /** The other direction: a perfectly ordinary enabled row must still be restored. */
+    @Test
+    fun `a session for an enabled staff row is restored`() = runTest {
+        val dao = FakeStaffDao()
+        val store = FakeSessionStore()
+        val repository = repository(dao = dao, sessionStore = store)
+        repository.createFirstOwner("Fahd", "correct-horse", "Fahd Owner").valueOrFail()
+
+        val restored = assertNotNull(repository.observeSession().first())
+        assertEquals(setOf(Role.Owner), restored.roles)
     }
 
     private fun repository(

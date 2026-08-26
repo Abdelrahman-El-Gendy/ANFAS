@@ -769,3 +769,33 @@
   `safeDrawing` for `systemBars.union(displayCutout)` on the theory that safeDrawing's IME component
   was being consumed, wrote a confident comment saying so, and it changed nothing — the real cause
   was the missing bring-into-view. Reverted. Measure first, then edit.
+
+## Key Learnings — 2026-08-26 (session validity)
+
+- **A persisted session must be re-derived from the database on every emission, not trusted as
+  stored.** `Settings` (SharedPreferences / NSUserDefaults) survives backup and device transfer; the
+  Room file is deliberately excluded because the domain is PII. So a transferred install holds a
+  session id for a staff row that does not exist, and reading the store alone showed the dashboard to
+  an authenticated nobody. Reproduced on Android by writing only the two session keys into
+  `shared_prefs/anfas.xml` with no `databases` dir.
+- **Stored roles go stale and that is a privilege escalation.** A demoted Owner kept Owner
+  permissions until sign-out, because the session's role set was a snapshot. Derive roles from the
+  row.
+- **Do not clear storage from inside a cold flow** to "self-heal" a bad session: it fires per
+  collector, and one transient failure becomes a permanent sign-out. Emit null instead.
+- **AGP 9 writes the debug APK to `build/intermediates/apk/debug/`, and
+  `build/outputs/apk/debug/` can hold a stale artifact from an older build.** I side-loaded a
+  day-old APK and concluded a working fix had failed. Check the APK's mtime against the source, or
+  install via `installDebug` rather than a hand-picked path.
+- **The emulator's `/data` fills up.** `adb shell pm trim-caches 2000M` is the safe way to free space
+  (caches only, apps regenerate them) — never uninstall the user's other apps.
+- To create a "signed in" state without driving the UI: write `session.user_id` and `session.roles`
+  into `shared_prefs/anfas.xml` via `run-as com.anfas.app`. No password hash needed, because sign-in
+  is not involved.
+
+## Do-Not-Repeat — 2026-08-26 (third entry)
+
+- **Backtick test names must not contain commas** — Kotlin/Native fails with "Name contains illegal
+  characters". This is the third time (bug-069, and again here with `roles come from the staff row,
+  not from the stored session`). Only `compileTestKotlinIosSimulatorArm64` catches it, so `check`
+  must be run before shipping, not just the JVM tests.

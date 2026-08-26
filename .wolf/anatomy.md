@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T11:08:57.827Z
-> Files: 573 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T11:39:03.955Z
+> Files: 574 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~13685 tok)
+- `CLAUDE.md` — OpenWolf (~14149 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -593,6 +593,7 @@
 - `MemberMappers.kt` — Storage <-> domain. Deliberately total in one direction only: any row whose [status] string (~453 tok)
 - `MemberRepository.kt` — The only way a feature reaches member data. Reads emit AppResult; no `isEmpty()` by design (~290 tok)
 - `OfflineFirstAnnouncementRepository.kt` — Room-backed. `publish()` freezes `recipientCountAtPublish` by computing AnnouncementReach.count against live members/terms at the moment of publish — never recomputed after (~1400 tok)
+- `OfflineFirstAuthRepository.kt` — The stored session, **re-derived from the `staff` row it names** rather than trusted as (~3813 tok)
 - `OfflineFirstEquipmentRepository.kt` — OfflineFirstEquipmentRepository: observeAll, observeDetail, createEquipment, logMaintenance (~1637 tok)
 - `OfflineFirstIntakeRepository.kt` — Room-backed OCR intake. (~1722 tok)
 - `OfflineFirstMemberRepository.kt` — Room-backed. The error boundary: storage failures become AppError.Storage; CancellationException is rethrown. No network path yet (~560 tok)

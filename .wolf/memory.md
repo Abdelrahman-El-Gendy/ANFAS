@@ -483,3 +483,10 @@ skiko dialog actual with iOS, which is verified.
 | 13:58 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDialog.kt | modified Dialog() | ~308 |
 | 14:08 | Edited CLAUDE.md | added optional chaining | ~1015 |
 | 14:20 | Fixed keyboard handling on sign-in/first-run setup: adjustResize, imePadding on container, bring-into-view on IME change, dead Next key, scrollable dialog body | androidApp/src/main/AndroidManifest.xml, feature/auth/.../SignInScreen.kt, core/designsystem/.../AnfasTextField.kt, core/designsystem/.../AnfasDialog.kt, core/designsystem/src/jvmTest/.../AnfasDialogTest.kt, CLAUDE.md | verified on emulator portrait AND landscape before/after; dialog test falsified by reverting; check + both iOS targets green; iOS keyboard interaction NOT verified (idb absent) | ~30000 |
+| 14:11 | Session end: 39 writes across 15 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 26 reads | ~22249 tok |
+| 14:13 | Session end: 39 writes across 15 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 26 reads | ~22249 tok |
+| 14:16 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstAuthRepository.kt | added 1 condition(s) | ~791 |
+| 14:17 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstAuthRepository.kt | added optional chaining | ~203 |
+| 14:39 | Edited CLAUDE.md | expanded (+21 lines) | ~542 |
+| 14:45 | Session validity: a stored session is now re-derived from its staff row (absent/disabled/no-role => signed out) and roles come from the row, closing a stale-privilege hole | core/data/.../OfflineFirstAuthRepository.kt, core/data/src/commonTest/.../AuthRepositoryTest.kt, CLAUDE.md | 5 tests, 4 fail when reverted; reproduced on emulator (prefs session + no DB): before = dashboard, after = 'Set up this device'; check + both iOS targets green | ~26000 |
+| 14:42 | Session end: 42 writes across 16 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 33 reads | ~23894 tok |

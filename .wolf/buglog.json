@@ -1591,5 +1591,66 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-089",
+    "timestamp": "2026-08-26T14:45:00Z",
+    "error_message": "A restored/transferred install showed the dashboard as an authenticated user whose staff row did not exist; also a demoted staff member kept their old permissions until sign-out",
+    "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstAuthRepository.kt",
+    "root_cause": "observeSession() returned sessionStore.observe() verbatim, so the session was whatever key-value storage held. Settings survives backup and device transfer while the Room file is deliberately excluded (PII), so an install can hold a session id for a row that does not exist. The stored role set was also a snapshot from sign-in time, so role changes did not take effect until sign-out.",
+    "fix": "observeSession() now flatMapLatest's into dao.observeById(storedId) and emits null when the row is absent, disabled, or resolves no role; roles are taken from the row. 5 tests added, 4 of which fail when the fix is reverted. Reproduced and verified on the emulator by seeding shared_prefs with a session and no databases dir: before = dashboard, after = 'Set up this device'.",
+    "tags": [
+      "auth",
+      "session",
+      "rbac",
+      "privilege-escalation",
+      "backup",
+      "device-transfer",
+      "security"
+    ],
+    "related_bugs": [
+      "bug-090"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:45:00Z"
+  },
+  {
+    "id": "bug-090",
+    "timestamp": "2026-08-26T14:45:00Z",
+    "error_message": "Concluded a correct fix had failed on device; had actually side-loaded a day-old APK",
+    "file": "androidApp/build/outputs/apk/debug/androidApp-debug.apk",
+    "root_cause": "AGP 9 writes the debug APK to build/intermediates/apk/debug/. The legacy build/outputs/apk/debug/ path still held an artifact from the previous day, and `assembleDebug` reported success without touching it, so `adb install` of that path installed stale code.",
+    "fix": "Installed from build/intermediates/apk/debug/. Check the APK mtime against the source before drawing a conclusion from a device run.",
+    "tags": [
+      "agp9",
+      "apk-path",
+      "tooling",
+      "diagnosis",
+      "stale-artifact"
+    ],
+    "related_bugs": [
+      "bug-089"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:45:00Z"
+  },
+  {
+    "id": "bug-091",
+    "timestamp": "2026-08-26T14:45:00Z",
+    "error_message": "e: AuthRepositoryTest.kt:349:9 Name contains illegal characters: \",\".",
+    "file": "core/data/src/commonTest/kotlin/com/anfas/core/data/AuthRepositoryTest.kt",
+    "root_cause": "A backtick test name containing a comma. Kotlin/Native rejects it; only compileTestKotlinIosSimulatorArm64 surfaces it, so the JVM tests passed first. Third occurrence of an already-documented rule (see bug-069).",
+    "fix": "Renamed to `roles come from the staff row rather than the stored session`. Run ./gradlew check (not just jvmTest) before shipping.",
+    "tags": [
+      "kotlin-native",
+      "test-naming",
+      "recurrence"
+    ],
+    "related_bugs": [
+      "bug-069",
+      "bug-089"
+    ],
+    "occurrences": 3,
+    "last_seen": "2026-08-26T14:45:00Z"
   }
 ]
