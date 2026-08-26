@@ -49,6 +49,16 @@ val dataModule: Module = module {
         OfflineFirstMemberRepository(dao = get(), newId = { Uuid.random().toString() })
     }
     single<ReminderRepository> { OfflineFirstReminderRepository(dao = get()) }
+    // Three DAOs, because deciding who is owed a reminder needs members, their current terms and
+    // the reminders already written. That breadth is why it is not a method on ReminderRepository.
+    single<ReminderScheduler> {
+        DefaultReminderScheduler(
+            members = get(),
+            subscriptions = get(),
+            reminders = get(),
+            dispatchers = get(),
+        )
+    }
     single<SubscriptionRepository> { OfflineFirstSubscriptionRepository(dao = get()) }
     single<SessionStore> { SettingsSessionStore(settings = get()) }
     single<PasswordHasher> { Pbkdf2PasswordHasher() }

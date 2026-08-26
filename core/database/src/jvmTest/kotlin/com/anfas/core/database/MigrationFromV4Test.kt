@@ -77,6 +77,24 @@ class MigrationFromV4Test {
                     connection.countOf("members"),
                     "the pre-existing member row must survive every migration",
                 )
+                // v12 is the first migration in this schema to add a *column* to a table that
+                // already has rows in it -- every earlier hop added or dropped whole tables. The
+                // risk it introduces is specific: an auto-migration needs `defaultValue` on a new
+                // NOT NULL column, and without one the rows already on disk have nothing written
+                // into them. So assert the surviving member actually carries the default, rather
+                // than only that the column exists.
+                assertEquals(
+                    0,
+                    connection.intOf("SELECT whatsapp_opt_in FROM members LIMIT 1"),
+                    "the pre-existing member should default to no WhatsApp consent",
+                )
+                // Nobody may be opted in by a migration: consent is asked for, never inferred.
+                assertEquals(
+                    0,
+                    connection.countOf("members WHERE whatsapp_opt_in != 0"),
+                    "migrating must not opt anyone in to WhatsApp messages",
+                )
+
                 // A migration must never invent a login. An existing gym has no staff account
                 // until someone completes first-run setup.
                 assertEquals(
@@ -112,6 +130,9 @@ class MigrationFromV4Test {
             if (stmt.step()) stmt.getInt(0) else -1
         }
 
+    private fun SQLiteConnection.intOf(sql: String): Int =
+        prepare(sql).use { stmt -> if (stmt.step()) stmt.getInt(0) else -1 }
+
     private fun SQLiteConnection.userVersion(): Int = prepare("PRAGMA user_version").use { stmt ->
         if (stmt.step()) stmt.getInt(0) else -1
     }
@@ -141,6 +162,6 @@ class MigrationFromV4Test {
          * Mirrors AnfasDatabase's @Database(version = ...). Bump both together; the assertion
          * that matters is that the chain *ran*, not what number it landed on.
          */
-        const val CURRENT_SCHEMA_VERSION = 11
+        const val CURRENT_SCHEMA_VERSION = 12
     }
 }

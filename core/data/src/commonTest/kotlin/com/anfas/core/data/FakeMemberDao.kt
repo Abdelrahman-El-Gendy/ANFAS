@@ -63,6 +63,8 @@ internal fun memberEntity(
     status: String = "ACTIVE",
     lastCheckInAtEpochMs: Long? = null,
     phone: String? = null,
+    whatsappOptIn: Boolean = false,
+    preferredLanguage: String? = null,
 ) = MemberEntity(
     id = id,
     fullName = name,
@@ -73,4 +75,6 @@ internal fun memberEntity(
     status = status,
     lastCheckInAtEpochMs = lastCheckInAtEpochMs,
     avatarUrl = null,
+    whatsappOptIn = whatsappOptIn,
+    preferredLanguage = preferredLanguage,
 )

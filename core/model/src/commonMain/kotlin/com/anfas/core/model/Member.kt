@@ -21,6 +21,25 @@ data class Member(
     val status: MembershipStatus,
     val lastCheckInAt: Instant?,
     val avatarUrl: String?,
+    /**
+     * Whether this member has agreed to receive WhatsApp template messages.
+     *
+     * **Defaults to false and must stay that way.** Meta requires opt-in before a template message
+     * may be sent, there is no API to ask whether someone has opted in, and consent is not
+     * something a migration can infer — so the only honest starting value for every existing row
+     * is "we have not asked". The consequence is deliberate: the reminder queue builds empty until
+     * staff actually mark members, and `ReminderScheduler` reports how many it skipped for this
+     * reason rather than looking broken.
+     */
+    val whatsappOptIn: Boolean = false,
+    /**
+     * Which language this member reads, deciding `reminder_ar` against `reminder_en`.
+     *
+     * Null means "not asked", and the scheduler falls back to Arabic. Deliberately *not* the app's
+     * own UI language: that is a device setting belonging to whichever receptionist is on shift,
+     * and it says nothing about what the member reads.
+     */
+    val preferredLanguage: TemplateLanguage? = null,
 ) {
     /** Initials for the avatar fallback — the design shows "DT", "EL" when there is no photo. */
     val initials: String

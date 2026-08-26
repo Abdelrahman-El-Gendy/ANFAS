@@ -80,6 +80,23 @@ fun ReminderQueueScreen(component: ReminderQueueComponent, modifier: Modifier = 
                 title = s.reminders.title,
                 onBack = component::onClose,
                 backContentDescription = s.common.back,
+                // Hidden rather than disabled for a role that may not change the queue, matching
+                // how every other permission-gated action in the app behaves.
+                actions = if (state.mayBuildQueue) {
+                    {
+                        AnfasTextAction(
+                            text = if (state.isBuilding) {
+                                s.reminders.building
+                            } else {
+                                s.reminders.buildQueue
+                            },
+                            onClick = component::onBuildQueue,
+                            enabled = !state.isBuilding,
+                        )
+                    }
+                } else {
+                    null
+                },
             )
             Column(
                 modifier = Modifier
@@ -475,6 +492,11 @@ private fun QueueNotice.render(s: AppStrings): String = when (this) {
         }
 
     QueueNotice.NothingRetryable -> s.reminders.requeuedNone
+
+    is QueueNotice.QueueBuilt -> s.reminders.queueBuilt(queued)
+
+    is QueueNotice.QueueBuiltNothing ->
+        s.reminders.queueBuiltNothing(noConsent, noPhone, alreadyQueued)
 
     is QueueNotice.Failed -> message
 }

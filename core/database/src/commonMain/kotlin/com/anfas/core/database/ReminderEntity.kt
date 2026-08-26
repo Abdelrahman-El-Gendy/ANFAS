@@ -76,6 +76,18 @@ interface ReminderDao {
     @Query("SELECT * FROM reminders WHERE id = :id")
     fun observeById(id: String): Flow<ReminderEntity?>
 
+    /**
+     * Which of these ids already have a row, whatever their status.
+     *
+     * The scheduler derives a deterministic id per term, so this is how it stays idempotent: build
+     * the candidate ids, ask which already exist, insert only the rest. It deliberately ignores
+     * status — a reminder already SENT or FAILED for a term must not be recreated as QUEUED, which
+     * is exactly what re-running would otherwise do through `@Upsert` (it replaces every column by
+     * id, resetting attempts and clearing the failure).
+     */
+    @Query("SELECT id FROM reminders WHERE id IN (:ids)")
+    suspend fun existingIds(ids: List<String>): List<String>
+
     @Upsert
     suspend fun upsertAll(reminders: List<ReminderEntity>)
 

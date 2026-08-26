@@ -318,8 +318,12 @@ row, whereas the bar divides a phone equally between its items.
   ellipsised every label — a row of stubs whose only job was to say which is which. A fifth needs a
   real argument, and `NavigationPermissionTest` fails until someone makes it. The export's fourth is
   **Schedule** and so is ours: once `:feature:classes` was built it took that slot, and Reminders
-  moved to `WideOnly` — still one tap from the dashboard's "needs renewal" tile, which is where you
-  would look for it anyway.
+  moved to `WideOnly` — one tap from the dashboard's "needs renewal" tile, which is where you would
+  look for it anyway. **That tile only became the route in the WhatsApp Phase 1 work**; before then
+  the only phone entry point was the *failed reminders* tile, gated on `failedReminders > 0`, so the
+  queue was unreachable on a phone in exactly the state staff need it — nothing failed because
+  nothing had ever been queued. The failed tile keeps its gate: it is a shortcut into the failures,
+  useless when there are none.
 - **Cut the bar by asking which entries are *places*.** Three kinds of thing get conflated into
   tabs: destinations; **screen actions** — "scan a sheet" belongs to the directory, since intake is
   a task whose product is members, and `members-empty` says so; and **account-level things** —
@@ -529,6 +533,53 @@ Every fix here came from watching a device, and each earlier attempt looked righ
   public entry point. `AnfasDialogTest` pins it.
 - **Verify in landscape, not just portrait.** Portrait had enough slack to hide two of these three
   bugs. Landscape is where a 780px keyboard on a 1280px screen leaves no margin for error.
+
+## WhatsApp reminders — Phase 1 (enqueue)
+
+`design/whatsapp-send-system.md` stages this work; Phase 1 is the part needing no Meta account and
+no network. **Nothing sends.** What exists now is the piece that was missing: something that
+*creates* a reminder.
+
+- **`ReminderScheduler` is the only thing in the app that writes a reminder.** Before it,
+  `ReminderRepository.upsert` had no production caller and the queue screen could only ever be
+  empty. It is its own seam rather than a method on `ReminderRepository` because it needs members,
+  their current terms *and* existing reminders — a repository reaching into two other tables' DAOs
+  is how the data layer stops being separable. The two-DAO join follows
+  `OfflineFirstAnnouncementRepository.observeReach`.
+- **The reminder id is deterministic — `renewal:<termId>` — and that *is* the deduplication.**
+  Following `SubscriptionPlanSeed`'s stated pattern ("an upsert keyed by a stable id, so re-running
+  it cannot duplicate rows"). It also collapses two things the design doc treated separately: the
+  idempotency key and the cross-device content key are the same string, so neither needed a column.
+  Keyed on the **term**, not the day or the template: a member is reminded once per renewal however
+  often the queue is built, and keying on the template would let a language change produce a second
+  reminder for one term.
+- **The scheduler inserts, never upserts over.** `@Upsert` replaces every column by id, so
+  rebuilding would reset a `FAILED` row to `QUEUED` and discard its attempt count and failure
+  reason. `ReminderDao.existingIds` asks which ids are already present — any status — in one query,
+  and only the rest are written. Pinned by a test that fails loudly if this is ever reversed.
+- **Consent defaults to false and nothing may change that.** Meta requires opt-in, there is no API
+  to ask whether someone opted in, and a migration cannot infer it. The consequence is deliberate
+  and visible: the first build on a real gym's data queues nothing. `ScheduleOutcome` is therefore
+  *itemised* — "1 not opted in, 1 without a phone number, 1 already reminded" — because a bare zero
+  reads as a broken button. `MigrationFromV4Test` asserts the surviving member row is not opted in;
+  `defaultValue = "1"` would compile happily and silently opt in a gym's entire membership.
+- **`whatsapp_opt_in` is the first column ever added to an existing table in this schema.** Every
+  earlier hop added or dropped whole tables. Room *refuses to build* without
+  `@ColumnInfo(defaultValue = ...)` on a new NOT NULL column — "New NOT NULL column added with no
+  default value specified" — so KSP guards its presence; only the test guards its *value*.
+- **`preferredLanguage` is on the member, and is deliberately not the app's UI language.** That is a
+  device setting belonging to whichever receptionist is on shift and says nothing about what the
+  member reads. Null means "not asked" and falls back to Arabic.
+- **The scheduler never selects `PAYMENT_DUE` or `MARKETING_PROMO`**, for two different reasons.
+  Payment has no trigger — nothing models an unpaid balance. Marketing carries an opt-out
+  obligation that cannot be honoured without inbound message handling. Both stay in the enum
+  because the queue screen filters by them.
+- **"Build queue" is gated on `RETRY_REMINDERS`**, the existing "may change the reminder queue"
+  permission, and enforced in the component as well as hidden in the UI. Building is not sending;
+  Phase 2 introduces `SEND_REMINDERS` when there is an actual send to gate.
+- Known and not fixed: the queue's table truncates badly on a phone (`MEM…`, a status chip wrapping
+  to two lines). Pre-existing — the queue was always empty, so nobody had ever seen a row — and it
+  wants the card/table branch `IntakeReviewScreen` already has.
 
 ## Dates the user enters
 

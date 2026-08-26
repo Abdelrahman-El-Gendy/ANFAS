@@ -24,7 +24,7 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         EquipmentEntity::class,
         MaintenanceLogEntryEntity::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = true,
     // v2 adds the `members` table. Adding a table needs no hand-written logic, but the
     // migration is declared rather than falling back to a destructive recreate — the
@@ -66,6 +66,12 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         // v11 adds `equipment` and `maintenance_log`. The latter CASCADEs from the former, the
         // same shape as therapy_sessions from therapy_cases.
         AutoMigration(from = 10, to = 11),
+        // v12 adds two columns to `members` -- WhatsApp consent and the member's own reading
+        // language -- for the reminder scheduler. Every hop before this one added or dropped whole
+        // tables; this is the first added *column*, which is why `whatsapp_opt_in` carries
+        // `defaultValue = "0"` on the entity. Without it Room has nothing to write into the rows
+        // already on disk and refuses the auto-migration at schema-diff time.
+        AutoMigration(from = 11, to = 12),
     ],
 )
 @ConstructedBy(AnfasDatabaseConstructor::class)

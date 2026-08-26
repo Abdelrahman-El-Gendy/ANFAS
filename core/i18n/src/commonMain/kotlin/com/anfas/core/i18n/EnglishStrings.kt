@@ -88,6 +88,9 @@ object EnglishStrings : AppStrings {
         override val profileNotFoundMessage =
             "This member may have been deleted on another device."
         override val profileNoPhone = "No phone number"
+        override val profileWhatsAppConsent = "Send WhatsApp reminders"
+        override val profileWhatsAppConsentHint =
+            "Only members who have agreed are messaged. Ask before turning this on."
         override fun profileExpiresInDays(days: Int) =
             if (days == 1) "Expires tomorrow" else "Expires in $days days"
         override val profileExpired = "Expired"
@@ -173,6 +176,23 @@ object EnglishStrings : AppStrings {
         override val failureUnknownTitle = "Message not delivered"
         override val failureUnknownExplanation =
             "The provider did not say why. Check the technical details below."
+        override val buildQueue = "Build queue"
+        override val building = "Building…"
+        override fun queueBuilt(queued: Int) =
+            if (queued == 1) "Queued 1 reminder" else "Queued $queued reminders"
+
+        override fun queueBuiltNothing(noConsent: Int, noPhone: Int, alreadyQueued: Int): String {
+            val reasons = buildList {
+                if (noConsent > 0) add("$noConsent not opted in")
+                if (noPhone > 0) add("$noPhone without a phone number")
+                if (alreadyQueued > 0) add("$alreadyQueued already reminded")
+            }
+            return if (reasons.isEmpty()) {
+                "Nothing needs renewing yet"
+            } else {
+                "Nothing to queue: " + reasons.joinToString(", ")
+            }
+        }
     }
 
     override val renewal = object : AppStrings.Renewal {

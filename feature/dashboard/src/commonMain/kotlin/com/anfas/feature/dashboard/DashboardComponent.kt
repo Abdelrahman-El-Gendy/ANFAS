@@ -99,6 +99,13 @@ class DashboardComponent(
 
     fun onMemberSelected(id: MemberId) = onMemberClicked(id)
 
+    /**
+     * Both reminder tiles lead to the same screen -- the queue's own tabs are where you choose
+     * between what is queued and what failed. Kept as two named methods rather than one because
+     * the tiles differ in *when* they are offered, not in where they go.
+     */
+    fun onOpenRemindersClicked() = onOpenReminders()
+
     fun onFailedRemindersClicked() = onOpenReminders()
 
     private companion object {

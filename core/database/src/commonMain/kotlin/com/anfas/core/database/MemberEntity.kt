@@ -39,6 +39,26 @@ data class MemberEntity(
     val status: String,
     val lastCheckInAtEpochMs: Long?,
     val avatarUrl: String?,
+    /**
+     * WhatsApp consent.
+     *
+     * **`defaultValue` is required, and KSP enforces it** — this is the first column ever added to
+     * an existing table in this schema, so it is the first time it has mattered. Removing it fails
+     * the build outright: *"New NOT NULL column 'whatsapp_opt_in' added with no default value
+     * specified"*. Room has nothing to write into the rows already on disk. Note it is a SQL
+     * literal, so the string `"0"` and not `false`.
+     *
+     * Which value is *not* enforced by anything but `MigrationFromV4Test`, and that is what the
+     * assertion there is for: `"1"` would compile happily and silently opt in every member a gym
+     * already has. Consent is asked for, never inferred.
+     */
+    @androidx.room3.ColumnInfo(name = "whatsapp_opt_in", defaultValue = "0")
+    val whatsappOptIn: Boolean,
+    /**
+     * Holds [com.anfas.core.model.TemplateLanguage] by name. Nullable — "not asked" is a real
+     * state, distinct from either language — so no default is needed.
+     */
+    @androidx.room3.ColumnInfo(name = "preferred_language") val preferredLanguage: String?,
 )
 
 @Dao

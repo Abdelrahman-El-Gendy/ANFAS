@@ -1669,5 +1669,41 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-26T15:30:00Z"
+  },
+  {
+    "id": "bug-093",
+    "timestamp": "2026-08-26T19:10:00Z",
+    "error_message": "The reminder queue was unreachable on a phone whenever it was empty",
+    "file": "feature/dashboard/src/commonMain/kotlin/com/anfas/feature/dashboard/DashboardScreen.kt",
+    "root_cause": "Reminders are Placement.WideOnly, so on a phone the queue is only reachable from a parent screen. That parent was the dashboard's failed-reminders tile, whose onClick was gated on `failedReminders > 0` -- so with nothing failed (which is the normal state, and always the state before anything has been queued) there was no route at all. CLAUDE.md already claimed the 'needs renewal' tile was the route; it was not.",
+    "fix": "The needing-renewal tile is now unconditionally clickable and opens the queue; the failed tile keeps its gate as a shortcut into failures. Added DashboardComponent.onOpenRemindersClicked. Found by trying to reach the new Build queue button on a device.",
+    "tags": [
+      "navigation",
+      "dashboard",
+      "reachability",
+      "reminders",
+      "stale-doc"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T19:10:00Z"
+  },
+  {
+    "id": "bug-094",
+    "timestamp": "2026-08-26T19:10:00Z",
+    "error_message": "New ReminderQueueComponent tests failed: the scheduler was never called and no notice appeared",
+    "file": "feature/subscriptions/src/commonTest/kotlin/com/anfas/feature/subscriptions/ReminderQueueComponentTest.kt",
+    "root_cause": "onBuildQueue guards on state.value.mayBuildQueue, but state is stateIn(WhileSubscribed) -- with no collector, state.value is the initialValue where the permission is false, so the guard refused. The tests read state.value instead of subscribing.",
+    "fix": "Subscribe with Turbine and drain to a settled frame before acting, matching the suite's existing pattern; added an awaitSettled helper. Note the guard fails safe (refuses rather than permits), so this was a test defect, not a production one.",
+    "tags": [
+      "compose",
+      "stateIn",
+      "turbine",
+      "test-defect",
+      "coroutines"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T19:10:00Z"
   }
 ]

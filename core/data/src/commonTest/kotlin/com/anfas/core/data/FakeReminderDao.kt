@@ -47,6 +47,11 @@ internal class FakeReminderDao(initial: List<ReminderEntity> = emptyList()) : Re
         list.firstOrNull { it.id == id }
     }
 
+    override suspend fun existingIds(ids: List<String>): List<String> {
+        failure?.let { throw it }
+        return rows.value.map { it.id }.filter { it in ids }
+    }
+
     override suspend fun upsertAll(reminders: List<ReminderEntity>) {
         failure?.let { throw it }
         rows.value = (rows.value.associateBy { it.id } + reminders.associateBy { it.id })

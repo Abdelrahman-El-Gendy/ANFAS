@@ -130,6 +130,14 @@ private fun Tiles(state: DashboardState, component: DashboardComponent, s: AppSt
             // Amber only when there is something to act on. A permanently-coloured tile stops
             // being read after a week.
             tone = if (state.needingRenewal > 0) ChipTone.Critical else ChipTone.Positive,
+            // Unconditionally clickable, and the phone's only route to the reminder queue.
+            //
+            // Reminders are `Placement.WideOnly` -- rail on desktop, reached from a parent screen
+            // on a phone -- and this is that parent. It used to be the failed-reminders tile below,
+            // gated on `failedReminders > 0`, which made the queue unreachable on a phone in
+            // exactly the state where staff need it: nothing failed *because* nothing has been
+            // queued yet. That also matches what CLAUDE.md already claimed the route was.
+            onClick = component::onOpenRemindersClicked,
         )
         Tile(
             label = s.dashboard.failedReminders,
@@ -140,6 +148,8 @@ private fun Tiles(state: DashboardState, component: DashboardComponent, s: AppSt
                 s.dashboard.failedRemindersHint
             },
             tone = if (state.failedReminders > 0) ChipTone.Critical else ChipTone.Positive,
+            // Still gated: this one is a shortcut *into the failures*, so it leads nowhere useful
+            // when there are none. The renewal tile above is the unconditional route.
             onClick = component::onFailedRemindersClicked.takeIf { state.failedReminders > 0 },
         )
     }

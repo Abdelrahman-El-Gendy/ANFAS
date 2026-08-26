@@ -121,6 +121,10 @@ interface AppStrings {
         val profileNotFoundMessage: String
         val profileNoPhone: String
 
+        /** The WhatsApp consent toggle on the profile, and the line under it. */
+        val profileWhatsAppConsent: String
+        val profileWhatsAppConsentHint: String
+
         /** Status pill above the membership card. */
         fun profileExpiresInDays(days: Int): String
         val profileExpired: String
@@ -194,6 +198,12 @@ interface AppStrings {
         val failureTemplatePausedExplanation: String
         val failureUnknownTitle: String
         val failureUnknownExplanation: String
+
+        /** The Build queue action, and the notices reporting what one build did. */
+        val buildQueue: String
+        val building: String
+        fun queueBuilt(queued: Int): String
+        fun queueBuiltNothing(noConsent: Int, noPhone: Int, alreadyQueued: Int): String
     }
 
     interface Renewal {

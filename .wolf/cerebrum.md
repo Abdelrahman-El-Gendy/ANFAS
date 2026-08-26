@@ -819,3 +819,29 @@
   failure mode where an unknown input is ignored.
 - What still cannot be verified locally is the runner/emulator combination itself. Same class of risk
   as the macos-15 → macos-26 discovery: the first real CI run is the test.
+
+## Key Learnings — 2026-08-26 (WhatsApp Phase 1)
+
+- **A deterministic id can replace a dedupe query entirely.** `SubscriptionPlanSeed` already stated
+  the pattern ("an upsert keyed by a stable id, so re-running it cannot duplicate rows"). Applying it
+  to reminders (`renewal:<termId>`) removed two proposed columns — an idempotency key and a content
+  key — because the id is both.
+- **But `@Upsert` replaces every column by id**, so a scheduler must NOT upsert over existing rows:
+  it would reset a FAILED row to QUEUED and wipe its attempts. Add a `SELECT id ... WHERE id IN (:ids)`
+  query and insert only the missing ones. DAO-only change, no migration.
+- **Room refuses to build when a new NOT NULL column has no `defaultValue`** — "New NOT NULL column
+  added with no default value specified". So KSP guards presence; only a test can guard the *value*.
+  This repo's first added column (every earlier migration added/dropped whole tables).
+- **`stateIn(WhileSubscribed)` means `state.value` is the initial value until something collects.**
+  A component guard reading `state.value.mayX` therefore refuses until subscribed — fail-safe, but
+  tests must subscribe (Turbine) before acting, or they test the initial value instead.
+- **Seeding an Android app's database from the host:** the schema lives in the `-wal` until
+  checkpointed, so pulling only `anfas.db` gives a 4KB empty file. Pull `.db`, `-wal` and `-shm`
+  together, edit with python sqlite3, `PRAGMA wal_checkpoint(TRUNCATE)`, then push back and delete the
+  device's `-wal`/`-shm`. No `sqlite3` binary exists on the emulator.
+- **`uiautomator dump` beats eyeballing screenshots for finding tap targets** in Compose: clickable
+  nodes appear with real `bounds`, which both locates them and proves clickability. It is how I
+  confirmed the renewal tile had actually become clickable.
+- Found while verifying: the reminder queue's only phone entry point was the *failed reminders* tile,
+  gated on `failedReminders > 0` — so it was unreachable exactly when empty. CLAUDE.md had already
+  claimed the renewal tile was the route; now it is.

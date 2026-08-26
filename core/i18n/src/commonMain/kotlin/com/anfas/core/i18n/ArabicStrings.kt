@@ -120,6 +120,9 @@ object ArabicStrings : AppStrings {
         override val profileNotFoundTitle = "العضو غير موجود"
         override val profileNotFoundMessage = "قد يكون هذا العضو حُذف من جهاز آخر."
         override val profileNoPhone = "لا يوجد رقم هاتف"
+        override val profileWhatsAppConsent = "إرسال تذكيرات واتساب"
+        override val profileWhatsAppConsentHint =
+            "لا نرسل إلا للأعضاء الذين وافقوا. اسأل العضو قبل التشغيل."
         override fun profileExpiresInDays(days: Int) = when (arabicPlural(days)) {
             PluralCategory.ZERO -> "انتهت"
             PluralCategory.ONE -> "تنتهي غدًا"
@@ -226,6 +229,29 @@ object ArabicStrings : AppStrings {
         override val failureUnknownTitle = "لم يتم تسليم الرسالة"
         override val failureUnknownExplanation =
             "لم يوضّح المزوّد السبب. راجع التفاصيل الفنية أدناه."
+        override val buildQueue = "تجهيز القائمة"
+        override val building = "جارٍ التجهيز…"
+
+        // CLDR Arabic plurals: one / two / few (3-10) / many (11-99) / other.
+        override fun queueBuilt(queued: Int) = when {
+            queued == 1 -> "تم إضافة تذكير واحد"
+            queued == 2 -> "تم إضافة تذكيرين"
+            queued % 100 in 3..10 -> "تم إضافة $queued تذكيرات"
+            else -> "تم إضافة $queued تذكيرًا"
+        }
+
+        override fun queueBuiltNothing(noConsent: Int, noPhone: Int, alreadyQueued: Int): String {
+            val reasons = buildList {
+                if (noConsent > 0) add("$noConsent لم يوافقوا")
+                if (noPhone > 0) add("$noPhone بدون رقم هاتف")
+                if (alreadyQueued > 0) add("$alreadyQueued تم تذكيرهم بالفعل")
+            }
+            return if (reasons.isEmpty()) {
+                "لا توجد عضويات تحتاج التجديد"
+            } else {
+                "لا شيء لإضافته: " + reasons.joinToString("، ")
+            }
+        }
     }
 
     override val renewal = object : AppStrings.Renewal {

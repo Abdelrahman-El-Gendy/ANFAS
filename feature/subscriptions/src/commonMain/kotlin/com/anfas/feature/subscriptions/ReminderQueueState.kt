@@ -44,6 +44,14 @@ data class ReminderQueueState(
     val notice: QueueNotice? = null,
     /** Whether this session holds `Permission.RETRY_REMINDERS`. */
     val mayRetry: Boolean = false,
+    /**
+     * Whether this session may rebuild the queue. Backed by `RETRY_REMINDERS` -- the existing
+     * "may change the reminder queue" permission -- rather than a new one: building is not sending,
+     * and Phase 2 introduces `SEND_REMINDERS` when there is an actual send to gate.
+     */
+    val mayBuildQueue: Boolean = false,
+    /** True while a build is in flight, so the action cannot be pressed twice. */
+    val isBuilding: Boolean = false,
 ) {
     val visibleReminders: List<Reminder>
         get() = (content as? ReminderQueueContent.Loaded)?.reminders ?: emptyList()
@@ -67,5 +75,11 @@ sealed interface QueueNotice {
     /** [requeued] of [requested] actually went; the rest could not be retried. */
     data class Requeued(val requeued: Int, val requested: Int) : QueueNotice
     data object NothingRetryable : QueueNotice
+
+    /** One queue build, itemised so "nothing happened" can explain itself. */
+    data class QueueBuilt(val queued: Int) : QueueNotice
+
+    data class QueueBuiltNothing(val noConsent: Int, val noPhone: Int, val alreadyQueued: Int) :
+        QueueNotice
     data class Failed(val message: String) : QueueNotice
 }

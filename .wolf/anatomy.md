@@ -1,11 +1,15 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T13:11:24.887Z
-> Files: 574 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T15:25:21.832Z
+> Files: 581 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/
+
+- `whatsapp-send-system.html` — WhatsApp Send System (~9146 tok)
 
 ## ../../.claude/plans/
 
-- `plan-what-is-remaining-abundant-elephant.md` — ANFAS — what is built, and what remains (~3342 tok)
+- `plan-what-is-remaining-abundant-elephant.md` — WhatsApp Phase 1 — make the reminder queue real (~1456 tok)
 
 ## ../../.claude/projects/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/memory/
 
@@ -586,7 +590,7 @@
 ## core/data/src/commonMain/kotlin/com/anfas/core/data/
 
 - `AnnouncementRepository.kt` — interface + AnnouncementDetail, SaveAnnouncementOutcome(Saved/Invalid), AnnouncementProblem (~600 tok)
-- `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~1249 tok)
+- `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~1380 tok)
 - `EquipmentRepository.kt` — The gym floor's equipment inventory and its maintenance history. (~850 tok)
 - `IntakeMappers.kt` — Storage <-> domain for OCR intake. (~889 tok)
 - `IntakeRepository.kt` — Which cell of a row an edit targets. (~644 tok)
@@ -597,6 +601,7 @@
 - `OfflineFirstEquipmentRepository.kt` — OfflineFirstEquipmentRepository: observeAll, observeDetail, createEquipment, logMaintenance (~1637 tok)
 - `OfflineFirstIntakeRepository.kt` — Room-backed OCR intake. (~1722 tok)
 - `OfflineFirstMemberRepository.kt` — Room-backed. The error boundary: storage failures become AppError.Storage; CancellationException is rethrown. No network path yet (~560 tok)
+- `ReminderScheduler.kt` — What one queue build did, itemised. (~1999 tok)
 
 ## core/data/src/commonTest/kotlin/com/anfas/core/data/
 
@@ -607,6 +612,7 @@
 - `KoinOnCloseContractTest.kt` — Pins the Koin contract that `dataModule` relies on to close the Room connection. (~690 tok)
 - `OfflineFirstIntakeRepositoryTest.kt` — Only for the create-batch test, which needs a domain row to hand in. (~2806 tok)
 - `OfflineFirstMemberRepositoryTest.kt` — 6 tests: ordering, number search, bad-status degradation, error boundary, round trip, delete (~900 tok)
+- `ReminderSchedulerTest.kt` — The scheduler is the only thing in the app that creates a reminder, so every rule it applies is (~3111 tok)
 
 ## core/database — added in v3
 
@@ -638,8 +644,9 @@
 - `DatabaseBuilderFactory.kt` — Resolves the platform database location and hands back a builder. Actuals differ in what (~250 tok)
 - `EquipmentEntity.kt` — A physical asset on the gym floor. No foreign key anywhere in this table — it names no staff, (~787 tok)
 - `IntakeEntity.kt` — A photographed sign-up sheet awaiting review. (~1198 tok)
-- `MemberEntity.kt` — Storage shape for a member. Kept flat and primitive on purpose: no domain enums or (~829 tok)
+- `MemberEntity.kt` — Storage shape for a member. Kept flat and primitive on purpose: no domain enums or (~1091 tok)
 - `PlaceholderEntity.kt` — ONE placeholder entity, present only to prove the KSP wiring generates code on every (~178 tok)
+- `ReminderEntity.kt` — A queued/sent/failed WhatsApp reminder. (~1099 tok)
 
 ## core/database/src/iosMain/kotlin/com/anfas/core/database/
 
@@ -726,7 +733,7 @@
 - `Ids.kt` — Typed identifiers. One value class per aggregate root, so a MemberId can never be passed (~271 tok)
 - `Intake.kt` — A photographed sign-up sheet and everything OCR read off it. (~1387 tok)
 - `IntakeValidator.kt` — Decides what is wrong with each row of a batch — the logic behind the export's (~1529 tok)
-- `Member.kt` — A gym member. (~427 tok)
+- `Member.kt` — A gym member. (~717 tok)
 
 ## core/model/src/commonMain/kotlin/com/anfas/core/model/ (subscriptions)
 
@@ -749,6 +756,10 @@
 ## core/network/src/commonMain/kotlin/com/anfas/core/network/
 
 - `HttpClientFactory.kt` — The engine is supplied per platform (OkHttp on Android, Darwin on iOS, CIO on desktop), (~228 tok)
+
+## design/
+
+- `whatsapp-send-system.md` — The WhatsApp send system — design (~4591 tok)
 
 ## design/stitch/
 
@@ -803,6 +814,10 @@
 
 - `ClassesModule.kt` — `ClassesComponentFactory` + Koin module (~200 tok)
 
+## feature/dashboard/src/commonMain/kotlin/com/anfas/feature/dashboard/
+
+- `DashboardScreen.kt` — The reception dashboard: what needs doing at the desk right now. (~2935 tok)
+
 ## feature/equipment/
 
 - `build.gradle.kts` — Gradle Kotlin build configuration (~55 tok)
@@ -854,6 +869,7 @@
 
 - `LastCheckIn.kt` — Relative check-in label; `now`/`zone` are parameters so tests are timezone-independent (~480 tok)
 - `MemberProfileComponentFactory.kt` — now also injects `AuthRepository` (~350 tok)
+- `MemberProfileState.kt` — The member profile screen. (~492 tok)
 - `MembershipStatusUi.kt` — MembershipStatus -> ChipTone + label. Lives here because designsystem must not know the domain (~230 tok)
 - `MembersListComponent.kt` — Decompose component. Debounced search via flatMapLatest; navigation is callbacks, not routing (~700 tok)
 - `MembersListComponentFactory.kt` — Lets :composeApp build the component without seeing its dependencies (~280 tok)
