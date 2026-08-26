@@ -538,6 +538,34 @@ as screens — none belongs to a feature, because any screen can be interrupted 
   wider. `desktopApp/main.kt` now opens at 1280x840 and sets an AWT `minimumSize` of 1060x680, past
   the breakpoint rather than exactly on it. A feature that vanishes when a window is dragged
   narrower is a bug, not a responsive layout.
+- **The desktop window remembers where it was, and the restore is guarded because its bug is
+  unrecoverable.** A window restored onto a monitor that is no longer attached cannot be found and
+  dragged back — the app appears to launch and do nothing — so `resolveWindowGeometry` decides
+  before the window is ever shown. Its rules, each pinned by a test in `WindowGeometryTest`: a
+  saved size below the resize floor is raised to it (so restoring can never reintroduce the
+  unreachable-`DesktopOnly`-features bug); the window must overlap *some* screen at all, else
+  recentre; the size is capped to the screen it lands on but never below the floor; the position is
+  then clamped so the title bar stays grabbable. **Negative coordinates are legitimate and
+  preserved** — a monitor arranged to the left of the primary has negative x, and rejecting that
+  would refuse to restore for everyone with that setup. The overlap gate is deliberately weaker
+  than the position clamp: gating on the same threshold made the clamp dead code and recentred a
+  window someone had parked off an edge on purpose.
+- **Geometry is read from the AWT frame, not from `WindowState`.** `WindowState.position` stays
+  `WindowPosition.PlatformDefault` when the platform is what placed the window — exactly the
+  first-run case — so the first version saved nothing at all. Found by running the app and reading
+  the preferences node, not by reasoning. Reading `window.x/y/width/height` also puts the saved
+  values in the same logical user-space units as `GraphicsConfiguration.getBounds()`, so the
+  comparison against screen rectangles has no unit mismatch.
+- **Persisted continuously (debounced) as well as on close**, because Cmd+Q is how most people quit
+  a Mac app and whether that routes through the window's close request is Compose/AWT's business,
+  not something to bet the feature on. Storage is the **same `java.util.prefs` node
+  (`com/anfas/app`) that `:core:common` backs `Settings` with**, keys namespaced `window.*` — so no
+  new dependency and no second storage mechanism. `java.prefs` is in the jlink module list
+  (`Contents/runtime/Contents/Home/release`), verified in a packaged build, because prefs failing
+  only inside the app image is exactly the kind of bug this would otherwise ship.
+- **Reading that plist back with `defaults` or `plistlib` will lie to you** — cfprefsd serves a
+  cached copy, so the keys look absent when they are not. Read them from a fresh JVM
+  (`Preferences.userRoot().node("com/anfas/app").keys()`) instead.
 - **jpackage cannot cross-build**, so `targetFormats` is derived from `OperatingSystem.current()`.
   Declaring Dmg+Msi+Deb together means every host fails on two of three.
 - The Room database is excluded from cloud backup and device transfer: the whole domain is PII.

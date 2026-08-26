@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T08:45:24.963Z
-> Files: 571 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T09:20:26.194Z
+> Files: 572 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~12105 tok)
+- `CLAUDE.md` — OpenWolf (~12740 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -385,10 +385,6 @@
 
 ## androidApp/src/androidTest/kotlin/com/anfas/app/
 
-- `R8SmokeTest.kt` — Instrumented smoke tests against the R8-minified `stage` APK:
-  theMinifiedAppStarts, theMinifiedAppSurvivesSaveAndRestore. Drives the app only through
-  ActivityScenario + org.junit.Assert -- any library API a test calls is absent from a
-  shrunk build. (~1467 tok)
 
 ## androidApp/src/main/
 
@@ -768,10 +764,17 @@
 
 ## desktopApp/src/main/kotlin/com/anfas/app/
 
-- `main.kt` — Thin launcher. All shared behaviour lives in :composeApp — do not add logic here. (~966 tok)
+- `main.kt` — Thin launcher. All shared *app* behaviour lives in :composeApp — do not add feature logic here. (~2678 tok)
+- `WindowGeometry.kt` — Desktop window position/size persistence. WindowGeometry,
+  resolveWindowGeometry (clamps a restore against the screens that exist NOW),
+  read/writeWindowGeometry (java.util.prefs, same node as Settings), availableScreenBounds.
+  (~2132 tok)
 
 ## desktopApp/src/test/kotlin/com/anfas/app/
 
+- `WindowGeometryTest.kt` — 19 tests over resolveWindowGeometry and the preferences round-trip:
+  detached monitor, negative coords on a left-hand monitor, title bar above the screen, the
+  resize floor, screen-smaller-than-floor, edge nudging. (~2114 tok)
 - `WindowSizeTest.kt` — The desktop window must open — and must stay — above the layout breakpoint. (~782 tok)
 
 ## feature/announcements/

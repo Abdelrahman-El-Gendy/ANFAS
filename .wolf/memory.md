@@ -449,3 +449,20 @@ skiko dialog actual with iOS, which is verified.
 | 11:45 | Edited CLAUDE.md | 1→3 lines | ~62 |
 | 12:05 | Instrumented R8 smoke tests: rewrote to app-entry-points only (ActivityScenario launch/recreate, org.junit.Assert) after 5 tests failed on shrunk-away library APIs | androidApp/src/androidTest/.../R8SmokeTest.kt, androidApp/build.gradle.kts, proguard-rules-test.pro, proguard-rules-stage.pro | 2/2 green on Pixel 9 Pro against the minified stage APK; falsified by injecting a startup crash; check + both iOS targets + assembleRelease green | ~9000 |
 | 11:47 | Session end: 10 writes across 5 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 0 reads | ~4867 tok |
+| 11:48 | Session end: 10 writes across 5 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 0 reads | ~4867 tok |
+| 11:55 | Created desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt | — | ~1947 |
+| 11:55 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | added optional chaining | ~534 |
+| 11:55 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | added 1 condition(s) | ~257 |
+| 11:56 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | modified main() | ~136 |
+| 11:56 | Created desktopApp/src/test/kotlin/com/anfas/app/WindowGeometryTest.kt | — | ~1999 |
+| 11:57 | Edited desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt | 7→10 lines | ~204 |
+| 11:57 | Edited desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt | 6→9 lines | ~199 |
+| 11:57 | Edited desktopApp/src/test/kotlin/com/anfas/app/WindowGeometryTest.kt | 10→15 lines | ~232 |
+| 12:00 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | 5→4 lines | ~77 |
+| 12:00 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | modified LaunchedEffect() | ~370 |
+| 12:03 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | 2→7 lines | ~101 |
+| 12:03 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | 2→2 lines | ~31 |
+| 12:04 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | added 1 condition(s) | ~805 |
+| 12:20 | Edited CLAUDE.md | expanded (+28 lines) | ~723 |
+| 12:30 | Desktop window position/size persistence with screen-bounds clamping; 19 unit tests + end-to-end verification against the packaged app | desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt (new), main.kt, desktopApp/src/test/.../WindowGeometryTest.kt (new), CLAUDE.md | seed→launch→exact restore (150,80 1100x700); detached-monitor seed recentred; 800x600 raised to the 1060x680 floor; falsified by neutering the resolver (8/19 red, exactly the resolver branches); check + iOS compile green | ~14000 |
+| 12:22 | Session end: 24 writes across 8 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 4 reads | ~13023 tok |

@@ -1426,5 +1426,64 @@
     ],
     "occurrences": 1,
     "last_seen": "2026-08-26T12:05:00Z"
+  },
+  {
+    "id": "bug-081",
+    "timestamp": "2026-08-26T12:30:00Z",
+    "error_message": "Desktop window geometry was never persisted: the com/anfas/app preferences node stayed empty after running the app",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/main.kt",
+    "root_cause": "The save path read WindowState.position, which stays WindowPosition.PlatformDefault when the platform is what placed the window -- the first-run case. toGeometry() therefore returned null for every emission and filterNotNull dropped them all.",
+    "fix": "Read geometry from the AWT frame (window.x/y/width/height) inside FrameWindowScope, driven by a ComponentAdapter for moves/resizes plus one direct read for the initial placement (which fires no event). Also removes the dp-vs-px unit mismatch, since AWT bounds and GraphicsConfiguration bounds share one space.",
+    "tags": [
+      "compose-desktop",
+      "window-state",
+      "java.util.prefs",
+      "desktopApp",
+      "persistence"
+    ],
+    "related_bugs": [
+      "bug-082"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:30:00Z"
+  },
+  {
+    "id": "bug-082",
+    "timestamp": "2026-08-26T12:30:00Z",
+    "error_message": "Misdiagnosed 'the preferences write is not happening' -- defaults read and plistlib both showed no window.* keys while they were in fact written",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt",
+    "root_cause": "macOS cfprefsd serves a cached copy of com.apple.java.util.prefs.plist, so keys written seconds earlier read as absent from both `defaults read` and a direct plistlib load of the file.",
+    "fix": "Verify java.util.prefs from a fresh JVM instead: Preferences.userRoot().node(\"com/anfas/app\").keys(). That showed all five window.* keys present.",
+    "tags": [
+      "macos",
+      "java.util.prefs",
+      "cfprefsd",
+      "diagnosis",
+      "tooling"
+    ],
+    "related_bugs": [
+      "bug-081"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:30:00Z"
+  },
+  {
+    "id": "bug-083",
+    "timestamp": "2026-08-26T12:30:00Z",
+    "error_message": "WindowGeometryTest > a window hanging off the right edge keeps a grabbable strip on screen FAILED",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt",
+    "root_cause": "The overlap gate and the position clamp used the same constant (MIN_VISIBLE_WIDTH), so anything with less than that visible was rejected before the clamp could run -- making the clamp dead code and recentring a window a user had deliberately parked off an edge.",
+    "fix": "Weakened the gate to 'any overlap at all' (the detached-monitor case) and left the clamp to guarantee the grabbable minimum. A window parked off an edge is now nudged back into reach rather than recentred.",
+    "tags": [
+      "desktopApp",
+      "window-geometry",
+      "dead-code",
+      "test-caught"
+    ],
+    "related_bugs": [
+      "bug-081"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:30:00Z"
   }
 ]

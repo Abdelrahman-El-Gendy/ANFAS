@@ -701,3 +701,38 @@
   dependencies ship in the app APK only, so stdlib is never the test APK's program input; the keep
   rule has to be on the app side.
 - Emulator installs need `-Pandroid.injected.build.abi=arm64-v8a` on this machine (93% full /data).
+
+## Key Learnings — 2026-08-26 (desktop window geometry)
+
+- **`WindowState.position` stays `WindowPosition.PlatformDefault` when the platform placed the
+  window.** So a `snapshotFlow { windowState.toGeometry() }` that requires a specified position
+  emits nothing on first run and saves nothing at all. Read `window.x/y/width/height` off the AWT
+  frame instead (inside `FrameWindowScope`), via a `ComponentAdapter` for moves/resizes plus one
+  direct read for the initial placement, which fires no event.
+- **AWT `window.*` and `GraphicsConfiguration.getBounds()` are in the same logical user-space
+  units**, so reading geometry from the frame removes the dp-vs-px question entirely. On this
+  machine the screen is 1352x878 logical at scaleX=2.0.
+- **`defaults read com.apple.java.util.prefs` and plistlib both serve a stale cfprefsd cache** — a
+  key written seconds ago reads as absent. Verify `java.util.prefs` from a fresh JVM
+  (`Preferences.userRoot().node("...").keys()`). This cost a wrong "the write isn't happening"
+  diagnosis.
+- **macOS pulls a window fully on-screen itself** if the restored bounds overhang. A restore test
+  seeded with x+width > screen width will come back repositioned — that is the OS, not a bug in the
+  resolver. Seed a geometry that actually fits when testing exact round-trip.
+- **An overlap gate and a position clamp must not use the same threshold**, or the clamp is
+  unreachable dead code and every edge-parked window gets recentred. Gate on "any overlap at all";
+  clamp to the grabbable minimum. A test caught this, not review.
+- **The packaged app is where `java.prefs` can be missing.** Check the jlink module list in
+  `ANFAS.app/Contents/runtime/Contents/Home/release` — the `bin/java` binary is not in the app
+  image, so `--list-modules` cannot be run against it.
+- Window geometry, logging, crash handling, the EDT dance and shutdown ordering are all legitimate
+  `desktopApp` content — they have no Android/iOS counterpart. "The launcher holds no logic" means
+  no *feature* logic.
+
+## Do-Not-Repeat — 2026-08-26
+
+- **Do not take whole-screen `screencapture` shots to verify a desktop window.** Without
+  Accessibility permission the ANFAS window cannot be raised, so the capture shows whichever of the
+  user's apps has focus — this session captured their Outlook calendar, work timesheet and browser
+  tabs before I stopped. Verify desktop geometry numerically (seed prefs, launch, read back from a
+  fresh JVM) and say plainly that a content screenshot was not possible.
