@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T11:39:03.955Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T13:11:24.887Z
 > Files: 574 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~14149 tok)
+- `CLAUDE.md` — OpenWolf (~14294 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -44,7 +44,7 @@
 
 ## .github/workflows/
 
-- `ci.yml` — CI: CI (~1195 tok)
+- `ci.yml` — ` used to be here and now matches nothing -- branches are named (~1974 tok)
 
 ## .gradle/
 

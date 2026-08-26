@@ -1652,5 +1652,22 @@
     ],
     "occurrences": 3,
     "last_seen": "2026-08-26T14:45:00Z"
+  },
+  {
+    "id": "bug-092",
+    "timestamp": "2026-08-26T15:30:00Z",
+    "error_message": "CI's push trigger listed hardening/** , which matches no branch since the per-feature naming convention (feat/fix/test) was adopted",
+    "file": ".github/workflows/ci.yml",
+    "root_cause": "The pattern was written when all work happened on hardening/* branches. After switching to one descriptively-named branch per feature it silently matched nothing, so pushes to working branches ran no CI at all.",
+    "fix": "Narrowed push to `main` only, with a comment explaining why the feat/fix/test patterns are deliberately NOT added (they would double-run the matrix for any branch with an open PR, and the PR run is what gates a merge).",
+    "tags": [
+      "ci",
+      "github-actions",
+      "stale-config",
+      "branch-naming"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T15:30:00Z"
   }
 ]

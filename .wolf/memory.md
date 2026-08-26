@@ -490,3 +490,8 @@ skiko dialog actual with iOS, which is verified.
 | 14:39 | Edited CLAUDE.md | expanded (+21 lines) | ~542 |
 | 14:45 | Session validity: a stored session is now re-derived from its staff row (absent/disabled/no-role => signed out) and roles come from the row, closing a stale-privilege hole | core/data/.../OfflineFirstAuthRepository.kt, core/data/src/commonTest/.../AuthRepositoryTest.kt, CLAUDE.md | 5 tests, 4 fail when reverted; reproduced on emulator (prefs session + no DB): before = dashboard, after = 'Set up this device'; check + both iOS targets green | ~26000 |
 | 14:42 | Session end: 42 writes across 16 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 33 reads | ~23894 tok |
+| 14:44 | Session end: 42 writes across 16 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 33 reads | ~23894 tok |
+| 16:07 | Edited .github/workflows/ci.yml | 6→9 lines | ~119 |
+| 16:11 | Edited CLAUDE.md | expanded (+6 lines) | ~217 |
+| 15:30 | Added the android-instrumented CI job (emulator + R8 smoke tests) and fixed the stale hardening/** push trigger | .github/workflows/ci.yml, CLAUDE.md | YAML parses; all 6 action inputs verified against the action's own action.yml; the job's exact gradle command (no ABI flag) run locally: 2/2 green in 2m17s. Runner/emulator combination itself unverifiable locally - first real CI run is the test. | ~11000 |
+| 16:14 | Session end: 44 writes across 17 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 34 reads | ~25440 tok |

@@ -2,10 +2,13 @@ name: CI
 
 on:
   pull_request:
+  # `main` only. `hardening/**` used to be here and now matches nothing -- branches are named
+  # `feat/**`, `fix/**` and `test/**` per feature. Adding those patterns instead would run the
+  # whole matrix twice for any branch that also has a PR open, and the PR run is the one that
+  # gates a merge; a branch with no PR gets its coverage when one is opened.
   push:
     branches:
       - main
-      - "hardening/**"
 
 # A second push to the same PR/branch supersedes the last run rather than queuing behind it.
 concurrency:
@@ -101,3 +104,50 @@ jobs:
             -sdk iphonesimulator \
             -destination "generic/platform=iOS Simulator" \
             CODE_SIGNING_ALLOWED=NO
+
+  android-instrumented:
+    name: R8 smoke tests on an emulator (Android)
+    needs: wrapper
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+
+      # The emulator is unusably slow without hardware acceleration. GitHub's ubuntu runners do
+      # expose /dev/kvm, but not to the runner user, so this rule is required rather than an
+      # optimisation -- without it the job either crawls or times out.
+      - name: Give the runner access to KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # google_atd: an Automated Test Device image, stripped of the apps and services a CI run
+      # will never touch, so it boots far faster than a full one. The Google APIs variant rather
+      # than aosp_atd so nothing rests on my reading of whether ML Kit needs Play Services --
+      # `com.google.mlkit:text-recognition` is the bundled model and should not, but the app
+      # initialises ML Kit through Firebase's ComponentDiscovery at startup, which is precisely
+      # the path these tests exist to check, so this is the wrong place to be economical.
+      #
+      # API 35, not 36 or the 37 this was developed against: what is under test is what R8 left
+      # behind, which is identical on every level above minSdk 24, so the well-trodden image is
+      # worth more here than the newest one.
+      #
+      # Note there is deliberately NO `-Pandroid.injected.build.abi` flag. Locally that is set to
+      # arm64-v8a to fit a nearly-full emulator disk; passing it here would strip the x86_64
+      # libraries this runner actually needs, and the failure would look like a shrinking bug.
+      - name: connectedStageAndroidTest
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_atd
+          arch: x86_64
+          emulator-options: >-
+            -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -no-snapshot
+          disable-animations: true
+          script: ./gradlew :androidApp:connectedStageAndroidTest

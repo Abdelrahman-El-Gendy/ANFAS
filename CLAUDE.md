@@ -674,21 +674,32 @@ output was previously verified only by installing an APK by hand and reading log
   shows `kotlin.LazyKt__LazyKt -> R8$$REMOVED$$CLASS$$766` while `stage`'s keeps it.
 - **Emulator storage, not correctness, is the usual failure.** Pass
   `-Pandroid.injected.build.abi=arm64-v8a` so one ABI is installed instead of all of them.
-- Not in CI yet: `connectedAndroidTest` needs an emulator on the runner. The `jvm` job already
-  builds `:androidApp:assembleStage`, so the minified APK is proven to *build* on every PR; proving
-  it *runs* is still a local step.
+- **In CI as the `android-instrumented` job**, on ubuntu-latest via
+  `reactivecircus/android-emulator-runner`. Three things about it are not incidental: the KVM udev
+  rule is **required**, not an optimisation (GitHub's runners expose `/dev/kvm` but not to the
+  runner user, and the emulator without acceleration times out); the image is `google_atd` on
+  **API 35**, an Automated Test Device stripped of what a CI run never touches, with Google APIs so
+  nothing rests on whether ML Kit's bundled model needs Play Services; and there is deliberately
+  **no `-Pandroid.injected.build.abi` flag**, because the local `arm64-v8a` value exists only to fit
+  a nearly-full emulator disk and passing it on an x86_64 runner would strip the libraries the
+  runner needs — a failure that would read as a shrinking bug.
 
 ## CI
 
 - **`.github/workflows/ci.yml` is PR-validation only — no release/signing workflows yet.**
   Those need the keystore and Apple Team ID this project still doesn't have (see Release
   configuration above); adding a tag-triggered release workflow before signing material exists
-  would just be dead YAML. Three jobs after a wrapper-validation gate, because one runner cannot
+  would just be dead YAML. Four jobs after a wrapper-validation gate, because one runner cannot
   do it all: `jvm` on ubuntu-latest (`check :androidApp:assembleStage`), `apple` on macos-26
   (`iosSimulatorArm64Test linkReleaseFrameworkIosArm64`) — Apple targets silently *skip* on a
   Linux host, which is why this job exists — and `ios-app` (`xcodebuild build`), which catches
-  pbxproj/xcconfig breakage no Gradle task sees. All three verified to actually pass by running
-  their exact commands locally before committing the workflow, not just by eyeballing YAML.
+  pbxproj/xcconfig breakage no Gradle task sees. Plus `android-instrumented` (see below). Every
+  job's Gradle command was verified to pass by running it locally before committing the workflow,
+  not just by eyeballing YAML.
+- **`push` fires on `main` only.** It used to also list `hardening/**`, which matches nothing now
+  that branches are named `feat/**` / `fix/**` / `test/**` per feature. Adding those patterns would
+  run the whole matrix twice for any branch with a PR open, and the PR run is the one that gates a
+  merge.
 - **The Apple jobs need `macos-26`, not `macos-15`.** Compose Multiplatform 1.11.1's UIKit layer
   references iOS 26 SDK symbols (`UIViewLayoutRegion`, the `UIUtilities` framework), so linking on
   the macos-15 image's Xcode 16.4 fails with "Undefined symbols for architecture arm64" out of

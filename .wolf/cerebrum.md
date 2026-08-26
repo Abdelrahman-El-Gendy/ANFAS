@@ -799,3 +799,23 @@
   characters". This is the third time (bug-069, and again here with `roles come from the staff row,
   not from the stored session`). Only `compileTestKotlinIosSimulatorArm64` catches it, so `check`
   must be run before shipping, not just the JVM tests.
+
+## Key Learnings — 2026-08-26 (instrumented tests in CI)
+
+- **A GitHub ubuntu runner needs a KVM udev rule before the Android emulator is usable.** `/dev/kvm`
+  exists but is not accessible to the runner user; without the rule the emulator either crawls or
+  times out. This is required setup, not tuning.
+- **`google_atd` / API 35 / x86_64 is the CI image of choice.** ATD = Automated Test Device, stripped
+  of apps a CI run never touches, so it boots far faster. Google APIs variant chosen so nothing rests
+  on whether ML Kit's bundled model needs Play Services — the app initialises ML Kit via
+  ComponentDiscovery at startup, which is what the R8 tests check.
+- **Never pass `-Pandroid.injected.build.abi=arm64-v8a` in CI.** Locally it exists only to fit a
+  nearly-full emulator disk; on an x86_64 runner it strips the libraries the runner needs and the
+  failure looks like a shrinking bug.
+- `system-images;android-36;{aosp_atd,google_atd,google_apis};x86_64` all exist — check with
+  `sdkmanager --list | grep system-images` before guessing an image spec.
+- **An action's input names can be verified without running CI**: fetch its `action.yml` from the
+  raw GitHub URL and diff the declared inputs against the ones used. Cheap, and catches the silent
+  failure mode where an unknown input is ignored.
+- What still cannot be verified locally is the runner/emulator combination itself. Same class of risk
+  as the macos-15 → macos-26 discovery: the first real CI run is the test.
