@@ -641,3 +641,28 @@
 - **A suspiciously fast green (`BUILD SUCCESSFUL in 2s`) usually means nothing ran.** Confirm with
   `--rerun` and by reading the JUnit XML's `tests=` count, not the exit code.
 
+## Key Learnings — 2026-08-26 (screen-level layout tests)
+
+- **`Modifier.size` is clamped by the test surface's constraints; `requiredSize` is not.** A test
+  box set to 1324dp inside `runComposeUiTest` was silently squeezed under the 1024dp breakpoint, so
+  the "desktop width" case was actually exercising the *narrow* branch and passing for the wrong
+  reason. The tell was that reverting the fix failed a test that had no business failing — if
+  reverting breaks more branches than the bug touched, the test is measuring something else.
+- **Third time this pattern has bitten: a layout test that passes against the bug.** First `gap > 0`
+  when the real defect was a 1dp gap; then the device width instead of the width the component
+  receives; now `size` instead of `requiredSize`. The revert-and-watch-it-fail step is not optional
+  ceremony — it is the only thing that has caught any of them.
+- **Check a module's existing test fakes before writing your own.** `feature/intake-ocr` already had
+  `OcrFakes.kt` (`FakeTextRecogniser`, `RecordingImageStore`, `FakeCameraPermissions`) and an
+  `internal FakeIntakeRepository` that revalidates on read like the real repository. Duplicating
+  them is not merely wasteful, it fails to compile: `jvmTest` sees `commonTest`, and same-package
+  top-level names collide across source sets even when both are `private`.
+- **A thin launcher can still own a testable invariant.** `desktopApp` has no logic, but its window
+  constants encode "stay above the layout breakpoint". Making them `internal` and asserting against
+  `AnfasBreakpoints.tabletMax` (never a copied literal) turns a reachability rule into 4 tests that
+  run in under a second with no emulator.
+- **Rendering a whole screen in a test needs the component, and that is affordable.** Building a
+  real `IntakeReviewComponent` took a `LifecycleRegistry`, five fakes and ~40 lines — cheaper than
+  refactoring the screen to be testable, and it exercises the real composable rather than a
+  simplified stand-in.
+

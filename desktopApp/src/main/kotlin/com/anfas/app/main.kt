@@ -76,13 +76,13 @@ fun main() {
  * (both `Placement.DesktopOnly`, rail-only, with no mobile entry point by design) were
  * unreachable in the desktop app unless the user happened to drag the window wider.
  */
-private val INITIAL_WINDOW_WIDTH = 1280.dp
-private val INITIAL_WINDOW_HEIGHT = 840.dp
+internal val INITIAL_WINDOW_WIDTH = 1280.dp
+internal val INITIAL_WINDOW_HEIGHT = 840.dp
 
 /**
  * The resize floor, for the same reason: a feature that disappears when a window is dragged
  * narrower is a bug, not a responsive layout. Comfortably past the 1024dp breakpoint rather than
  * exactly on it, so rounding and window chrome cannot land us back on the phone layout.
  */
-private const val MIN_WINDOW_WIDTH_PX = 1060
-private const val MIN_WINDOW_HEIGHT_PX = 680
+internal const val MIN_WINDOW_WIDTH_PX = 1060
+internal const val MIN_WINDOW_HEIGHT_PX = 680

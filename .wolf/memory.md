@@ -419,3 +419,11 @@ skiko dialog actual with iOS, which is verified.
 | 13:31 | Edited CLAUDE.md | added optional chaining | ~528 |
 | 13:40 | Fixed the three open defects from the inventory: per-OS desktop DB path + conservative legacy migration (9 tests), DB close on quit via Koin onClose + lifecycle teardown (2 contract tests), and the missing keystore.properties.template | core/database, core/data, desktopApp, keystore.properties.template | check green + iOS arm64; real 135KB DB migrated with integrity_check ok | ~9k |
 | 13:34 | Session end: 124 writes across 52 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 85 reads | ~142719 tok |
+| 08:52 | Session end: 124 writes across 52 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 86 reads | ~142719 tok |
+| 10:57 | Edited desktopApp/build.gradle.kts | 6→11 lines | ~116 |
+| 10:58 | Created desktopApp/src/test/kotlin/com/anfas/app/WindowSizeTest.kt | — | ~782 |
+| 11:02 | Edited feature/intake-ocr/build.gradle.kts | expanded (+9 lines) | ~142 |
+| 11:03 | Created feature/intake-ocr/src/jvmTest/kotlin/com/anfas/feature/intakeocr/IntakeReviewLayoutTest.kt | — | ~2827 |
+| 11:09 | Edited CLAUDE.md | expanded (+16 lines) | ~423 |
+| 09:20 | Pinned the two remaining layout bugs: WindowSizeTest (desktopApp, 4 tests, asserts window width vs AnfasBreakpoints.tabletMax) and IntakeReviewLayoutTest (feature/intake-ocr jvmTest, 3 tests, source pane present at 300/370/395dp and at desktop width) | desktopApp/src/test, feature/intake-ocr/src/jvmTest, both build.gradle.kts | both PROVEN to fail on revert; check green + iOS arm64 | ~11k |
+| 09:22 | Caught a third vacuous-layout-test variant: Modifier.size is clamped by the test surface, so the desktop-width case was exercising the narrow branch. Switched to requiredSize | feature/intake-ocr/src/jvmTest/.../IntakeReviewLayoutTest.kt | revert now fails exactly the 2 phone tests, desktop passes | ~3k |

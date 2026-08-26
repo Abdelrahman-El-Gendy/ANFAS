@@ -444,8 +444,24 @@ as screens — none belongs to a feature, because any screen can be interrupted 
   header in `padding(horizontal = 16.dp)`, so an iPhone 17 header gets 370dp, not 402dp. The first
   draft used 402dp, where the title fits with 33dp to spare — the collision only exists at 370dp.
   Getting this wrong is the difference between a regression test and a decoration.
-- **Prove a new layout test fails without its fix.** Both of the mistakes above produced a
+- **Prove a new layout test fails without its fix.** Every mistake in this section produced a
   confidently green test that caught nothing. Revert the fix, watch it go red, put the fix back.
+- **`Modifier.requiredSize`, not `size`, when the width under test is the point.** `size` is still
+  clamped by the incoming constraints of the test surface, so a width wider than the default window
+  is silently squeezed — which made `IntakeReviewLayoutTest`'s *desktop* case quietly exercise the
+  **narrow** branch and pass for the wrong reason. Caught only because reverting the fix made a
+  test fail that had no business failing. A discriminating layout test should fail for exactly the
+  branches the bug touched, and pass for the others; if reverting breaks more than you expect, the
+  test is measuring something else.
+- **Screen-level tests belong in the feature's own `jvmTest`, and reuse the module's existing
+  fakes.** `feature/intake-ocr` already had `internal` fakes in `OcrFakes.kt` plus an
+  `internal FakeIntakeRepository` that revalidates on read like the real one. Declaring rivals is
+  both wasted work and a **compile error**: `jvmTest` sees `commonTest`, and same-package top-level
+  names collide across source sets even when both are `private`.
+- **A launcher constant can carry an invariant worth testing.** `desktopApp` holds no logic, but
+  `WindowSizeTest` asserts its window width against `AnfasBreakpoints.tabletMax` rather than a
+  copied `1024` — so moving the breakpoint fails there instead of silently making two
+  `DesktopOnly` features unreachable again.
 
 ## Dates the user enters
 

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T10:31:37.338Z
-> Files: 566 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T08:09:36.750Z
+> Files: 568 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../.claude/plans/
 
@@ -15,7 +15,7 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~10862 tok)
+- `CLAUDE.md` — OpenWolf (~11211 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
@@ -755,11 +755,15 @@
 
 ## desktopApp/
 
-- `build.gradle.kts` — Gradle Kotlin build configuration (~245 tok)
+- `build.gradle.kts` — Thin desktop launcher. Plain kotlin("jvm") rather than a kmp.* convention plugin, because (~990 tok)
 
 ## desktopApp/src/main/kotlin/com/anfas/app/
 
 - `main.kt` — Thin launcher. All shared behaviour lives in :composeApp — do not add logic here. (~966 tok)
+
+## desktopApp/src/test/kotlin/com/anfas/app/
+
+- `WindowSizeTest.kt` — The desktop window must open — and must stay — above the layout breakpoint. (~782 tok)
 
 ## feature/announcements/
 
@@ -808,7 +812,7 @@
 
 ## feature/intake-ocr/
 
-- `build.gradle.kts` (~87 tok)
+- `build.gradle.kts` — Layout tests, JVM only — same reasoning as `:core:designsystem`'s: the responsive (~302 tok)
 
 ## feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/
 
@@ -825,6 +829,10 @@
 ## feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/
 
 - `IntakeReviewComponentTest.kt` — Fake that revalidates on read the way the real repository does — without that, an edit test (~3630 tok)
+
+## feature/intake-ocr/src/jvmTest/kotlin/com/anfas/feature/intakeocr/
+
+- `IntakeReviewLayoutTest.kt` — The photographed sheet must be reachable on a phone. (~2827 tok)
 
 ## feature/members/
 
