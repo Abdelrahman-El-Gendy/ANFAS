@@ -57,11 +57,17 @@ Match this repo's existing style (`git log` shows it): a short present/imperativ
 line, often prefixed `Phase N: ` for hardening-sequence work, followed by a blank line and 1-4
 short paragraphs explaining *why*, not a bullet list of file names. Look at the last 3-5 commits
 with `git log -5` (full messages: `git log -5 --format=%B`) to match tone before writing yours.
-Always end the message with a blank line then:
+Always end the message with a blank line then exactly this trailer:
 
 ```
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 ```
+
+**Do not substitute your own model name here.** The trailer credits the model that wrote the code
+being committed, which is the delegating session — not you, the shipper. Getting this wrong once
+put `Claude Sonnet 5` on two commits (`5847b40`, `d8cbf35`) whose work was done by Opus, breaking
+an otherwise consistent history. If the delegating prompt names a different model, use that;
+otherwise use the line above verbatim.
 
 Pass the message via a heredoc (`git commit -m "$(cat <<'EOF' ... EOF)"`), never as a bare `-m`
 string with embedded newlines typed inline.
