@@ -5,6 +5,7 @@ import com.anfas.core.common.AppResult
 import com.anfas.core.database.EquipmentDao
 import com.anfas.core.database.EquipmentEntity
 import com.anfas.core.database.MaintenanceLogEntryEntity
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.Currency
 import com.anfas.core.model.Equipment
 import com.anfas.core.model.EquipmentId
@@ -59,8 +60,8 @@ internal class OfflineFirstEquipmentRepository(
             }
 
             val id = EquipmentId(Uuid.random().toString())
-            equipment.upsert(
-                EquipmentEntity(
+            equipment.upsertTracked(
+                equipment = EquipmentEntity(
                     id = id.value,
                     name = name.trim(),
                     assetTag = trimmedTag,
@@ -71,6 +72,7 @@ internal class OfflineFirstEquipmentRepository(
                     purchasedOnEpochDay = purchasedOn?.toEpochDays(),
                     warrantyUntilEpochDay = warrantyUntil?.toEpochDays(),
                 ),
+                change = changeFor(SyncTables.EQUIPMENT, id.value),
             )
             SaveEquipmentOutcome.Saved(id)
         }
@@ -96,9 +98,11 @@ internal class OfflineFirstEquipmentRepository(
             val existing = equipment.findById(equipmentId.value)
                 ?: return@runStorage LogMaintenanceOutcome.NotFound
 
-            equipment.insertLogEntry(
-                MaintenanceLogEntryEntity(
-                    id = Uuid.random().toString(),
+            val logId = Uuid.random().toString()
+            val at = capturedAt()
+            equipment.insertLogEntryTracked(
+                entry = MaintenanceLogEntryEntity(
+                    id = logId,
                     equipmentId = equipmentId.value,
                     occurredAtEpochMs = occurredAt.toEpochMilliseconds(),
                     summary = summary.trim(),
@@ -108,8 +112,16 @@ internal class OfflineFirstEquipmentRepository(
                     costMinorUnits = cost?.minorUnits,
                     partsUsed = partsUsed?.trim()?.takeIf { it.isNotEmpty() },
                 ),
+                equipment = existing.copy(status = resultingStatus.name),
+                // Two rows, two entries. The log entry and the machine's new status are separate
+                // records that happen to be written together, and a push that carried only one of
+                // them would leave the other device with a repair note against a machine still
+                // marked broken.
+                changes = listOf(
+                    changeFor(SyncTables.MAINTENANCE_LOG, logId, at),
+                    changeFor(SyncTables.EQUIPMENT, equipmentId.value, at),
+                ),
             )
-            equipment.upsert(existing.copy(status = resultingStatus.name))
             LogMaintenanceOutcome.Logged
         }
     }
@@ -118,7 +130,10 @@ internal class OfflineFirstEquipmentRepository(
         withContext(dispatchers.io) {
             runStorage("Could not update the equipment") {
                 val existing = equipment.findById(id.value) ?: return@runStorage Unit
-                equipment.upsert(existing.copy(status = EquipmentStatus.OUT_OF_ORDER.name))
+                equipment.upsertTracked(
+                    equipment = existing.copy(status = EquipmentStatus.OUT_OF_ORDER.name),
+                    change = changeFor(SyncTables.EQUIPMENT, id.value),
+                )
             }
         }
 }

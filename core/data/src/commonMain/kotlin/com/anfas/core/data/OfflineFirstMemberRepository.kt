@@ -2,6 +2,7 @@ package com.anfas.core.data
 
 import com.anfas.core.common.AppResult
 import com.anfas.core.database.MemberDao
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.Member
 import com.anfas.core.model.MemberId
 import com.anfas.core.model.MembershipNumbers
@@ -50,13 +51,29 @@ internal class OfflineFirstMemberRepository(
                 lastCheckInAt = null,
                 avatarUrl = null,
             )
-            dao.upsertAll(listOf(member.toEntity()))
+            dao.upsertAllTracked(
+                members = listOf(member.toEntity()),
+                changes = listOf(changeFor(SyncTables.MEMBERS, member.id.value)),
+            )
             member
         }
 
     override suspend fun upsert(members: List<Member>): AppResult<Unit> =
-        runStorage("Could not save members") { dao.upsertAll(members.map { it.toEntity() }) }
+        runStorage("Could not save members") {
+            dao.upsertAllTracked(
+                members = members.map { it.toEntity() },
+                changes = changesFor(SyncTables.MEMBERS, members.map { it.id.value }),
+            )
+        }
 
+    /**
+     * The tombstones for the cascaded therapy rows are written by the DAO, inside the same
+     * transaction and before the delete — see `MemberDao.deleteByIdTracked`. They cannot be
+     * computed here: after `deleteById` returns, the cases and sessions SQLite removed are
+     * unknowable.
+     */
     override suspend fun delete(id: MemberId): AppResult<Unit> =
-        runStorage("Could not delete member ${id.value}") { dao.deleteById(id.value) }
+        runStorage("Could not delete member ${id.value}") {
+            dao.deleteByIdTracked(id = id.value, nowEpochMs = capturedAt())
+        }
 }

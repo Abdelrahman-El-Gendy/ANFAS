@@ -7,6 +7,7 @@ import com.anfas.core.database.CheckInDao
 import com.anfas.core.database.CheckInEntity
 import com.anfas.core.database.MemberDao
 import com.anfas.core.database.SubscriptionDao
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.CheckIn
 import com.anfas.core.model.CheckInId
 import com.anfas.core.model.CheckInOutcome
@@ -55,14 +56,24 @@ internal class OfflineFirstCheckInRepository(
                     at = now(),
                     outcome = outcome,
                 )
-                dao.insert(checkIn.toEntity())
-
                 // Only a granted entry updates the member's last-seen stamp. A refused attempt is
                 // not a visit, and showing it as one would make the directory claim an expired
                 // member trained today.
-                if (outcome.grantsEntry) {
-                    memberDao.upsertAll(listOf(member.copy(lastCheckInAt = checkIn.at).toEntity()))
-                }
+                val touched =
+                    member.copy(lastCheckInAt = checkIn.at).toEntity().takeIf {
+                        outcome.grantsEntry
+                    }
+                val at = capturedAt()
+                dao.insertTracked(
+                    checkIn = checkIn.toEntity(),
+                    member = touched,
+                    changes = buildList {
+                        add(changeFor(SyncTables.CHECK_INS, checkIn.id.value, at))
+                        if (touched != null) {
+                            add(changeFor(SyncTables.MEMBERS, member.id.value, at))
+                        }
+                    },
+                )
 
                 // No name and no number: the log is on disk, but a shared reception device's log file
                 // must not record who entered.

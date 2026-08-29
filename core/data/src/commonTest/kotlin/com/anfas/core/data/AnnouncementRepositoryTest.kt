@@ -8,6 +8,9 @@ import com.anfas.core.database.StaffEntity
 import com.anfas.core.database.SubscriptionDao
 import com.anfas.core.database.SubscriptionEntity
 import com.anfas.core.database.SubscriptionPlanEntity
+import com.anfas.core.database.SyncOutboxEntity
+import com.anfas.core.database.SyncTables
+import com.anfas.core.database.SyncTombstoneEntity
 import com.anfas.core.model.AnnouncementAudience
 import com.anfas.core.model.AnnouncementId
 import com.anfas.core.model.AnnouncementStatus
@@ -278,6 +281,59 @@ class AnnouncementRepositoryTest {
         }
     }
 
+    /** Every write path here files an outbox entry. See SyncOutboxTest for why that matters. */
+    @Test
+    fun `each announcement write files an outbox entry`() = runTest {
+        val dao = FakeAnnouncementDao()
+        val repository = OfflineFirstAnnouncementRepository(
+            announcements = dao,
+            members = FakeMemberDao(),
+            subscriptions = FakeAnnouncementSubscriptions(emptyList()),
+            staff = FakeAnnouncementStaff(emptyMap()),
+            dispatchers = UnconfinedDispatchers,
+        )
+
+        val saved = repository.createDraft(
+            title = "Racks",
+            body = "News",
+            audience = AnnouncementAudience.ALL_MEMBERS,
+            eventDate = null,
+            eventTime = null,
+            createdByStaffId = null,
+            createdAt = Instant.fromEpochMilliseconds(0),
+        ).valueOrFail()
+        val id = assertIs<SaveAnnouncementOutcome.Saved>(saved).id
+        assertEquals(listOf(id.value), dao.sync.upserts(SyncTables.ANNOUNCEMENTS))
+
+        repository.updateDraft(
+            id,
+            "Racks",
+            "More news",
+            AnnouncementAudience.ALL_MEMBERS,
+            null,
+            null,
+        )
+            .valueOrFail()
+        repository.publish(id, Instant.fromEpochMilliseconds(1)).valueOrFail()
+        assertEquals(3, dao.sync.upserts(SyncTables.ANNOUNCEMENTS).size)
+
+        // A published announcement is not deletable, so the delete path needs a fresh draft.
+        val draft = assertIs<SaveAnnouncementOutcome.Saved>(
+            repository.createDraft(
+                title = "Temp",
+                body = "Temp",
+                audience = AnnouncementAudience.ALL_MEMBERS,
+                eventDate = null,
+                eventTime = null,
+                createdByStaffId = null,
+                createdAt = Instant.fromEpochMilliseconds(2),
+            ).valueOrFail(),
+        ).id
+        repository.deleteDraft(draft).valueOrFail()
+        assertEquals(listOf(draft.value), dao.sync.deletes(SyncTables.ANNOUNCEMENTS))
+        assertEquals(listOf(draft.value), dao.sync.tombstoned(SyncTables.ANNOUNCEMENTS))
+    }
+
     private fun repository(
         members: FakeMemberDao = FakeMemberDao(),
         subscriptions: SubscriptionDao = FakeAnnouncementSubscriptions(emptyList()),
@@ -291,7 +347,7 @@ class AnnouncementRepositoryTest {
     )
 }
 
-private class FakeAnnouncementDao : AnnouncementDao {
+internal class FakeAnnouncementDao : AnnouncementDao {
     private val rows = MutableStateFlow<List<AnnouncementEntity>>(emptyList())
 
     override fun observeAll(): Flow<List<AnnouncementEntity>> =
@@ -307,9 +363,17 @@ private class FakeAnnouncementDao : AnnouncementDao {
     override suspend fun delete(id: String) {
         rows.value = rows.value.filterNot { it.id == id }
     }
+
+    // --- sync bookkeeping. The tracked writes are default methods on the DAO, so implementing
+    // these two gives this fake the production sequencing rather than a re-implementation of it.
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
+
+    override suspend fun recordTombstones(entries: List<SyncTombstoneEntity>) = sync.record(entries)
 }
 
-private class FakeAnnouncementSubscriptions(terms: List<SubscriptionEntity>) : SubscriptionDao {
+internal class FakeAnnouncementSubscriptions(terms: List<SubscriptionEntity>) : SubscriptionDao {
     private val rows = MutableStateFlow(terms)
 
     override fun observePlans(): Flow<List<SubscriptionPlanEntity>> = MutableStateFlow(emptyList())
@@ -324,9 +388,24 @@ private class FakeAnnouncementSubscriptions(terms: List<SubscriptionEntity>) : S
     override suspend fun upsert(subscription: SubscriptionEntity) {
         rows.value = rows.value.filterNot { it.id == subscription.id } + subscription
     }
+
+    // --- sync bookkeeping
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
+
+    override suspend fun insertPlansIfAbsent(plans: List<SubscriptionPlanEntity>) {
+        val known = planRowsForSeed.map { it.id }.toSet()
+        planRowsForSeed += plans.filterNot { it.id in known }
+    }
+
+    override suspend fun planIds(): List<String> = planRowsForSeed.map { it.id }
+
+    /** Plan rows as the seed sees them. Separate from whatever the fake models for reads. */
+    val planRowsForSeed = mutableListOf<SubscriptionPlanEntity>()
 }
 
-private class FakeAnnouncementStaff(initial: Map<String, String>) : StaffDao {
+internal class FakeAnnouncementStaff(initial: Map<String, String>) : StaffDao {
     private val rows = MutableStateFlow(initial)
 
     override fun observeAll(): Flow<List<StaffEntity>> = rows.map { map ->

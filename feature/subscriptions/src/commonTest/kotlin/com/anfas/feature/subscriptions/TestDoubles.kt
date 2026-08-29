@@ -144,6 +144,9 @@ internal class FakeSubscriptionRepository(
 
     override suspend fun upsertPlans(plans: List<SubscriptionPlan>): AppResult<Unit> =
         AppResult.Success(Unit)
+
+    override suspend fun seedPlans(plans: List<SubscriptionPlan>): AppResult<Unit> =
+        AppResult.Success(Unit)
 }
 
 internal class FakeMemberRepository(private val member: Member?) : MemberRepository {

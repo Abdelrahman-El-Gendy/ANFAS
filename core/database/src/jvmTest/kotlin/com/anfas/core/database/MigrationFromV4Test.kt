@@ -102,9 +102,12 @@ class MigrationFromV4Test {
                     connection.countOf("staff"),
                     "migrating must not create a default account",
                 )
-                // Read from the entity annotation rather than hardcoded, so adding a migration
-                // does not fail this test for the wrong reason. Getting here at all proves the
-                // whole chain applied; the number itself is not the thing under test.
+                // CURRENT_SCHEMA_VERSION mirrors AnfasDatabase's @Database(version = ...).
+                // Reflection was tried here to remove the duplication (`@Database`'s retention
+                // does not survive into the compiled class, so `getAnnotation` returns null at
+                // runtime -- confirmed by running this test after switching to it and hitting a
+                // NullPointerException instead of an assertion failure). Getting here at all
+                // proves the whole chain applied; the number itself is not the thing under test.
                 assertEquals(
                     CURRENT_SCHEMA_VERSION,
                     connection.userVersion(),
@@ -118,6 +121,14 @@ class MigrationFromV4Test {
             File(dbFile.absolutePath + "-wal").delete()
             File(dbFile.absolutePath + "-shm").delete()
         }
+    }
+
+    private companion object {
+        /**
+         * Mirrors AnfasDatabase's @Database(version = ...). Bump both together; the assertion
+         * that matters is that the chain *ran*, not what number it landed on.
+         */
+        const val CURRENT_SCHEMA_VERSION = 13
     }
 
     private fun SQLiteConnection.tableNames(): List<String> =
@@ -155,13 +166,5 @@ class MigrationFromV4Test {
         } finally {
             connection.close()
         }
-    }
-
-    private companion object {
-        /**
-         * Mirrors AnfasDatabase's @Database(version = ...). Bump both together; the assertion
-         * that matters is that the chain *ran*, not what number it landed on.
-         */
-        const val CURRENT_SCHEMA_VERSION = 12
     }
 }

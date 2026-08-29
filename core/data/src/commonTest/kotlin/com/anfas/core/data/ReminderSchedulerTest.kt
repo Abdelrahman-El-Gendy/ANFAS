@@ -3,6 +3,7 @@ package com.anfas.core.data
 import com.anfas.core.database.SubscriptionDao
 import com.anfas.core.database.SubscriptionEntity
 import com.anfas.core.database.SubscriptionPlanEntity
+import com.anfas.core.database.SyncOutboxEntity
 import com.anfas.core.model.ReminderStatus
 import com.anfas.core.model.ReminderTemplate
 import com.anfas.core.model.TemplateLanguage
@@ -306,4 +307,19 @@ private class FakeSchedulerSubscriptions(private val terms: List<SubscriptionEnt
     override fun observeAllCurrent(): Flow<List<SubscriptionEntity>> = MutableStateFlow(terms)
 
     override suspend fun upsert(subscription: SubscriptionEntity) = Unit
+
+    // --- sync bookkeeping
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
+
+    override suspend fun insertPlansIfAbsent(plans: List<SubscriptionPlanEntity>) {
+        val known = planRowsForSeed.map { it.id }.toSet()
+        planRowsForSeed += plans.filterNot { it.id in known }
+    }
+
+    override suspend fun planIds(): List<String> = planRowsForSeed.map { it.id }
+
+    /** Plan rows as the seed sees them. Separate from whatever the fake models for reads. */
+    val planRowsForSeed = mutableListOf<SubscriptionPlanEntity>()
 }

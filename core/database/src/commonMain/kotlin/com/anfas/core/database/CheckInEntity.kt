@@ -7,6 +7,8 @@ import androidx.room3.Index
 import androidx.room3.Insert
 import androidx.room3.PrimaryKey
 import androidx.room3.Query
+import androidx.room3.Transaction
+import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -78,4 +80,34 @@ interface CheckInDao {
     // duplicated id silently overwrite an earlier entry instead of failing.
     @Insert
     suspend fun insert(checkIn: CheckInEntity)
+
+    // --- sync bookkeeping -------------------------------------------------------------------
+    // Declared here, not only on SyncDao, so an outbox entry shares a @Transaction with the write
+    // it describes. See SyncOutboxEntity: a change committed with no record of it never syncs,
+    // and nothing afterwards can detect that it happened.
+
+    @Insert
+    suspend fun recordChange(entry: SyncOutboxEntity)
+
+    @Upsert
+    suspend fun upsertMember(member: MemberEntity)
+
+    /**
+     * The entry, the member's last-seen stamp and both outbox records, in one transaction.
+     *
+     * These were two unrelated DAO calls before, so a failure between them could log a check-in
+     * the directory did not reflect. [member] is null for a refused attempt: a refusal is not a
+     * visit, and moving `lastCheckInAt` would make the directory claim an expired member trained
+     * today.
+     */
+    @Transaction
+    suspend fun insertTracked(
+        checkIn: CheckInEntity,
+        member: MemberEntity?,
+        changes: List<SyncOutboxEntity>,
+    ) {
+        insert(checkIn)
+        member?.let { upsertMember(it) }
+        changes.forEach { recordChange(it) }
+    }
 }

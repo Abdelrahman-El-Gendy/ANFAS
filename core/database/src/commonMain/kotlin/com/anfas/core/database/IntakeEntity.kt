@@ -6,6 +6,7 @@ import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
+import androidx.room3.Insert
 import androidx.room3.PrimaryKey
 import androidx.room3.Query
 import androidx.room3.Transaction
@@ -141,4 +142,89 @@ interface IntakeDao {
      */
     @Query("UPDATE intake_batches SET source_image_uri = :to WHERE source_image_uri = :from")
     suspend fun relocateSourceImage(from: String, to: String)
+
+    // --- sync bookkeeping -------------------------------------------------------------------
+    // Declared here, not only on SyncDao, so an outbox entry shares a @Transaction with the write
+    // it describes. See SyncOutboxEntity.
+    //
+    // Note what has deliberately NOT gained a tracked variant: `relocateSourceImage`. It rewrites
+    // a device-absolute `file://` path, which means nothing on another device -- pushing it would
+    // send a broken path that is non-null, so the receiving review pane would not even fall back
+    // to its "no source image" branch. It is local-only maintenance, not a change to shared state,
+    // and it is the first concrete instance of the local-only column the design note describes.
+
+    @Insert
+    suspend fun recordChange(entry: SyncOutboxEntity)
+
+    @Insert
+    suspend fun recordTombstones(entries: List<SyncTombstoneEntity>)
+
+    @Upsert
+    suspend fun upsertMembers(members: List<MemberEntity>)
+
+    @Transaction
+    suspend fun upsertBatchWithRowsTracked(
+        batch: IntakeBatchEntity,
+        rows: List<IntakeRowEntity>,
+        changes: List<SyncOutboxEntity>,
+    ) {
+        upsertBatchWithRows(batch, rows)
+        changes.forEach { recordChange(it) }
+    }
+
+    @Transaction
+    suspend fun upsertRowsTracked(rows: List<IntakeRowEntity>, changes: List<SyncOutboxEntity>) {
+        upsertRows(rows)
+        changes.forEach { recordChange(it) }
+    }
+
+    @Transaction
+    suspend fun setStatusTracked(id: String, status: String, change: SyncOutboxEntity) {
+        setStatus(id, status)
+        recordChange(change)
+    }
+
+    /**
+     * Importing writes members and closes the batch, and it now does both in one transaction.
+     *
+     * They were two calls through two different DAOs, so a failure between them left members
+     * created from a sheet still marked REVIEWING -- importing it again would have registered
+     * every one of them a second time, with fresh membership numbers.
+     */
+    @Transaction
+    suspend fun importTracked(
+        batchId: String,
+        status: String,
+        members: List<MemberEntity>,
+        changes: List<SyncOutboxEntity>,
+    ) {
+        if (members.isNotEmpty()) upsertMembers(members)
+        setStatus(batchId, status)
+        changes.forEach { recordChange(it) }
+    }
+
+    @Transaction
+    suspend fun deleteBatchTracked(id: String, nowEpochMs: Long) {
+        val rowIds = rowIdsForBatch(id)
+        val tombstones = buildList {
+            add(SyncTombstoneEntity(SyncTables.INTAKE_BATCHES, id, nowEpochMs))
+            rowIds.forEach { add(SyncTombstoneEntity(SyncTables.INTAKE_ROWS, it, nowEpochMs)) }
+        }
+        recordTombstones(tombstones)
+        tombstones.forEach {
+            recordChange(
+                SyncOutboxEntity(
+                    tableName = it.tableName,
+                    rowId = it.rowId,
+                    op = SyncOp.DELETE.name,
+                    capturedAtEpochMs = nowEpochMs,
+                ),
+            )
+        }
+        deleteBatch(id)
+    }
+
+    /** Read before the delete: `intake_rows` CASCADEs, so afterwards these ids are unknowable. */
+    @Query("SELECT id FROM intake_rows WHERE batch_id = :batchId")
+    suspend fun rowIdsForBatch(batchId: String): List<String>
 }

@@ -2,6 +2,8 @@ package com.anfas.core.data
 
 import com.anfas.core.database.MemberDao
 import com.anfas.core.database.MemberEntity
+import com.anfas.core.database.SyncOutboxEntity
+import com.anfas.core.database.SyncTombstoneEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -54,6 +56,24 @@ internal class FakeMemberDao(initial: List<MemberEntity> = emptyList()) : Member
         failure?.let { throw it }
         rows.value = rows.value.filterNot { it.id == id }
     }
+
+    // --- sync bookkeeping. The tracked writes are default methods on the DAO, so implementing
+    // these two gives this fake the production sequencing rather than a re-implementation of it.
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
+
+    override suspend fun recordTombstones(entries: List<SyncTombstoneEntity>) = sync.record(entries)
+
+    override suspend fun therapyCaseIdsForMember(memberId: String): List<String> =
+        therapyCaseIds[memberId].orEmpty()
+
+    override suspend fun therapySessionIdsForCases(caseIds: List<String>): List<String> =
+        caseIds.flatMap { therapySessionIds[it].orEmpty() }
+
+    /** Stand-ins for the cascade the real schema performs; a test wires these to exercise it. */
+    val therapyCaseIds = mutableMapOf<String, List<String>>()
+    val therapySessionIds = mutableMapOf<String, List<String>>()
 }
 
 internal fun memberEntity(

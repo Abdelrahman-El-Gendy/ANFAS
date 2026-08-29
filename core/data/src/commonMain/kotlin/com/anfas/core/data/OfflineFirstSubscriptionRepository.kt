@@ -3,6 +3,7 @@ package com.anfas.core.data
 import com.anfas.core.common.AppResult
 import com.anfas.core.database.SubscriptionDao
 import com.anfas.core.database.SubscriptionEntity
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.MemberId
 import com.anfas.core.model.RenewalQuote
 import com.anfas.core.model.SubscriptionId
@@ -44,7 +45,10 @@ internal class OfflineFirstSubscriptionRepository(private val dao: SubscriptionD
             currency = quote.total.currency.code,
             createdAtEpochMs = confirmedAtEpochMs,
         )
-        dao.upsert(entity)
+        dao.upsertTracked(
+            subscription = entity,
+            change = changeFor(SyncTables.SUBSCRIPTIONS, termId),
+        )
         SubscriptionTerm(
             id = SubscriptionId(termId),
             memberId = memberId,
@@ -58,5 +62,27 @@ internal class OfflineFirstSubscriptionRepository(private val dao: SubscriptionD
     }
 
     override suspend fun upsertPlans(plans: List<SubscriptionPlan>): AppResult<Unit> =
-        runStorage("Could not save plans") { dao.upsertPlans(plans.map { it.toEntity() }) }
+        runStorage("Could not save plans") {
+            dao.upsertPlansTracked(
+                plans = plans.map { it.toEntity() },
+                changes = changesFor(SyncTables.SUBSCRIPTION_PLANS, plans.map { it.id.value }),
+            )
+        }
+
+    /**
+     * The startup seed's write, and deliberately not [upsertPlans].
+     *
+     * `SubscriptionPlanSeed` is registered `createdAtStart`, so whatever it calls runs on every
+     * launch of every device. An upsert there rewrites the whole catalogue each time — which,
+     * once plans sync, makes every app start a conflict and reverts an owner's price change to
+     * the seeded value on the next launch, defeating the reason plans live in the database at
+     * all. Insert-if-absent seeds an empty install and then does nothing.
+     */
+    override suspend fun seedPlans(plans: List<SubscriptionPlan>): AppResult<Unit> =
+        runStorage("Could not seed plans") {
+            dao.insertPlansIfAbsentTracked(
+                plans = plans.map { it.toEntity() },
+                changes = changesFor(SyncTables.SUBSCRIPTION_PLANS, plans.map { it.id.value }),
+            )
+        }
 }

@@ -3,6 +3,7 @@ package com.anfas.core.data
 import app.cash.turbine.test
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.Member
 import com.anfas.core.model.MemberId
 import com.anfas.core.model.MembershipStatus
@@ -181,6 +182,27 @@ class OfflineFirstMemberRepositoryTest {
      * A counter, not a constant. A constant id made Room's upsert collapse every created member
      * into one row, which read as a product bug for a while — see MembershipNumbersTest.
      */
+
+    /**
+     * Both member write paths file an outbox entry. The delete path and its cascade are in
+     * SyncOutboxTest, which is where the reasoning for all of this lives.
+     */
+    @Test
+    fun `creating and upserting members each file an outbox entry`() = runTest {
+        val dao = FakeMemberDao()
+        val repository = repository(dao)
+
+        val created = repository.create(fullName = "Omar Khaled", phone = null).valueOrFail()
+        assertEquals(listOf(created.id.value), dao.sync.upserts(SyncTables.MEMBERS))
+
+        repository.upsert(listOf(created.copy(fullName = "Omar K"))).valueOrFail()
+        assertEquals(
+            listOf(created.id.value, created.id.value),
+            dao.sync.upserts(SyncTables.MEMBERS),
+            "the bulk upsert filed nothing, so a member edited here would never reach the other device",
+        )
+    }
+
     private fun repository(dao: FakeMemberDao): MemberRepository {
         var next = 0
         return OfflineFirstMemberRepository(dao = dao, newId = { "m-${next++}" })

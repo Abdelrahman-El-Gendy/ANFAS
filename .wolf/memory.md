@@ -571,3 +571,27 @@ skiko dialog actual with iOS, which is verified.
 | 02:24 | Verified Stage 0 intake-capture storage change end to end: check + both iOS targets green (2 real bugs fixed), Android FileProvider capture confirmed crash-free on emulator (highest-risk item), iOS build+launch verified via simctl (session seeded via NSUserDefaults, no typing needed), desktop verified via isolated scratch user.home | core/ocr, core/data, feature/intake-ocr, core/database | all platforms pass; android capture end-to-end incl. delete() confinement exercised; ios/desktop UI-navigation automation abandoned after a stray click landed in an unrelated Android Studio terminal window in this multi-display sandbox | ~large |
 | 02:26 | Edited CLAUDE.md | 4→8 lines | ~187 |
 | 02:26 | Session end: 29 writes across 18 files (sync-layer.html, OcrContracts.kt, Ocr.android.kt, intake_file_paths.xml, ImageSource.ios.kt) | 37 reads | ~57611 tok |
+| 02:27 | Session end: 29 writes across 18 files (sync-layer.html, OcrContracts.kt, Ocr.android.kt, intake_file_paths.xml, ImageSource.ios.kt) | 37 reads | ~57611 tok |
+
+## Session: 2026-08-29 13:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-29 13:02
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:21 | Edited feature/dashboard/src/commonTest/kotlin/com/anfas/feature/dashboard/DashboardComponentTest.kt | modified upsertPlans() | ~64 |
+| 13:21 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | 8→11 lines | ~208 |
+| 13:21 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | modified userVersion() | ~125 |
+| 13:22 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | removed 8 lines | ~1 |
+| 13:24 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | 11→11 lines | ~209 |
+| 13:24 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | 5→1 lines | ~22 |
+| 13:24 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | expanded (+8 lines) | ~134 |
+| 13:26 | Edited feature/members/src/commonTest/kotlin/com/anfas/feature/members/MemberProfileComponentTest.kt | modified upsertPlans() | ~72 |
+| 13:26 | Edited feature/subscriptions/src/commonTest/kotlin/com/anfas/feature/subscriptions/TestDoubles.kt | modified upsertPlans() | ~74 |
+| 13:20 | Verified Sync Stage 1 (outbox migration v12->v13): fixed 3 test fakes missing seedPlans override + bumped stale hardcoded schema-version constant in MigrationFromV4Test (tried reflection off @Database annotation first, confirmed it NPEs at runtime -- SOURCE retention, reverted). check + both iOS compile targets green. Real v4->v13 auto-migration chain confirmed via MigrationFromV4Test. | core/database/.../MigrationFromV4Test.kt, feature/dashboard, feature/members, feature/subscriptions test fakes | check GREEN | ~large |
+| 14:05 | Sync Stage 1 device verification: real v12->v13 migration confirmed on 2 real devices (existing desktop db + existing Android emulator db, both had prior real data, both migrated cleanly with data intact). seedPlans confirmed populating 3 plans on iOS/Android/renewal-sheet UI. Check-in on Android: granted check-in wrote check_ins+members in one transaction and both rows landed in sync_outbox atomically (verified by reading device db via adb+sqlite3). iOS/desktop UI navigation limited to screenshots only (no Accessibility permission for osascript, no idb/mobile-mcp tool available this session) -- Android fully interactive via adb input. | core/database (schema), core/data (repositories) -- verification only, no further code changes | all real-device checks pass | ~large |
+| 04:10 | Sync Stage 1: schema v13 adds sync_outbox + sync_tombstones (two tables, zero columns on existing tables). 24 tracked write paths across 8 repositories, outbox entry in the same @Transaction. Member delete tombstones the 2-deep therapy cascade. seedPlans now insert-if-absent. 3 previously non-atomic writes made atomic. Falsified 3 invariants. Migration verified on two real v12 devices | core/database/*, core/data/*, CLAUDE.md | verified green | ~60000 |
+| 14:01 | Session end: 9 writes across 4 files (DashboardComponentTest.kt, MigrationFromV4Test.kt, MemberProfileComponentTest.kt, TestDoubles.kt) | 24 reads | ~5147 tok |

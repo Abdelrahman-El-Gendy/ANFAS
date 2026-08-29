@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-26T23:26:06.698Z
-> Files: 598 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-08-29T10:26:54.425Z
+> Files: 600 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/
 
@@ -663,7 +663,7 @@
 ## core/database/src/jvmTest/kotlin/com/anfas/core/database/
 
 - `DesktopDataDirTest.kt` — The path resolution is pure and branchy, and the migration touches user data — both are worth (~1347 tok)
-- `MigrationFromV4Test.kt` — Opens a real v4 database file and lets Room migrate it forward to the current schema. (~2478 tok)
+- `MigrationFromV4Test.kt` — Opens a real v4 database file and lets Room migrate it forward to the current schema. (~2887 tok)
 
 ## core/designsystem — added for intake
 
@@ -846,6 +846,10 @@
 
 - `DashboardScreen.kt` — The reception dashboard: what needs doing at the desk right now. (~2935 tok)
 
+## feature/dashboard/src/commonTest/kotlin/com/anfas/feature/dashboard/
+
+- `DashboardComponentTest.kt` — Relative to today, so the "expiring soon" window is exercised rather than a fixed date. (~3246 tok)
+
 ## feature/equipment/
 
 - `build.gradle.kts` — Gradle Kotlin build configuration (~55 tok)
@@ -912,6 +916,7 @@
 ## feature/members/src/commonTest/kotlin/com/anfas/feature/members/
 
 - `LastCheckInTest.kt` — 7 tests, fixed UTC clock (~570 tok)
+- `MemberProfileComponentTest.kt` — Only the behaviour this component itself owns: `mayViewTherapy` and the navigation callbacks. (~1992 tok)
 - `MembersListComponentTest.kt` — 5 tests: DirectoryEmpty vs NoMatches, clear, failure, search by number (~900 tok)
 
 ## feature/subscriptions/
@@ -936,7 +941,7 @@
 
 - `ReminderQueueComponentTest.kt` — 10 tests: tab default, empty vs filtered, selection pruning, partial retry notices (~1500 tok)
 - `RenewalSheetComponentTest.kt` — 8 tests with a FixedClock: preselection, date math, discount, confirm passes the shown quote (~1500 tok)
-- `TestDoubles.kt` — Fake reminder/subscription/member repositories + TestDispatchers (~1300 tok)
+- `TestDoubles.kt` — Records what retry was asked to do, so the component's notice can be checked. (~3034 tok)
 
 ## feature/subscriptions/src/jvmTest/kotlin/com/anfas/feature/subscriptions/
 

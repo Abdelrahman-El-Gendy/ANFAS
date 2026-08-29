@@ -126,7 +126,7 @@ val dataModule: Module = module {
         CoroutineScope(
             dispatchers.io + SupervisorJob() + appExceptionHandler("PlanSeed"),
         ).also { scope ->
-            scope.launch { repository.upsertPlans(SubscriptionPlanSeed.plans) }
+            scope.launch { repository.seedPlans(SubscriptionPlanSeed.plans) }
         }
     }
 }

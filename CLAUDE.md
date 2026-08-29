@@ -342,6 +342,60 @@ The `anfas.layering` plugin (build-logic) fails the build on violations. Don't w
   root confinement while Android's carefully did; harmless-looking for a single delete, considerably
   worse once something deletes in a loop.
 
+## Sync — Stage 1 (the outbox)
+
+`design/sync-layer.md` stages this work. Stage 1 is the part needing no server: **nothing syncs**.
+What exists now is a durable record of what changed, which is the one thing that cannot be
+reconstructed after the fact.
+
+- **v13 adds two tables and not one column to an existing table**, which is a deliberate departure
+  from the design note's own list. The rule that decided it: **record only what cannot be
+  reconstructed later.** `updated_at` on twelve tables was dropped — nothing displays it and its
+  value at the moment the column is added is simply "now". `base_version` on the outbox was dropped
+  — no server has ever assigned a version, so the column could only ever be null, and a column that
+  can only be null is indistinguishable from a broken one. Both are cheap to add when they mean
+  something; an outbox entry and a tombstone are not, because once a row is edited or deleted
+  nothing on disk can tell you afterwards that it happened.
+- **`sync_tombstones` is a table, not a `deleted` flag on fourteen tables.** SQLite does not cascade
+  an `UPDATE`, so a flag would leave `therapy_cases` and `therapy_sessions` live and unflagged under
+  a tombstoned member — invisibly, since nothing filters on the flag. It would also need
+  `AND deleted = 0` in ~40 queries, where missing `observeNormalisedPhones` makes a deleted member's
+  phone permanently block re-registering that person through intake, and it would make
+  `MemberProfileState.Missing` dead code.
+- **An outbox entry lands in the same `@Transaction` as the write it describes**, which is why
+  `recordChange` is declared on each DAO rather than only on `SyncDao`. A Room DAO may insert any
+  entity. A free-standing `append` would compile, run, and silently let a change commit with no
+  record of it — and nothing later could detect that.
+- **Cascade children are read *before* the delete and inside the transaction.**
+  `MemberDao.deleteByIdTracked` reads therapy case ids and then session ids, two levels, because
+  after `deleteById` returns they are unknowable. Reading two levels rather than reimplementing the
+  cascade is the point: a hand-written cascade would have to stay in step with the schema on the
+  device *and* the server.
+- **A bulk `UPDATE` must name the rows it changed.** `unassignInstructorTracked` reads the ids
+  first. Reading them afterwards would match rows that already carry the new value — correct here
+  only by luck, and wrong for any bulk update whose predicate is the column it writes.
+- **Three write paths became atomic that were not.** `recordAttempt` (check-in + member stamp),
+  `logMaintenance` (log entry + equipment status) and `importBatch` (members + batch status) each
+  wrote through two calls with no transaction. `importBatch` was the dangerous one: a failure
+  between them left members created from a sheet still marked REVIEWING, so importing it again
+  registered every one of them a second time under fresh membership numbers.
+- **`seedPlans` is insert-if-absent and is not `upsertPlans`.** `SubscriptionPlanSeed` runs
+  `createdAtStart`, so it executes on every launch of every device; an upsert there rewrites the
+  whole catalogue each time, which once plans sync makes every app start a conflict and reverts an
+  owner's price change on the next launch.
+- **Three things deliberately record nothing, and each has a test asserting the absence.**
+  `reminders` (never synced — see the WhatsApp notes), `staff` (not in v1, PBKDF2 verifier bytes),
+  and `relocateSourceImage` (a device-absolute `file://` path, which on another device is a
+  *non-null broken string* — so its review pane would not even reach the "no source image" branch).
+  Without those tests an empty outbox is indistinguishable from a forgotten write path.
+- **Completeness is not compiler-enforced, and the test file says so.** Nothing in Kotlin/Native
+  lets a test enumerate an interface's write methods, so "no path was missed" rests on a test per
+  path plus the fact that no production code in `:core:data` reaches an untracked DAO writer. That
+  second half is a grep, worth re-running whenever a write is added.
+- **`MigrationFromV4Test` carries a hardcoded `CURRENT_SCHEMA_VERSION` that must be bumped by hand.**
+  Third time it has broken a build. Reading `@Database`'s version by reflection does not work —
+  the annotation does not survive to runtime, so `getAnnotation` returns null.
+
 ## Navigation
 
 **`TopLevel.placement` is the whole model.** The rail and the bar carry deliberately different

@@ -23,8 +23,10 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         AnnouncementEntity::class,
         EquipmentEntity::class,
         MaintenanceLogEntryEntity::class,
+        SyncOutboxEntity::class,
+        SyncTombstoneEntity::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
     // v2 adds the `members` table. Adding a table needs no hand-written logic, but the
     // migration is declared rather than falling back to a destructive recreate — the
@@ -72,6 +74,12 @@ import com.anfas.core.database.migrations.DropPlaceholderTable
         // `defaultValue = "0"` on the entity. Without it Room has nothing to write into the rows
         // already on disk and refuses the auto-migration at schema-diff time.
         AutoMigration(from = 11, to = 12),
+        // v13 adds `sync_outbox` and `sync_tombstones`. Two new tables and, deliberately, not one
+        // column on an existing one -- see SyncOutboxEntity for why `updated_at` and
+        // `base_version` are not here despite design/sync-layer.md listing them. Neither table
+        // carries a foreign key: an outbox entry and a tombstone must both outlive the row they
+        // name, which is the whole point of them.
+        AutoMigration(from = 12, to = 13),
     ],
 )
 @ConstructedBy(AnfasDatabaseConstructor::class)
@@ -87,6 +95,8 @@ abstract class AnfasDatabase : RoomDatabase() {
     abstract fun staffDao(): StaffDao
 
     abstract fun checkInDao(): CheckInDao
+
+    abstract fun syncDao(): SyncDao
 
     abstract fun gymClassDao(): GymClassDao
 
