@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: gradle/actions/wrapper-validation@v4
+      - uses: gradle/actions/wrapper-validation@v5
 
   jvm:
     name: Build, test and layering (JVM)
@@ -30,7 +30,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       # Apple targets silently skip on a Linux host -- that's why the `apple` job below exists
       # and runs on macOS. `check` here covers every JVM/Android test, ktlint/Spotless and the
       # anfas.layering rules; assembleStage additionally proves the R8-minified, debuggable
@@ -47,7 +47,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       # macOS runners have far less RAM than a dev machine. Override in $GRADLE_USER_HOME, not
       # the project's gradle.properties -- release framework linking for two iOS targets needs
       # org.gradle.jvmargs=-Xmx8192M locally, and lowering that project-wide would break local
@@ -69,7 +69,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - name: xcodebuild
         working-directory: app/iosApp
         run: |
