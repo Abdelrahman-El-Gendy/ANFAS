@@ -262,6 +262,23 @@ class NavigationPermissionTest {
     }
 
     /**
+     * `TherapyComponent` holds no permission check of its own, so this guard is the whole of the
+     * therapy gate: clinical notes reach only roles holding VIEW_THERAPY, whichever way the
+     * screen was arrived at (restored back stack included).
+     */
+    @Test
+    fun `the therapy route requires VIEW_THERAPY and no desk or floor role holds it`() {
+        val route = RootComponent.Config.TherapyCase(memberId = "m-1")
+        assertEquals(Permission.VIEW_THERAPY, route.requiredPermission)
+
+        listOf(Role.Receptionist, Role.Coach).forEach { role ->
+            val session = Session(userId = "s-1", roles = setOf(role))
+            assertTrue(!session.can(route.requiredPermission), "$role must not read therapy notes")
+        }
+        assertTrue(Session("s-1", setOf(Role.Therapist)).can(route.requiredPermission))
+    }
+
+    /**
      * Every role that can sign in must reach *something*, or the app opens on a
      * permission-denied screen it can never leave. Member is excluded: it grants nothing by
      * design and no account is created with it.

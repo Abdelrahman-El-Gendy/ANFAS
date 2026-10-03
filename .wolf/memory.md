@@ -613,3 +613,4 @@ skiko dialog actual with iOS, which is verified.
 | 19:16 | Created .github/workflows/release.yml | — | ~4351 |
 | 19:19 | Session end: 3 writes across 2 files (README.md, release.yml) | 0 reads | ~9770 tok |
 | 19:19 | Added .github/workflows/release.yml (tag-triggered release pipeline); updated CLAUDE.md CI note | .github/workflows/release.yml, CLAUDE.md | verified bundleRelease/assembleRelease/packageDmg locally | ~4000 |
+| 12:30 | Added commonTest component tests to :feature:classes (24), :feature:therapy (26), :feature:checkin (14) + therapy route-guard test in composeApp NavigationPermissionTest; falsified non-security guards; fixed own bugs bug-070/071 (comma test names, removeFirst on Android host). check + iosSimulatorArm64Test green | feature/{classes,therapy,checkin}/src/commonTest, composeApp NavigationPermissionTest.kt | pass | ~0 tok |

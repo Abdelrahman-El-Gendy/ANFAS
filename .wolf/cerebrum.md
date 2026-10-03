@@ -180,6 +180,15 @@
 
 <!-- Mistakes made and corrected. Each entry prevents the same mistake recurring. -->
 <!-- Format: [YYYY-MM-DD] Description of what went wrong and what to do instead. -->
+- [2026-10-03] commonTest must not use JDK-21-only collection methods (`removeFirst`, `removeLast`,
+  `getFirst`). On the Android host target they bind to a method the SDK lacks; thrown inside a
+  component `scope.launch` the error is swallowed by `appExceptionHandler`, so a repository call
+  just silently never happens (green on jvmTest, red on testAndroidHostTest). Use an Iterator.
+  Also: a fresh git worktree has no `local.properties` (copy it from the main checkout), and
+  `./gradlew check` runs Spotless on test sources too — run `spotlessApply` after writing tests.
+- [2026-10-03] The Compose-UI jvmTest layout tests CLAUDE.md describes (AnfasScreenHeaderTest,
+  IntakeReviewLayoutTest, `test-composeUi` bundle) do not exist on this branch lineage; no feature
+  module has a jvmTest source set. Don't assume that infrastructure is present — check first.
 - [2026-08-21] Do not trust `mcp__stitch__download_assets`. It reports "Assets downloaded to <dir>"
   and writes nothing. Fetch `htmlCode.downloadUrl` from `list_screens` with curl instead.
 - [2026-08-21] Do not add Stitch as an `http` MCP server pointing at `https://stitch.googleapis.com/mcp`.
