@@ -1989,5 +1989,40 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-29T14:00:00Z"
+  },
+  {
+    "id": "bug-109",
+    "timestamp": "2026-10-03T12:00:00Z",
+    "error_message": "e: ...CheckInComponentTest.kt:51:9 Name contains illegal characters: \",\".",
+    "file": "feature/checkin|classes|therapy/src/commonTest (new *ComponentTest.kt)",
+    "root_cause": "Third recurrence of the Kotlin/Native comma-in-test-name gotcha (bug-069): new component tests were named with commas and only jvmTest was run first. Do-Not-Repeat was not re-read before naming tests.",
+    "fix": "Removed commas from every backticked test name in the three new files. Only the native test compile (compileTestKotlinIosSimulatorArm64 / iosSimulatorArm64Test) catches it.",
+    "tags": [
+      "kotlin-native",
+      "test-naming",
+      "ios",
+      "compile-error"
+    ],
+    "related_bugs": [],
+    "occurrences": 3,
+    "last_seen": "2026-10-03T12:00:00Z"
+  },
+  {
+    "id": "bug-110",
+    "timestamp": "2026-10-03T12:10:00Z",
+    "error_message": "ClassesComponentTest (testAndroidHostTest): NoSuchElementException: List is empty / form stuck isSubmitting; same tests green on jvmTest",
+    "file": "feature/classes/src/commonTest/kotlin/com/anfas/feature/classes/ClassesComponentTest.kt",
+    "root_cause": "The test harness supplied newId via MutableList.removeFirst(). On the Android host target that binds to a JDK 21 List method the Android SDK lacks, so it threw inside the component's scope.launch; appExceptionHandler swallowed it, so the save silently never reached the repository (and the form stayed isSubmitting). jvmTest passed because the full JDK has the method. Test-only bug, no production defect.",
+    "fix": "Use an Iterator (remaining.next()) for the id supplier. Lesson: in commonTest avoid JDK-21-only collection methods (removeFirst/removeLast/getFirst/getLast); and a silently-missing repository call under a component scope usually means an exception was swallowed by appExceptionHandler.",
+    "tags": [
+      "android-host-test",
+      "jdk21",
+      "removeFirst",
+      "swallowed-exception",
+      "classes"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T12:10:00Z"
   }
 ]

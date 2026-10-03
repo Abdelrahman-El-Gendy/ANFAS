@@ -852,6 +852,10 @@
 ## feature/dashboard/src/commonTest/kotlin/com/anfas/feature/dashboard/
 
 - `DashboardComponentTest.kt` — Relative to today, so the "expiring soon" window is exercised rather than a fixed date. (~3246 tok)
+## feature/classes/src/commonTest/kotlin/com/anfas/feature/classes/
+
+- `ClassesComponentTest.kt` — 24 component tests: load/fail, MANAGE_CLASSES enforced in component, save/clash/invalid/edit/delete, day + filters (~4200 tok)
+- `ClassesFakes.kt` — internal FakeClassRepository (records writes), FakeAuth (mutable session), TestDispatchers, FixedClock (~1100 tok)
 
 ## feature/equipment/
 
@@ -960,6 +964,16 @@
 - `CloseCaseConfirmDialog.kt` — a confirmation, not a silent action (~350 tok)
 - `TherapyModule.kt` — `TherapyComponentFactory` + Koin module (~250 tok)
 - `TreatmentTypeUi.kt` — `TreatmentType.label(s)` (~200 tok)
+
+## feature/therapy/src/commonTest/kotlin/com/anfas/feature/therapy/
+
+- `TherapyComponentTest.kt` — 26 component tests: case open/AlreadyOpen/edit/close, session log, trend words-not-arrows (EN+AR), unassigned therapist (~4800 tok)
+- `TherapyFakes.kt` — internal FakeTherapyRepository (records writes), FakeMemberRepository, FakeAuth, staff() (~1700 tok)
+
+## feature/checkin/src/commonTest/kotlin/com/anfas/feature/checkin/
+
+- `CheckInComponentTest.kt` — 14 component tests: search, outcome comes from repository policy, refusals logged, re-entrancy, failure (~3000 tok)
+- `CheckInFakes.kt` — FakeCheckInRepository runs the real CheckInPolicy; FakeMemberRepository; member()/term() builders (~1500 tok)
 
 ## gradle/
 
