@@ -977,7 +977,19 @@
 
 ## server/src/main/kotlin/com/anfas/app/
 
-- `Application.kt` — Data class: HealthResponse (3 properties) (~469 tok)
+- `Application.kt` — ServerConfig (env), main, module(store, adminSecret): bearer auth "device"/"admin", StatusPages, /health (~900 tok)
+
+## server/src/main/kotlin/com/anfas/app/sync/
+
+- `SyncWire.kt` — Stage 2 wire DTOs (@SerialName snake_case), PushOp, SyncedTables allowlist (12 tables; never reminders/staff) (~1100 tok)
+- `ChangeStore.kt` — ChangeStore interface + SqliteChangeStore (JDBC, append-only log, device tokens hashed, idempotent on device_id+client_seq, 409 on reuse, latest_only export) (~2600 tok)
+- `SyncRoutes.kt` — validatePush, PushLimits, /admin/devices, /admin/devices/{id}/revoke, /admin/export, /sync/push (~1700 tok)
+
+## server/src/test/kotlin/com/anfas/app/sync/
+
+- `ChangeStoreTest.kt` — store: auth, revoke, replay, seq reuse, latest_only, durability across reopen (~1900 tok)
+- `SyncRoutesTest.kt` — route tests via testApplication against a real in-memory store (~2400 tok)
+- `ProtocolContractTest.kt` — pins JSON names, table allowlist, validatePush rules (~1300 tok)
 
 ## server/src/main/resources/
 

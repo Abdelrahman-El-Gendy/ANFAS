@@ -14,4 +14,12 @@ dependencies {
     // keeps :core:designsystem and :core:database, and therefore Compose and Room, off
     // the server classpath.
     implementation(project(":core:model"))
+
+    // The box's own durable store. A plain JDBC driver and hand-written SQL: the server holds
+    // opaque payloads and four columns of metadata, so an ORM would be more machinery than data.
+    implementation(libs.sqlite.jdbc)
+
+    // Route tests drive the app through its own wire types, so they need the client-side JSON
+    // plugin; the convention plugin only supplies the server half.
+    testImplementation(libs.ktor.client.contentNegotiation)
 }

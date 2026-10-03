@@ -1989,5 +1989,29 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-29T14:00:00Z"
+  },
+  {
+    "id": "bug-109",
+    "timestamp": "2026-10-03T19:50:00Z",
+    "error_message": "Agent worktree started at 582d3f8 (pre-stage-1), not feat/sync-outbox-and-tombstones; full check then failed with 'SDK location not found'",
+    "file": "(worktree setup)",
+    "root_cause": "Isolated worktree was cut from an older commit than the requested base; local.properties is gitignored so absent in a fresh worktree",
+    "fix": "git reset --hard feat/sync-outbox-and-tombstones on the new branch before any work; copied local.properties from the main checkout",
+    "tags": ["worktree", "git", "local.properties"],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T19:50:00Z"
+  },
+  {
+    "id": "bug-110",
+    "timestamp": "2026-10-03T19:50:00Z",
+    "error_message": "UncompletedCoroutinesError in ApplicationTest.healthEndpointReportsOk and MigrationFromV4Test during a full parallel ./gradlew check",
+    "file": "server/src/test/kotlin/com/anfas/app/ApplicationTest.kt",
+    "root_cause": "Test-coroutine timeout under heavy machine load while every module's tests ran at once; not an assertion failure",
+    "fix": "None needed: both pass alone and on rerun of the full check. Documented in CLAUDE.md under Sync - Stage 2",
+    "tags": ["flaky", "testApplication", "runTest", "timeout"],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T19:50:00Z"
   }
 ]

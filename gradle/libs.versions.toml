@@ -42,6 +42,9 @@ essenty = "2.5.0"
 # Android-first line — do NOT mix them.
 room3 = "3.0.1"
 sqlite = "2.7.0"
+# JDBC driver for :server only. The device-side SQLite is androidx.sqlite (above); this is the
+# server's own store and shares nothing with it.
+sqliteJdbc = "3.53.4.0"
 ktor = "3.5.2"
 kotlinx-coroutines = "1.11.0"
 kotlinx-serialization = "1.11.0"
@@ -156,6 +159,7 @@ multiplatformSettings = { module = "com.russhwolf:multiplatform-settings", versi
 multiplatformSettings-noArg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
 multiplatformSettings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatformSettings" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqliteJdbc" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 # --- Test -----------------------------------------------------------------

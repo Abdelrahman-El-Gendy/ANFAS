@@ -396,6 +396,84 @@ reconstructed after the fact.
   Third time it has broken a build. Reading `@Database`'s version by reflection does not work —
   the annotation does not survive to runtime, so `getAnnotation` returns null.
 
+## Sync - Stage 2 (the box, server half)
+
+`design/sync-layer.md` stage 2 is "one-way push to the box — the durability release". **This
+commit is the server half only.** `:server` now accepts, durably stores and exports pushed
+changes; **no client pushes anything**, so nothing in the apps changed and `AnfasBanner`'s
+sync promise stays unwired. The client half is listed under "Not built" below, with why.
+
+- **The wire types live in `:server`, not `:core:model`, and the client will mirror them.** The
+  design (§9) says opaque JSON for the durability stage with the layering rule untouched, and the
+  reason to hold the line is the one it gives: put `version`/`tenantId`-shaped DTOs in
+  `:core:model` and someone will add them to `Member` because it is right there. The price is two
+  declarations of one contract; `ProtocolContractTest` pins the JSON names (`@SerialName` on every
+  field, for R8) so the mirror has something to be checked against. `:core:sync-protocol` plus a
+  reviewed amendment to the layering rule is for stage 4, when the server needs invariants.
+- **The server is a log, not a replica.** `changes(server_seq AUTOINCREMENT, device_id,
+  client_seq, table, row_id, op, payload, ...)`; payloads are stored as JSON and never
+  interpreted, so the server cannot validate a member or enforce a unique membership number — the
+  cost the design already accepted. SQLite via JDBC (`org.xerial:sqlite-jdbc`, catalog
+  `sqlite-jdbc`), one connection, `synchronous=FULL`: this store exists to be the surviving copy,
+  and losing the last acknowledged transaction to a power cut would defeat the stage.
+  `AUTOINCREMENT` rather than rowid reuse, because a cursor that can be handed out twice is the
+  failure a server-assigned sequence exists to prevent.
+- **Idempotency is `(device_id, client_seq)`, and a replay with *different content* is a 409, not
+  a duplicate.** Acking a retried batch is the whole point of the key. But a restored backup or a
+  reinstall that kept its credential restarts `sync_outbox.seq` at 1, and treating those as
+  duplicates would silently discard real changes forever. Seeing `client_seq` N described as a
+  different `(table, row_id, op)` refuses the request; the fix is to re-register the device
+  (new id, new token). Pinned by two tests that go red if the content check is removed.
+- **A push is validated whole and written atomically.** An outbox drains in order; a half-applied
+  batch would leave a device unable to say what the box holds, and one bad entry would otherwise
+  be retried forever behind the good ones that were already acknowledged. The ack is
+  `acknowledged_through` = the highest `client_seq` in the request, valid for new and duplicate
+  entries alike.
+- **"Never synced" is enforced on the box, not trusted to the client.** `SyncedTables.ALL` is the
+  twelve names in `SyncTables`; `reminders`, `staff` and the two sync tables are refused with 400
+  (`ProtocolContractTest` pins the set, and a route test pushes each forbidden name). A client bug that tried to ship password verifiers or a SENT reminder would otherwise
+  succeed silently.
+- **Two credentials, and neither is a user login.** A device token authorises `POST /sync/push`
+  and nothing else; the owner's `ANFAS_ADMIN_SECRET` authorises `/admin/*` (register, revoke,
+  export). Tokens are 256 random bits, shown once, stored as SHA-256 — not a password hash,
+  because there is nothing to brute-force and a leaked file should still not hand out working
+  credentials. **An unset or under-16-character admin secret closes the admin routes** rather
+  than opening them or falling back to a default. This is the per-installation credential the
+  design (§9) says the WhatsApp relay should later share, so there is one registration to build.
+- **There is deliberately no device-facing read.** Pull is stage 3. Until then the only way data
+  leaves the box is the admin export, so a stolen tablet's token can add rows but not read the
+  gym's members back out. `GET /admin/export?after_seq&limit&latest_only=true` pages the raw log,
+  or — with `latest_only` — the live state: newest change per row, kept only if it is an UPSERT.
+  That is the "manual out-of-band restore into an empty database" the design asks for; whatever
+  does the restore is a tool, not an endpoint.
+- **No `tenant_id` or `branch_id` column.** One box serves one owner (design §4), and the
+  design's own warning applies: a column whose meaning is undecided gets defaulted and re-migrated
+  anyway. `branch_id` rides inside the opaque payload where the client puts it.
+- **Errors never echo internals.** The 500 body is a fixed string and the cause is logged only;
+  a driver message can quote a row. Logs carry device ids and counts, never payloads or tokens
+  (the domain is PII). The server logs through Ktor's SLF4J/logback, not Kermit, which is the
+  app-side logger.
+- **TLS is a stated requirement, not something the server does.** It speaks plain HTTP on 8080;
+  put it behind a TLS terminator (design §9: TLS and disk encryption on the box are requirements,
+  not assumptions) before any device uses it off a trusted LAN. Bearer tokens over plain HTTP are
+  readable to anyone on the path. There is no rate limiting either.
+- **`ServerConfig` is the one place the environment is read** (`ANFAS_DB_PATH`,
+  `ANFAS_ADMIN_SECRET`) so tests pass values instead of mutating process state. `module(store,
+  adminSecret)` takes its store explicitly, which is the server's version of constructor
+  injection; Koin was not added for one composition root.
+- **Not built, and what each needs.** The client half: serialising a row to JSON at push time
+  (the outbox stores `table, row_id, op` and **not** the row, by Stage 1's design, so the pusher
+  reads the row when it sends and a row deleted since reads as DELETE), a device-registration
+  step and credential in `Settings`, a pusher in `:core:data` over `:core:network`, which means
+  paying the documented cost of putting `:core:network` on `:composeApp`'s classpath, and
+  pruning the outbox through `acknowledged_through`. Also not built: the restore tool, pull
+  (stage 3), and the offline-banner wiring — it stays unwired until a device can actually push,
+  because "changes will sync when you reconnect" is a promise only then.
+- **Test-time flake worth knowing:** under a full parallel `./gradlew check` on a loaded machine,
+  `testApplication` and `runTest` can hit `UncompletedCoroutinesError` (a timeout, not an
+  assertion). `ApplicationTest.healthEndpointReportsOk` and an unrelated
+  `MigrationFromV4Test` both did once; both pass alone and on rerun.
+
 ## Navigation
 
 **`TopLevel.placement` is the whole model.** The rail and the bar carry deliberately different

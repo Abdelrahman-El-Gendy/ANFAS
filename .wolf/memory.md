@@ -613,3 +613,4 @@ skiko dialog actual with iOS, which is verified.
 | 19:16 | Created .github/workflows/release.yml | — | ~4351 |
 | 19:19 | Session end: 3 writes across 2 files (README.md, release.yml) | 0 reads | ~9770 tok |
 | 19:19 | Added .github/workflows/release.yml (tag-triggered release pipeline); updated CLAUDE.md CI note | .github/workflows/release.yml, CLAUDE.md | verified bundleRelease/assembleRelease/packageDmg locally | ~4000 |
+| 19:50 | Sync stage 2 server half (feat/sync-stage-2-server): sqlite-jdbc log store, device/admin bearer auth, /sync/push, /admin/export, 34 server tests, CLAUDE.md section | server/**, gradle/libs.versions.toml, CLAUDE.md | check + :server:test green; reverting two fixes turned 4 tests red | ~25000 |
