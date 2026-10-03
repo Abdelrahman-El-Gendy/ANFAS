@@ -613,3 +613,4 @@ skiko dialog actual with iOS, which is verified.
 | 19:16 | Created .github/workflows/release.yml | — | ~4351 |
 | 19:19 | Session end: 3 writes across 2 files (README.md, release.yml) | 0 reads | ~9770 tok |
 | 19:19 | Added .github/workflows/release.yml (tag-triggered release pipeline); updated CLAUDE.md CI note | .github/workflows/release.yml, CLAUDE.md | verified bundleRelease/assembleRelease/packageDmg locally | ~4000 |
+| 20:00 | WhatsApp Phase 3: RelayWhatsAppGateway (core:data), RelayWire (core:model), createPlatformHttpClient + sanitised logging (core:network), relay route + IdempotencyCache + GraphApiMetaClient (server), networkModule in composeApp; CLAUDE.md Phase 3 section | core/data, core/model, core/network, server, composeApp, CLAUDE.md | check + server:test + iOS compile green; 3 fixes falsified; live Meta delivery UNVERIFIED | ~60000 |

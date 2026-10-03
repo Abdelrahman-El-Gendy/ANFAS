@@ -1989,5 +1989,54 @@
     "related_bugs": [],
     "occurrences": 1,
     "last_seen": "2026-08-29T14:00:00Z"
+  },
+  {
+    "id": "bug-109",
+    "timestamp": "2026-10-03T19:50:00Z",
+    "error_message": "createHttpClient installed Logging at LogLevel.HEADERS with no header sanitiser: the first request carrying Authorization would write the relay credential into every log line (latent; no caller until WhatsApp Phase 3)",
+    "file": "core/network/src/commonMain/kotlin/com/anfas/core/network/HttpClientFactory.kt",
+    "root_cause": "Ktor logs request headers verbatim unless sanitizeHeader is configured; the factory had been intentionally inert so nobody noticed.",
+    "fix": "sanitizeHeader for Authorization, Kermit-backed logger, timeouts; HttpClientLoggingTest goes red when the sanitiser is removed.",
+    "tags": [
+      "ktor",
+      "logging",
+      "secrets",
+      "whatsapp"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T19:50:00Z"
+  },
+  {
+    "id": "bug-110",
+    "timestamp": "2026-10-03T19:50:00Z",
+    "error_message": "Agent worktree started on hardening/phase-3-ocr (582d3f8) with no WhatsApp Phase 1/2 code or design docs, not the stated feat/sync-outbox-and-tombstones base",
+    "file": "(git worktree)",
+    "root_cause": "Worktree was cut from the repo's main branch, not the caller's current branch.",
+    "fix": "git reset --hard feat/sync-outbox-and-tombstones on the fresh new branch before any work. Also: worktree has no local.properties, so ./gradlew check needs ANDROID_HOME exported.",
+    "tags": [
+      "worktree",
+      "git",
+      "environment"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T19:50:00Z"
+  },
+  {
+    "id": "bug-111",
+    "timestamp": "2026-10-03T19:50:00Z",
+    "error_message": "Ktor testApplication: 'The test application has already been built' when application{} is called twice in one test; relay test also asserted a token absent from Ktor's own client log, which quotes exception text",
+    "file": "server/src/test/kotlin/com/anfas/app/WhatsAppRelayTest.kt",
+    "root_cause": "One application{} per testApplication; Ktor internal loggers quote exception messages the test itself invented.",
+    "fix": "One test per application configuration; assert exception-text absence only on the relay's own logger.",
+    "tags": [
+      "ktor",
+      "testing",
+      "testApplication"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-10-03T19:50:00Z"
   }
 ]

@@ -37,12 +37,14 @@ kotlin {
             // For ocrModule only. The shell owns the DI graph, so it has to see every module
             // it registers; the capture and recognition types stay inside :feature:intake-ocr.
             implementation(project(":core:ocr"))
-            // :core:network and :core:auth are deliberately NOT here. Both are documented
-            // seams with no implementations and no callers yet, and an unused dependency edge
-            // still costs build time, R8 input, and -- for :core:network -- links OkHttp,
-            // Darwin and CIO into every release artifact, plus risks a transitive AAR
-            // contributing android.permission.INTERNET to the merged manifest. Re-add each the
-            // commit that first uses it.
+            // :core:network arrives with the first thing that actually uses it: the WhatsApp relay
+            // gateway (Phase 3). The costs this comment used to list are real and are now paid on
+            // purpose -- each platform links its one Ktor engine (OkHttp / Darwin / CIO) into the
+            // release artifact, and the relay is the reason. INTERNET was already declared in
+            // :androidApp's manifest, so nothing new reaches the merged manifest. It is wired ONLY
+            // for `networkModule`'s HttpClient; nothing here calls out until a relay is
+            // configured. (:core:auth is still not listed: it comes in through :core:data.)
+            implementation(project(":core:network"))
 
             implementation(project(":feature:members"))
             implementation(project(":feature:subscriptions"))

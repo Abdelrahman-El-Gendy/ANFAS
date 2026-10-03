@@ -14,4 +14,12 @@ dependencies {
     // keeps :core:designsystem and :core:database, and therefore Compose and Room, off
     // the server classpath.
     implementation(project(":core:model"))
+
+    // The relay talks to Meta's Graph API with a Ktor client. The engine is CIO and is named
+    // explicitly, as in :core:network, rather than discovered. These are external libraries:
+    // the layering rule restricts which *projects* :server may depend on, not what it may use.
+    implementation(libs.bundles.ktor.client)
+    implementation(libs.ktor.client.cio)
+
+    testImplementation(libs.ktor.client.mock)
 }
