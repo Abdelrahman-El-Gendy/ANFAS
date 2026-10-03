@@ -893,10 +893,11 @@ output was previously verified only by installing an APK by hand and reading log
 
 ## CI
 
-- **`.github/workflows/ci.yml` is PR-validation only — no release/signing workflows yet.**
-  Those need the keystore and Apple Team ID this project still doesn't have (see Release
-  configuration above); adding a tag-triggered release workflow before signing material exists
-  would just be dead YAML. Four jobs after a wrapper-validation gate, because one runner cannot
+- **`.github/workflows/ci.yml` is PR-validation only; `release.yml` is the tag-triggered build.**
+  `release.yml` (tag `vX.Y.Z` == `versionName`) builds AAB/APK, desktop dmg/msi/deb and an iOS
+  archive into a *draft* GitHub Release. Every signing secret is optional: without them Android is
+  debug-signed and iOS is an unsigned archive, both labelled as such. Desktop uses `package*`, not
+  `packageRelease*` — the Release variants run ProGuard and fail (verified locally). Four jobs after a wrapper-validation gate, because one runner cannot
   do it all: `jvm` on ubuntu-latest (`check :androidApp:assembleStage`), `apple` on macos-26
   (`iosSimulatorArm64Test linkReleaseFrameworkIosArm64`) — Apple targets silently *skip* on a
   Linux host, which is why this job exists — and `ios-app` (`xcodebuild build`), which catches

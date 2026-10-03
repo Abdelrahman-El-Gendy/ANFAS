@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-10-03T16:03:21.647Z
-> Files: 602 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-03T16:16:16.144Z
+> Files: 603 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/
 
@@ -50,6 +50,7 @@
 ## .github/workflows/
 
 - `ci.yml` — ` used to be here and now matches nothing -- branches are named (~1974 tok)
+- `release.yml` — CI: Release (~4351 tok)
 
 ## .gradle/
 

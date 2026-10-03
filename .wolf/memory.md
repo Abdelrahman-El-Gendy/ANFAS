@@ -608,3 +608,8 @@ skiko dialog actual with iOS, which is verified.
 | 19:01 | Session end: 1 writes across 1 files (README.md) | 0 reads | ~4687 tok |
 | 19:03 | Edited design/README.md | expanded (+35 lines) | ~683 |
 | 19:03 | Session end: 2 writes across 1 files (README.md) | 0 reads | ~5419 tok |
+| 19:03 | Session end: 2 writes across 1 files (README.md) | 0 reads | ~5419 tok |
+| 19:04 | Session end: 2 writes across 1 files (README.md) | 0 reads | ~5419 tok |
+| 19:16 | Created .github/workflows/release.yml | — | ~4351 |
+| 19:19 | Session end: 3 writes across 2 files (README.md, release.yml) | 0 reads | ~9770 tok |
+| 19:19 | Added .github/workflows/release.yml (tag-triggered release pipeline); updated CLAUDE.md CI note | .github/workflows/release.yml, CLAUDE.md | verified bundleRelease/assembleRelease/packageDmg locally | ~4000 |

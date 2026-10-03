@@ -1,0 +1,368 @@
+name: Release
+
+# Tag-triggered build of every shippable artifact, collected into a DRAFT GitHub Release.
+#
+#   1. Bump gradle/version.properties (versionName and versionCode) and merge it.
+#   2. git tag v<versionName> && git push origin v<versionName>
+#   3. Review the draft release this creates and publish it by hand.
+#
+# Signing is secret-driven and every secret is optional. With none configured the workflow still
+# runs end to end, but the Android build is debug-signed and the iOS build is an unsigned archive,
+# and the release says so -- a fresh fork never fails here, and never ships something that looks
+# signed and is not. See "Release configuration" in CLAUDE.md for why.
+#
+# Secrets (repo Settings -> Secrets and variables -> Actions):
+#   Android   ANDROID_KEYSTORE_BASE64  base64 of the .jks      (base64 -i anfas-release.jks)
+#             ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+#             PLAY_SERVICE_ACCOUNT_JSON  optional; uploads the AAB to the Play internal track
+#   iOS       IOS_TEAM_ID, IOS_DIST_CERT_P12_BASE64, IOS_DIST_CERT_PASSWORD,
+#             IOS_PROVISIONING_PROFILE_BASE64, IOS_PROVISIONING_PROFILE_NAME
+#             ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8_BASE64   optional; uploads to TestFlight
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  # A manual run builds everything and keeps the artifacts on the run page, but creates no release.
+  workflow_dispatch:
+
+# Never cancel a release half way; a second tag queues behind the first.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+jobs:
+  verify:
+    name: Verify the tag and run the full check
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_code: ${{ steps.version.outputs.version_code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/wrapper-validation@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+
+      # The tag is a promise about what is inside. A tag that disagrees with version.properties
+      # would publish 1.0.0 binaries under a 1.1.0 name, and a store would reject or mislabel it.
+      - name: Read the version and compare it with the tag
+        id: version
+        run: |
+          VERSION=$(grep -E '^versionName=' gradle/version.properties | cut -d= -f2 | tr -d '[:space:]')
+          CODE=$(grep -E '^versionCode=' gradle/version.properties | cut -d= -f2 | tr -d '[:space:]')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_code=$CODE" >> "$GITHUB_OUTPUT"
+          echo "version.properties: $VERSION ($CODE)"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v${VERSION}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match versionName ${VERSION} in gradle/version.properties"
+            exit 1
+          fi
+
+      # Tests, ktlint/Spotless and the anfas.layering rules, plus the stale-Version.xcconfig check.
+      # The Apple and emulator suites are CI's job and gate the merge; they are not repeated here.
+      - run: ./gradlew check
+
+  android:
+    name: Android (AAB + APK)
+    needs: verify
+    runs-on: ubuntu-latest
+    outputs:
+      signed: ${{ steps.keystore.outputs.signed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+
+      # androidApp/build.gradle.kts reads keystore.properties from the repo root and falls back
+      # to debug signing when it is absent. Writing the file is therefore the whole integration.
+      - name: Materialise the release keystore
+        id: keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret: this build is DEBUG-SIGNED and must not be shipped."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "$KEYSTORE_B64" | base64 --decode > anfas-release.jks
+          {
+            echo "storeFile=anfas-release.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > keystore.properties
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+
+      - run: ./gradlew :androidApp:bundleRelease :androidApp:assembleRelease
+
+      # Prove what actually signed the APK rather than trusting that the secret was read. A
+      # debug certificate here, with signed=true, would mean the keystore was silently ignored.
+      - name: Print the signing certificate
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$APKSIGNER" verify --print-certs androidApp/build/outputs/apk/release/*.apk
+
+      - name: Collect and name the artifacts
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+          SIGNED: ${{ steps.keystore.outputs.signed }}
+        run: |
+          SUFFIX=""; [ "$SIGNED" = "true" ] || SUFFIX="-DEBUG-SIGNED"
+          mkdir -p dist
+          cp androidApp/build/outputs/bundle/release/*.aab "dist/ANFAS-${VERSION}${SUFFIX}.aab"
+          cp androidApp/build/outputs/apk/release/*.apk "dist/ANFAS-${VERSION}${SUFFIX}.apk"
+          # R8's mapping file is what turns a production stack trace back into source. It is
+          # useless to reconstruct later, so it ships with the release.
+          cp androidApp/build/outputs/mapping/release/mapping.txt "dist/ANFAS-${VERSION}-android-mapping.txt"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: dist/*
+          if-no-files-found: error
+
+      # `secrets` cannot be read in an `if`, so presence is lifted into an output first.
+      - name: Check for Play credentials
+        id: play
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: '[ -n "$PLAY_JSON" ] && echo "enabled=true" >> "$GITHUB_OUTPUT" || echo "enabled=false" >> "$GITHUB_OUTPUT"'
+
+      - name: Upload to the Play internal track
+        if: steps.keystore.outputs.signed == 'true' && steps.play.outputs.enabled == 'true'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.anfas.app
+          releaseFiles: dist/*.aab
+          track: internal
+          status: draft
+          mappingFile: dist/ANFAS-${{ needs.verify.outputs.version }}-android-mapping.txt
+
+  desktop:
+    name: Desktop (${{ matrix.os }})
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # jpackage cannot cross-build, so each host produces only its own format
+          # (desktopApp/build.gradle.kts derives targetFormats from the host OS).
+          - os: macos-26
+            task: packageDmg
+            glob: dmg
+          - os: windows-latest
+            task: packageMsi
+            glob: msi
+          - os: ubuntu-latest
+            task: packageDeb
+            glob: deb
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      # packageDmg/Msi/Deb, not packageRelease*: the Release variants run ProGuard over the whole
+      # desktop classpath and fail on unresolved references (verified locally on
+      # com.jetbrains.SharedTextures); the project has no desktop ProGuard config.
+      # The MSI needs the WiX toolset, which GitHub's Windows image ships; failing loudly later
+      # is better than guessing, so no extra install step here.
+      - run: ./gradlew :desktopApp:${{ matrix.task }}
+      - name: Collect the installer
+        shell: bash
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          mkdir -p dist
+          for f in desktopApp/build/compose/binaries/main/${{ matrix.glob }}/*; do
+            ext="${f##*.}"
+            cp "$f" "dist/ANFAS-${VERSION}-desktop-${{ runner.os }}.${ext}"
+          done
+          ls -l dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ runner.os }}
+          path: dist/*
+          if-no-files-found: error
+
+  ios:
+    name: iOS (archive)
+    needs: verify
+    # macos-26 for the iOS 26 SDK Compose Multiplatform 1.11.1 links against -- see ci.yml.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Select the newest Xcode and record it
+        run: |
+          LATEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          sudo xcode-select -s "$LATEST"
+          xcodebuild -version
+      # Same heap override as ci.yml's apple job, and for the same reason: two-target release
+      # framework linking needs more than a default runner daemon gets.
+      - name: Lower the Gradle daemon heap for this runner
+        run: |
+          mkdir -p "$HOME/.gradle"
+          echo "org.gradle.jvmargs=-Xmx5120M -Dfile.encoding=UTF-8" >> "$HOME/.gradle/gradle.properties"
+
+      - name: Install signing material
+        id: signing
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          CERT_B64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          PROFILE_B64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          if [ -z "$TEAM_ID" ] || [ -z "$CERT_B64" ] || [ -z "$PROFILE_B64" ]; then
+            echo "::warning::iOS signing secrets missing: producing an UNSIGNED archive that cannot be installed or uploaded."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          KEYCHAIN="$RUNNER_TEMP/build.keychain-db"
+          KEYCHAIN_PASSWORD=$(uuidgen)
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          echo "$CERT_B64" | base64 --decode > "$RUNNER_TEMP/dist.p12"
+          security import "$RUNNER_TEMP/dist.p12" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          echo "$PROFILE_B64" | base64 --decode \
+            > "$HOME/Library/MobileDevice/Provisioning Profiles/anfas.mobileprovision"
+          # Local.xcconfig is the documented, gitignored place for TEAM_ID (see Config.xcconfig).
+          echo "TEAM_ID=$TEAM_ID" > app/iosApp/Configuration/Local.xcconfig
+          echo "signed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Archive
+        working-directory: app/iosApp
+        env:
+          SIGNED: ${{ steps.signing.outputs.signed }}
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
+        run: |
+          if [ "$SIGNED" = "true" ]; then
+            xcodebuild archive \
+              -project iosApp.xcodeproj -scheme iosApp -configuration Release \
+              -destination "generic/platform=iOS" \
+              -archivePath "$RUNNER_TEMP/ANFAS.xcarchive" \
+              CODE_SIGN_STYLE=Manual \
+              DEVELOPMENT_TEAM="$TEAM_ID" \
+              CODE_SIGN_IDENTITY="Apple Distribution" \
+              PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
+          else
+            xcodebuild archive \
+              -project iosApp.xcodeproj -scheme iosApp -configuration Release \
+              -destination "generic/platform=iOS" \
+              -archivePath "$RUNNER_TEMP/ANFAS.xcarchive" \
+              CODE_SIGNING_ALLOWED=NO
+          fi
+
+      - name: Export the IPA
+        if: steps.signing.outputs.signed == 'true'
+        env:
+          TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          PROFILE_NAME: ${{ secrets.IOS_PROVISIONING_PROFILE_NAME }}
+        run: |
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict><key>com.anfas.app</key><string>${PROFILE_NAME}</string></dict>
+          </dict></plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/ANFAS.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export"
+
+      - name: Check for App Store Connect credentials
+        id: asc
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: '[ -n "$ASC_KEY_ID" ] && echo "enabled=true" >> "$GITHUB_OUTPUT" || echo "enabled=false" >> "$GITHUB_OUTPUT"'
+
+      - name: Upload to TestFlight
+        if: steps.signing.outputs.signed == 'true' && steps.asc.outputs.enabled == 'true'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: |
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          echo "$ASC_KEY_P8_BASE64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          xcrun altool --upload-app --type ios \
+            --file "$RUNNER_TEMP"/export/*.ipa \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Collect the artifact
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+          SIGNED: ${{ steps.signing.outputs.signed }}
+        run: |
+          mkdir -p dist
+          if [ "$SIGNED" = "true" ]; then
+            cp "$RUNNER_TEMP"/export/*.ipa "dist/ANFAS-${VERSION}.ipa"
+          else
+            ditto -c -k --sequesterRsrc --keepParent \
+              "$RUNNER_TEMP/ANFAS.xcarchive" "dist/ANFAS-${VERSION}-UNSIGNED.xcarchive.zip"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: Draft the GitHub Release
+    # A manual run keeps its artifacts on the run page and creates no release.
+    if: github.ref_type == 'tag'
+    needs: [verify, android, desktop, ios]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - run: ls -l dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: ANFAS ${{ needs.verify.outputs.version }}
+          generate_release_notes: true
+          files: dist/*
+          # Anything not signed for real is marked, so a draft never reads as shippable by accident.
+          body: |
+            **Android:** ${{ needs.android.outputs.signed == 'true' && 'release-signed' || '⚠️ DEBUG-SIGNED — do not distribute' }}
+            Build ${{ needs.verify.outputs.version }} (versionCode ${{ needs.verify.outputs.version_code }}).
+            Desktop installers are unsigned and not notarised.
