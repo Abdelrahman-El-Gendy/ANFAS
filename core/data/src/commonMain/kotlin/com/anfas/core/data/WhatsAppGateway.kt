@@ -6,7 +6,7 @@ import com.anfas.core.model.FailureReason
  * One template message, ready to hand over.
  *
  * This is the wire contract the relay will carry, defined now so the shape is settled before an
- * HTTP client exists — see `design/whatsapp-send-system.md` §2 for why the token lives on a server
+ * HTTP client existed — it is carried on the wire as `RelaySendRequest` (`:core:model`); see `design/whatsapp-send-system.md` §2 for why the token lives on a server
  * and the device only ever posts one of these.
  */
 data class TemplateMessage(
@@ -60,7 +60,8 @@ interface WhatsAppGateway {
     /**
      * Whether there is anything on the other end.
      *
-     * False until the live gateway and its credentials land (Phase 3). This exists so the Run
+     * False until a relay URL and device credential are configured (the live gateway is
+     * `RelayWhatsAppGateway`; [NoWhatsAppGateway] is always false). This exists so the Run
      * queue action can be *withheld with a reason* rather than offered and then failing every row:
      * a run against nothing would mark the whole queue FAILED and spend each reminder's attempts,
      * so the queue would be poisoned before WhatsApp was ever connected.
@@ -71,9 +72,11 @@ interface WhatsAppGateway {
 }
 
 /**
- * The gateway until there is a real one.
+ * The gateway when no HTTP client is bound at all (tests, or a launcher that omits the network).
+ * In the shipped app `RelayWhatsAppGateway` is bound instead and reports itself unconfigured until a
+ * relay exists.
  *
- * Registered in production deliberately, rather than leaving the binding absent: an absent binding
+ * Bound deliberately, rather than leaving the binding absent: an absent binding
  * is a Koin resolution failure the first time someone opens the queue, whereas this is a truthful
  * "not connected yet" the UI can explain. `send` is unreachable in practice — [isConfigured] is
  * false, so nothing calls it — and returns [GatewayResult.Unreachable] rather than throwing, on the

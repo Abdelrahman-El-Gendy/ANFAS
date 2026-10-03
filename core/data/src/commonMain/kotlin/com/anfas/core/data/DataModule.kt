@@ -7,6 +7,7 @@ import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.database.AnfasDatabase
 import com.anfas.core.database.buildDatabase
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -49,9 +50,24 @@ val dataModule: Module = module {
         OfflineFirstMemberRepository(dao = get(), newId = { Uuid.random().toString() })
     }
     single<ReminderRepository> { OfflineFirstReminderRepository(dao = get()) }
-    // No live gateway yet (Phase 3). Bound rather than left absent so opening the queue is a
-    // truthful "not connected" instead of a Koin resolution failure.
-    single<WhatsAppGateway> { NoWhatsAppGateway }
+    // The relay's address and this installation's credential. Read afresh on every use, so the
+    // owner configuring it takes effect without a restart.
+    single { SettingsRelayConfigSource(settings = get()) }
+    single<RelayConfigSource> { get<SettingsRelayConfigSource>() }
+    // The live gateway needs an HttpClient, and :core:data deliberately has no engine of its own --
+    // the app shell binds one (see :composeApp's networkModule). Without that binding this stays
+    // NoWhatsAppGateway, bound rather than absent so opening the queue is a truthful "not
+    // connected" instead of a Koin resolution failure. WITH it, `isConfigured` is still false until
+    // a relay URL and credential exist, so Run queue stays withheld with its explanation and a run
+    // can never fail every row against nothing.
+    single<WhatsAppGateway> {
+        val client = getOrNull<HttpClient>()
+        if (client == null) {
+            NoWhatsAppGateway
+        } else {
+            RelayWhatsAppGateway(client = client, config = get())
+        }
+    }
     single<ReminderSender> {
         DefaultReminderSender(reminders = get(), gateway = get(), dispatchers = get())
     }

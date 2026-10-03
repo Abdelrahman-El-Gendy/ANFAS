@@ -19,14 +19,18 @@ import kotlinx.serialization.json.Json
 const val PORT: Int = 8080
 
 fun main() {
-    embeddedServer(Netty, port = PORT, host = "0.0.0.0", module = Application::module)
+    embeddedServer(Netty, port = PORT, host = "0.0.0.0", module = { module() })
         .start(wait = true)
 }
 
 @Serializable
 data class HealthResponse(val status: String, val service: String)
 
-fun Application.module() {
+/**
+ * [relay] defaults to whatever the environment configures, and is null (route answers 503) when
+ * it configures nothing -- so a bare `./gradlew :server:run` still starts and serves `/health`.
+ */
+fun Application.module(relay: WhatsAppRelay? = WhatsAppRelay.fromEnvironment()) {
     install(ContentNegotiation) {
         json(
             Json {
@@ -55,5 +59,6 @@ fun Application.module() {
         get("/health") {
             call.respond(HealthResponse(status = "ok", service = "anfas-server"))
         }
+        whatsAppRelay(relay)
     }
 }

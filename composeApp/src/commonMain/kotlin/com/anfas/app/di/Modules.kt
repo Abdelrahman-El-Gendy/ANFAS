@@ -6,6 +6,7 @@ import com.anfas.core.common.logger
 import com.anfas.core.common.platformSettingsModule
 import com.anfas.core.data.dataModule
 import com.anfas.core.i18n.i18nModule
+import com.anfas.core.network.createPlatformHttpClient
 import com.anfas.core.ocr.ocrModule
 import com.anfas.feature.announcements.AnnouncementsModule
 import com.anfas.feature.auth.AuthModule
@@ -17,6 +18,7 @@ import com.anfas.feature.intakeocr.IntakeOcrModule
 import com.anfas.feature.members.MembersModule
 import com.anfas.feature.subscriptions.SubscriptionsModule
 import com.anfas.feature.therapy.TherapyModule
+import io.ktor.client.HttpClient
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -28,6 +30,21 @@ val coreModule: Module = module {
     // Key-value storage, registered once. Both :core:i18n (language) and :core:data (session)
     // resolve Settings from here — see platformSettingsModule's KDoc.
     includes(platformSettingsModule())
+}
+
+/**
+ * The one HttpClient, with this platform's engine.
+ *
+ * Lives in the app shell because it is the only module allowed to see both :core:network (which
+ * owns the engines) and :core:data (which consumes an `HttpClient` and deliberately owns no
+ * engine). `dataModule` resolves it with `getOrNull`, so omitting this module degrades the
+ * WhatsApp gateway to "not connected" rather than failing to start.
+ *
+ * `createdAtStart` is deliberately absent: building an engine is not free, and nothing needs it
+ * until the first send.
+ */
+val networkModule: Module = module {
+    single<HttpClient> { createPlatformHttpClient() }
 }
 
 /**
@@ -59,6 +76,7 @@ fun initKoin(declaration: KoinAppDeclaration = {}): KoinApplication = startKoin 
     logger("Startup").i("ANFAS starting: DI graph initialising")
     declaration()
     modules(coreModule)
+    modules(networkModule)
     modules(dataModule)
     modules(i18nModule)
     modules(ocrModule)

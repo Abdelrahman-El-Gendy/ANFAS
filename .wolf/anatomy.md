@@ -762,7 +762,9 @@
 
 ## core/network/src/commonMain/kotlin/com/anfas/core/network/
 
-- `HttpClientFactory.kt` — The engine is supplied per platform (OkHttp on Android, Darwin on iOS, CIO on desktop), (~228 tok)
+- `HttpClientFactory.kt` — createHttpClient: JSON, timeouts, Logging at HEADERS with Authorization redacted; expect createPlatformHttpClient (~700 tok)
+- `PlatformHttpClient.{android,ios,jvm}.kt` (under androidMain/iosMain/jvmMain) — name OkHttp/Darwin/CIO explicitly, no ServiceLoader discovery (~80 tok each)
+- `HttpClientLoggingTest.kt` (commonTest) — credential and bodies never reach the log (~500 tok)
 
 ## core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/
 
@@ -977,7 +979,8 @@
 
 ## server/src/main/kotlin/com/anfas/app/
 
-- `Application.kt` — Data class: HealthResponse (3 properties) (~469 tok)
+- `Application.kt` — Ktor module(relay) + /health; whatsAppRelay route mounted (~520 tok)
+- `WhatsAppRelay.kt` — POST /v1/whatsapp/send: device auth, IdempotencyCache, GraphApiMetaClient, MetaOutcome (~3500 tok)
 
 ## server/src/main/resources/
 
@@ -986,3 +989,10 @@
 ## server/src/test/kotlin/com/anfas/app/
 
 - `ApplicationTest.kt` — ApplicationTest: healthEndpointReportsOk (~188 tok)
+- `WhatsAppRelayTest.kt` — 21 tests against a MockEngine Meta: auth, mapping, idempotency, no secrets logged (~3500 tok)
+
+## WhatsApp Phase 3 additions
+
+- `core/model/.../RelayWire.kt` — RelaySendRequest/Response/ErrorResponse + path + status-code contract shared by device and :server (~600 tok)
+- `core/data/.../RelayWhatsAppGateway.kt` — live gateway over HttpClient, RelayConfig (https-only, redacted toString), SettingsRelayConfigSource (~2200 tok)
+- `core/data/src/commonTest/.../RelayWhatsAppGatewayTest.kt` — status mapping, unreachable != rejected, rate-limit stops run, no secrets logged (~3000 tok)

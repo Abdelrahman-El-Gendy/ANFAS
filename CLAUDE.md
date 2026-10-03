@@ -727,15 +727,102 @@ so nothing leaves the device.
 - **One parameter per template, the member's name.** The real parameter list is fixed when Meta
   approves the templates (Phase 3), so committing to a second value now would be guessing at a
   template that does not exist — and the name is the one value every candidate will carry.
-- **Deferred to Phase 3, deliberately:** the Ktor client and the `:server` relay route. Neither can
-  be verified end-to-end without a Meta token, and wiring `:core:network` into `:composeApp` has
-  documented costs (engines in every release artifact) worth paying only when something real is on
-  the other end. The wire contract — `TemplateMessage` — is defined now so that work is mechanical.
-- **"Send test message" is also deferred**, and for a reason rather than by omission: a test send
-  against a fake gateway proves nothing, so it only becomes meaningful once the live one exists.
+- **Deferred to Phase 3, deliberately:** the Ktor client and the `:server` relay route — now built,
+  see the next section. The wire contract — `TemplateMessage` — was defined first so that work was
+  mechanical.
+- **"Send test message" was also deferred**, and for a reason rather than by omission: a test send
+  against a fake gateway proves nothing. Phase 3 reconsidered and kept it deferred.
 - Corrected while verifying: the queued empty state said "Reminders appear here once the daily job
   schedules them". There is no daily job — it now names Build queue. And the sent tab said
   "Delivered", which overstates `SENT`: WhatsApp accepting a message is not a delivery receipt.
+
+## WhatsApp reminders — Phase 3 (the live gateway)
+
+The code path from a queued reminder to Meta's Graph API now exists end to end, and **none of it has
+ever spoken to Meta.** Every test runs against Ktor's `MockEngine` standing in for the relay (device
+side) or for Meta (relay side). What is proven: authentication, status-to-result mapping,
+deduplication, and what reaches a log. What is *not*: that a real message is delivered to a phone,
+that the Graph payload matches an approved template, that Meta's error codes are the ones in
+`failureReasonFor` for the version in use. Those need a Meta account, an approved template and a
+token — see `design/whatsapp-send-system.md` §12.
+
+- **The token lives on `:server`; a device holds only a revocable credential.** `RelayWhatsAppGateway`
+  posts a `TemplateMessage` to `POST /v1/whatsapp/send` on the relay with a per-installation bearer
+  credential, and the relay holds the Meta token in its environment (`WHATSAPP_ACCESS_TOKEN`). This
+  is the design doc's Option B, chosen so a lost tablet is cut off by removing one credential rather
+  than rotating the business token. The credential is still a secret and is never logged;
+  `RelayConfig` is deliberately not a `data class`, because the generated `toString` would print it.
+- **The wire contract is declared once, in `:core:model` (`RelayWire.kt`).** `:server` may depend on
+  nothing else, so the module both ends share is the only place a contract can live without a copy
+  that drifts. It cost `:core:model` the serialization plugin and `kotlinx-serialization-json`, both
+  already on the pure-Kotlin allowlist; nothing else in that module is serialisable.
+- **Status codes carry the verdict, and 5xx is not one.** 2xx accepted; 422 Meta refused (its code in
+  the body, which `failureReasonFor` then reads); 429 rate limited — reported as 130429 when the body
+  gives no code, so a bare throttle still stops the run; 401/403 and other 4xx are *our* refusal
+  (revoked credential, wrong URL) with no provider code. **5xx, 408, a timeout or no connection is
+  `GatewayResult.Unreachable`, never `Rejected`**: the relay may have handed the message to Meta
+  before failing, so we do not know, and calling it a rejection would tell a receptionist it
+  definitely did not go. The relay applies the same rule to Meta: its own 5xx and transport failures
+  answer 502, and Meta rejecting the *relay's* credential (HTTP 401/403, code 190) is also 502 — not
+  a verdict on the message and not the device's doing.
+- **Idempotency is two layers, and only the first exists.** The device sends the reminder's id as
+  the key; the relay's `IdempotencyCache` returns the original outcome for a repeat, so a call that
+  timed out after Meta accepted it cannot become a second message. It remembers only **definitive**
+  outcomes (accepted, refused). A rate limit or an unknown outcome is deliberately *not* cached,
+  because retrying those has to be able to reach Meta again; duplicates racing in flight share one
+  call. In memory, six hours: a relay restart forgets it, an accepted gap for one process serving
+  one gym. The design doc's second key (cross-device, `(member, template, day)`) is **not built** —
+  two devices holding different rows still produce different keys.
+- **`isConfigured` is true only when a relay URL and credential exist, read on every call.**
+  `dataModule` binds `RelayWhatsAppGateway` when an `HttpClient` is bound and `NoWhatsAppGateway`
+  when not (bound rather than absent, as in Phase 2). With the client bound but no relay configured,
+  `isConfigured` is false and Run queue stays withheld with its explanation — verified by a
+  sender-level test that no attempt is spent and no request leaves. **Nothing in the app writes
+  those two `Settings` keys yet** (`SettingsRelayConfigSource.save` is the seam). Until an
+  owner-facing setup screen exists the feature is dormant on every install: wired and tested, not
+  switchable on without a code change. `RelayConfig.of` refuses cleartext to anything but
+  loopback, so the credential cannot be configured to travel over plain HTTP.
+- **Wiring `:core:network` into `:composeApp` is paid for on purpose, and only for this.** Phase 2
+  deferred it because every release artifact then links OkHttp, Darwin or CIO. That cost is now
+  buying something real, so it is accepted; the mitigations that remain are that `:core:data`
+  depends on `ktor-client-core` only (no engine — so depending on it drags nothing in), that the
+  client is a lazy `single` with no `createdAtStart`, and that nothing calls out until a relay is
+  configured. `INTERNET` was already in `:androidApp`'s manifest, so the merged manifest gains
+  nothing. Re-run `./gradlew :androidApp:connectedStageAndroidTest` (R8) before shipping: new
+  per-platform engines are exactly what shrinking has caught before.
+- **Each target names its Ktor engine (`createPlatformHttpClient` is an `expect`)** rather than
+  calling `HttpClient()` and letting it discover one. Discovery rests on `ServiceLoader`, the same
+  reflective lookup R8 already stripped once (ML Kit's `ComponentDiscovery`). Not verified under R8
+  here — see the note above.
+- **Ktor's `Logging` plugin was a leak waiting for its first caller.** `createHttpClient` had
+  `LogLevel.HEADERS` with no sanitiser, so the first request carrying `Authorization` would have
+  written the credential into every log line. It now redacts that header, routes through the
+  Kermit seam, and gained connect/request timeouts (a dead connection otherwise waits for the OS,
+  and the timeout surfaces as `Unreachable`, which is the truthful state). `BODY` stays forbidden:
+  it would write member numbers into a file. Pinned by `HttpClientLoggingTest`, which goes red when
+  the sanitiser is removed.
+- **What is logged, on both ends: the reminder id and an outcome class. Never a number, a name, a
+  parameter, a header, or an exception *message*.** A transport exception's text can quote the URL
+  it was dialling, so only its class name is recorded. Tests drive every outcome path through a
+  capturing log writer (Kermit on the device, Logback on the server) and assert the credential,
+  the Meta token, the number and the member's name appear nowhere.
+- **The relay needs four environment variables and fails closed without any of them:**
+  `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_GRAPH_API_VERSION` and
+  `RELAY_DEVICE_TOKENS` (comma-separated, one per installation; revoke by removing one and
+  restarting). Missing any, the route answers 503 — which the device reads as *unreachable*, not as
+  a verdict — and the log names only the variables that are absent. **The Graph API version has no
+  default, deliberately**: versions expire, and a hardcoded one is a send path that quietly stops
+  working months after it shipped. Pin it and re-confirm `failureReasonFor`'s codes against it.
+  Device credentials are compared in constant time against every configured token.
+- **Not built:** relay-side rate limiting (Meta's own 429 is passed through and stops the device's
+  run; a gym's volume does not need a second limiter), persistence of the idempotency window, the
+  cross-device content key, per-device revocation without a restart, delivery webhooks, and any
+  setup UI.
+- **"Send test message" stays deferred.** A live gateway now exists, but a test send needs a
+  recipient, an approved template, a place to enter the relay config (nothing writes it yet) and
+  EN/AR copy — and the only thing it could usefully prove, that Meta delivers, is the one thing
+  that cannot be checked without a token. Offering a button whose success cannot be demonstrated
+  is the same mistake as the offline banner that promised a sync nothing performed.
 
 ## Dates the user enters
 

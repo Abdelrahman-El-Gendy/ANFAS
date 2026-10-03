@@ -1,5 +1,6 @@
 plugins {
     id("anfas.kmp.library")
+    alias(libs.plugins.kotlinSerialization)
 }
 
 // :core:model depends on NOTHING. No project dependencies, and no external
@@ -12,10 +13,16 @@ plugins {
 // `api`, not `implementation`: LocalDate appears in this module's public types
 // (SubscriptionTerm.startsOn, RenewalQuote.endsOn), so it is part of the ABI and consumers
 // cannot compile against it otherwise.
+//
+// kotlinx-serialization-json is here for one file, `RelayWire.kt`: the request/response shapes
+// that the device and `:server` both speak. This module is the only thing both already depend
+// on, and a wire contract declared once cannot drift between its two ends. It is on the
+// allowlist, and nothing else in the module is serialisable.
 kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.kotlinx.datetime)
+            api(libs.kotlinx.serialization.json)
         }
     }
 }

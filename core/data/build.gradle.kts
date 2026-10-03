@@ -20,9 +20,17 @@ kotlin {
             implementation(libs.bundles.koin)
             // SettingsSessionStore persists which staff id is signed in. No secret: see its KDoc.
             implementation(libs.bundles.settings)
+            // The relay gateway is written against HttpClient and nothing else. Core only: no
+            // engine here, so this module does not pull OkHttp/Darwin/CIO into anything that
+            // merely depends on it. The app shell supplies the client (:core:network).
+            implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(libs.turbine)
+            implementation(libs.ktor.client.mock)
+            // A capturing LogWriter, to prove nothing sensitive reaches a log.
+            implementation(libs.kermit)
         }
         androidMain.dependencies {
             // androidContext() — the DatabaseBuilderFactory actual needs a Context.
