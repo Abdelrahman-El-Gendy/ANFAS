@@ -595,3 +595,16 @@ skiko dialog actual with iOS, which is verified.
 | 14:05 | Sync Stage 1 device verification: real v12->v13 migration confirmed on 2 real devices (existing desktop db + existing Android emulator db, both had prior real data, both migrated cleanly with data intact). seedPlans confirmed populating 3 plans on iOS/Android/renewal-sheet UI. Check-in on Android: granted check-in wrote check_ins+members in one transaction and both rows landed in sync_outbox atomically (verified by reading device db via adb+sqlite3). iOS/desktop UI navigation limited to screenshots only (no Accessibility permission for osascript, no idb/mobile-mcp tool available this session) -- Android fully interactive via adb input. | core/database (schema), core/data (repositories) -- verification only, no further code changes | all real-device checks pass | ~large |
 | 04:10 | Sync Stage 1: schema v13 adds sync_outbox + sync_tombstones (two tables, zero columns on existing tables). 24 tracked write paths across 8 repositories, outbox entry in the same @Transaction. Member delete tombstones the 2-deep therapy cascade. seedPlans now insert-if-absent. 3 previously non-atomic writes made atomic. Falsified 3 invariants. Migration verified on two real v12 devices | core/database/*, core/data/*, CLAUDE.md | verified green | ~60000 |
 | 14:01 | Session end: 9 writes across 4 files (DashboardComponentTest.kt, MigrationFromV4Test.kt, MemberProfileComponentTest.kt, TestDoubles.kt) | 24 reads | ~5147 tok |
+| 14:03 | Session end: 9 writes across 4 files (DashboardComponentTest.kt, MigrationFromV4Test.kt, MemberProfileComponentTest.kt, TestDoubles.kt) | 24 reads | ~5147 tok |
+
+## Session: 2026-10-03 18:45
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 18:48 | Created design/README.md | — | ~4375 |
+| 18:48 | Wrote design/README.md (Claude Design brief: roles, tokens, 14 screens, states, a11y, not-built list) | design/README.md | done | ~3500 |
+| 18:48 | Session end: 1 writes across 1 files (README.md) | 0 reads | ~4687 tok |
+| 18:49 | Session end: 1 writes across 1 files (README.md) | 0 reads | ~4687 tok |
+| 19:01 | Session end: 1 writes across 1 files (README.md) | 0 reads | ~4687 tok |
+| 19:03 | Edited design/README.md | expanded (+35 lines) | ~683 |
+| 19:03 | Session end: 2 writes across 1 files (README.md) | 0 reads | ~5419 tok |

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-29T10:26:54.425Z
-> Files: 600 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-03T16:03:21.647Z
+> Files: 602 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/
 
@@ -786,6 +786,8 @@
 
 ## design/
 
+- `README.md` — Project documentation (~4736 tok)
+- `README.md` — Claude Design brief: product, roles, tokens, every screen + states, a11y, not-built list (~3500 tok)
 - `sync-layer.md` — The sync layer — design (~5739 tok)
 - `whatsapp-send-system.md` — The WhatsApp send system — design (~4591 tok)
 
