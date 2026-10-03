@@ -8,6 +8,8 @@ import com.anfas.core.common.appExceptionHandler
 import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.ReminderCounts
 import com.anfas.core.data.ReminderRepository
+import com.anfas.core.data.ReminderScheduler
+import com.anfas.core.data.ReminderSender
 import com.anfas.core.model.MemberId
 import com.anfas.core.model.Reminder
 import com.anfas.core.model.ReminderId
@@ -42,6 +44,8 @@ import kotlinx.coroutines.launch
 class ReminderQueueComponent(
     componentContext: ComponentContext,
     private val repository: ReminderRepository,
+    private val scheduler: ReminderScheduler,
+    private val sender: ReminderSender,
     private val auth: AuthRepository,
     dispatchers: AppDispatchers,
     private val onOpenMemberClicked: (MemberId) -> Unit,
@@ -76,6 +80,11 @@ class ReminderQueueComponent(
             openedFailure = queueResult.find(selections.openedId),
             notice = selections.notice,
             mayRetry = session?.can(Permission.RETRY_REMINDERS) == true,
+            mayBuildQueue = session?.can(Permission.RETRY_REMINDERS) == true,
+            isBuilding = selections.isBuilding,
+            maySend = session?.can(Permission.SEND_REMINDERS) == true,
+            gatewayConnected = sender.isConfigured,
+            isSending = selections.isSending,
         )
     }.stateIn(
         scope = scope,
@@ -137,6 +146,66 @@ class ReminderQueueComponent(
 
     fun onNoticeShown() = ui.update { it.copy(notice = null) }
 
+    /**
+     * Materialises the queue from the members who are due a renewal.
+     *
+     * The one action in Phase 1 that writes reminders -- nothing sends yet. Guarded here as well as
+     * hidden in the UI, for the same reason [retry] is: a component method is callable from
+     * anywhere, so a hidden button is not a boundary.
+     */
+    fun onBuildQueue() {
+        if (!state.value.mayBuildQueue || state.value.isBuilding) return
+        ui.update { it.copy(isBuilding = true, notice = null) }
+        scope.launch {
+            val notice = when (val result = scheduler.buildQueue()) {
+                is AppResult.Failure -> QueueNotice.Failed(result.error.message)
+
+                is AppResult.Success -> result.value.let { outcome ->
+                    // Distinguished so "queued 0" can say which reason applied. With consent
+                    // defaulting to false, a first build on real data legitimately queues nothing,
+                    // and a bare "0" would read as a broken button.
+                    if (outcome.queued > 0) {
+                        QueueNotice.QueueBuilt(outcome.queued)
+                    } else {
+                        QueueNotice.QueueBuiltNothing(
+                            noConsent = outcome.skippedNoConsent,
+                            noPhone = outcome.skippedNoPhone,
+                            alreadyQueued = outcome.alreadyQueued,
+                        )
+                    }
+                }
+            }
+            ui.update { it.copy(isBuilding = false, notice = notice) }
+        }
+    }
+
+    /**
+     * Sends what is queued.
+     *
+     * Guarded on the permission *and* on there being a gateway. Both are checked here as well as in
+     * the screen: running against no gateway would mark every row failed and spend its attempts, so
+     * the queue would be poisoned before WhatsApp was ever connected.
+     */
+    fun onRunQueue() {
+        val current = state.value
+        if (!current.maySend || !current.gatewayConnected || current.isSending) return
+        ui.update { it.copy(isSending = true, notice = null) }
+        scope.launch {
+            val notice = when (val result = sender.runQueue()) {
+                is AppResult.Failure -> QueueNotice.Failed(result.error.message)
+
+                is AppResult.Success -> result.value.let { outcome ->
+                    if (outcome.stoppedEarly) {
+                        QueueNotice.RunStoppedEarly(outcome.sent)
+                    } else {
+                        QueueNotice.RunFinished(sent = outcome.sent, failed = outcome.failed)
+                    }
+                }
+            }
+            ui.update { it.copy(isSending = false, notice = notice) }
+        }
+    }
+
     private fun retry(ids: List<ReminderId>) {
         if (ids.isEmpty()) return
         // Enforced here as well as hidden in the UI. A component method is callable from
@@ -173,6 +242,8 @@ class ReminderQueueComponent(
         val selectedIds: Set<ReminderId> = emptySet(),
         val openedId: ReminderId? = null,
         val notice: QueueNotice? = null,
+        val isBuilding: Boolean = false,
+        val isSending: Boolean = false,
     )
 
     private companion object {

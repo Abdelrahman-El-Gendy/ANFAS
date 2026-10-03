@@ -3,9 +3,12 @@ package com.anfas.core.data
 import com.anfas.core.common.AppResult
 import com.anfas.core.database.CheckInDao
 import com.anfas.core.database.CheckInEntity
+import com.anfas.core.database.MemberEntity
 import com.anfas.core.database.SubscriptionDao
 import com.anfas.core.database.SubscriptionEntity
 import com.anfas.core.database.SubscriptionPlanEntity
+import com.anfas.core.database.SyncOutboxEntity
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.CheckInOutcome
 import com.anfas.core.model.MemberId
 import com.anfas.core.model.MembershipStatus
@@ -53,7 +56,7 @@ class CheckInRepositoryTest {
     @Test
     fun `a refused attempt is still recorded but is not counted as a visit`() = runTest {
         val members = FakeMemberDao(listOf(memberEntity("m1", "Omar")))
-        val log = FakeCheckInDao()
+        val log = FakeCheckInDao(members = members)
         val repo = repository(
             members = members,
             checkIns = log,
@@ -71,7 +74,7 @@ class CheckInRepositoryTest {
     @Test
     fun `the entry keeps the name and number it was recorded with`() = runTest {
         val members = FakeMemberDao(listOf(memberEntity("m1", "Omar Hassan")))
-        val log = FakeCheckInDao()
+        val log = FakeCheckInDao(members = members)
         val repo = repository(members = members, checkIns = log)
 
         repo.recordAttempt(MemberId("m1"), today).valueOrFail()
@@ -146,9 +149,47 @@ class CheckInRepositoryTest {
         assertTrue(!entry.wasGranted)
     }
 
+    /**
+     * A granted check-in changes two rows and files two entries; a refused one changes one and
+     * files one.
+     *
+     * The asymmetry is the same one `recordAttempt` already enforces for a different reason: a
+     * refusal is not a visit, so `lastCheckInAt` does not move — and if it does not move, there is
+     * nothing about the member to push. Filing a member entry anyway would push a row this device
+     * did not change.
+     */
+    @Test
+    fun `a granted check-in files two entries and a refused one files a single entry`() = runTest {
+        val granted = FakeMemberDao(listOf(memberEntity("m1", "Omar", status = "ACTIVE")))
+        val grantedLog = FakeCheckInDao(members = granted)
+        repository(
+            members = granted,
+            checkIns = grantedLog,
+            terms = listOf(term("m1", LocalDate(2024, 6, 1), LocalDate(2024, 7, 1))),
+        )
+            .recordAttempt(MemberId("m1"), today)
+            .valueOrFail()
+        assertEquals(
+            listOf(SyncTables.CHECK_INS, SyncTables.MEMBERS),
+            grantedLog.sync.changes.map { it.tableName },
+        )
+
+        val refused = FakeMemberDao(listOf(memberEntity("m1", "Omar", status = "EXPIRED")))
+        val refusedLog = FakeCheckInDao(members = refused)
+        repository(members = refused, checkIns = refusedLog)
+            .recordAttempt(MemberId("m1"), today)
+            .valueOrFail()
+        assertEquals(
+            listOf(SyncTables.CHECK_INS),
+            refusedLog.sync.changes.map { it.tableName },
+            "a refused attempt filed a member change, so the other device would be told the " +
+                "member's last-seen stamp moved when it did not",
+        )
+    }
+
     private fun repository(
         members: FakeMemberDao = FakeMemberDao(listOf(memberEntity("m1", "Omar"))),
-        checkIns: FakeCheckInDao = FakeCheckInDao(),
+        checkIns: FakeCheckInDao = FakeCheckInDao(members = members),
         terms: List<SubscriptionEntity> = emptyList(),
     ): CheckInRepository {
         var next = 0
@@ -186,7 +227,11 @@ class CheckInRepositoryTest {
     )
 }
 
-private class FakeCheckInDao(initial: List<CheckInEntity> = emptyList()) : CheckInDao {
+internal class FakeCheckInDao(
+    initial: List<CheckInEntity> = emptyList(),
+    /** See FakeIntakeDao: one `members` table, so one fake. */
+    private val members: FakeMemberDao? = null,
+) : CheckInDao {
     val rows = MutableStateFlow(initial)
 
     override fun observeBetween(fromEpochMs: Long, untilEpochMs: Long): Flow<List<CheckInEntity>> =
@@ -216,9 +261,23 @@ private class FakeCheckInDao(initial: List<CheckInEntity> = emptyList()) : Check
     override suspend fun insert(checkIn: CheckInEntity) {
         rows.value = rows.value + checkIn
     }
+
+    // --- sync bookkeeping. The tracked writes are default methods on the DAO, so implementing
+    // these two gives this fake the production sequencing rather than a re-implementation of it.
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
+
+    override suspend fun upsertMember(member: MemberEntity) {
+        touchedMembers += member
+        members?.upsertAll(listOf(member))
+    }
+
+    /** The member rows a granted check-in stamped, in the same transaction as the entry. */
+    val touchedMembers = mutableListOf<MemberEntity>()
 }
 
-private class FakeSubscriptionDao(private val terms: List<SubscriptionEntity>) : SubscriptionDao {
+internal class FakeSubscriptionDao(private val terms: List<SubscriptionEntity>) : SubscriptionDao {
     override fun observePlans(): Flow<List<SubscriptionPlanEntity>> = MutableStateFlow(emptyList())
 
     override suspend fun upsertPlans(plans: List<SubscriptionPlanEntity>) = Unit
@@ -229,4 +288,19 @@ private class FakeSubscriptionDao(private val terms: List<SubscriptionEntity>) :
     override fun observeAllCurrent(): Flow<List<SubscriptionEntity>> = MutableStateFlow(terms)
 
     override suspend fun upsert(subscription: SubscriptionEntity) = Unit
+
+    // --- sync bookkeeping
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
+
+    override suspend fun insertPlansIfAbsent(plans: List<SubscriptionPlanEntity>) {
+        val known = planRowsForSeed.map { it.id }.toSet()
+        planRowsForSeed += plans.filterNot { it.id in known }
+    }
+
+    override suspend fun planIds(): List<String> = planRowsForSeed.map { it.id }
+
+    /** Plan rows as the seed sees them. Separate from whatever the fake models for reads. */
+    val planRowsForSeed = mutableListOf<SubscriptionPlanEntity>()
 }

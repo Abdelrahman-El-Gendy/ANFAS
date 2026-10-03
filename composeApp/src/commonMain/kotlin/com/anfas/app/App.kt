@@ -431,14 +431,26 @@ private fun AppLanguage.toScript(): AnfasScript = when (this) {
  */
 private fun Permission.areaLabel(s: AppStrings): String = when (this) {
     Permission.VIEW_MEMBERS, Permission.EDIT_MEMBERS -> s.members.title
+
     Permission.MANAGE_SUBSCRIPTIONS -> s.renewal.selectDuration
-    Permission.VIEW_REMINDERS, Permission.RETRY_REMINDERS -> s.reminders.title
+
+    Permission.VIEW_REMINDERS,
+    Permission.RETRY_REMINDERS,
+    Permission.SEND_REMINDERS,
+    -> s.reminders.title
+
     Permission.SCAN_INTAKE, Permission.IMPORT_INTAKE -> s.intake.title
+
     Permission.CHECK_IN_MEMBERS -> s.checkIn.title
+
     Permission.MANAGE_CLASSES -> s.classes.title
+
     Permission.MANAGE_ANNOUNCEMENTS -> s.announcements.title
+
     Permission.MANAGE_EQUIPMENT -> s.equipment.title
+
     Permission.VIEW_THERAPY -> s.therapy.title
+
     Permission.MANAGE_STAFF -> s.staff.title
 }
 

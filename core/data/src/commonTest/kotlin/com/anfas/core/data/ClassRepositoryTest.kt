@@ -5,6 +5,10 @@ import com.anfas.core.database.GymClassDao
 import com.anfas.core.database.GymClassEntity
 import com.anfas.core.database.StaffDao
 import com.anfas.core.database.StaffEntity
+import com.anfas.core.database.SyncOp
+import com.anfas.core.database.SyncOutboxEntity
+import com.anfas.core.database.SyncTables
+import com.anfas.core.database.SyncTombstoneEntity
 import com.anfas.core.model.ClassCategory
 import com.anfas.core.model.GymClass
 import com.anfas.core.model.GymClassId
@@ -245,6 +249,28 @@ class ClassRepositoryTest {
         assertEquals(7, DayOfWeek.SUNDAY.isoDayNumber)
     }
 
+    /**
+     * Every write path in this repository files an outbox entry — the coverage `design/sync-layer.md`
+     * calls the point of this stage. A write that commits without one is a change that never
+     * syncs, and nothing afterwards can detect that it happened.
+     */
+    @Test
+    fun `saving a class files an upsert and deleting one files a delete and a tombstone`() =
+        runTest {
+            val dao = FakeGymClassDao()
+            val repository = repository(dao)
+
+            repository.save(gymClass()).valueOrFail()
+            assertEquals(
+                listOf(SyncTables.SCHEDULED_CLASSES to SyncOp.UPSERT.name),
+                dao.sync.recorded,
+            )
+
+            repository.delete(GymClassId("c-1")).valueOrFail()
+            assertEquals(listOf("c-1"), dao.sync.deletes(SyncTables.SCHEDULED_CLASSES))
+            assertEquals(listOf("c-1"), dao.sync.tombstoned(SyncTables.SCHEDULED_CLASSES))
+        }
+
     private fun repository(
         dao: FakeGymClassDao,
         staff: FakeStaff = FakeStaff(emptyMap()),
@@ -255,7 +281,7 @@ class ClassRepositoryTest {
     )
 }
 
-private class FakeGymClassDao : GymClassDao {
+internal class FakeGymClassDao : GymClassDao {
     private val rows = MutableStateFlow<List<GymClassEntity>>(emptyList())
 
     override fun observeAll(): Flow<List<GymClassEntity>> = rows.map { list ->
@@ -292,9 +318,20 @@ private class FakeGymClassDao : GymClassDao {
             if (it.instructorStaffId == staffId) it.copy(instructorStaffId = null) else it
         }
     }
+
+    // --- sync bookkeeping. The tracked writes are default methods on the DAO, so implementing
+    // these two gives this fake the production sequencing rather than a re-implementation of it.
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
+
+    override suspend fun recordTombstones(entries: List<SyncTombstoneEntity>) = sync.record(entries)
+
+    override suspend fun idsForInstructor(staffId: String): List<String> =
+        rows.value.filter { it.instructorStaffId == staffId }.map { it.id }
 }
 
-private class FakeStaff(initial: Map<String, String>) : StaffDao {
+internal class FakeStaff(initial: Map<String, String>) : StaffDao {
     private val rows = MutableStateFlow(initial)
 
     fun rename(id: String, name: String) {

@@ -263,6 +263,9 @@ private class FakeSubscriptions(private val terms: List<SubscriptionTerm>) :
 
     override suspend fun upsertPlans(plans: List<SubscriptionPlan>): AppResult<Unit> =
         AppResult.Success(Unit)
+
+    override suspend fun seedPlans(plans: List<SubscriptionPlan>): AppResult<Unit> =
+        AppResult.Success(Unit)
 }
 
 private class FakeReminders(private val counts: ReminderCounts, private val failure: AppError?) :

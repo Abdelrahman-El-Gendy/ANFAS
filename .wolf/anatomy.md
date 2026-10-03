@@ -1,11 +1,16 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-08-25T07:27:46.292Z
-> Files: 559 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-10-03T16:16:16.144Z
+> Files: 603 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/
+
+- `sync-layer.html` — ANFAS Sync Layer (~12843 tok)
+- `whatsapp-send-system.html` — WhatsApp Send System (~9146 tok)
 
 ## ../../.claude/plans/
 
-- `plan-what-is-remaining-abundant-elephant.md` — ANFAS — Remaining work and production readiness (~4907 tok)
+- `plan-what-is-remaining-abundant-elephant.md` — The sync layer — design on paper (~2045 tok)
 
 ## ../../.claude/projects/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/memory/
 
@@ -15,10 +20,11 @@
 
 - `.gitignore` — Git ignore rules (~88 tok)
 - `build.gradle.kts` — Gradle Kotlin build configuration (~133 tok)
-- `CLAUDE.md` — OpenWolf (~8996 tok)
+- `CLAUDE.md` — OpenWolf (~17676 tok)
 - `gradle.properties` — Kotlin (~160 tok)
 - `gradlew` — you may not use this file except in compliance with the License. (~2292 tok)
 - `gradlew.bat` (~773 tok)
+- `keystore.properties.template` — Copy to keystore.properties and fill in. keystore.properties is gitignored — never commit it, (~235 tok)
 - `local.properties` — # This file must *NOT* be checked into Version Control Systems, (~96 tok)
 - `README.md` — Project documentation (~614 tok)
 - `settings.gradle.kts` — Gradle Kotlin settings (~433 tok)
@@ -30,8 +36,8 @@
 
 ## .claude/agents/
 
-- `feature-verifier.md` — What you run, in order (~1052 tok)
-- `git-shipper.md` — Step 0 - orient yourself, every time (~1155 tok)
+- `feature-verifier.md` — Gate 1 - build and test (~1904 tok)
+- `git-shipper.md` — Step 0 - orient yourself, every time (~1816 tok)
 
 ## .claude/rules/
 
@@ -43,7 +49,8 @@
 
 ## .github/workflows/
 
-- `ci.yml` — CI: CI (~818 tok)
+- `ci.yml` — ` used to be here and now matches nothing -- branches are named (~1974 tok)
+- `release.yml` — CI: Release (~4351 tok)
 
 ## .gradle/
 
@@ -377,12 +384,17 @@
 
 ## androidApp/
 
-- `build.gradle.kts` — Gradle Kotlin build configuration (~450 tok)
+- `build.gradle.kts` — Thin Android launcher. AGP 9 no longer allows the KMP plugin in the same module as (~1727 tok)
+- `proguard-rules-stage.pro` — R8 rules added to the `stage` app APK only -- never to `release`. (~428 tok)
+- `proguard-rules-test.pro` — R8 rules for the androidTest APK only, wired via `testProguardFiles`. (~569 tok)
 - `proguard-rules.pro` — Add project specific ProGuard rules here. (~200 tok)
+
+## androidApp/src/androidTest/kotlin/com/anfas/app/
+
 
 ## androidApp/src/main/
 
-- `AndroidManifest.xml` (~229 tok)
+- `AndroidManifest.xml` (~567 tok)
 
 ## androidApp/src/main/kotlin/com/anfas/app/
 
@@ -503,7 +515,7 @@
 
 ## composeApp/src/commonMain/kotlin/com/anfas/app/
 
-- `App.kt` — App shell: theme, the navigation host, and the top-level nav chrome. (~6610 tok)
+- `App.kt` — App shell: theme, the navigation host, and the top-level nav chrome. (~6830 tok)
 
 ## composeApp/src/commonMain/kotlin/com/anfas/app/di/
 
@@ -580,25 +592,32 @@
 ## core/data/src/commonMain/kotlin/com/anfas/core/data/
 
 - `AnnouncementRepository.kt` — interface + AnnouncementDetail, SaveAnnouncementOutcome(Saved/Invalid), AnnouncementProblem (~600 tok)
-- `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~1123 tok)
+- `DataModule.kt` — Wiring for the data layer. Everything is a `single`: the database holds an open connection (~1380 tok)
 - `EquipmentRepository.kt` — The gym floor's equipment inventory and its maintenance history. (~850 tok)
 - `IntakeMappers.kt` — Storage <-> domain for OCR intake. (~889 tok)
-- `IntakeRepository.kt` — Which cell of a row an edit targets. (~644 tok)
+- `IntakeRepository.kt` — Which cell of a row an edit targets. (~785 tok)
 - `MemberMappers.kt` — Storage <-> domain. Deliberately total in one direction only: any row whose [status] string (~453 tok)
 - `MemberRepository.kt` — The only way a feature reaches member data. Reads emit AppResult; no `isEmpty()` by design (~290 tok)
 - `OfflineFirstAnnouncementRepository.kt` — Room-backed. `publish()` freezes `recipientCountAtPublish` by computing AnnouncementReach.count against live members/terms at the moment of publish — never recomputed after (~1400 tok)
+- `OfflineFirstAuthRepository.kt` — The stored session, **re-derived from the `staff` row it names** rather than trusted as (~3813 tok)
 - `OfflineFirstEquipmentRepository.kt` — OfflineFirstEquipmentRepository: observeAll, observeDetail, createEquipment, logMaintenance (~1637 tok)
-- `OfflineFirstIntakeRepository.kt` — Room-backed OCR intake. (~1722 tok)
+- `OfflineFirstIntakeRepository.kt` — Room-backed OCR intake. (~1720 tok)
 - `OfflineFirstMemberRepository.kt` — Room-backed. The error boundary: storage failures become AppError.Storage; CancellationException is rethrown. No network path yet (~560 tok)
+- `ReminderScheduler.kt` — What one queue build did, itemised. (~1999 tok)
+- `ReminderSender.kt` — What one run of the queue did. (~1943 tok)
+- `WhatsAppGateway.kt` — One template message, ready to hand over. (~1135 tok)
 
 ## core/data/src/commonTest/kotlin/com/anfas/core/data/
 
 - `AnnouncementRepositoryTest.kt` — 12 tests: draft validation, publish freezes recipient count, delete only for drafts (~1900 tok)
 - `EquipmentRepositoryTest.kt` — A plain issue report -- no technician -- must not read as a service in the detail. (~2430 tok)
-- `FakeIntakeDao.kt` — In-memory IntakeDao. Mirrors the real thing where it matters: rows are ordered by ordinal, (~1110 tok)
+- `FakeIntakeDao.kt` — In-memory IntakeDao. Mirrors the real thing where it matters: rows are ordered by ordinal, (~1221 tok)
 - `FakeMemberDao.kt` — In-memory stand-in for Room. Query semantics mirror the DAO's SQL — case-insensitive (~690 tok)
+- `KoinOnCloseContractTest.kt` — Pins the Koin contract that `dataModule` relies on to close the Room connection. (~690 tok)
 - `OfflineFirstIntakeRepositoryTest.kt` — Only for the create-batch test, which needs a domain row to hand in. (~2806 tok)
 - `OfflineFirstMemberRepositoryTest.kt` — 6 tests: ordering, number search, bad-status degradation, error boundary, round trip, delete (~900 tok)
+- `ReminderSchedulerTest.kt` — The scheduler is the only thing in the app that creates a reminder, so every rule it applies is (~3111 tok)
+- `ReminderSenderTest.kt` — Every branch here decides whether a member gets messaged, gets messaged twice, or is quietly (~2609 tok)
 
 ## core/database — added in v3
 
@@ -629,9 +648,10 @@
 - `AnnouncementEntity.kt` — flat announcements table, no FKs + AnnouncementDao (observeAll DESC by created_at, findById, upsert, delete) (~500 tok)
 - `DatabaseBuilderFactory.kt` — Resolves the platform database location and hands back a builder. Actuals differ in what (~250 tok)
 - `EquipmentEntity.kt` — A physical asset on the gym floor. No foreign key anywhere in this table — it names no staff, (~787 tok)
-- `IntakeEntity.kt` — A photographed sign-up sheet awaiting review. (~1198 tok)
-- `MemberEntity.kt` — Storage shape for a member. Kept flat and primitive on purpose: no domain enums or (~829 tok)
+- `IntakeEntity.kt` — A photographed sign-up sheet awaiting review. (~1494 tok)
+- `MemberEntity.kt` — Storage shape for a member. Kept flat and primitive on purpose: no domain enums or (~1091 tok)
 - `PlaceholderEntity.kt` — ONE placeholder entity, present only to prove the KSP wiring generates code on every (~178 tok)
+- `ReminderEntity.kt` — A queued/sent/failed WhatsApp reminder. (~1099 tok)
 
 ## core/database/src/iosMain/kotlin/com/anfas/core/database/
 
@@ -639,11 +659,12 @@
 
 ## core/database/src/jvmMain/kotlin/com/anfas/core/database/
 
-- `DatabaseBuilderFactory.jvm.kt` — DatabaseBuilderFactory: create (~118 tok)
+- `DatabaseBuilderFactory.jvm.kt` — OS-idiomatic data location, mirroring `AppLog.desktopLogFile` one module over — same injectable (~1008 tok)
 
 ## core/database/src/jvmTest/kotlin/com/anfas/core/database/
 
-- `MigrationFromV4Test.kt` — Opens a real v4 database file and lets Room migrate it forward to the current schema. (~2478 tok)
+- `DesktopDataDirTest.kt` — The path resolution is pure and branchy, and the migration touches user data — both are worth (~1347 tok)
+- `MigrationFromV4Test.kt` — Opens a real v4 database file and lets Room migrate it forward to the current schema. (~2887 tok)
 
 ## core/designsystem — added for intake
 
@@ -651,7 +672,7 @@
 
 ## core/designsystem/
 
-- `build.gradle.kts` — Gradle Kotlin build configuration (~48 tok)
+- `build.gradle.kts` — Compose layout tests, on the JVM target only. (~301 tok)
 
 ## core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/
 
@@ -661,7 +682,8 @@
 - `AnfasCheckbox.kt` — 4dp-radius checkbox + tri-state variant for header select-all (~700 tok)
 - `AnfasChoice.kt` — `AnfasChoiceChip` (single-choice) + `AnfasSelectableRow` (radio card for plans) (~700 tok)
 - `AnfasColorScheme.kt` — Maps the palette onto M3 `darkColorScheme()`. Dark only; the design has no light mode (~380 tok)
-- `AnfasDialog.kt` — Layer-2 modal: titled header, scrollable body, footer bar. The only shadow in the design (~650 tok)
+- `AnfasDateField.kt` — A labelled date input backed by the Material 3 calendar picker. (~1954 tok)
+- `AnfasDialog.kt` — A Layer-2 modal: `surface-container-low`, a titled header with a close affordance, a (~1719 tok)
 - `AnfasDimens.kt` — Spacing, border/rule/hover alphas, breakpoints + column counts, elevation (cards 0dp, modals 8dp) (~470 tok)
 - `AnfasEmptyState.kt` — Centred nothing-state. Tone.Invitation (amber badge) vs Tone.Informational (grey) (~600 tok)
 - `AnfasExtendedColors.kt` — M3 *fixed* roles + brand accents (offWhite/sage/rose/charcoal) as a data class + CompositionLocal. sage=therapy, rose=classes (~520 tok)
@@ -671,7 +693,7 @@
 - `AnfasInlineEdit.kt` — A table cell that can be corrected in place. (~1277 tok)
 - `AnfasNavigation.kt` — `NavItem` + `AnfasBottomNav` (<1024dp) and `AnfasNavRail` (>=1024dp) (~900 tok)
 - `AnfasPalette.kt` — GENERATED from design/stitch/export. 47 M3 colour tokens + 4 brand accents. The only file with hex literals (~560 tok)
-- `AnfasScreenHeader.kt` — Page title + subtitle + trailing actions (~330 tok)
+- `AnfasScreenHeader.kt` — Page title, one line of supporting text, and trailing actions — the block every staff screen (~804 tok)
 - `AnfasSearchField.kt` — Search input on `background`, amber border on focus, clear affordance when non-empty (~520 tok)
 - `AnfasShapes.kt` — 4dp/8dp/12dp/pill. 12dp is the base radius; large/extraLarge deliberately also 12dp (~200 tok)
 - `AnfasStatusChip.kt` — The status pill used throughout the staff app. (~691 tok)
@@ -679,14 +701,20 @@
 - `AnfasTable.kt` — Header row/cell, row with 2% hover, 5% divider, footer. Compressed 12dp staff row padding (~700 tok)
 - `AnfasTabs.kt` — Underlined tab strip with count badges; emphasiseCount tints a non-zero failure count (~600 tok)
 - `AnfasTextAction.kt` — Text-only action, Primary/Muted emphasis (~330 tok)
+- `AnfasTextField.kt` — A labelled single-line input. (~2279 tok)
 - `AnfasTheme.kt` — Theme entry point wiring colours/type/shapes; also the `AnfasTheme` accessor object for what M3 has no slot for (~420 tok)
 - `AnfasType.kt` — IBM Plex Sans family (3 static weights), the 7 named roles verbatim, and M3 `Typography`. `dataMono` = tabular figures, not a mono face (~700 tok)
 
+## core/designsystem/src/jvmTest/kotlin/com/anfas/core/designsystem/
+
+- `AnfasDialogTest.kt` — Geometry, not appearance — the same reason [AnfasScreenHeaderTest] exists. (~1226 tok)
+- `AnfasScreenHeaderTest.kt` — Geometry, not appearance. (~1579 tok)
+
 ## core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/
 
-- `AppStrings.kt` — Every user-facing string, as a typed interface. (~6375 tok)
-- `ArabicStrings.kt` — Arabic copy. (~10078 tok)
-- `EnglishStrings.kt` — English copy, lifted verbatim from the literals that were previously inline in the screens, so (~8967 tok)
+- `AppStrings.kt` — Every user-facing string, as a typed interface. (~6483 tok)
+- `ArabicStrings.kt` — Arabic copy. (~10128 tok)
+- `EnglishStrings.kt` — English copy, lifted verbatim from the literals that were previously inline in the screens, so (~9019 tok)
 
 ## core/i18n/src/commonTest/kotlin/com/anfas/core/i18n/
 
@@ -705,11 +733,13 @@
 ## core/model/src/commonMain/kotlin/com/anfas/core/model/
 
 - `Announcement.kt` — Announcement + AnnouncementStatus(DRAFT/PUBLISHED) + AnnouncementAudience(3 segments, 2 declined w/ KDoc) + AnnouncementReach.matching()/count() (~900 tok)
+- `DatePickerBoundary.kt` — The boundary between `AnfasDateField` and this app's date type. (~387 tok)
 - `Equipment.kt` — A physical asset on the gym floor — the export's `equipment-detail`. (~825 tok)
 - `Ids.kt` — Typed identifiers. One value class per aggregate root, so a MemberId can never be passed (~271 tok)
 - `Intake.kt` — A photographed sign-up sheet and everything OCR read off it. (~1387 tok)
 - `IntakeValidator.kt` — Decides what is wrong with each row of a batch — the logic behind the export's (~1529 tok)
-- `Member.kt` — A gym member. (~427 tok)
+- `Member.kt` — A gym member. (~717 tok)
+- `PhoneE164.kt` — The phone number in the form a messaging provider wants: international digits, no `+`. (~879 tok)
 
 ## core/model/src/commonMain/kotlin/com/anfas/core/model/ (subscriptions)
 
@@ -721,8 +751,10 @@
 ## core/model/src/commonTest/kotlin/com/anfas/core/model/
 
 - `AnnouncementReachTest.kt` — 7 tests covering all three audience segments' matching logic (~800 tok)
+- `DatePickerBoundaryTest.kt` — The picker hands back UTC midnight, so that exact value must map to the same day. (~392 tok)
 - `IntakeValidatorTest.kt` — Confident by default, so a test only opts into low confidence when that is the point. (~2327 tok)
 - `MaintenanceLogTest.kt` — The bug this pins: a plain issue report logged after the last real service must not push (~524 tok)
+- `PhoneE164Test.kt` — A wrong number here is worse than no number: the send is charged, counts against the business's (~816 tok)
 
 ## core/network/
 
@@ -732,24 +764,56 @@
 
 - `HttpClientFactory.kt` — The engine is supplied per platform (OkHttp on Android, Darwin on iOS, CIO on desktop), (~228 tok)
 
+## core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/
+
+- `Ocr.android.kt` — Nothing to request. See the comment in androidMain/AndroidManifest.xml: ACTION_IMAGE_CAPTURE (~3179 tok)
+
+## core/ocr/src/androidMain/res/xml/
+
+- `intake_file_paths.xml` (~240 tok)
+
+## core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/
+
+- `OcrContracts.kt` — A captured photograph on disk. (~1251 tok)
+
+## core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/
+
+- `ImageSource.ios.kt` — Capture via `UIImagePickerController`, presented from the top-most view controller. (~1654 tok)
+- `Ocr.ios.kt` — Vision-backed recognition. (~2175 tok)
+
+## core/ocr/src/jvmMain/kotlin/com/anfas/core/ocr/
+
+- `Ocr.jvm.kt` — Desktop has no capture and no OCR, deliberately and visibly. (~798 tok)
+
+## design/
+
+- `README.md` — Project documentation (~4736 tok)
+- `README.md` — Claude Design brief: product, roles, tokens, every screen + states, a11y, not-built list (~3500 tok)
+- `sync-layer.md` — The sync layer — design (~5739 tok)
+- `whatsapp-send-system.md` — The WhatsApp send system — design (~4591 tok)
+
 ## design/stitch/
 
 - `design.md` — Brand & Style (~1850 tok)
 - `design.md` — Stitch theme spec: front-matter tokens + prose brand/component guidance. Its prose palette contradicts its own token block — see TOKENS.md (~1900 tok)
 - `README.md` — Project documentation (~353 tok)
 - `README.md` — What to drop here and why; the export/derive workflow (~330 tok)
-- `TOKENS.md` — GENERATED inventory: 47 M3 colours, 4 brand accents, type ramp, radii, spacing, elevation, 6 resolved conflicts, and the 23-screen → module mapping (~2200 tok)
+- `TOKENS.md` — TOKENS.md — extracted design tokens (~2083 tok)
 
 ## design/stitch/export/
 
 
 ## desktopApp/
 
-- `build.gradle.kts` — Gradle Kotlin build configuration (~245 tok)
+- `build.gradle.kts` — Thin desktop launcher. Plain kotlin("jvm") rather than a kmp.* convention plugin, because (~990 tok)
 
 ## desktopApp/src/main/kotlin/com/anfas/app/
 
-- `main.kt` — Thin launcher. All shared behaviour lives in :composeApp — do not add logic here. (~327 tok)
+- `main.kt` — Thin launcher. All shared *app* behaviour lives in :composeApp — do not add feature logic here. (~2678 tok)
+
+## desktopApp/src/test/kotlin/com/anfas/app/
+
+- `WindowSizeTest.kt` — The desktop window must open — and must stay — above the layout breakpoint. (~782 tok)
 
 ## feature/announcements/
 
@@ -757,17 +821,21 @@
 
 ## feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/
 
-- `AnnouncementFormDialog.kt` — Compose or edit an announcement. [state]'s `liveReach` reflects [form]'s currently selected (~2160 tok)
-- `AnnouncementsComponent.kt` — Compose, edit, publish and delete gym-wide bulletins. (~3089 tok)
+- `AnnouncementFormDialog.kt` — Compose or edit an announcement. [state]'s `liveReach` reflects [form]'s currently selected (~2236 tok)
+- `AnnouncementsComponent.kt` — Compose, edit, publish and delete gym-wide bulletins. (~2980 tok)
 - `AnnouncementsModule.kt` — Koin module for the announcements feature. Intentionally empty — UI, components and use cases (~89 tok)
 - `AnnouncementsScreen.kt` — List screen; extensive KDoc on departures from the Stitch export's split editor+preview (~1800 tok)
-- `AnnouncementsState.kt` — AnnouncementsState/AnnouncementsContent/AnnouncementForm/AnnouncementsNotice (~700 tok)
+- `AnnouncementsState.kt` — The live "Reaches N members" figure for [AnnouncementForm.audience] as it stands right (~618 tok)
 - `DeleteConfirmDialog.kt` — confirmation before deleting a draft (~350 tok)
 - `PublishConfirmDialog.kt` — confirmation before publishing; shows the frozen-at-publish reach count (~450 tok)
 
 ## feature/announcements/src/commonTest/kotlin/com/anfas/feature/announcements/
 
 - `AnnouncementsComponentTest.kt` — Only what this component itself owns: permission gating and the publish-once guard. Save, (~2502 tok)
+
+## feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/
+
+- `SignInScreen.kt` — Staff sign-in, and first-run owner setup. (~2435 tok)
 
 ## feature/classes/
 
@@ -777,18 +845,26 @@
 
 - `ClassesModule.kt` — `ClassesComponentFactory` + Koin module (~200 tok)
 
+## feature/dashboard/src/commonMain/kotlin/com/anfas/feature/dashboard/
+
+- `DashboardScreen.kt` — The reception dashboard: what needs doing at the desk right now. (~2935 tok)
+
+## feature/dashboard/src/commonTest/kotlin/com/anfas/feature/dashboard/
+
+- `DashboardComponentTest.kt` — Relative to today, so the "expiring soon" window is exercised rather than a fixed date. (~3246 tok)
+
 ## feature/equipment/
 
 - `build.gradle.kts` — Gradle Kotlin build configuration (~55 tok)
 
 ## feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/
 
-- `AddEquipmentDialog.kt` — AddEquipmentDialog, FieldLabel, ChipRow (~1582 tok)
-- `EquipmentComponent.kt` — The equipment inventory list, its filters, and the detail drawer -- one component for all (~2854 tok)
+- `AddEquipmentDialog.kt` — AddEquipmentDialog, FieldLabel, ChipRow (~1828 tok)
+- `EquipmentComponent.kt` — The equipment inventory list, its filters, and the detail drawer -- one component for all (~2869 tok)
 - `EquipmentDetailDrawer.kt` — A modal rather than the export's slide-in side panel — the same list-plus-`AnfasDialog` shape (~1993 tok)
 - `EquipmentModule.kt` — Koin module for the equipment feature. Factories only — the component owns a coroutine scope (~274 tok)
 - `EquipmentScreen.kt` — The gym floor's equipment inventory — the export's `equipment-detail`, its own fourth desktop (~2579 tok)
-- `EquipmentState.kt` — [visibleEquipment] is [EquipmentContent.Loaded]'s list narrowed by [statusFilter]/[zoneFilter]/ (~887 tok)
+- `EquipmentState.kt` — [visibleEquipment] is [EquipmentContent.Loaded]'s list narrowed by [statusFilter]/[zoneFilter]/ (~881 tok)
 - `EquipmentUi.kt` — EquipmentStatus, EquipmentStatus, EquipmentStatus, EquipmentZone (~389 tok)
 - `LogMaintenanceDialog.kt` — No date field -- see `MaintenanceLogEntry`'s KDoc on why an entry is always logged "now". (~1103 tok)
 
@@ -798,23 +874,30 @@
 
 ## feature/intake-ocr/
 
-- `build.gradle.kts` (~87 tok)
+- `build.gradle.kts` — Layout tests, JVM only — same reasoning as `:core:designsystem`'s: the responsive (~302 tok)
 
 ## feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/
 
 - `commonTest/IntakeReviewComponentTest.kt` — 12 tests: batch selection, edit-unblocks-row, import notices, zoom clamping (~2000 tok)
-- `IntakeOcrModule.kt` — Lets :composeApp construct the review component without seeing its dependencies. Same pattern (~317 tok)
+- `IntakeHousekeeping.kt` — Reconciles the captures on disk with the batches that reference them, once at startup. (~899 tok)
+- `IntakeOcrModule.kt` — Lets :composeApp construct the review component without seeing its dependencies. Same pattern (~779 tok)
 - `IntakeOcrModule.kt` — IntakeReviewComponentFactory + Koin `factory` (~230 tok)
 - `IntakeReviewComponent.kt` — Reviewing a scanned sign-up sheet: correct what OCR misread, then import the rows that pass. (~1904 tok)
 - `IntakeReviewComponent.kt` — Shows the OLDEST sheet still REVIEWING. Edits write through; import notices name the leftovers (~1300 tok)
-- `IntakeReviewScreen.kt` — Reviewing a scanned sign-up sheet. (~8403 tok)
+- `IntakeReviewScreen.kt` — Reviewing a scanned sign-up sheet. (~8651 tok)
 - `IntakeReviewScreen.kt` — Split source/table view (stacks <1024dp), normalised overlay boxes, inline editing, import/discard footer (~2300 tok)
 - `IntakeReviewState.kt` — The batch-review screen. (~462 tok)
 - `IntakeReviewState.kt` — Content Loading/NoBatches/Loaded/Failed; zoom+pan live in state, not the composable (~330 tok)
 
 ## feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/
 
-- `IntakeReviewComponentTest.kt` — Fake that revalidates on read the way the real repository does — without that, an edit test (~3630 tok)
+- `IntakeHousekeepingTest.kt` — `purgeExcept` deletes files. Every test here exists because a wrong answer costs a sheet (~1387 tok)
+- `IntakeReviewComponentTest.kt` — State is a combine of three flows, so the first useful value can be a few emissions in. (~5722 tok)
+- `OcrFakes.kt` — Returns whatever the test hands it, so ingestion can be exercised without a camera. (~647 tok)
+
+## feature/intake-ocr/src/jvmTest/kotlin/com/anfas/feature/intakeocr/
+
+- `IntakeReviewLayoutTest.kt` — The photographed sheet must be reachable on a phone. (~2827 tok)
 
 ## feature/members/
 
@@ -824,6 +907,7 @@
 
 - `LastCheckIn.kt` — Relative check-in label; `now`/`zone` are parameters so tests are timezone-independent (~480 tok)
 - `MemberProfileComponentFactory.kt` — now also injects `AuthRepository` (~350 tok)
+- `MemberProfileState.kt` — The member profile screen. (~492 tok)
 - `MembershipStatusUi.kt` — MembershipStatus -> ChipTone + label. Lives here because designsystem must not know the domain (~230 tok)
 - `MembersListComponent.kt` — Decompose component. Debounced search via flatMapLatest; navigation is callbacks, not routing (~700 tok)
 - `MembersListComponentFactory.kt` — Lets :composeApp build the component without seeing its dependencies (~280 tok)
@@ -835,6 +919,7 @@
 ## feature/members/src/commonTest/kotlin/com/anfas/feature/members/
 
 - `LastCheckInTest.kt` — 7 tests, fixed UTC clock (~570 tok)
+- `MemberProfileComponentTest.kt` — Only the behaviour this component itself owns: `mayViewTherapy` and the navigation callbacks. (~1992 tok)
 - `MembersListComponentTest.kt` — 5 tests: DirectoryEmpty vs NoMatches, clear, failure, search by number (~900 tok)
 
 ## feature/subscriptions/
@@ -859,7 +944,11 @@
 
 - `ReminderQueueComponentTest.kt` — 10 tests: tab default, empty vs filtered, selection pruning, partial retry notices (~1500 tok)
 - `RenewalSheetComponentTest.kt` — 8 tests with a FixedClock: preselection, date math, discount, confirm passes the shown quote (~1500 tok)
-- `TestDoubles.kt` — Fake reminder/subscription/member repositories + TestDispatchers (~1300 tok)
+- `TestDoubles.kt` — Records what retry was asked to do, so the component's notice can be checked. (~3034 tok)
+
+## feature/subscriptions/src/jvmTest/kotlin/com/anfas/feature/subscriptions/
+
+- `ReminderQueueLayoutTest.kt` — Six columns do not fit on a phone. (~1336 tok)
 
 ## feature/therapy/
 
@@ -875,7 +964,7 @@
 ## gradle/
 
 - `gradle-daemon-jvm.properties` — This file is generated by updateDaemonJvm (~309 tok)
-- `libs.versions.toml` (~3479 tok)
+- `libs.versions.toml` (~3601 tok)
 
 ## gradle/wrapper/
 

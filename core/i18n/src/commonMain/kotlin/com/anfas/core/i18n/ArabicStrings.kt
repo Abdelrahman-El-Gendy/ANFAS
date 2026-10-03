@@ -34,6 +34,7 @@ object ArabicStrings : AppStrings {
         override val zoomIn = "تكبير"
         override val zoomOut = "تصغير"
         override val selected = "محدد"
+        override val selectAll = "تحديد الكل"
 
         override fun today(time: String, separator: String) = "اليوم$separator$time"
         override fun yesterday(time: String, separator: String) = "أمس$separator$time"
@@ -62,6 +63,10 @@ object ArabicStrings : AppStrings {
             .getOrElse(isoDayNumber - 1) { "" }
         override val back = "رجوع"
         override val moreOptions = "الحساب والإعدادات"
+        override val chooseDate = "اختر تاريخًا"
+        override val openDatePicker = "افتح التقويم"
+        override val confirmDate = "اختيار"
+        override val clearDate = "مسح"
     }
 
     override val members = object : AppStrings.Members {
@@ -116,6 +121,9 @@ object ArabicStrings : AppStrings {
         override val profileNotFoundTitle = "العضو غير موجود"
         override val profileNotFoundMessage = "قد يكون هذا العضو حُذف من جهاز آخر."
         override val profileNoPhone = "لا يوجد رقم هاتف"
+        override val profileWhatsAppConsent = "إرسال تذكيرات واتساب"
+        override val profileWhatsAppConsentHint =
+            "لا نرسل إلا للأعضاء الذين وافقوا. اسأل العضو قبل التشغيل."
         override fun profileExpiresInDays(days: Int) = when (arabicPlural(days)) {
             PluralCategory.ZERO -> "انتهت"
             PluralCategory.ONE -> "تنتهي غدًا"
@@ -173,9 +181,10 @@ object ArabicStrings : AppStrings {
             "القائمة سليمة. تم تسليم آخر $delivered رسالة."
         override val noFailedMessage = "القائمة سليمة وتعمل دون انقطاع."
         override val nothingQueuedTitle = "لا شيء في الانتظار"
-        override val nothingQueuedMessage = "تظهر التذكيرات هنا بعد أن تجدولها المهمة اليومية."
+        override val nothingQueuedMessage =
+            "جهّز القائمة للعثور على الأعضاء الذين تنتهي عضويتهم قريبًا."
         override val nothingSentTitle = "لم يُرسل شيء بعد"
-        override val nothingSentMessage = "ستظهر هنا التذكيرات التي تم تسليمها."
+        override val nothingSentMessage = "ستظهر هنا التذكيرات التي تم إرسالها."
         override val filteredEmptyTitle = "لا توجد تذكيرات مطابقة لهذه الفلاتر"
         override val filteredEmptyMessage = "جرّب قالبًا آخر أو امسح البحث."
         override val clearFilters = "مسح الفلاتر"
@@ -222,6 +231,46 @@ object ArabicStrings : AppStrings {
         override val failureUnknownTitle = "لم يتم تسليم الرسالة"
         override val failureUnknownExplanation =
             "لم يوضّح المزوّد السبب. راجع التفاصيل الفنية أدناه."
+        override val buildQueue = "تجهيز القائمة"
+        override val building = "جارٍ التجهيز…"
+
+        // CLDR Arabic plurals: one / two / few (3-10) / many (11-99) / other.
+        override fun queueBuilt(queued: Int) = when {
+            queued == 1 -> "تم إضافة تذكير واحد"
+            queued == 2 -> "تم إضافة تذكيرين"
+            queued % 100 in 3..10 -> "تم إضافة $queued تذكيرات"
+            else -> "تم إضافة $queued تذكيرًا"
+        }
+
+        override fun queueBuiltNothing(noConsent: Int, noPhone: Int, alreadyQueued: Int): String {
+            val reasons = buildList {
+                if (noConsent > 0) add("$noConsent لم يوافقوا")
+                if (noPhone > 0) add("$noPhone بدون رقم هاتف")
+                if (alreadyQueued > 0) add("$alreadyQueued تم تذكيرهم بالفعل")
+            }
+            return if (reasons.isEmpty()) {
+                "لا توجد عضويات تحتاج التجديد"
+            } else {
+                "لا شيء لإضافته: " + reasons.joinToString("، ")
+            }
+        }
+        override val runQueue = "إرسال القائمة"
+        override val running = "جارٍ الإرسال…"
+        override val notConnected = "واتساب غير متصل بعد، لذا لا يمكن إرسال هذه الرسائل."
+
+        // CLDR Arabic plurals: one / two / few (3-10) / many (11-99) / other.
+        override fun runFinished(sent: Int, failed: Int): String {
+            val sentText = when {
+                sent == 1 -> "تم إرسال رسالة واحدة"
+                sent == 2 -> "تم إرسال رسالتين"
+                sent % 100 in 3..10 -> "تم إرسال $sent رسائل"
+                else -> "تم إرسال $sent رسالة"
+            }
+            return if (failed == 0) sentText else "$sentText، وفشل $failed"
+        }
+
+        override fun runStoppedEarly(sent: Int) =
+            "توقف الإرسال بعد $sent: واتساب يحد من سرعة الإرسال. الباقي لا يزال في القائمة."
     }
 
     override val renewal = object : AppStrings.Renewal {
@@ -590,8 +639,6 @@ object ArabicStrings : AppStrings {
         override val deleted = "تم حذف المسودة."
         override val errorTitleBlank = "اكتب عنوانًا للإعلان."
         override val errorBodyBlank = "اكتب نص الإعلان."
-        override val errorEventDateUnreadable =
-            "تعذّرت قراءة هذا التاريخ. جرّب \"1 نوفمبر 2026\" أو \"2026-11-01\"."
     }
 
     override val therapy = object : AppStrings.Therapy {

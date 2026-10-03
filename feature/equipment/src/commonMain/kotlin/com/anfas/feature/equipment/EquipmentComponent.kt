@@ -13,7 +13,6 @@ import com.anfas.core.model.Equipment
 import com.anfas.core.model.EquipmentId
 import com.anfas.core.model.EquipmentStatus
 import com.anfas.core.model.EquipmentZone
-import com.anfas.core.model.IntakeValidator
 import com.anfas.core.model.Money
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
@@ -113,10 +112,10 @@ class EquipmentComponent(
     fun onSubmitAddForm() {
         val form = state.value.addForm ?: return
         if (!form.canSubmit) return
-        val purchasedOn = form.purchasedOnText.trim().takeIf { it.isNotEmpty() }
-            ?.let(IntakeValidator::parseDate)
-        val warrantyUntil = form.warrantyUntilText.trim().takeIf { it.isNotEmpty() }
-            ?.let(IntakeValidator::parseDate)
+        // Straight through: the calendar picker cannot hand back an unparseable date, so there
+        // is nothing to parse and no failure branch to handle.
+        val purchasedOn = form.purchasedOn
+        val warrantyUntil = form.warrantyUntil
 
         ui.update { it.copy(addForm = form.copy(isSubmitting = true)) }
         scope.launch {

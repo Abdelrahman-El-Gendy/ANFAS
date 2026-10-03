@@ -1,666 +1,193 @@
 {
-  "session_id": "session-2026-08-24-1244",
-  "started": "2026-08-24T09:44:15.710Z",
+  "session_id": "session-2026-08-29-1302",
+  "started": "2026-08-29T10:02:12.511Z",
   "files_read": {
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/auth/src/commonMain/kotlin/com/anfas/core/auth/Permission.kt": {
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/dashboard/src/commonTest/kotlin/com/anfas/feature/dashboard/DashboardComponentTest.kt": {
       "count": 1,
       "tokens": 0,
-      "first_read": "2026-08-24T09:45:58.589Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/AnnouncementEntity.kt": {
-      "count": 1,
-      "tokens": 500,
-      "first_read": "2026-08-24T09:47:28.652Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/TherapyEntity.kt": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-08-24T09:47:33.695Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonMain/kotlin/com/anfas/core/model/Ids.kt": {
-      "count": 1,
-      "tokens": 165,
-      "first_read": "2026-08-24T09:47:38.741Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasIcons.kt": {
-      "count": 3,
-      "tokens": 2987,
-      "first_read": "2026-08-24T09:47:59.611Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/AppStrings.kt": {
-      "count": 2,
-      "tokens": 0,
-      "first_read": "2026-08-24T09:49:20.286Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt": {
-      "count": 4,
-      "tokens": 7200,
-      "first_read": "2026-08-24T09:50:54.281Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsModule.kt": {
-      "count": 1,
-      "tokens": 89,
-      "first_read": "2026-08-24T09:51:18.123Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentModule.kt": {
-      "count": 1,
-      "tokens": 86,
-      "first_read": "2026-08-24T09:51:23.622Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/build.gradle.kts": {
-      "count": 1,
-      "tokens": 133,
-      "first_read": "2026-08-24T09:51:34.773Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt": {
-      "count": 1,
-      "tokens": 603,
-      "first_read": "2026-08-24T09:51:38.213Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt": {
-      "count": 1,
-      "tokens": 573,
-      "first_read": "2026-08-24T09:51:42.874Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/AnnouncementRepository.kt": {
-      "count": 1,
-      "tokens": 600,
-      "first_read": "2026-08-24T09:51:49.493Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstAnnouncementRepository.kt": {
-      "count": 1,
-      "tokens": 1400,
-      "first_read": "2026-08-24T09:51:53.822Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonMain/kotlin/com/anfas/core/model/Announcement.kt": {
-      "count": 1,
-      "tokens": 900,
-      "first_read": "2026-08-24T09:51:59.426Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/StorageBoundary.kt": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-08-24T09:52:58.758Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasStatusChip.kt": {
-      "count": 1,
-      "tokens": 330,
-      "first_read": "2026-08-24T09:53:42.352Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonTest/kotlin/com/anfas/core/data/AnnouncementRepositoryTest.kt": {
-      "count": 1,
-      "tokens": 1900,
-      "first_read": "2026-08-24T09:56:38.762Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/EnglishStrings.kt": {
-      "count": 1,
-      "tokens": 0,
-      "first_read": "2026-08-24T09:58:41.501Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/ArabicStrings.kt": {
-      "count": 2,
-      "tokens": 0,
-      "first_read": "2026-08-24T09:59:28.364Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsState.kt": {
-      "count": 1,
-      "tokens": 700,
-      "first_read": "2026-08-24T10:00:43.333Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsScreen.kt": {
-      "count": 1,
-      "tokens": 1800,
-      "first_read": "2026-08-24T10:02:51.354Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/App.kt": {
-      "count": 2,
-      "tokens": 6596,
-      "first_read": "2026-08-24T10:28:32.005Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt": {
-      "count": 2,
-      "tokens": 2934,
-      "first_read": "2026-08-24T10:30:32.396Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md": {
-      "count": 4,
-      "tokens": 8756,
-      "first_read": "2026-08-24T10:37:49.857Z"
+      "first_read": "2026-08-29T10:21:13.735Z"
     },
     "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt": {
-      "count": 1,
-      "tokens": 2478,
-      "first_read": "2026-08-24T10:41:28.614Z"
+      "count": 2,
+      "tokens": 2873,
+      "first_read": "2026-08-29T10:21:19.258Z"
     },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/di/Modules.kt": {
-      "count": 1,
-      "tokens": 371,
-      "first_read": "2026-08-24T10:42:58.275Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/app/iosApp/iosApp.xcodeproj/xcuserdata/abdelrahmanelgendy.xcuserdatad/xcschemes/iosApp.xcscheme": {
-      "count": 1,
-      "tokens": 638,
-      "first_read": "2026-08-25T07:01:49.607Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/.github/workflows/ci.yml": {
-      "count": 1,
-      "tokens": 818,
-      "first_read": "2026-08-25T07:10:45.023Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/.github/dependabot.yml": {
-      "count": 1,
-      "tokens": 178,
-      "first_read": "2026-08-25T07:10:45.659Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/OcrContracts.kt": {
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/members/src/commonTest/kotlin/com/anfas/feature/members/MemberProfileComponentTest.kt": {
       "count": 1,
       "tokens": 0,
-      "first_read": "2026-08-25T07:18:41.849Z"
+      "first_read": "2026-08-29T10:26:24.512Z"
     },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/ImageSource.kt": {
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/subscriptions/src/commonTest/kotlin/com/anfas/feature/subscriptions/TestDoubles.kt": {
+      "count": 1,
+      "tokens": 1300,
+      "first_read": "2026-08-29T10:26:39.230Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/desktop1.png": {
       "count": 1,
       "tokens": 0,
-      "first_read": "2026-08-25T07:18:47.447Z"
+      "first_read": "2026-08-29T10:31:29.939Z"
     },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeIngestion.kt": {
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/desktop2.png": {
       "count": 1,
       "tokens": 0,
-      "first_read": "2026-08-25T07:19:09.337Z"
+      "first_read": "2026-08-29T10:32:10.748Z"
     },
-    "/Users/abdelrahmanelgendy/.claude/plans/plan-what-is-remaining-abundant-elephant.md": {
+    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/auth/src/commonTest/kotlin/com/anfas/core/auth/PasswordHashTest.kt": {
       "count": 1,
       "tokens": 0,
-      "first_read": "2026-08-25T07:20:37.434Z"
+      "first_read": "2026-08-29T10:33:42.941Z"
     },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt": {
-      "count": 3,
-      "tokens": 8403,
-      "first_read": "2026-08-25T07:22:24.339Z"
-    },
-    "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/build.gradle.kts": {
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/desktop_fresh1.png": {
       "count": 1,
-      "tokens": 133,
-      "first_read": "2026-08-25T07:24:47.611Z"
+      "tokens": 0,
+      "first_read": "2026-08-29T10:38:40.579Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/ios1.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:44:01.679Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android1.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:46:05.343Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android2.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:46:37.614Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android3.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:46:56.504Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android4.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:47:54.771Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android5.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:48:21.442Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android6.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:48:47.467Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android7.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:49:17.825Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android8.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:49:42.603Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android9.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:51:15.513Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android10.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:51:46.508Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android11.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:52:10.428Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android12.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:52:47.107Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/android13.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:53:13.895Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/ios2.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:54:33.845Z"
+    },
+    "/private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/ipad1.png": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-08-29T10:56:33.024Z"
     }
   },
   "files_written": [
     {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonMain/kotlin/com/anfas/core/model/Ids.kt",
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/dashboard/src/commonTest/kotlin/com/anfas/feature/dashboard/DashboardComponentTest.kt",
       "action": "edit",
-      "tokens": 49,
-      "at": "2026-08-24T09:54:13.931Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonMain/kotlin/com/anfas/core/model/Equipment.kt",
-      "action": "create",
-      "tokens": 884,
-      "at": "2026-08-24T09:54:29.324Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/model/src/commonTest/kotlin/com/anfas/core/model/MaintenanceLogTest.kt",
-      "action": "create",
-      "tokens": 561,
-      "at": "2026-08-24T09:54:39.478Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/EquipmentEntity.kt",
-      "action": "create",
-      "tokens": 843,
-      "at": "2026-08-24T09:54:51.964Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt",
-      "action": "edit",
-      "tokens": 38,
-      "at": "2026-08-24T09:54:56.901Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt",
-      "action": "edit",
-      "tokens": 112,
-      "at": "2026-08-24T09:55:02.746Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt",
-      "action": "edit",
-      "tokens": 35,
-      "at": "2026-08-24T09:55:08.776Z"
+      "tokens": 68,
+      "at": "2026-08-29T10:21:16.960Z"
     },
     {
       "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt",
       "action": "edit",
-      "tokens": 13,
-      "at": "2026-08-24T09:55:17.832Z"
+      "tokens": 223,
+      "at": "2026-08-29T10:21:54.958Z"
     },
     {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/EquipmentRepository.kt",
-      "action": "create",
-      "tokens": 911,
-      "at": "2026-08-24T09:56:05.222Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstEquipmentRepository.kt",
-      "action": "create",
-      "tokens": 1754,
-      "at": "2026-08-24T09:56:24.306Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt",
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt",
       "action": "edit",
-      "tokens": 30,
-      "at": "2026-08-24T09:56:29.175Z"
+      "tokens": 134,
+      "at": "2026-08-29T10:21:59.291Z"
     },
     {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt",
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt",
       "action": "edit",
-      "tokens": 43,
-      "at": "2026-08-24T09:56:34.271Z"
+      "tokens": 1,
+      "at": "2026-08-29T10:22:02.595Z"
     },
     {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/data/src/commonTest/kotlin/com/anfas/core/data/EquipmentRepositoryTest.kt",
-      "action": "create",
-      "tokens": 2604,
-      "at": "2026-08-24T09:57:11.889Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/auth/src/commonMain/kotlin/com/anfas/core/auth/Permission.kt",
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt",
       "action": "edit",
-      "tokens": 130,
-      "at": "2026-08-24T09:57:18.394Z"
+      "tokens": 224,
+      "at": "2026-08-29T10:24:35.530Z"
     },
     {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/auth/src/commonMain/kotlin/com/anfas/core/auth/Permission.kt",
-      "action": "edit",
-      "tokens": 39,
-      "at": "2026-08-24T09:57:23.652Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasStatusChip.kt",
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt",
       "action": "edit",
       "tokens": 24,
-      "at": "2026-08-24T09:57:28.268Z"
+      "at": "2026-08-29T10:24:39.349Z"
     },
     {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasStatusChip.kt",
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt",
       "action": "edit",
-      "tokens": 102,
-      "at": "2026-08-24T09:57:34.292Z"
+      "tokens": 144,
+      "at": "2026-08-29T10:24:43.879Z"
     },
     {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasIcons.kt",
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/members/src/commonTest/kotlin/com/anfas/feature/members/MemberProfileComponentTest.kt",
       "action": "edit",
-      "tokens": 577,
-      "at": "2026-08-24T09:57:46.232Z"
+      "tokens": 77,
+      "at": "2026-08-29T10:26:27.953Z"
     },
     {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/AppStrings.kt",
+      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/subscriptions/src/commonTest/kotlin/com/anfas/feature/subscriptions/TestDoubles.kt",
       "action": "edit",
-      "tokens": 19,
-      "at": "2026-08-24T09:58:00.472Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/AppStrings.kt",
-      "action": "edit",
-      "tokens": 600,
-      "at": "2026-08-24T09:58:55.615Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/EnglishStrings.kt",
-      "action": "edit",
-      "tokens": 939,
-      "at": "2026-08-24T09:59:13.259Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/ArabicStrings.kt",
-      "action": "edit",
-      "tokens": 916,
-      "at": "2026-08-24T10:00:01.910Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentState.kt",
-      "action": "create",
-      "tokens": 950,
-      "at": "2026-08-24T10:01:31.435Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentComponent.kt",
-      "action": "create",
-      "tokens": 3052,
-      "at": "2026-08-24T10:02:07.950Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentComponent.kt",
-      "action": "edit",
-      "tokens": 36,
-      "at": "2026-08-24T10:02:15.759Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentComponent.kt",
-      "action": "edit",
-      "tokens": 9,
-      "at": "2026-08-24T10:02:20.020Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentModule.kt",
-      "action": "create",
-      "tokens": 294,
-      "at": "2026-08-24T10:02:26.714Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentUi.kt",
-      "action": "create",
-      "tokens": 417,
-      "at": "2026-08-24T10:02:45.528Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentScreen.kt",
-      "action": "create",
-      "tokens": 2763,
-      "at": "2026-08-24T10:03:49.661Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentScreen.kt",
-      "action": "edit",
-      "tokens": 18,
-      "at": "2026-08-24T10:04:00.627Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt",
-      "action": "create",
-      "tokens": 2238,
-      "at": "2026-08-24T10:04:29.267Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt",
-      "action": "edit",
-      "tokens": 5,
-      "at": "2026-08-24T10:04:36.427Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt",
-      "action": "edit",
-      "tokens": 30,
-      "at": "2026-08-24T10:04:41.470Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt",
-      "action": "edit",
-      "tokens": 56,
-      "at": "2026-08-24T10:04:53.248Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt",
-      "action": "edit",
-      "tokens": 14,
-      "at": "2026-08-24T10:04:57.931Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/AddEquipmentDialog.kt",
-      "action": "create",
-      "tokens": 1695,
-      "at": "2026-08-24T10:24:47.671Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/LogMaintenanceDialog.kt",
-      "action": "create",
-      "tokens": 1182,
-      "at": "2026-08-24T10:25:03.176Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonTest/kotlin/com/anfas/feature/equipment/EquipmentComponentTest.kt",
-      "action": "create",
-      "tokens": 2303,
-      "at": "2026-08-24T10:26:05.008Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 66,
-      "at": "2026-08-24T10:27:24.233Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 44,
-      "at": "2026-08-24T10:27:29.459Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 48,
-      "at": "2026-08-24T10:27:35.127Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 72,
-      "at": "2026-08-24T10:27:41.411Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 56,
-      "at": "2026-08-24T10:27:46.880Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 44,
-      "at": "2026-08-24T10:27:52.456Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 214,
-      "at": "2026-08-24T10:28:00.968Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 68,
-      "at": "2026-08-24T10:28:07.816Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 102,
-      "at": "2026-08-24T10:28:13.983Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt",
-      "action": "edit",
-      "tokens": 109,
-      "at": "2026-08-24T10:28:22.020Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
-      "action": "edit",
-      "tokens": 83,
-      "at": "2026-08-24T10:28:39.377Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
-      "action": "edit",
-      "tokens": 83,
-      "at": "2026-08-24T10:28:44.887Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
-      "action": "edit",
-      "tokens": 78,
-      "at": "2026-08-24T10:28:50.733Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
-      "action": "edit",
-      "tokens": 29,
-      "at": "2026-08-24T10:28:56.895Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
-      "action": "edit",
-      "tokens": 70,
-      "at": "2026-08-24T10:29:02.264Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
-      "action": "edit",
-      "tokens": 46,
-      "at": "2026-08-24T10:29:21.918Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonTest/kotlin/com/anfas/app/navigation/ConfigSerializationTest.kt",
-      "action": "edit",
-      "tokens": 52,
-      "at": "2026-08-24T10:29:56.667Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt",
-      "action": "edit",
-      "tokens": 66,
-      "at": "2026-08-24T10:30:13.104Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt",
-      "action": "edit",
-      "tokens": 61,
-      "at": "2026-08-24T10:30:19.427Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt",
-      "action": "edit",
-      "tokens": 62,
-      "at": "2026-08-24T10:30:24.958Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt",
-      "action": "edit",
-      "tokens": 275,
-      "at": "2026-08-24T10:30:42.421Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt",
-      "action": "edit",
-      "tokens": 103,
-      "at": "2026-08-24T10:30:55.332Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt",
-      "action": "edit",
-      "tokens": 21,
-      "at": "2026-08-24T10:31:04.853Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/equipment/src/commonTest/kotlin/com/anfas/feature/equipment/EquipmentComponentTest.kt",
-      "action": "edit",
-      "tokens": 22,
-      "at": "2026-08-24T10:33:59.901Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md",
-      "action": "edit",
-      "tokens": 937,
-      "at": "2026-08-24T10:38:07.714Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/.github/workflows/ci.yml",
-      "action": "create",
-      "tokens": 818,
-      "at": "2026-08-25T07:02:19.625Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/.github/dependabot.yml",
-      "action": "create",
-      "tokens": 178,
-      "at": "2026-08-25T07:02:26.137Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md",
-      "action": "edit",
-      "tokens": 681,
-      "at": "2026-08-25T07:08:40.913Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "action": "edit",
-      "tokens": 45,
-      "at": "2026-08-25T07:24:55.974Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "action": "edit",
-      "tokens": 37,
-      "at": "2026-08-25T07:25:01.497Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "action": "edit",
-      "tokens": 25,
-      "at": "2026-08-25T07:25:14.011Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "action": "edit",
-      "tokens": 36,
-      "at": "2026-08-25T07:25:19.565Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
-      "action": "edit",
-      "tokens": 689,
-      "at": "2026-08-25T07:25:30.504Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md",
-      "action": "edit",
-      "tokens": 210,
-      "at": "2026-08-25T07:27:26.926Z"
-    },
-    {
-      "file": "/Users/abdelrahmanelgendy/AndroidStudioProjects/ANFAS/CLAUDE.md",
-      "action": "edit",
-      "tokens": 352,
-      "at": "2026-08-25T07:27:46.299Z"
+      "tokens": 79,
+      "at": "2026-08-29T10:26:54.431Z"
     }
   ],
   "edit_counts": {
-    "core/model/src/commonMain/kotlin/com/anfas/core/model/Ids.kt": 1,
-    "core/model/src/commonMain/kotlin/com/anfas/core/model/Equipment.kt": 1,
-    "core/model/src/commonTest/kotlin/com/anfas/core/model/MaintenanceLogTest.kt": 1,
-    "core/database/src/commonMain/kotlin/com/anfas/core/database/EquipmentEntity.kt": 1,
-    "core/database/src/commonMain/kotlin/com/anfas/core/database/AnfasDatabase.kt": 3,
-    "core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt": 1,
-    "core/data/src/commonMain/kotlin/com/anfas/core/data/EquipmentRepository.kt": 1,
-    "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstEquipmentRepository.kt": 1,
-    "core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt": 2,
-    "core/data/src/commonTest/kotlin/com/anfas/core/data/EquipmentRepositoryTest.kt": 1,
-    "core/auth/src/commonMain/kotlin/com/anfas/core/auth/Permission.kt": 2,
-    "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasStatusChip.kt": 2,
-    "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasIcons.kt": 1,
-    "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/AppStrings.kt": 2,
-    "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/EnglishStrings.kt": 1,
-    "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/ArabicStrings.kt": 1,
-    "feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentState.kt": 1,
-    "feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentComponent.kt": 3,
-    "feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentModule.kt": 1,
-    "feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentUi.kt": 1,
-    "feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentScreen.kt": 2,
-    "feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentDetailDrawer.kt": 5,
-    "feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/AddEquipmentDialog.kt": 1,
-    "feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/LogMaintenanceDialog.kt": 1,
-    "feature/equipment/src/commonTest/kotlin/com/anfas/feature/equipment/EquipmentComponentTest.kt": 2,
-    "composeApp/src/commonMain/kotlin/com/anfas/app/navigation/RootComponent.kt": 10,
-    "composeApp/src/commonMain/kotlin/com/anfas/app/App.kt": 6,
-    "composeApp/src/commonTest/kotlin/com/anfas/app/navigation/ConfigSerializationTest.kt": 1,
-    "composeApp/src/commonTest/kotlin/com/anfas/app/navigation/NavigationPermissionTest.kt": 6,
-    "CLAUDE.md": 4,
-    ".github/workflows/ci.yml": 1,
-    ".github/dependabot.yml": 1,
-    "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt": 5
+    "feature/dashboard/src/commonTest/kotlin/com/anfas/feature/dashboard/DashboardComponentTest.kt": 1,
+    "core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt": 6,
+    "feature/members/src/commonTest/kotlin/com/anfas/feature/members/MemberProfileComponentTest.kt": 1,
+    "feature/subscriptions/src/commonTest/kotlin/com/anfas/feature/subscriptions/TestDoubles.kt": 1
   },
-  "anatomy_hits": 26,
-  "anatomy_misses": 10,
-  "repeated_reads_warned": 14,
+  "anatomy_hits": 2,
+  "anatomy_misses": 22,
+  "repeated_reads_warned": 1,
   "cerebrum_warnings": 0,
-  "stop_count": 9
+  "stop_count": 2
 }

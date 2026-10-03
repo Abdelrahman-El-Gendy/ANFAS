@@ -16,5 +16,16 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.turbine)
         }
+        /**
+         * Layout tests, JVM only -- same reasoning as `:core:designsystem` and
+         * `:feature:intake-ocr`: the responsive branch is common Compose code and identical on
+         * every target, so running it three times buys nothing and would drag a Skiko renderer
+         * into the iOS test binary. `compose.desktop.currentOs` is required, not optional: these
+         * really compose and measure, so without it they fail at class-load.
+         */
+        jvmTest.dependencies {
+            implementation(libs.bundles.test.composeUi)
+            implementation(compose.desktop.currentOs)
+        }
     }
 }

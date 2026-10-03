@@ -3,8 +3,10 @@ package com.anfas.core.database
 import androidx.room3.ColumnInfo
 import androidx.room3.Dao
 import androidx.room3.Entity
+import androidx.room3.Insert
 import androidx.room3.PrimaryKey
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 
@@ -46,4 +48,35 @@ interface AnnouncementDao {
 
     @Query("DELETE FROM announcements WHERE id = :id")
     suspend fun delete(id: String)
+
+    // --- sync bookkeeping -------------------------------------------------------------------
+    // Declared here, not only on SyncDao, so an outbox entry shares a @Transaction with the write
+    // it describes. See SyncOutboxEntity: a change committed with no record of it never syncs,
+    // and nothing afterwards can detect that it happened.
+
+    @Insert
+    suspend fun recordChange(entry: SyncOutboxEntity)
+
+    @Insert
+    suspend fun recordTombstones(entries: List<SyncTombstoneEntity>)
+
+    @Transaction
+    suspend fun upsertTracked(announcement: AnnouncementEntity, change: SyncOutboxEntity) {
+        upsert(announcement)
+        recordChange(change)
+    }
+
+    @Transaction
+    suspend fun deleteTracked(id: String, nowEpochMs: Long) {
+        recordTombstones(listOf(SyncTombstoneEntity(SyncTables.ANNOUNCEMENTS, id, nowEpochMs)))
+        recordChange(
+            SyncOutboxEntity(
+                tableName = SyncTables.ANNOUNCEMENTS,
+                rowId = id,
+                op = SyncOp.DELETE.name,
+                capturedAtEpochMs = nowEpochMs,
+            ),
+        )
+        delete(id)
+    }
 }

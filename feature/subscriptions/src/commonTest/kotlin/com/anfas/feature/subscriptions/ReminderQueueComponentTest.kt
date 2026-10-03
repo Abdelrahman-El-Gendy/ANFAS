@@ -4,6 +4,10 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
+import com.anfas.core.data.ReminderScheduler
+import com.anfas.core.data.ReminderSender
+import com.anfas.core.data.ScheduleOutcome
+import com.anfas.core.data.SendRunOutcome
 import com.anfas.core.model.FailureReason
 import com.anfas.core.model.ReminderId
 import com.anfas.core.model.ReminderStatus
@@ -13,6 +17,7 @@ import com.arkivanov.essenty.lifecycle.resume
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -203,6 +208,8 @@ class ReminderQueueComponentTest {
                 },
             ),
             repository = repository,
+            scheduler = FakeScheduler(),
+            sender = FakeSender(),
             auth = FakeAuth(mayRetry = false),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onCloseClicked = {},
@@ -229,15 +236,152 @@ class ReminderQueueComponentTest {
         }
     }
 
+    @Test
+    fun `building the queue reports how many were queued`() = runTest {
+        val scheduler = FakeScheduler(AppResult.Success(ScheduleOutcome(queued = 2)))
+        val component = component(reminders = emptyList(), scheduler = scheduler)
+
+        // Subscribing matters: state is `stateIn(WhileSubscribed)`, so the permission that gates
+        // the build is not in `state.value` until something collects. The screen always does.
+        component.state.test {
+            awaitSettled { it.mayBuildQueue }
+
+            component.onBuildQueue()
+
+            assertEquals(1, scheduler.builds)
+            assertEquals(
+                QueueNotice.QueueBuilt(queued = 2),
+                awaitSettled {
+                    it.notice != null
+                }.notice,
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /**
+     * Queuing nothing is a normal outcome -- consent defaults to false -- so the notice has to
+     * carry the reasons rather than a bare zero the user would read as a broken button.
+     */
+    @Test
+    fun `queuing nothing explains why`() = runTest {
+        val scheduler = FakeScheduler(
+            AppResult.Success(
+                ScheduleOutcome(queued = 0, skippedNoConsent = 3, skippedNoPhone = 1),
+            ),
+        )
+        val component = component(reminders = emptyList(), scheduler = scheduler)
+
+        component.state.test {
+            awaitSettled { it.mayBuildQueue }
+
+            component.onBuildQueue()
+
+            assertEquals(
+                QueueNotice.QueueBuiltNothing(noConsent = 3, noPhone = 1, alreadyQueued = 0),
+                awaitSettled { it.notice != null }.notice,
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /**
+     * The boundary, not the button. A component method is callable from anywhere, so hiding the
+     * action in the UI is not what stops a role without the permission from writing reminders.
+     */
+    @Test
+    fun `a role that may not change the queue cannot build it`() = runTest {
+        val scheduler = FakeScheduler()
+        val component = component(
+            reminders = emptyList(),
+            mayRetry = false,
+            scheduler = scheduler,
+        )
+        component.state.test {
+            // Drain until the session has been read, so the refusal is the permission's doing
+            // rather than the initial value's.
+            awaitSettled { !it.mayBuildQueue && it.content !is ReminderQueueContent.Loading }
+
+            component.onBuildQueue()
+
+            assertEquals(0, scheduler.builds, "the build must not reach the scheduler")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `running the queue reports what was sent`() = runTest {
+        val sender = FakeSender(outcome = AppResult.Success(SendRunOutcome(sent = 3, failed = 1)))
+        val component = component(reminders = emptyList(), sender = sender)
+
+        component.state.test {
+            awaitSettled { it.maySend && it.gatewayConnected }
+
+            component.onRunQueue()
+
+            assertEquals(1, sender.runs)
+            assertEquals(
+                QueueNotice.RunFinished(sent = 3, failed = 1),
+                awaitSettled { it.notice != null }.notice,
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /** Stopping early is its own notice: the remainder are still queued, not lost. */
+    @Test
+    fun `a rate-limited run says it stopped early`() = runTest {
+        val sender = FakeSender(
+            outcome = AppResult.Success(SendRunOutcome(sent = 2, failed = 1, stoppedEarly = true)),
+        )
+        val component = component(reminders = emptyList(), sender = sender)
+
+        component.state.test {
+            awaitSettled { it.maySend && it.gatewayConnected }
+
+            component.onRunQueue()
+
+            assertEquals(
+                QueueNotice.RunStoppedEarly(sent = 2),
+                awaitSettled { it.notice != null }.notice,
+            )
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /**
+     * The guard that protects the queue before WhatsApp exists. Running against no gateway would
+     * fail every row and spend its attempts, so the component must refuse even if something calls
+     * the method directly.
+     */
+    @Test
+    fun `the queue cannot be run with no gateway connected`() = runTest {
+        val sender = FakeSender(isConfigured = false)
+        val component = component(reminders = emptyList(), sender = sender)
+
+        component.state.test {
+            awaitSettled { it.maySend && !it.gatewayConnected }
+
+            component.onRunQueue()
+
+            assertEquals(0, sender.runs, "the run must not reach the sender")
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun TestScope.component(
         reminders: List<com.anfas.core.model.Reminder>,
         forced: AppResult<List<com.anfas.core.model.Reminder>>? = null,
         mayRetry: Boolean = true,
+        scheduler: FakeScheduler = FakeScheduler(),
+        sender: FakeSender = FakeSender(),
     ): ReminderQueueComponent {
         val lifecycle = LifecycleRegistry()
         val component = ReminderQueueComponent(
             componentContext = DefaultComponentContext(lifecycle = lifecycle),
             repository = FakeReminderRepository(reminders, forced),
+            scheduler = scheduler,
+            sender = sender,
             auth = FakeAuth(mayRetry = mayRetry),
             dispatchers = TestDispatchers(UnconfinedTestDispatcher(testScheduler)),
             onCloseClicked = {},

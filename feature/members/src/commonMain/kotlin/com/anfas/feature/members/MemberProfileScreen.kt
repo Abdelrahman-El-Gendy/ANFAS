@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.anfas.core.designsystem.AnfasCard
+import com.anfas.core.designsystem.AnfasCheckbox
 import com.anfas.core.designsystem.AnfasDetailTopBar
 import com.anfas.core.designsystem.AnfasEmptyState
 import com.anfas.core.designsystem.AnfasIcons
@@ -96,8 +97,10 @@ fun MemberProfileScreen(component: MemberProfileComponent, modifier: Modifier = 
             is MemberProfileContent.Loaded -> ProfileBody(
                 content = content,
                 mayViewTherapy = state.mayViewTherapy,
+                mayEdit = state.mayEdit,
                 onRenew = component::onRenew,
                 onTherapy = component::onTherapy,
+                onWhatsAppConsentChanged = component::onWhatsAppConsentChanged,
                 modifier = Modifier.fillMaxWidth().weight(1f),
             )
         }
@@ -108,8 +111,10 @@ fun MemberProfileScreen(component: MemberProfileComponent, modifier: Modifier = 
 private fun ProfileBody(
     content: MemberProfileContent.Loaded,
     mayViewTherapy: Boolean,
+    mayEdit: Boolean,
     onRenew: () -> Unit,
     onTherapy: () -> Unit,
+    onWhatsAppConsentChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val s = strings
@@ -126,6 +131,13 @@ private fun ProfileBody(
 
         MembershipCard(term = content.term, progress = content.progress, s = s)
 
+        WhatsAppConsent(
+            consented = content.member.whatsappOptIn,
+            enabled = mayEdit,
+            onChange = onWhatsAppConsentChanged,
+            s = s,
+        )
+
         AnfasPrimaryButton(
             text = s.members.profileRenew,
             onClick = onRenew,
@@ -141,6 +153,54 @@ private fun ProfileBody(
                 onClick = onTherapy,
                 icon = AnfasIcons.Group,
                 modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+/**
+ * WhatsApp consent.
+ *
+ * Shown to everyone who can open the profile but only editable with `EDIT_MEMBERS`, which is the
+ * opposite call from the Therapy button above: whether a member may be messaged is a fact about
+ * them that anyone reading the profile should be able to see, whereas clinical records are not.
+ *
+ * The hint is not decoration. Consent has to be *asked for* -- Meta has no API to tell us whether
+ * someone opted in -- so the person tapping this is asserting they asked.
+ */
+@Composable
+private fun WhatsAppConsent(
+    consented: Boolean,
+    enabled: Boolean,
+    onChange: (Boolean) -> Unit,
+    s: AppStrings,
+) {
+    val scheme = MaterialTheme.colorScheme
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        AnfasCheckbox(
+            checked = consented,
+            // Null rather than a no-op lambda, so the control reads as unavailable to
+            // accessibility services instead of merely ignoring taps.
+            onCheckedChange = if (enabled) onChange else null,
+            enabled = enabled,
+        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier.weight(1f).padding(top = 10.dp),
+        ) {
+            Text(
+                text = s.members.profileWhatsAppConsent,
+                style = AnfasTheme.textStyles.bodyMedium,
+                color = scheme.onSurface,
+            )
+            Text(
+                text = s.members.profileWhatsAppConsentHint,
+                // No bodySmall in this design system; the variant colour carries the hierarchy.
+                style = AnfasTheme.textStyles.bodyMedium,
+                color = scheme.onSurfaceVariant,
             )
         }
     }

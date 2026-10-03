@@ -26,6 +26,15 @@ enum class Permission {
     /** Re-queue a failed reminder, which sends a WhatsApp message on the gym's account. */
     RETRY_REMINDERS,
 
+    /**
+     * Running the queue -- actually dispatching messages.
+     *
+     * Separate from [RETRY_REMINDERS] because retrying one message a member is expecting is a
+     * different act from sending two hundred at once. Reception holds both; a role could
+     * plausibly hold only the first, and the split exists so that stays a decision.
+     */
+    SEND_REMINDERS,
+
     /** Photograph a sign-up sheet and review what OCR read. */
     SCAN_INTAKE,
 
@@ -102,6 +111,8 @@ val Role.permissions: Set<Permission>
             Permission.MANAGE_SUBSCRIPTIONS,
             Permission.VIEW_REMINDERS,
             Permission.RETRY_REMINDERS,
+            // Chasing renewals is the desk's job, so reception dispatches them.
+            Permission.SEND_REMINDERS,
             Permission.SCAN_INTAKE,
             Permission.IMPORT_INTAKE,
             Permission.CHECK_IN_MEMBERS,

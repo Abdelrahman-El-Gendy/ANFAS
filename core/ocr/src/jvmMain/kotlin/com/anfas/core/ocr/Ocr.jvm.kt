@@ -58,4 +58,12 @@ private object UnsupportedTextRecogniser : TextRecogniser {
 private object NoOpIntakeImageStore : IntakeImageStore {
     override suspend fun delete(uri: String) = Unit
     override suspend fun purgeExcept(keep: Set<String>) = Unit
+
+    /**
+     * Empty, and it must stay empty even once sync lands. Desktop never captures, so any uri it
+     * reads belongs to a phone's filesystem: "adopting" one would mean moving a file that is not
+     * here. The design note calls this out — a synced `source_image_uri` has to become local-only
+     * with a separate blob id, and repointing paths is not the seam that solves it.
+     */
+    override suspend fun adoptLegacyCaptures(): Map<String, String> = emptyMap()
 }

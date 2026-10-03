@@ -1208,5 +1208,786 @@
     "related_bugs": [],
     "occurrences": 2,
     "last_seen": "2026-08-24T13:35:00Z"
+  },
+  {
+    "id": "bug-070",
+    "timestamp": "2026-08-25T10:55:00Z",
+    "error_message": "The photographed sign-up sheet was not visible at all on a phone: intake's source pane was omitted below 1024dp",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt",
+    "root_cause": "ReviewBody's narrow branch rendered only ValidationPane, inside a Column with verticalArrangement=spacedBy(16.dp) wrapping a single child -- a vestigial container showing the intent was two stacked panes. The screen KDoc said 'the split becomes stacked below 1024dp', which is not what the code did. Net effect: the source photo was unreachable on a phone, the very device that captures it, so the photo-rendering feature shipped one commit earlier was invisible on Android and iPhone.",
+    "fix": "Added SourceDocumentPane to the narrow branch above ValidationPane using the same SOURCE_PANE_WEIGHT/TABLE_PANE_WEIGHT 40/60 split, vertically; corrected the KDoc to describe what it now does and why dropping the photo was worse than a small zoomable pane. Verified on the Pixel 9 Pro emulator: the sheet renders correctly oriented with overlay boxes aligned.",
+    "tags": [
+      "intake-ocr",
+      "responsive-layout",
+      "breakpoint",
+      "reachability",
+      "device-testing"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T10:55:00Z"
+  },
+  {
+    "id": "bug-071",
+    "timestamp": "2026-08-25T11:10:00Z",
+    "error_message": "The desktop app opened on the mobile bottom-bar layout, making Announcements and Equipment unreachable on desktop",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/main.kt",
+    "root_cause": "Window() was created with no state and no minimum size, so it used Compose's 800x600 default -- below AnfasBreakpoints.tabletMax (1024dp), the point where App.kt switches to the phone layout. The phone layout's bottom bar carries only the four Placement.Primary destinations, so both Placement.DesktopOnly features (Announcements, Equipment) had no entry point at all in the desktop app unless the user manually dragged the window wider.",
+    "fix": "rememberWindowState(width=1280.dp, height=840.dp) plus an AWT window.minimumSize of 1060x680 set in a LaunchedEffect (Compose's Window has no minimumSize parameter). Past the breakpoint rather than exactly on it so chrome/rounding cannot land back on the phone layout. Confirmed by relaunching: the full rail with Announcements and Equipment Inventory now renders.",
+    "tags": [
+      "desktop",
+      "window-state",
+      "breakpoint",
+      "reachability",
+      "navigation"
+    ],
+    "related_bugs": [
+      "bug-070"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T11:10:00Z"
+  },
+  {
+    "id": "bug-072",
+    "timestamp": "2026-08-25T11:12:00Z",
+    "error_message": "CI: Undefined symbols for architecture arm64: _OBJC_CLASS_$_UIViewLayoutRegion, referenced from CMPLayoutRegion.o; framework 'UIUtilities' not found",
+    "file": ".github/workflows/ci.yml",
+    "root_cause": "Both macOS jobs ran on the macos-15 runner image, whose Xcode is 16.4. Compose Multiplatform 1.11.1's UIKit layer references iOS 26 SDK symbols, so Kotlin/Native linking of the test binary and the release framework fails there. Local development is on Xcode 26.6 with the iOS 26.5 SDK, which is why the workflow's commands passed locally and failed only on the runner -- the failure was invisible until the first real CI run.",
+    "fix": "Moved the `apple` and `ios-app` jobs to runs-on: macos-26, and added a step to both that selects the newest installed Xcode and prints `xcodebuild -version` (plus the simulator SDK list on the apple job), so a future runner-image regression surfaces as one readable line instead of hundreds of linker errors.",
+    "tags": [
+      "ci",
+      "github-actions",
+      "ios",
+      "kotlin-native",
+      "compose-multiplatform",
+      "xcode"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T11:12:00Z"
+  },
+  {
+    "id": "bug-073",
+    "timestamp": "2026-08-25T11:45:00Z",
+    "error_message": "User report: 'the add class button on simulator iphone not properly rendered' -- the Classes title ran flush into the Add class button with no gap, reading as clipped text",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasScreenHeader.kt",
+    "root_cause": "AnfasScreenHeader's Row used Arrangement.SpaceBetween with the title Column taking Modifier.weight(1f, fill = false). SpaceBetween can only distribute space that is left OVER, and a weight(1f) child claims the entire remaining share -- so once the title is long enough to fill that share there is no space left to distribute and the title lands flush against the first action, with zero separation. It only showed on the narrower iPhone (~402dp): on the Pixel (~427dp) 'Today's schedule' had just enough room that the absence of a gutter was not obvious. Not a clipping bug -- the glyphs were complete, there was simply no gap, which reads as clipping.",
+    "fix": "Gave the actions Row a Modifier.padding(start = 16.dp) gutter. Padding rather than an Arrangement gap on purpose: it becomes part of the actions' MEASURED width, which is what shrinks the title's weighted share, so an over-long title now wraps instead of colliding. Verified on iPhone 17 (title wraps to two lines, clear space around the button), on the Pixel 9 Pro (still one line, now with breathing room), and on Members, which is the two-action worst case.",
+    "tags": [
+      "designsystem",
+      "compose-layout",
+      "ios",
+      "responsive",
+      "weight",
+      "space-between"
+    ],
+    "related_bugs": [
+      "bug-070",
+      "bug-071"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T11:45:00Z"
+  },
+  {
+    "id": "bug-074",
+    "timestamp": "2026-08-25T13:20:00Z",
+    "error_message": "Desktop database was written to ~/.anfas on every OS, which is wrong on macOS and Windows",
+    "file": "core/database/src/jvmMain/kotlin/com/anfas/core/database/DatabaseBuilderFactory.jvm.kt",
+    "root_cause": "create() hardcoded File(System.getProperty(\"user.home\"), \".anfas\"). macOS has a standard Application Support directory that Migration Assistant and backup tooling understand; a dot-directory in a Windows profile can end up synced to OneDrive, which for SQLite means a .db being copied out from under an open connection and away from its -wal. The correct per-OS pattern already existed one module over for logs (core/common/.../AppLog.jvm.kt) with injectable params and a unit test -- the database was simply the odd one out.",
+    "fix": "Added resolveDesktopDataDir(osName, userHome, localAppData, xdgDataHome) mirroring AppLog.desktopLogFile's shape: macOS Library/Application Support/ANFAS, Windows %LOCALAPPDATA%/ANFAS, Linux $XDG_DATA_HOME/anfas (data locations, deliberately not the log ones). Plus adoptLegacyDatabase(from,to): never overwrites an existing newer DB, moves -wal/-shm as a set before the .db so an interrupted move leaves the legacy dir authoritative, and never throws so a permissions problem cannot become a failure to start. 9 tests in DesktopDataDirTest; verified against a real 135KB database which moved with integrity_check clean and the v11 identity hash unchanged.",
+    "tags": [
+      "desktop",
+      "database",
+      "per-os-paths",
+      "data-migration",
+      "sqlite"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T13:20:00Z"
+  },
+  {
+    "id": "bug-075",
+    "timestamp": "2026-08-25T13:30:00Z",
+    "error_message": "Quitting the desktop app abandoned the Room connection: anfas.db-wal/-shm left behind, Decompose lifecycle never torn down",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/main.kt, core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt",
+    "root_cause": "onCloseRequest was ::exitApplication only -- no AnfasDatabase.close() and no lifecycle teardown, so the LifecycleRegistry was resume()d and never stopped. SQLite recovers from an uncheckpointed WAL on next open, but a .db copied by a backup tool while the WAL still holds recent commits is an incomplete database.",
+    "fix": "Declared the close on the Koin definition that opens it -- single<AnfasDatabase> { ... }.withOptions { onClose { it?.close() } } in dataModule -- so no platform launcher has to remember. main.kt now does lifecycle.destroy() then stopKoin() then exitApplication(), in that order, so components cancel their scopes before the connection closes. NOTE: `single { } onClose { }` reads naturally and does NOT compile; in Koin 4.2 onClose is an extension on BeanDefinition reachable only inside withOptions. KoinOnCloseContractTest pins that contract (2 tests) using an isolated koinApplication rather than the global context, because the real dataModule resolves the user's actual data directory.",
+    "tags": [
+      "desktop",
+      "koin",
+      "room",
+      "lifecycle",
+      "shutdown",
+      "api-misuse"
+    ],
+    "related_bugs": [
+      "bug-074"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T13:30:00Z"
+  },
+  {
+    "id": "bug-076",
+    "timestamp": "2026-08-25T13:35:00Z",
+    "error_message": ".gitignore un-ignored keystore.properties.template, but that file never existed",
+    "file": "keystore.properties.template",
+    "root_cause": "A negation rule (!keystore.properties.template) was added alongside the keystore.properties ignore, following the Local.xcconfig.template precedent, but the template itself was never created -- so anyone cloning the repo had no idea what keys the signing config expects.",
+    "fix": "Created it with the four keys androidApp/build.gradle.kts actually reads (storeFile, storePassword, keyAlias, keyPassword), the keytool command to generate a keystore, a warning that losing it means never updating the app under the same package, and the apksigner command to verify what signed an APK. Confirmed trackable via `git add --dry-run` while keystore.properties itself stays ignored.",
+    "tags": [
+      "release",
+      "signing",
+      "documentation",
+      "gitignore"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-25T13:35:00Z"
+  },
+  {
+    "id": "bug-077",
+    "timestamp": "2026-08-26T12:05:00Z",
+    "error_message": "R8SmokeTest: all 5 instrumented tests failed with NoSuchMethodError / NoClassDefFoundError (BuildersKt.runBlocking, kotlin.collections.CollectionsKt, GlobalContext.getOrNull, DefaultComponentContext.<init>)",
+    "file": "androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt",
+    "root_cause": "The tests called library APIs that the production app never calls, so R8 correctly shrank them out of the app APK. Anything a test reaches for from outside is by definition unreachable from the app, so it is absent from a minified build.",
+    "fix": "Rewrote the suite to drive the app only through its own entry points (ActivityScenario.launch / recreate) and to assert with org.junit.Assert instead of kotlin.test. Dropped all project dependencies and kotlin.test from androidTest.",
+    "tags": [
+      "r8",
+      "instrumented-test",
+      "androidTest",
+      "shrinking",
+      "minify",
+      "test-design"
+    ],
+    "related_bugs": [
+      "bug-078",
+      "bug-079"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:05:00Z"
+  },
+  {
+    "id": "bug-078",
+    "timestamp": "2026-08-26T12:05:00Z",
+    "error_message": "AndroidJUnitRunner crashed in onCreate: NoClassDefFoundError: Failed resolution of: Lkotlin/LazyKt; at androidx.test.platform.io.TestDirCalculator",
+    "file": "androidApp/proguard-rules-stage.pro",
+    "root_cause": "kotlin-stdlib is a dependency of both the app and the androidTest APK, and AGP ships a shared dependency in the app APK only. The app inlines every `lazy` call so retains no kotlin.LazyKt, while androidx.test's own Kotlin code calls it. -dontshrink in testProguardFiles cannot help: stdlib is not the test APK's program input.",
+    "fix": "New proguard-rules-stage.pro with `-keep class kotlin.LazyKt* { *; }`, applied via proguardFile() on the `stage` build type only so release is untouched. Verified: release's mapping still shows kotlin.LazyKt__LazyKt -> R8$$REMOVED$$CLASS$$766.",
+    "tags": [
+      "r8",
+      "proguard",
+      "kotlin-stdlib",
+      "androidx-test",
+      "minify",
+      "stage-build-type"
+    ],
+    "related_bugs": [
+      "bug-077"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:05:00Z"
+  },
+  {
+    "id": "bug-079",
+    "timestamp": "2026-08-26T12:05:00Z",
+    "error_message": "Missing classes detected while running R8: com.google.errorprone.annotations.CanIgnoreReturnValue / MustBeClosed (task :androidApp:minifyStageAndroidTestWithR8)",
+    "file": "androidApp/proguard-rules-test.pro",
+    "root_cause": "Because `stage` is minified, the androidTest APK is minified too. androidx.test's Checks/Tracer carry ErrorProne annotations that are compile-time only and ship in a module nothing here depends on.",
+    "fix": "New proguard-rules-test.pro wired via testProguardFiles, holding -dontwarn com.google.errorprone.annotations.** (plus -dontshrink, since the test APK is not the artifact under test). Kept out of proguard-rules.pro so a test dependency never loosens the shipped app's config.",
+    "tags": [
+      "r8",
+      "proguard",
+      "androidx-test",
+      "errorprone",
+      "testProguardFiles"
+    ],
+    "related_bugs": [
+      "bug-078"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:05:00Z"
+  },
+  {
+    "id": "bug-080",
+    "timestamp": "2026-08-26T12:05:00Z",
+    "error_message": "Could not resolve org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0 -- constraint {strictly 1.8.0} from stageRuntimeClasspath by consistent resolution",
+    "file": "androidApp/build.gradle.kts",
+    "root_cause": "AGP applies consistent resolution: an androidTest configuration must resolve the same versions as the production runtime. The Android classpath never declares serialization-json directly, so the transitively-supplied kotlinx BOM pins everything to 1.8.0, and the catalog's 1.11.0 is excluded by the strict constraint.",
+    "fix": "Removed the androidTestImplementation declaration entirely and redesigned the test not to need serialization-json (ActivityScenario.recreate exercises the serializers through the app instead).",
+    "tags": [
+      "gradle",
+      "consistent-resolution",
+      "version-catalog",
+      "kotlinx-serialization",
+      "androidTest"
+    ],
+    "related_bugs": [
+      "bug-077"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:05:00Z"
+  },
+  {
+    "id": "bug-081",
+    "timestamp": "2026-08-26T12:30:00Z",
+    "error_message": "Desktop window geometry was never persisted: the com/anfas/app preferences node stayed empty after running the app",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/main.kt",
+    "root_cause": "The save path read WindowState.position, which stays WindowPosition.PlatformDefault when the platform is what placed the window -- the first-run case. toGeometry() therefore returned null for every emission and filterNotNull dropped them all.",
+    "fix": "Read geometry from the AWT frame (window.x/y/width/height) inside FrameWindowScope, driven by a ComponentAdapter for moves/resizes plus one direct read for the initial placement (which fires no event). Also removes the dp-vs-px unit mismatch, since AWT bounds and GraphicsConfiguration bounds share one space.",
+    "tags": [
+      "compose-desktop",
+      "window-state",
+      "java.util.prefs",
+      "desktopApp",
+      "persistence"
+    ],
+    "related_bugs": [
+      "bug-082"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:30:00Z"
+  },
+  {
+    "id": "bug-082",
+    "timestamp": "2026-08-26T12:30:00Z",
+    "error_message": "Misdiagnosed 'the preferences write is not happening' -- defaults read and plistlib both showed no window.* keys while they were in fact written",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt",
+    "root_cause": "macOS cfprefsd serves a cached copy of com.apple.java.util.prefs.plist, so keys written seconds earlier read as absent from both `defaults read` and a direct plistlib load of the file.",
+    "fix": "Verify java.util.prefs from a fresh JVM instead: Preferences.userRoot().node(\"com/anfas/app\").keys(). That showed all five window.* keys present.",
+    "tags": [
+      "macos",
+      "java.util.prefs",
+      "cfprefsd",
+      "diagnosis",
+      "tooling"
+    ],
+    "related_bugs": [
+      "bug-081"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:30:00Z"
+  },
+  {
+    "id": "bug-083",
+    "timestamp": "2026-08-26T12:30:00Z",
+    "error_message": "WindowGeometryTest > a window hanging off the right edge keeps a grabbable strip on screen FAILED",
+    "file": "desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt",
+    "root_cause": "The overlap gate and the position clamp used the same constant (MIN_VISIBLE_WIDTH), so anything with less than that visible was rejected before the clamp could run -- making the clamp dead code and recentring a window a user had deliberately parked off an edge.",
+    "fix": "Weakened the gate to 'any overlap at all' (the detached-monitor case) and left the clamp to guarantee the grabbable minimum. A window parked off an edge is now nudged back into reach rather than recentred.",
+    "tags": [
+      "desktopApp",
+      "window-geometry",
+      "dead-code",
+      "test-caught"
+    ],
+    "related_bugs": [
+      "bug-081"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T12:30:00Z"
+  },
+  {
+    "id": "bug-084",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "User: 'when entering in the input texts in signin and signup the screen not responsive with the keyboard the input components shown under the keyboard'",
+    "file": "androidApp/src/main/AndroidManifest.xml",
+    "root_cause": "MainActivity calls enableEdgeToEdge() but the activity declared no windowSoftInputMode, so the system used adjustPan: the whole window slid up by a fixed amount instead of the IME being reported as an inset. The ANFAS top bar was pushed under the status bar and whether a field cleared the keyboard depended on the pan distance.",
+    "fix": "Added android:windowSoftInputMode=\"adjustResize\" to the MainActivity declaration, with a comment explaining that edge-to-edge requires it.",
+    "tags": [
+      "android",
+      "ime",
+      "keyboard",
+      "insets",
+      "manifest",
+      "edge-to-edge"
+    ],
+    "related_bugs": [
+      "bug-085",
+      "bug-086",
+      "bug-087"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-085",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "Focused text field remained two-thirds under the keyboard on a landscape phone even with a correctly inset scroll container",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt",
+    "root_cause": "Compose brings a newly-focused field into view at the moment focus arrives, when the keyboard is not yet open and the field is usually already visible, so nothing scrolls. The viewport then shrinks by the keyboard height and no second bring-into-view is issued.",
+    "fix": "AnfasTextField now holds a BringIntoViewRequester with a LaunchedEffect keyed on both `focused` and WindowInsets.ime.getBottom(density), so it re-requests on every keyboard height change. Fixes every screen and dialog using the component.",
+    "tags": [
+      "compose",
+      "ime",
+      "keyboard",
+      "bringIntoView",
+      "designsystem",
+      "scroll"
+    ],
+    "related_bugs": [
+      "bug-084"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-086",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "The keyboard's Next key did nothing; focus stayed on the current field",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt",
+    "root_cause": "KeyboardActions(onNext = { onImeAction?.invoke() }) supplies a non-null handler, which replaces Compose's default focus-advance even when onImeAction is null and the body does nothing. Every field except the last one has no onImeAction.",
+    "fix": "Built `imeActionHandler` only when onImeAction != null and passed it (or null) to onDone/onGo/onNext, so the platform default applies where there is no submit action.",
+    "tags": [
+      "compose",
+      "keyboard",
+      "KeyboardActions",
+      "focus",
+      "designsystem"
+    ],
+    "related_bugs": [
+      "bug-085"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-087",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "AnfasDialog KDoc claimed 'a scrollable body' but the body Column had no verticalScroll; a tall form pushed its own footer (Save/Cancel) off the bottom edge",
+    "file": "core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDialog.kt",
+    "root_cause": "The body Column was unbounded and unscrollable, so with a keyboard-shrunk window the six form dialogs could be neither submitted nor dismissed. The component's own documentation asserted otherwise.",
+    "fix": "Body Column now has weight(1f, fill = false) + verticalScroll, and the dialog has imePadding(). Extracted AnfasDialogPanel (internal) because Dialog opens its own window and ignores composing constraints, making the invariant untestable via the public composable; pinned by AnfasDialogTest, verified to fail when the fix is reverted.",
+    "tags": [
+      "compose",
+      "dialog",
+      "scroll",
+      "ime",
+      "designsystem",
+      "stale-doc"
+    ],
+    "related_bugs": [
+      "bug-084",
+      "bug-085"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-088",
+    "timestamp": "2026-08-26T14:20:00Z",
+    "error_message": "Self-inflicted: changed App.kt from safeDrawing to systemBars.union(displayCutout) on the theory that safeDrawing's IME component was being consumed, with a comment asserting it fixed the bug. It changed nothing.",
+    "file": "composeApp/src/commonMain/kotlin/com/anfas/app/App.kt",
+    "root_cause": "Diagnosed by reasoning instead of measurement. windowInsetsPadding(x.only(sides)) limits its consumption to the sides it pads, so the bottom/IME inset was never consumed. A temporary debug Text printing WindowInsets.ime.getBottom() showed ime=1008 and the layout clipping at exactly screen-1008, proving imePadding was already working.",
+    "fix": "Reverted App.kt entirely. Measure the inset before editing layout code on a consumption hunch.",
+    "tags": [
+      "diagnosis",
+      "insets",
+      "compose",
+      "self-correction"
+    ],
+    "related_bugs": [
+      "bug-084",
+      "bug-085"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:20:00Z"
+  },
+  {
+    "id": "bug-089",
+    "timestamp": "2026-08-26T14:45:00Z",
+    "error_message": "A restored/transferred install showed the dashboard as an authenticated user whose staff row did not exist; also a demoted staff member kept their old permissions until sign-out",
+    "file": "core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstAuthRepository.kt",
+    "root_cause": "observeSession() returned sessionStore.observe() verbatim, so the session was whatever key-value storage held. Settings survives backup and device transfer while the Room file is deliberately excluded (PII), so an install can hold a session id for a row that does not exist. The stored role set was also a snapshot from sign-in time, so role changes did not take effect until sign-out.",
+    "fix": "observeSession() now flatMapLatest's into dao.observeById(storedId) and emits null when the row is absent, disabled, or resolves no role; roles are taken from the row. 5 tests added, 4 of which fail when the fix is reverted. Reproduced and verified on the emulator by seeding shared_prefs with a session and no databases dir: before = dashboard, after = 'Set up this device'.",
+    "tags": [
+      "auth",
+      "session",
+      "rbac",
+      "privilege-escalation",
+      "backup",
+      "device-transfer",
+      "security"
+    ],
+    "related_bugs": [
+      "bug-090"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:45:00Z"
+  },
+  {
+    "id": "bug-090",
+    "timestamp": "2026-08-26T14:45:00Z",
+    "error_message": "Concluded a correct fix had failed on device; had actually side-loaded a day-old APK",
+    "file": "androidApp/build/outputs/apk/debug/androidApp-debug.apk",
+    "root_cause": "AGP 9 writes the debug APK to build/intermediates/apk/debug/. The legacy build/outputs/apk/debug/ path still held an artifact from the previous day, and `assembleDebug` reported success without touching it, so `adb install` of that path installed stale code.",
+    "fix": "Installed from build/intermediates/apk/debug/. Check the APK mtime against the source before drawing a conclusion from a device run.",
+    "tags": [
+      "agp9",
+      "apk-path",
+      "tooling",
+      "diagnosis",
+      "stale-artifact"
+    ],
+    "related_bugs": [
+      "bug-089"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T14:45:00Z"
+  },
+  {
+    "id": "bug-091",
+    "timestamp": "2026-08-26T14:45:00Z",
+    "error_message": "e: AuthRepositoryTest.kt:349:9 Name contains illegal characters: \",\".",
+    "file": "core/data/src/commonTest/kotlin/com/anfas/core/data/AuthRepositoryTest.kt",
+    "root_cause": "A backtick test name containing a comma. Kotlin/Native rejects it; only compileTestKotlinIosSimulatorArm64 surfaces it, so the JVM tests passed first. Third occurrence of an already-documented rule (see bug-069).",
+    "fix": "Renamed to `roles come from the staff row rather than the stored session`. Run ./gradlew check (not just jvmTest) before shipping.",
+    "tags": [
+      "kotlin-native",
+      "test-naming",
+      "recurrence"
+    ],
+    "related_bugs": [
+      "bug-069",
+      "bug-089"
+    ],
+    "occurrences": 3,
+    "last_seen": "2026-08-26T14:45:00Z"
+  },
+  {
+    "id": "bug-092",
+    "timestamp": "2026-08-26T15:30:00Z",
+    "error_message": "CI's push trigger listed hardening/** , which matches no branch since the per-feature naming convention (feat/fix/test) was adopted",
+    "file": ".github/workflows/ci.yml",
+    "root_cause": "The pattern was written when all work happened on hardening/* branches. After switching to one descriptively-named branch per feature it silently matched nothing, so pushes to working branches ran no CI at all.",
+    "fix": "Narrowed push to `main` only, with a comment explaining why the feat/fix/test patterns are deliberately NOT added (they would double-run the matrix for any branch with an open PR, and the PR run is what gates a merge).",
+    "tags": [
+      "ci",
+      "github-actions",
+      "stale-config",
+      "branch-naming"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T15:30:00Z"
+  },
+  {
+    "id": "bug-093",
+    "timestamp": "2026-08-26T19:10:00Z",
+    "error_message": "The reminder queue was unreachable on a phone whenever it was empty",
+    "file": "feature/dashboard/src/commonMain/kotlin/com/anfas/feature/dashboard/DashboardScreen.kt",
+    "root_cause": "Reminders are Placement.WideOnly, so on a phone the queue is only reachable from a parent screen. That parent was the dashboard's failed-reminders tile, whose onClick was gated on `failedReminders > 0` -- so with nothing failed (which is the normal state, and always the state before anything has been queued) there was no route at all. CLAUDE.md already claimed the 'needs renewal' tile was the route; it was not.",
+    "fix": "The needing-renewal tile is now unconditionally clickable and opens the queue; the failed tile keeps its gate as a shortcut into failures. Added DashboardComponent.onOpenRemindersClicked. Found by trying to reach the new Build queue button on a device.",
+    "tags": [
+      "navigation",
+      "dashboard",
+      "reachability",
+      "reminders",
+      "stale-doc"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T19:10:00Z"
+  },
+  {
+    "id": "bug-094",
+    "timestamp": "2026-08-26T19:10:00Z",
+    "error_message": "New ReminderQueueComponent tests failed: the scheduler was never called and no notice appeared",
+    "file": "feature/subscriptions/src/commonTest/kotlin/com/anfas/feature/subscriptions/ReminderQueueComponentTest.kt",
+    "root_cause": "onBuildQueue guards on state.value.mayBuildQueue, but state is stateIn(WhileSubscribed) -- with no collector, state.value is the initialValue where the permission is false, so the guard refused. The tests read state.value instead of subscribing.",
+    "fix": "Subscribe with Turbine and drain to a settled frame before acting, matching the suite's existing pattern; added an awaitSettled helper. Note the guard fails safe (refuses rather than permits), so this was a test defect, not a production one.",
+    "tags": [
+      "compose",
+      "stateIn",
+      "turbine",
+      "test-defect",
+      "coroutines"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T19:10:00Z"
+  },
+  {
+    "id": "bug-095",
+    "timestamp": "2026-08-26T21:00:00Z",
+    "error_message": "PhoneE164Test > a foreign country code is preserved FAILED -- 966501234567 became 20966501234567",
+    "file": "core/model/src/commonMain/kotlin/com/anfas/core/model/PhoneE164.kt",
+    "root_cause": "The else branch prepended the default country code to any number without a leading 0 or 00, so every already-international foreign number got 20 stuck on the front. A member with a Saudi or Emirati number would have had their renewal notice sent to whoever owns the resulting Egyptian number.",
+    "fix": "Use length to tell the cases apart: <=10 digits is a bare national subscriber number and gets the country code; anything longer already carries one. Prefix alone cannot distinguish them.",
+    "tags": [
+      "phone",
+      "e164",
+      "whatsapp",
+      "test-caught",
+      "data-correctness"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T21:00:00Z"
+  },
+  {
+    "id": "bug-096",
+    "timestamp": "2026-08-26T21:00:00Z",
+    "error_message": "The reminder queue's empty state claimed 'Reminders appear here once the daily job schedules them' -- there is no daily job",
+    "file": "core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/EnglishStrings.kt",
+    "root_cause": "Copy written when the queue could never be populated, so nobody had read it against reality. Phase 1 made the queue real and the sentence became false. The sent tab also said 'Delivered', which overstates SENT -- Meta accepting a message is not a delivery receipt.",
+    "fix": "The queued empty state now names Build queue; the sent one says 'sent' rather than 'delivered'. Both languages. Spotted from a device screenshot, not from reading code.",
+    "tags": [
+      "i18n",
+      "stale-copy",
+      "honesty",
+      "whatsapp"
+    ],
+    "related_bugs": [
+      "bug-095"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T21:00:00Z"
+  },
+  {
+    "id": "bug-097",
+    "timestamp": "2026-08-26T22:00:00Z",
+    "error_message": "The reminder queue rendered its six-column desktop table on a phone: headers squeezed to 'MEM\u2026'/'TEM\u2026' and the status chip wrapped to two lines (three in Arabic)",
+    "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueScreen.kt",
+    "root_cause": "The screen had no narrow branch -- unlike IntakeReviewScreen, which already switches to one card per row below AnfasTableMinWidth. It went unnoticed because the queue was always empty until the WhatsApp scheduler landed, so no row had ever been rendered.",
+    "fix": "Added ReminderCardList/ReminderCard behind a BoxWithConstraints at the same threshold, keeping bulk selection (with a labelled select-all) and the export's error stripe. Pinned by ReminderQueueLayoutTest, falsified in both directions.",
+    "tags": [
+      "compose",
+      "responsive",
+      "rtl",
+      "reminders",
+      "layout-test"
+    ],
+    "related_bugs": [
+      "bug-098",
+      "bug-099"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:00:00Z"
+  },
+  {
+    "id": "bug-098",
+    "timestamp": "2026-08-26T22:00:00Z",
+    "error_message": "The 4dp error stripe on a failed reminder card was invisible",
+    "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueScreen.kt",
+    "root_cause": "fillMaxHeight() inside a wrap-content Row has no height to fill and resolves to zero. The construct was copied from the table row, which works only because that row sets its own height.",
+    "fix": "Modifier.height(IntrinsicSize.Min) on the card's Row, so the stripe fills the Column's height. Spotted from a device screenshot.",
+    "tags": [
+      "compose",
+      "layout",
+      "intrinsic-size",
+      "design-fidelity"
+    ],
+    "related_bugs": [
+      "bug-097"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:00:00Z"
+  },
+  {
+    "id": "bug-099",
+    "timestamp": "2026-08-26T22:00:00Z",
+    "error_message": "In Arabic the scheduled date rendered as '\u0623\u063a\u0633\u0637\u0633 17 2026' instead of '17 \u0623\u063a\u0633\u0637\u0633 2026'",
+    "file": "feature/subscriptions/src/commonMain/kotlin/com/anfas/feature/subscriptions/ReminderQueueScreen.kt",
+    "root_cause": "scheduledLabel() was styled dataMonoLtr in the table (and copied into the new card). That style is for Latin-only runs; a localised date carries a translated month name and its runs get reordered. Exactly the rule CLAUDE.md documents. Latent in the table since it was written -- only visible once a reminder was old enough to print an absolute date rather than 'Today'.",
+    "fix": "bodyMedium for the date in both the table and the card; dataMonoLtr kept for the phone number only. Verified on device: '17 \u0623\u063a\u0633\u0637\u0633 2026'.",
+    "tags": [
+      "rtl",
+      "i18n",
+      "dataMonoLtr",
+      "latent-bug",
+      "reminders"
+    ],
+    "related_bugs": [
+      "bug-097"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:00:00Z"
+  },
+  {
+    "id": "bug-100",
+    "timestamp": "2026-08-27T02:00:00Z",
+    "error_message": "An unreviewed intake sheet can vanish silently: captures were written to context.cacheDir/intake, which the OS deletes under memory pressure with no notification",
+    "file": "core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/Ocr.android.kt",
+    "root_cause": "cacheDir was chosen so the OS could reclaim the space. But a captured sheet is the only copy of a member's handwritten details until the batch is imported, and there is no upload_pending state and no re-capture path -- so a cache purge loses it and the review pane just shows an empty source pane with no explanation.",
+    "fix": "IntakeCaptureFiles.directory moved to context.filesDir/intake; res/xml/intake_file_paths.xml switched from <cache-path> to <files-path> (a mismatch makes FileProvider.getUriForFile throw and breaks camera capture outright); IntakeImageStore.adoptLegacyCaptures() moves any file left in cacheDir/intake and reports old->new uris so the rows naming them can be repointed.",
+    "tags": [
+      "intake",
+      "ocr",
+      "android",
+      "data-loss",
+      "filesystem",
+      "fileprovider",
+      "stage-0",
+      "sync"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-27T02:00:00Z"
+  },
+  {
+    "id": "bug-101",
+    "timestamp": "2026-08-27T02:05:00Z",
+    "error_message": "IntakeImageStore.purgeExcept had no production caller, so an image whose batch vanished without cleanup stayed on disk forever",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt",
+    "root_cause": "purgeExcept is documented as a 'startup safety net' but nothing ran at startup that used it. Written with its callers assumed rather than wired.",
+    "fix": "New IntakeHousekeeping, registered single(createdAtStart = true) in IntakeOcrModule on its own IO scope with appExceptionHandler, mirroring DataModule's plan seed. Placed in :feature:intake-ocr because it needs both the batches table and the platform file store. Needed two new DAO queries (sourceImageUris, relocateSourceImage) -- queries only, so no schema change and no migration.",
+    "tags": [
+      "intake",
+      "ocr",
+      "housekeeping",
+      "koin",
+      "startup",
+      "dead-code",
+      "stage-0"
+    ],
+    "related_bugs": [
+      "bug-100"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-27T02:05:00Z"
+  },
+  {
+    "id": "bug-102",
+    "timestamp": "2026-08-27T02:10:00Z",
+    "error_message": "A purge running before legacy adoption deletes exactly the sheets adoption exists to rescue",
+    "file": "feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt",
+    "root_cause": "An adopted file has been moved into the current directory but no row names it yet, so a keep-set built from the batches table at that moment does not include it and the purge treats it as orphaned. Also: a failed keep-set read falling through to purgeExcept(emptySet()) would delete every sheet awaiting review, because an empty keep-set and 'the database could not be read' are indistinguishable to purgeExcept.",
+    "fix": "run() calls adoptRelocatedCaptures() then purgeOrphanedCaptures(), sequentially in one function rather than as two independent startup jobs. A failed sourceImageUris() read logs and SKIPS the purge. IntakeHousekeepingTest pins both, asserting the keep-set's contents rather than only the call order (the order alone still reads correct if the repoint silently failed). Falsified in two directions: reversing the calls fails exactly the 2 ordering tests; making a failed read purge everything fails exactly the 1 asymmetry test.",
+    "tags": [
+      "intake",
+      "ocr",
+      "ordering",
+      "destructive",
+      "testing",
+      "falsification",
+      "stage-0"
+    ],
+    "related_bugs": [
+      "bug-100",
+      "bug-101"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-27T02:10:00Z"
+  },
+  {
+    "id": "bug-103",
+    "timestamp": "2026-08-27T02:15:00Z",
+    "error_message": "iOS purgeExcept was a do-nothing stub commented 'nothing writes there yet', and iOS delete had no root confinement",
+    "file": "core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/Ocr.ios.kt",
+    "root_cause": "The stub's comment stopped being true the day ImageSource.ios.kt started writing to Application Support/intake, so the safety net silently did not exist on iOS. Separately, delete() called removeItemAtPath on whatever the DB row said, while Android deliberately confined to its own intake directory -- tolerable for one delete, much worse once purge deletes in a loop.",
+    "fix": "Implemented purgeExcept against intakeDirectory() (made internal in ImageSource.ios.kt so writer and purge cannot disagree, the same mistake Android had three copies of); added a toLocalPath() root confinement matching Android; store now takes AppDispatchers so disk work leaves the caller's thread.",
+    "tags": [
+      "intake",
+      "ocr",
+      "ios",
+      "stale-comment",
+      "dead-code",
+      "data-loss",
+      "stage-0"
+    ],
+    "related_bugs": [
+      "bug-100",
+      "bug-101"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-27T02:15:00Z"
+  },
+  {
+    "id": "bug-104",
+    "timestamp": "2026-08-26T22:36:47Z",
+    "error_message": "core:ocr:parseAndroidMainLocalResources FAILED -- [Fatal Error] intake_file_paths.xml:9:21: The string \"--\" is not permitted within comments.",
+    "file": "core/ocr/src/androidMain/res/xml/intake_file_paths.xml",
+    "root_cause": "The new explanatory XML comment used the project's own prose convention of '--' as an em-dash substitute (the same style used throughout CLAUDE.md and KDoc). XML forbids a literal '--' anywhere inside a comment body, so the resource parser failed the whole core:ocr module before any Kotlin compiled.",
+    "fix": "Reworded the one offending sentence to use a comma instead of '--'. No behavioural change; XML/HTML comments must never carry this prose convention -- use commas or parentheses in .xml files instead.",
+    "tags": [
+      "xml",
+      "build-failure",
+      "android-resources",
+      "fileprovider",
+      "intake"
+    ],
+    "related_bugs": [
+      "bug-100"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:36:47Z"
+  },
+  {
+    "id": "bug-105",
+    "timestamp": "2026-08-26T22:37:37Z",
+    "error_message": "core:data:compileTestKotlinJvm FAILED -- Class 'FakeIntakeDao' is not abstract and does not implement abstract members: sourceImageUris(), relocateSourceImage(from, to)",
+    "file": "core/data/src/commonTest/kotlin/com/anfas/core/data/FakeIntakeDao.kt",
+    "root_cause": "IntakeDao gained two new abstract methods (sourceImageUris, relocateSourceImage) for the Stage 0 capture-storage housekeeping feature, but the commonTest in-memory fake implementing IntakeDao was not updated to match, so the whole core:data test source set failed to compile.",
+    "fix": "Added both methods to FakeIntakeDao: sourceImageUris() maps non-null sourceImageUri off the in-memory batch list; relocateSourceImage(from, to) rewrites matching batches' sourceImageUri, mirroring the real UPDATE ... WHERE source_image_uri = :from.",
+    "tags": [
+      "kotlin",
+      "compile-error",
+      "test-fake",
+      "intake",
+      "interface-drift"
+    ],
+    "related_bugs": [
+      "bug-100"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-26T22:37:37Z"
+  },
+  {
+    "id": "bug-106",
+    "timestamp": "2026-08-29T13:10:00Z",
+    "error_message": "Class 'FakeSubscriptions'/'FakeSubscriptionRepository' is not abstract and does not implement abstract member: suspend fun seedPlans(...)",
+    "file": "feature/dashboard/src/commonTest/kotlin/com/anfas/feature/dashboard/DashboardComponentTest.kt; feature/members/src/commonTest/kotlin/com/anfas/feature/members/MemberProfileComponentTest.kt; feature/subscriptions/src/commonTest/kotlin/com/anfas/feature/subscriptions/TestDoubles.kt",
+    "root_cause": "Sync Stage 1 added SubscriptionRepository.seedPlans() (insert-if-absent, used by the startup seed instead of upsertPlans) but three feature-module test fakes implementing the interface predate the change and only override upsertPlans, so their jvmTest/iosSimulatorArm64Test compilation broke -- exactly the mechanical fallout the task briefing warned about.",
+    "fix": "Added a trivial override suspend fun seedPlans(plans) = AppResult.Success(Unit) to each of the three fakes, matching their existing upsertPlans stub.",
+    "tags": [
+      "sync",
+      "subscriptions",
+      "test-fakes",
+      "compile-error",
+      "mechanical"
+    ],
+    "related_bugs": [],
+    "occurrences": 3,
+    "last_seen": "2026-08-29T13:10:00Z"
+  },
+  {
+    "id": "bug-107",
+    "timestamp": "2026-08-29T13:15:00Z",
+    "error_message": "MigrationFromV4Test: java.lang.AssertionError: the file should be at the current schema version expected:<12> but was:<13>",
+    "file": "core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt",
+    "root_cause": "CURRENT_SCHEMA_VERSION is a hardcoded companion constant mirroring @Database(version = ...) on AnfasDatabase, with a comment noting it must be bumped together. Sync Stage 1 bumped the schema to v13 (sync_outbox + sync_tombstones via AutoMigration(12,13)) without bumping this constant -- the third time this exact test has broken this way (v5->v6 per bug-051, now v12->v13), for a reason unconnected to what the test verifies.",
+    "fix": "Bumped CURRENT_SCHEMA_VERSION to 13. Also tried removing the constant entirely by reading version off the @Database annotation via reflection (AnfasDatabase::class.java.getAnnotation(Database::class.java).version) -- confirmed this does NOT work: Database has SOURCE-level retention that KSP consumes and does not survive into the compiled class, so getAnnotation returns null and the call throws NullPointerException at runtime (verified by actually running the test with the reflection approach before reverting). Reverted to the hardcoded constant as the only working option; the passing run after the bump is real evidence the full v4->v13 auto-migration chain (including the new sync tables) runs correctly against a real v4 database file.",
+    "tags": [
+      "room",
+      "migration",
+      "tests",
+      "brittleness",
+      "sync",
+      "reflection-does-not-work"
+    ],
+    "related_bugs": [
+      "bug-051"
+    ],
+    "occurrences": 1,
+    "last_seen": "2026-08-29T13:15:00Z"
+  },
+  {
+    "id": "bug-108",
+    "timestamp": "2026-08-29T14:00:00Z",
+    "error_message": "N/A -- verification note, not a bug fix",
+    "file": "N/A",
+    "root_cause": "This sandbox has no Accessibility permission granted to osascript/System Events (click/keystroke on a real app window fail with \"osascript is not allowed assistive access\"), and no idb/mobile-mcp/XcodeBuildMCP tool is actually exposed in this session despite the task briefing describing that workflow. Desktop and iOS Simulator UI could therefore be observed via screenshots but not driven by taps/typing; Android WAS drivable because adb shell input tap/text operates device-side and does not need host Accessibility permission.",
+    "fix": "N/A -- documented as an environment constraint for future verification sessions: do full interactive verification (taps, search, check-in, renewal sheet) on the Android emulator via adb; on desktop/iOS Simulator, verify via screenshots of launch state plus direct sqlite3 reads of the on-device database (both platforms confirmed real user_version 12->13 migrations and seedPlans-populated subscription_plans this way without needing taps).",
+    "tags": [
+      "verification",
+      "environment-constraint",
+      "ios",
+      "desktop",
+      "ui-automation",
+      "accessibility-permission"
+    ],
+    "related_bugs": [],
+    "occurrences": 1,
+    "last_seen": "2026-08-29T14:00:00Z"
   }
 ]

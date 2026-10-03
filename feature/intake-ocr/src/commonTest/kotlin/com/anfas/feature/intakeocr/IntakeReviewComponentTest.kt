@@ -427,6 +427,8 @@ internal class FakeIntakeRepository(
     batches: List<IntakeBatch> = emptyList(),
     private val importResult: AppResult<ImportOutcome>? = null,
     private val createResult: AppResult<Unit>? = null,
+    private val urisResult: AppResult<List<String>>? = null,
+    private val relocateResult: AppResult<Unit>? = null,
 ) : IntakeRepository {
 
     private val state = MutableStateFlow(batches)
@@ -435,6 +437,13 @@ internal class FakeIntakeRepository(
 
     /** Every batch handed to [createBatch], so a test can assert that none was. */
     val created = mutableListOf<IntakeBatch>()
+
+    /** Every repoint, in order, for the housekeeping tests. */
+    val relocations = mutableListOf<Pair<String, String>>()
+
+    /** Snapshot of the batches at the moment `sourceImageUris` was asked — see the ordering test. */
+    var urisReadAt: List<IntakeBatch>? = null
+        private set
 
     override fun observeBatches(): Flow<AppResult<List<IntakeBatch>>> =
         state.map { AppResult.Success(it) }
@@ -503,6 +512,22 @@ internal class FakeIntakeRepository(
     override suspend fun discardBatch(id: IntakeBatchId): AppResult<Unit> {
         state.value = state.value.map {
             if (it.id == id) it.copy(status = IntakeBatchStatus.DISCARDED) else it
+        }
+        return AppResult.Success(Unit)
+    }
+
+    /** Reads through the live batch list, so a repoint applied first is visible here. */
+    override suspend fun sourceImageUris(): AppResult<List<String>> {
+        urisReadAt = state.value
+        urisResult?.let { return it }
+        return AppResult.Success(state.value.mapNotNull { it.sourceImageUri })
+    }
+
+    override suspend fun relocateSourceImage(from: String, to: String): AppResult<Unit> {
+        relocations += from to to
+        relocateResult?.let { return it }
+        state.value = state.value.map {
+            if (it.sourceImageUri == from) it.copy(sourceImageUri = to) else it
         }
         return AppResult.Success(Unit)
     }

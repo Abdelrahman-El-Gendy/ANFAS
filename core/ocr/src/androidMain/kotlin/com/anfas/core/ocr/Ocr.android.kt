@@ -61,9 +61,28 @@ internal actual fun platformOcrModule(): Module = module {
     }
 }
 
-/** Where captured sheets live. Internal cache — see res/xml/intake_file_paths.xml. */
+/**
+ * Where captured sheets live: **internal files, not internal cache** — see
+ * res/xml/intake_file_paths.xml, whose `<files-path>` entry has to name the same place or
+ * `FileProvider.getUriForFile` throws and the camera cannot be launched at all.
+ *
+ * It used to be `getCacheDir()`, chosen so the OS could reclaim the space. That is precisely the
+ * problem: the OS deletes cache under pressure without notifying anyone, and there is no
+ * `upload_pending` state and no re-capture path — so a sheet photographed at the desk could
+ * disappear before anyone reviewed it, and the review pane would show an empty source pane with no
+ * explanation. Reclaimable storage is the wrong trade for the only copy of a member's handwritten
+ * details. Captures are still deleted as soon as a batch is imported or discarded, and
+ * [IntakeImageStore.purgeExcept] sweeps anything orphaned, so the space is still bounded — it is
+ * bounded by this app rather than by the OS.
+ *
+ * [legacyDirectory] is the old cache location, kept only so [IntakeImageStore.adoptLegacyCaptures]
+ * can empty it.
+ */
 internal class IntakeCaptureFiles(private val context: Context) {
-    val directory: File get() = File(context.cacheDir, "intake").apply { mkdirs() }
+    val directory: File get() = File(context.filesDir, "intake").apply { mkdirs() }
+
+    /** Not created if absent — an install that never used the old path must not gain a directory. */
+    val legacyDirectory: File get() = File(context.cacheDir, "intake")
 
     fun authority(): String = "${context.packageName}.intake.fileprovider"
 }
@@ -182,16 +201,17 @@ private class AndroidIntakeImageStore(
 ) : IntakeImageStore {
 
     private val log = logger("Ocr")
+    private val files = IntakeCaptureFiles(context)
 
     override suspend fun delete(uri: String) = withContext(dispatchers.io) {
-        runCatching { uri.toLocalFile(context)?.delete() }
+        runCatching { uri.toLocalFile()?.delete() }
             .onFailure { log.w("Could not delete a captured sheet", it) }
         Unit
     }
 
     override suspend fun purgeExcept(keep: Set<String>) = withContext(dispatchers.io) {
-        val kept = keep.mapNotNull { it.toLocalFile(context)?.absolutePath }.toSet()
-        File(context.cacheDir, "intake").listFiles().orEmpty()
+        val kept = keep.mapNotNull { it.toLocalFile()?.absolutePath }.toSet()
+        files.directory.listFiles().orEmpty()
             .filter { it.absolutePath !in kept }
             .forEach { stale ->
                 runCatching { stale.delete() }
@@ -199,16 +219,53 @@ private class AndroidIntakeImageStore(
             }
         Unit
     }
-}
 
-/**
- * Only ever deletes inside our own intake directory. A batch row's uri comes from the database,
- * and treating it as an arbitrary deletable path would turn a corrupt row into data loss
- * elsewhere on disk.
- */
-private fun String.toLocalFile(context: Context): File? {
-    val path = Uri.parse(this).path ?: return null
-    val file = File(path).canonicalFile
-    val root = File(context.cacheDir, "intake").canonicalFile
-    return file.takeIf { it.path.startsWith(root.path + File.separator) }
+    /**
+     * Timid in the same way `adoptLegacyDatabase` is, and for the same reason: every failure mode
+     * here beats doing nothing. It never overwrites a file already at the new path, reports only
+     * the moves that actually succeeded — so a row is never repointed at a file that was not
+     * moved — and never throws.
+     */
+    override suspend fun adoptLegacyCaptures(): Map<String, String> = withContext(dispatchers.io) {
+        val legacy = files.legacyDirectory
+        val stale = runCatching { legacy.listFiles().orEmpty() }.getOrDefault(emptyArray())
+        if (stale.isEmpty()) return@withContext emptyMap()
+
+        val target = files.directory
+        val moved = stale.mapNotNull { source ->
+            val destination = File(target, source.name)
+            // An existing file at the new path is by definition the current one.
+            if (destination.exists()) {
+                runCatching { source.delete() }
+                return@mapNotNull null
+            }
+            runCatching { source.renameTo(destination) }
+                .onFailure { log.w("Could not adopt a legacy capture", it) }
+                .getOrDefault(false)
+                .takeIf { it }
+                ?.let {
+                    Uri.fromFile(source).toString() to Uri.fromFile(destination).toString()
+                }
+        }.toMap()
+
+        log.i("Adopted ${moved.size} of ${stale.size} legacy captures from ${legacy.path}")
+        // Best-effort: an empty directory left behind is harmless, a thrown exception is not.
+        runCatching { legacy.delete() }
+        moved
+    }
+
+    /**
+     * Only ever deletes inside our own intake directory. A batch row's uri comes from the database,
+     * and treating it as an arbitrary deletable path would turn a corrupt row into data loss
+     * elsewhere on disk.
+     *
+     * Rooted at [IntakeCaptureFiles.directory], so it moves with the capture location rather than
+     * being a fourth copy of the path that can silently disagree with the other three.
+     */
+    private fun String.toLocalFile(): File? {
+        val path = Uri.parse(this).path ?: return null
+        val file = File(path).canonicalFile
+        val root = files.directory.canonicalFile
+        return file.takeIf { it.path.startsWith(root.path + File.separator) }
+    }
 }

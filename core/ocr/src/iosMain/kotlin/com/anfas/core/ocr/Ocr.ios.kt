@@ -2,12 +2,15 @@
 
 package com.anfas.core.ocr
 
+import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppError
 import com.anfas.core.common.AppResult
+import com.anfas.core.common.logger
 import com.anfas.core.model.OcrLine
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
 import platform.AVFoundation.AVAuthorizationStatusAuthorized
@@ -16,8 +19,8 @@ import platform.AVFoundation.AVCaptureDevice
 import platform.AVFoundation.AVMediaTypeVideo
 import platform.AVFoundation.authorizationStatusForMediaType
 import platform.AVFoundation.requestAccessForMediaType
+import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
-import platform.Foundation.NSUserDefaults
 import platform.UIKit.UIApplication
 import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.UIKit.UIImage
@@ -58,7 +61,7 @@ actual fun openAppSettings() {
 
 internal actual fun platformOcrModule(): Module = module {
     single<TextRecogniser> { VisionTextRecogniser() }
-    single<IntakeImageStore> { AppleIntakeImageStore() }
+    single<IntakeImageStore> { AppleIntakeImageStore(get()) }
 }
 
 /**
@@ -142,17 +145,47 @@ private fun VNRecognizedTextObservation.toOcrLine(): OcrLine? {
 
 /**
  * Sheet photographs live in Application Support and are **excluded from iCloud backup** — they
- * contain member names and phone numbers, and should not ride into a personal backup.
+ * contain member names and phone numbers, and should not ride into a personal backup. The
+ * directory comes from [intakeDirectory], the same function the capture path writes through.
  */
-internal class AppleIntakeImageStore : IntakeImageStore {
-    override suspend fun delete(uri: String) {
-        platform.Foundation.NSFileManager.defaultManager
-            .removeItemAtPath(uri.removePrefix("file://"), null)
+internal class AppleIntakeImageStore(private val dispatchers: AppDispatchers) : IntakeImageStore {
+
+    private val log = logger("Ocr")
+
+    override suspend fun delete(uri: String) = withContext(dispatchers.io) {
+        val path = uri.toLocalPath() ?: return@withContext
+        NSFileManager.defaultManager.removeItemAtPath(path, null)
+        Unit
     }
 
-    override suspend fun purgeExcept(keep: Set<String>) {
-        // Left for the capture commit that creates the directory; nothing writes there yet.
-        NSUserDefaults.standardUserDefaults.synchronize()
+    override suspend fun purgeExcept(keep: Set<String>) = withContext(dispatchers.io) {
+        val root = intakeDirectory() ?: return@withContext
+        val kept = keep.mapNotNull { it.toLocalPath() }.toSet()
+        val manager = NSFileManager.defaultManager
+        val names = manager.contentsOfDirectoryAtPath(root, null).orEmpty()
+        var purged = 0
+        names.forEach { entry ->
+            val name = entry as? String ?: return@forEach
+            val path = "$root/$name"
+            if (path !in kept && manager.removeItemAtPath(path, null)) purged++
+        }
+        if (purged > 0) log.i("Purged $purged orphaned sheets")
+        Unit
+    }
+
+    /** Application Support has always been the only capture location here — nothing to adopt. */
+    override suspend fun adoptLegacyCaptures(): Map<String, String> = emptyMap()
+
+    /**
+     * Confined to our own intake directory, matching Android. A batch row's uri comes from the
+     * database, so treating it as an arbitrary removable path would turn one corrupt row into
+     * data loss elsewhere in the container — and `purgeExcept` deletes in a loop, which makes
+     * the unconfined version considerably worse than the single delete it used to be.
+     */
+    private fun String.toLocalPath(): String? {
+        val root = intakeDirectory() ?: return null
+        val path = removePrefix("file://")
+        return path.takeIf { it.startsWith("$root/") }
     }
 }
 

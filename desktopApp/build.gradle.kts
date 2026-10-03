@@ -21,6 +21,11 @@ dependencies {
 
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutines.swing)
+
+    // The launcher is thin, but its window-size constants carry a real invariant: they must keep
+    // the app above the layout breakpoint. That is worth a test, so this module has one.
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlin.testJunit)
 }
 
 /**

@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import com.anfas.core.database.EquipmentDao
 import com.anfas.core.database.EquipmentEntity
 import com.anfas.core.database.MaintenanceLogEntryEntity
+import com.anfas.core.database.SyncOutboxEntity
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.EquipmentStatus
 import com.anfas.core.model.EquipmentZone
 import com.anfas.core.model.Money
@@ -213,13 +215,52 @@ class EquipmentRepositoryTest {
         ).valueOrFail(),
     ).id
 
+    /** Every write path here files an outbox entry. See SyncOutboxTest for why that matters. */
+    @Test
+    fun `each equipment write files an outbox entry`() = runTest {
+        val dao = FakeEquipmentDao()
+        val repository = OfflineFirstEquipmentRepository(dao, UnconfinedDispatchers)
+
+        val saved = repository.createEquipment(
+            name = "Treadmill",
+            assetTag = "FH-TRD-004",
+            zone = EquipmentZone.CARDIO_FLOOR,
+            status = EquipmentStatus.OPERATIONAL,
+            manufacturer = null,
+            serialNumber = null,
+            purchasedOn = null,
+            warrantyUntil = null,
+        ).valueOrFail()
+        val id = assertIs<SaveEquipmentOutcome.Saved>(saved).id
+        assertEquals(listOf(id.value), dao.sync.upserts(SyncTables.EQUIPMENT))
+
+        repository.logMaintenance(
+            equipmentId = id,
+            occurredAt = Instant.fromEpochMilliseconds(0),
+            summary = "Belt replaced",
+            details = "",
+            reportedByStaffName = null,
+            technician = "Sam",
+            cost = null,
+            partsUsed = null,
+            resultingStatus = EquipmentStatus.OPERATIONAL,
+        ).valueOrFail()
+        // Two rows written, so two entries: a push carrying only one of them would leave the
+        // other device with a repair note against a machine still marked broken.
+        assertEquals(1, dao.sync.upserts(SyncTables.MAINTENANCE_LOG).size)
+        assertEquals(listOf(id.value, id.value), dao.sync.upserts(SyncTables.EQUIPMENT))
+
+        repository.markOutOfOrder(id).valueOrFail()
+        assertEquals(3, dao.sync.upserts(SyncTables.EQUIPMENT).size)
+    }
+
     private fun repository(): EquipmentRepository = OfflineFirstEquipmentRepository(
         equipment = FakeEquipmentDao(),
         dispatchers = UnconfinedDispatchers,
     )
 }
 
-private class FakeEquipmentDao : EquipmentDao {
+internal class FakeEquipmentDao : EquipmentDao {
     private val rows = MutableStateFlow<List<EquipmentEntity>>(emptyList())
     private val log = MutableStateFlow<List<MaintenanceLogEntryEntity>>(emptyList())
 
@@ -247,4 +288,10 @@ private class FakeEquipmentDao : EquipmentDao {
     override suspend fun insertLogEntry(entry: MaintenanceLogEntryEntity) {
         log.value = log.value + entry
     }
+
+    // --- sync bookkeeping. The tracked writes are default methods on the DAO, so implementing
+    // these two gives this fake the production sequencing rather than a re-implementation of it.
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
 }

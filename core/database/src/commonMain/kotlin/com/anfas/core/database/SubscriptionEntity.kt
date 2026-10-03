@@ -4,8 +4,10 @@ import androidx.room3.ColumnInfo
 import androidx.room3.Dao
 import androidx.room3.Entity
 import androidx.room3.Index
+import androidx.room3.Insert
 import androidx.room3.PrimaryKey
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 
@@ -91,4 +93,55 @@ interface SubscriptionDao {
 
     @Upsert
     suspend fun upsert(subscription: SubscriptionEntity)
+
+    // --- sync bookkeeping -------------------------------------------------------------------
+    // Declared here, not only on SyncDao, so an outbox entry shares a @Transaction with the write
+    // it describes. See SyncOutboxEntity: a change committed with no record of it never syncs,
+    // and nothing afterwards can detect that it happened.
+
+    @Insert
+    suspend fun recordChange(entry: SyncOutboxEntity)
+
+    @Transaction
+    suspend fun upsertTracked(subscription: SubscriptionEntity, change: SyncOutboxEntity) {
+        upsert(subscription)
+        recordChange(change)
+    }
+
+    @Transaction
+    suspend fun upsertPlansTracked(
+        plans: List<SubscriptionPlanEntity>,
+        changes: List<SyncOutboxEntity>,
+    ) {
+        upsertPlans(plans)
+        changes.forEach { recordChange(it) }
+    }
+
+    /**
+     * Insert-if-absent, for the startup seed.
+     *
+     * `upsertPlans` cannot be what runs at every launch. `SubscriptionPlanSeed` is registered
+     * `createdAtStart`, so an upsert rewrites the whole catalogue on every launch of every
+     * device -- which, once plans sync, makes each app start a conflict and silently reverts an
+     * owner's price change to the seeded value. Named for what it does rather than reusing the
+     * upsert, because the difference is the entire point.
+     */
+    @Insert(onConflict = androidx.room3.OnConflictStrategy.IGNORE)
+    suspend fun insertPlansIfAbsent(plans: List<SubscriptionPlanEntity>)
+
+    @Transaction
+    suspend fun insertPlansIfAbsentTracked(
+        plans: List<SubscriptionPlanEntity>,
+        changes: List<SyncOutboxEntity>,
+    ) {
+        val before = planIds().toSet()
+        insertPlansIfAbsent(plans)
+        // Only the rows that actually landed are recorded. An IGNOREd insert changed nothing, and
+        // filing an outbox entry for it would push a row this device did not write.
+        val inserted = planIds().toSet() - before
+        changes.filter { it.rowId in inserted }.forEach { recordChange(it) }
+    }
+
+    @Query("SELECT id FROM subscription_plans")
+    suspend fun planIds(): List<String>
 }

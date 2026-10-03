@@ -77,6 +77,24 @@ class MigrationFromV4Test {
                     connection.countOf("members"),
                     "the pre-existing member row must survive every migration",
                 )
+                // v12 is the first migration in this schema to add a *column* to a table that
+                // already has rows in it -- every earlier hop added or dropped whole tables. The
+                // risk it introduces is specific: an auto-migration needs `defaultValue` on a new
+                // NOT NULL column, and without one the rows already on disk have nothing written
+                // into them. So assert the surviving member actually carries the default, rather
+                // than only that the column exists.
+                assertEquals(
+                    0,
+                    connection.intOf("SELECT whatsapp_opt_in FROM members LIMIT 1"),
+                    "the pre-existing member should default to no WhatsApp consent",
+                )
+                // Nobody may be opted in by a migration: consent is asked for, never inferred.
+                assertEquals(
+                    0,
+                    connection.countOf("members WHERE whatsapp_opt_in != 0"),
+                    "migrating must not opt anyone in to WhatsApp messages",
+                )
+
                 // A migration must never invent a login. An existing gym has no staff account
                 // until someone completes first-run setup.
                 assertEquals(
@@ -84,9 +102,12 @@ class MigrationFromV4Test {
                     connection.countOf("staff"),
                     "migrating must not create a default account",
                 )
-                // Read from the entity annotation rather than hardcoded, so adding a migration
-                // does not fail this test for the wrong reason. Getting here at all proves the
-                // whole chain applied; the number itself is not the thing under test.
+                // CURRENT_SCHEMA_VERSION mirrors AnfasDatabase's @Database(version = ...).
+                // Reflection was tried here to remove the duplication (`@Database`'s retention
+                // does not survive into the compiled class, so `getAnnotation` returns null at
+                // runtime -- confirmed by running this test after switching to it and hitting a
+                // NullPointerException instead of an assertion failure). Getting here at all
+                // proves the whole chain applied; the number itself is not the thing under test.
                 assertEquals(
                     CURRENT_SCHEMA_VERSION,
                     connection.userVersion(),
@@ -102,6 +123,14 @@ class MigrationFromV4Test {
         }
     }
 
+    private companion object {
+        /**
+         * Mirrors AnfasDatabase's @Database(version = ...). Bump both together; the assertion
+         * that matters is that the chain *ran*, not what number it landed on.
+         */
+        const val CURRENT_SCHEMA_VERSION = 13
+    }
+
     private fun SQLiteConnection.tableNames(): List<String> =
         prepare("SELECT name FROM sqlite_master WHERE type='table'").use { stmt ->
             buildList { while (stmt.step()) add(stmt.getText(0)) }
@@ -111,6 +140,9 @@ class MigrationFromV4Test {
         prepare("SELECT COUNT(*) FROM $table").use { stmt ->
             if (stmt.step()) stmt.getInt(0) else -1
         }
+
+    private fun SQLiteConnection.intOf(sql: String): Int =
+        prepare(sql).use { stmt -> if (stmt.step()) stmt.getInt(0) else -1 }
 
     private fun SQLiteConnection.userVersion(): Int = prepare("PRAGMA user_version").use { stmt ->
         if (stmt.step()) stmt.getInt(0) else -1
@@ -134,13 +166,5 @@ class MigrationFromV4Test {
         } finally {
             connection.close()
         }
-    }
-
-    private companion object {
-        /**
-         * Mirrors AnfasDatabase's @Database(version = ...). Bump both together; the assertion
-         * that matters is that the chain *ran*, not what number it landed on.
-         */
-        const val CURRENT_SCHEMA_VERSION = 11
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.anfas.core.data.AnnouncementProblem
 import com.anfas.core.designsystem.AnfasChoiceChip
+import com.anfas.core.designsystem.AnfasDateField
 import com.anfas.core.designsystem.AnfasDialog
 import com.anfas.core.designsystem.AnfasPrimaryButton
 import com.anfas.core.designsystem.AnfasSecondaryButton
@@ -24,8 +25,10 @@ import com.anfas.core.designsystem.AnfasTheme
 import com.anfas.core.designsystem.TextActionEmphasis
 import com.anfas.core.i18n.AppStrings
 import com.anfas.core.i18n.asLtrIsolate
+import com.anfas.core.i18n.formatLong
 import com.anfas.core.model.AnnouncementAudience
 import com.anfas.core.model.AnnouncementId
+import com.anfas.core.model.DatePickerBoundary
 import com.anfas.core.model.minuteOfDayToTime
 
 /**
@@ -136,19 +139,25 @@ internal fun AnnouncementFormDialog(
                 }
             }
 
-            AnfasTextField(
-                value = form.eventDateText,
-                onValueChange = { value ->
-                    component.onFormChanged { it.copy(eventDateText = value) }
-                },
+            AnfasDateField(
                 label = s.announcements.fieldEventDate,
+                formattedValue = form.eventDate?.let { s.formatLong(it) },
+                placeholder = s.common.chooseDate,
+                selectedDateMillis = DatePickerBoundary.toEpochMillis(form.eventDate),
+                onDateSelected = { millis ->
+                    component.onFormChanged {
+                        it.copy(eventDate = DatePickerBoundary.toLocalDate(millis))
+                    }
+                },
+                confirmLabel = s.common.confirmDate,
+                cancelLabel = s.common.cancel,
+                clearLabel = s.common.clearDate,
+                openContentDescription = s.common.openDatePicker,
                 enabled = !form.isSubmitting,
-                errorMessage = s.announcements.errorEventDateUnreadable
-                    .takeIf { AnnouncementProblem.EVENT_DATE_UNREADABLE in form.problems },
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            if (form.eventDateText.isNotBlank()) {
+            if (form.eventDate != null) {
                 FieldLabel(s.announcements.fieldEventTime)
                 ChipRow {
                     EVENT_TIMES.forEach { minuteOfDay ->

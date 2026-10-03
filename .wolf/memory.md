@@ -323,3 +323,293 @@ feature modules existed. ./gradlew check green on all platforms including iOS.
 | 10:28 | Session end: 73 writes across 33 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 36 reads | ~79545 tok |
 | 10:31 | feature-verifier: re-verified OCR intake image-render fix. gradlew check green, iosSimulatorArm64+iosArm64 compose compile green, no defects found. Verified Coil3 SubcomposeAsyncImage(model,contentDescription,contentScale,error) signature against sources jar, sourceImageUri file:// population on Android/iOS, overlay-box coordinate alignment with FillBounds. Skipped live desktop-render check (judged not worth setup effort). | feature/intake-ocr/.../IntakeReviewScreen.kt, CLAUDE.md | pass | ~0 tok |
 | 10:32 | Session end: 73 writes across 33 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 36 reads | ~83438 tok |
+| 10:34 | Session end: 73 writes across 33 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 36 reads | ~83438 tok |
+| 10:38 | Created .claude/agents/feature-verifier.md | — | ~2031 |
+| 10:48 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt | expanded (+11 lines) | ~304 |
+| 10:48 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeReviewScreen.kt | 2→4 lines | ~100 |
+| 10:54 | Created core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDateField.kt | — | ~1954 |
+| 10:55 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/AppStrings.kt | expanded (+10 lines) | ~174 |
+| 10:55 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/EnglishStrings.kt | 1→5 lines | ~67 |
+| 10:55 | Edited core/i18n/src/commonMain/kotlin/com/anfas/core/i18n/ArabicStrings.kt | 1→5 lines | ~64 |
+| 10:56 | Created core/model/src/commonMain/kotlin/com/anfas/core/model/DatePickerBoundary.kt | — | ~387 |
+| 10:56 | Created core/model/src/commonTest/kotlin/com/anfas/core/model/DatePickerBoundaryTest.kt | — | ~392 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsState.kt | 5→5 lines | ~79 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsState.kt | added 1 import(s) | ~47 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsComponent.kt | modified onSubmitForm() | ~112 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsComponent.kt | inline fix | ~15 |
+| 10:57 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementsComponent.kt | 3→2 lines | ~37 |
+| 10:58 | Edited feature/announcements/src/commonMain/kotlin/com/anfas/feature/announcements/AnnouncementFormDialog.kt | added optional chaining | ~236 |
+| 10:58 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentState.kt | 4→4 lines | ~63 |
+| 10:59 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/EquipmentComponent.kt | 6→6 lines | ~86 |
+| 10:59 | Edited feature/equipment/src/commonMain/kotlin/com/anfas/feature/equipment/AddEquipmentDialog.kt | added optional chaining | ~454 |
+| 11:05 | Edited .claude/agents/git-shipper.md | expanded (+10 lines) | ~447 |
+| 11:08 | Edited .claude/agents/git-shipper.md | expanded (+24 lines) | ~441 |
+| 11:09 | Edited .github/workflows/ci.yml | expanded (+14 lines) | ~349 |
+| 11:09 | Edited .github/workflows/ci.yml | expanded (+8 lines) | ~217 |
+| 11:12 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | modified Window() | ~434 |
+| 11:12 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | added 4 import(s) | ~151 |
+| 11:29 | Edited CLAUDE.md | expanded (+23 lines) | ~497 |
+| 11:29 | Edited CLAUDE.md | expanded (+8 lines) | ~218 |
+| 11:29 | Edited CLAUDE.md | 4→4 lines | ~101 |
+
+## Session summary: per-platform verification, date picker, and two real bugs it found
+Acted on four standing instructions from the user: verify every feature on every platform before
+committing; verify UI *rendering* per platform too; replace free-text dates with a real picker;
+one descriptively-named branch per feature, merged to main after delivery. Encoded all four in
+.claude/agents/{feature-verifier,git-shipper}.md and cerebrum User Preferences.
+
+Built AnfasDateField (Material 3 calendar, epoch-millis boundary via DatePickerBoundary in
+:core:model, 5 tests) and wired it into the announcement event date and equipment
+purchased/warranty dates, deleting AnnouncementProblem.EVENT_DATE_UNREADABLE and its string as
+now-unreachable. Verified the picker end-to-end on Android (androidMain dialog actual) and iOS
+(skikoMain actual): picks 12 Aug 2026, formats via i18n, no off-by-one.
+
+Ran all three platforms against a seeded database (staff/members/subs/equipment/maintenance log/
+intake batch + a synthetic A4 sheet PNG with orientation markers, pushed per-platform with the
+right image URI). Three real findings:
+  1. Intake's source pane was DROPPED entirely below 1024dp, so the sheet photo was unreachable on
+     the very device that takes it. The KDoc claimed "becomes stacked". Completed the stacked
+     layout (same 40/60 split, vertical) and fixed the KDoc.
+  2. desktopApp opened at Compose's default 800x600 -- under the 1024dp breakpoint -- so the
+     DESKTOP app showed the phone bottom bar and Announcements/Equipment (DesktopOnly, rail-only)
+     were unreachable. Added rememberWindowState 1280x840 + AWT minimumSize 1060x680.
+  3. CI's Apple jobs were failing on GitHub: macos-15's Xcode 16.4 lacks the iOS 26 SDK symbols
+     CMP 1.11.1 needs (UIViewLayoutRegion/UIUtilities). Moved both macOS jobs to macos-26 and made
+     them print the selected Xcode version.
+Also confirmed correct: Arabic RTL on Android (full mirror, real glyphs, no clipping), all four
+EquipmentStatus chip tones incl. the new amber Warning, duplicate-phone detection (my first seed
+had the wrong phone_normalised -- normalisePhone folds the EG country code -- not an app bug), and
+that the iOS calendar's Saturday-first week is correct for an Egyptian locale, not a bug.
+Not done: clicking through the desktop date picker -- osascript lacks Accessibility permission and
+blind Robot clicks were hitting the user's own windows, so I stopped. Desktop shares the identical
+skiko dialog actual with iOS, which is verified.
+| 11:32 | Session end: 100 writes across 42 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 53 reads | ~98445 tok |
+| 11:35 | Session end: 100 writes across 42 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 53 reads | ~98445 tok |
+| 11:43 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasScreenHeader.kt | modified if() | ~632 |
+| 11:46 | Fixed AnfasScreenHeader: title ran flush into the actions button (SpaceBetween has no leftover space to distribute when the title takes weight(1f)); added a 16dp measured gutter on the actions so a long title wraps instead of colliding | core/designsystem/.../AnfasScreenHeader.kt | verified iPhone 17 + Pixel 9 Pro + Members two-action case; check green | ~3k |
+| 11:49 | Session end: 101 writes across 43 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 61 reads | ~99452 tok |
+| 11:51 | Session end: 101 writes across 43 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 61 reads | ~99452 tok |
+| 11:54 | Edited gradle/libs.versions.toml | 2→7 lines | ~168 |
+| 11:54 | Edited gradle/libs.versions.toml | 2→3 lines | ~49 |
+| 11:54 | Created core/designsystem/build.gradle.kts | — | ~301 |
+| 11:55 | Created core/designsystem/src/jvmTest/kotlin/com/anfas/core/designsystem/AnfasScreenHeaderTest.kt | — | ~1364 |
+| 12:00 | Created core/designsystem/src/jvmTest/kotlin/com/anfas/core/designsystem/AnfasScreenHeaderTest.kt | — | ~1579 |
+| 12:05 | Edited CLAUDE.md | expanded (+22 lines) | ~487 |
+| 12:05 | Set up Compose UI test infra (:core:designsystem jvmTest, ui-test + ui-test-junit4 + compose.desktop.currentOs, catalog bundle test-composeUi) and wrote AnfasScreenHeaderTest (3 tests, 4 widths) | core/designsystem, gradle/libs.versions.toml | 3 tests pass; PROVEN to fail without the gutter (0dp at 300/340dp) | ~6k |
+| 12:06 | Two vacuous-test mistakes caught before shipping: asserted gap>0 when the real bug was a 1dp gap, and used device width 402dp instead of the 370dp the header actually gets | core/designsystem/src/jvmTest/.../AnfasScreenHeaderTest.kt | fixed via an empirical geometry probe across 6 widths | ~4k |
+| 12:06 | Session end: 107 writes across 46 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 62 reads | ~107265 tok |
+| 12:08 | Session end: 107 writes across 46 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 62 reads | ~107265 tok |
+| 12:21 | Created ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | — | ~2791 |
+| 12:21 | Edited ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | inline fix | ~186 |
+| 12:22 | Edited ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | expanded (+27 lines) | ~1024 |
+| 12:22 | Edited ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | expanded (+6 lines) | ~396 |
+| 12:24 | Edited CLAUDE.md | 5→6 lines | ~114 |
+| 12:24 | Edited CLAUDE.md | 3→4 lines | ~87 |
+| 12:24 | Edited CLAUDE.md | inline fix | ~160 |
+| 12:24 | Edited design/stitch/TOKENS.md | 4→4 lines | ~60 |
+| 12:25 | Edited design/stitch/TOKENS.md | modified note() | ~197 |
+| 12:25 | Session end: 116 writes across 48 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 85 reads | ~137207 tok |
+| 13:04 | Created core/database/src/jvmMain/kotlin/com/anfas/core/database/DatabaseBuilderFactory.jvm.kt | — | ~1008 |
+| 13:04 | Created core/database/src/jvmTest/kotlin/com/anfas/core/database/DesktopDataDirTest.kt | — | ~1347 |
+| 13:05 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt | added optional chaining | ~144 |
+| 13:26 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt | 3→2 lines | ~35 |
+| 13:26 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | expanded (+9 lines) | ~178 |
+| 13:27 | Created keystore.properties.template | — | ~235 |
+| 13:30 | Created core/data/src/commonTest/kotlin/com/anfas/core/data/KoinOnCloseContractTest.kt | — | ~690 |
+| 13:31 | Edited CLAUDE.md | added optional chaining | ~528 |
+| 13:40 | Fixed the three open defects from the inventory: per-OS desktop DB path + conservative legacy migration (9 tests), DB close on quit via Koin onClose + lifecycle teardown (2 contract tests), and the missing keystore.properties.template | core/database, core/data, desktopApp, keystore.properties.template | check green + iOS arm64; real 135KB DB migrated with integrity_check ok | ~9k |
+| 13:34 | Session end: 124 writes across 52 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 85 reads | ~142719 tok |
+| 08:52 | Session end: 124 writes across 52 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 86 reads | ~142719 tok |
+| 10:57 | Edited desktopApp/build.gradle.kts | 6→11 lines | ~116 |
+| 10:58 | Created desktopApp/src/test/kotlin/com/anfas/app/WindowSizeTest.kt | — | ~782 |
+| 11:02 | Edited feature/intake-ocr/build.gradle.kts | expanded (+9 lines) | ~142 |
+| 11:03 | Created feature/intake-ocr/src/jvmTest/kotlin/com/anfas/feature/intakeocr/IntakeReviewLayoutTest.kt | — | ~2827 |
+| 11:09 | Edited CLAUDE.md | expanded (+16 lines) | ~423 |
+| 09:20 | Pinned the two remaining layout bugs: WindowSizeTest (desktopApp, 4 tests, asserts window width vs AnfasBreakpoints.tabletMax) and IntakeReviewLayoutTest (feature/intake-ocr jvmTest, 3 tests, source pane present at 300/370/395dp and at desktop width) | desktopApp/src/test, feature/intake-ocr/src/jvmTest, both build.gradle.kts | both PROVEN to fail on revert; check green + iOS arm64 | ~11k |
+| 09:22 | Caught a third vacuous-layout-test variant: Modifier.size is clamped by the test surface, so the desktop-width case was exercising the narrow branch. Switched to requiredSize | feature/intake-ocr/src/jvmTest/.../IntakeReviewLayoutTest.kt | revert now fails exactly the 2 phone tests, desktop passes | ~3k |
+| 11:12 | Session end: 129 writes across 54 files (Ids.kt, Equipment.kt, MaintenanceLogTest.kt, EquipmentEntity.kt, AnfasDatabase.kt) | 87 reads | ~147448 tok |
+| 11:16 | Edited androidApp/build.gradle.kts | 2→6 lines | ~97 |
+| 11:16 | Edited androidApp/build.gradle.kts | 3→7 lines | ~84 |
+| 11:17 | Created androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt | — | ~2511 |
+| 11:21 | Edited androidApp/build.gradle.kts | expanded (+9 lines) | ~215 |
+
+## Session: 2026-08-26 11:25
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 11:28 | Edited androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt | modified configDiscriminatorsSurviveShrinking() | ~608 |
+| 11:29 | Created androidApp/proguard-rules-test.pro | — | ~274 |
+| 11:29 | Edited androidApp/build.gradle.kts | 3→7 lines | ~134 |
+| 11:31 | Edited androidApp/proguard-rules-test.pro | expanded (+15 lines) | ~420 |
+| 11:32 | Created androidApp/proguard-rules-stage.pro | — | ~428 |
+| 11:32 | Edited androidApp/build.gradle.kts | 2→5 lines | ~85 |
+| 11:35 | Created androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt | — | ~1291 |
+| 11:37 | Edited androidApp/src/androidTest/kotlin/com/anfas/app/R8SmokeTest.kt | modified theMinifiedAppSurvivesSaveAndRestore() | ~306 |
+| 11:45 | Edited CLAUDE.md | expanded (+41 lines) | ~935 |
+| 11:45 | Edited CLAUDE.md | 1→3 lines | ~62 |
+| 12:05 | Instrumented R8 smoke tests: rewrote to app-entry-points only (ActivityScenario launch/recreate, org.junit.Assert) after 5 tests failed on shrunk-away library APIs | androidApp/src/androidTest/.../R8SmokeTest.kt, androidApp/build.gradle.kts, proguard-rules-test.pro, proguard-rules-stage.pro | 2/2 green on Pixel 9 Pro against the minified stage APK; falsified by injecting a startup crash; check + both iOS targets + assembleRelease green | ~9000 |
+| 11:47 | Session end: 10 writes across 5 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 0 reads | ~4867 tok |
+| 11:48 | Session end: 10 writes across 5 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 0 reads | ~4867 tok |
+| 11:55 | Created desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt | — | ~1947 |
+| 11:55 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | added optional chaining | ~534 |
+| 11:55 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | added 1 condition(s) | ~257 |
+| 11:56 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | modified main() | ~136 |
+| 11:56 | Created desktopApp/src/test/kotlin/com/anfas/app/WindowGeometryTest.kt | — | ~1999 |
+| 11:57 | Edited desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt | 7→10 lines | ~204 |
+| 11:57 | Edited desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt | 6→9 lines | ~199 |
+| 11:57 | Edited desktopApp/src/test/kotlin/com/anfas/app/WindowGeometryTest.kt | 10→15 lines | ~232 |
+| 12:00 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | 5→4 lines | ~77 |
+| 12:00 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | modified LaunchedEffect() | ~370 |
+| 12:03 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | 2→7 lines | ~101 |
+| 12:03 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | 2→2 lines | ~31 |
+| 12:04 | Edited desktopApp/src/main/kotlin/com/anfas/app/main.kt | added 1 condition(s) | ~805 |
+| 12:20 | Edited CLAUDE.md | expanded (+28 lines) | ~723 |
+| 12:30 | Desktop window position/size persistence with screen-bounds clamping; 19 unit tests + end-to-end verification against the packaged app | desktopApp/src/main/kotlin/com/anfas/app/WindowGeometry.kt (new), main.kt, desktopApp/src/test/.../WindowGeometryTest.kt (new), CLAUDE.md | seed→launch→exact restore (150,80 1100x700); detached-monitor seed recentred; 800x600 raised to the 1060x680 floor; falsified by neutering the resolver (8/19 red, exactly the resolver branches); check + iOS compile green | ~14000 |
+| 12:22 | Session end: 24 writes across 8 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 4 reads | ~13023 tok |
+| 12:25 | Edited .claude/agents/git-shipper.md | expanded (+6 lines) | ~152 |
+| 12:26 | Session end: 25 writes across 9 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 4 reads | ~13186 tok |
+| 12:33 | Edited androidApp/src/main/AndroidManifest.xml | expanded (+12 lines) | ~264 |
+| 12:34 | Edited androidApp/src/main/AndroidManifest.xml | 2→2 lines | ~51 |
+| 12:39 | Edited feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/SignInScreen.kt | expanded (+8 lines) | ~294 |
+| 12:46 | Edited composeApp/src/commonMain/kotlin/com/anfas/app/App.kt | expanded (+9 lines) | ~422 |
+| 13:42 | Edited feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/SignInScreen.kt | Box() → BoxWithConstraints() | ~664 |
+| 13:42 | Edited feature/auth/src/commonMain/kotlin/com/anfas/feature/auth/SignInScreen.kt | added 1 condition(s) | ~319 |
+| 13:45 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt | added 1 condition(s) | ~414 |
+| 13:48 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt | expanded (+6 lines) | ~207 |
+| 13:49 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasTextField.kt | added optional chaining | ~106 |
+| 13:55 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDialog.kt | modified Dialog() | ~151 |
+| 13:56 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDialog.kt | expanded (+9 lines) | ~247 |
+| 13:57 | Created core/designsystem/src/jvmTest/kotlin/com/anfas/core/designsystem/AnfasDialogTest.kt | — | ~1226 |
+| 13:58 | Edited core/designsystem/src/commonMain/kotlin/com/anfas/core/designsystem/AnfasDialog.kt | modified Dialog() | ~308 |
+| 14:08 | Edited CLAUDE.md | added optional chaining | ~1015 |
+| 14:20 | Fixed keyboard handling on sign-in/first-run setup: adjustResize, imePadding on container, bring-into-view on IME change, dead Next key, scrollable dialog body | androidApp/src/main/AndroidManifest.xml, feature/auth/.../SignInScreen.kt, core/designsystem/.../AnfasTextField.kt, core/designsystem/.../AnfasDialog.kt, core/designsystem/src/jvmTest/.../AnfasDialogTest.kt, CLAUDE.md | verified on emulator portrait AND landscape before/after; dialog test falsified by reverting; check + both iOS targets green; iOS keyboard interaction NOT verified (idb absent) | ~30000 |
+| 14:11 | Session end: 39 writes across 15 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 26 reads | ~22249 tok |
+| 14:13 | Session end: 39 writes across 15 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 26 reads | ~22249 tok |
+| 14:16 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstAuthRepository.kt | added 1 condition(s) | ~791 |
+| 14:17 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstAuthRepository.kt | added optional chaining | ~203 |
+| 14:39 | Edited CLAUDE.md | expanded (+21 lines) | ~542 |
+| 14:45 | Session validity: a stored session is now re-derived from its staff row (absent/disabled/no-role => signed out) and roles come from the row, closing a stale-privilege hole | core/data/.../OfflineFirstAuthRepository.kt, core/data/src/commonTest/.../AuthRepositoryTest.kt, CLAUDE.md | 5 tests, 4 fail when reverted; reproduced on emulator (prefs session + no DB): before = dashboard, after = 'Set up this device'; check + both iOS targets green | ~26000 |
+| 14:42 | Session end: 42 writes across 16 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 33 reads | ~23894 tok |
+| 14:44 | Session end: 42 writes across 16 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 33 reads | ~23894 tok |
+| 16:07 | Edited .github/workflows/ci.yml | 6→9 lines | ~119 |
+| 16:11 | Edited CLAUDE.md | expanded (+6 lines) | ~217 |
+| 15:30 | Added the android-instrumented CI job (emulator + R8 smoke tests) and fixed the stale hardening/** push trigger | .github/workflows/ci.yml, CLAUDE.md | YAML parses; all 6 action inputs verified against the action's own action.yml; the job's exact gradle command (no ABI flag) run locally: 2/2 green in 2m17s. Runner/emulator combination itself unverifiable locally - first real CI run is the test. | ~11000 |
+| 16:14 | Session end: 44 writes across 17 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 34 reads | ~25440 tok |
+| 16:16 | Session end: 44 writes across 17 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 34 reads | ~25440 tok |
+| 16:24 | Created design/whatsapp-send-system.md | — | ~4897 |
+| 16:28 | Created ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/whatsapp-send-system.html | — | ~9146 |
+| 16:29 | Session end: 46 writes across 19 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 35 reads | ~40486 tok |
+| 17:42 | Created ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | — | ~1553 |
+| 17:42 | Edited core/model/src/commonMain/kotlin/com/anfas/core/model/Member.kt | modified Member() | ~411 |
+| 17:43 | Edited core/database/src/commonMain/kotlin/com/anfas/core/database/MemberEntity.kt | expanded (+18 lines) | ~287 |
+| 17:44 | Edited core/database/src/commonMain/kotlin/com/anfas/core/database/ReminderEntity.kt | modified observeById() | ~207 |
+| 17:48 | Created core/data/src/commonMain/kotlin/com/anfas/core/data/ReminderScheduler.kt | — | ~1999 |
+| 17:49 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/DataModule.kt | expanded (+10 lines) | ~130 |
+| 17:53 | Created core/data/src/commonTest/kotlin/com/anfas/core/data/ReminderSchedulerTest.kt | — | ~3111 |
+| 18:00 | Edited feature/members/src/commonMain/kotlin/com/anfas/feature/members/MemberProfileState.kt | expanded (+7 lines) | ~128 |
+| 18:25 | Edited feature/dashboard/src/commonMain/kotlin/com/anfas/feature/dashboard/DashboardScreen.kt | modified if() | ~417 |
+| 19:10 | WhatsApp Phase 1: ReminderScheduler + consent fields (schema v12) + Build queue action; the queue is no longer permanently empty | core/model/Member.kt, core/database/{MemberEntity,ReminderEntity,AnfasDatabase}.kt, core/data/{ReminderScheduler,MemberMappers,DataModule}.kt, feature/{members,subscriptions,dashboard}, core/i18n x3, CLAUDE.md | 11 scheduler tests + 3 component tests + migration assertion, all falsified; check + iOS green; verified on emulator: 3 expiring members -> "Queued 1 reminder" (1 no consent, 1 no phone), second press -> "Nothing to queue: 1 not opted in, 1 without a phone number, 1 already reminded" | ~52000 |
+| 19:11 | Session end: 55 writes across 28 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 60 reads | ~72442 tok |
+| 19:13 | Session end: 55 writes across 28 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 60 reads | ~72442 tok |
+| 20:20 | Created core/model/src/commonMain/kotlin/com/anfas/core/model/PhoneE164.kt | — | ~760 |
+| 20:21 | Created core/data/src/commonMain/kotlin/com/anfas/core/data/WhatsAppGateway.kt | — | ~949 |
+| 20:22 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/WhatsAppGateway.kt | modified failureReasonFor() | ~371 |
+| 20:22 | Created core/data/src/commonMain/kotlin/com/anfas/core/data/ReminderSender.kt | — | ~1943 |
+| 20:26 | Created core/data/src/commonTest/kotlin/com/anfas/core/data/ReminderSenderTest.kt | — | ~2609 |
+| 20:28 | Created core/model/src/commonTest/kotlin/com/anfas/core/model/PhoneE164Test.kt | — | ~816 |
+| 20:30 | Edited core/model/src/commonMain/kotlin/com/anfas/core/model/PhoneE164.kt | digits() → dropped() | ~414 |
+| 21:00 | WhatsApp Phase 2: gateway seam + null gateway, error mapping, PhoneE164, ReminderSender (attempts-before-call, rate-limit stop, ceiling), SEND_REMINDERS, Run queue UI | core/data/{WhatsAppGateway,ReminderSender}.kt (new), core/model/PhoneE164.kt (new), core/auth/Permission.kt, composeApp/App.kt, feature/subscriptions/*, core/i18n x3, CLAUDE.md | 12 sender + 9 e164 + 17 component tests; check + iOS green; on device: not-connected line renders (also verified in Arabic RTL), and with the gateway temporarily flipped to accept, Run queue -> "Sent 1 message", Queued 0/Sent 1 | ~46000 |
+| 20:59 | Session end: 62 writes across 33 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 63 reads | ~83265 tok |
+| 21:01 | Session end: 62 writes across 33 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 63 reads | ~83265 tok |
+| 21:14 | Created feature/subscriptions/src/jvmTest/kotlin/com/anfas/feature/subscriptions/ReminderQueueLayoutTest.kt | — | ~1336 |
+| 22:00 | Queue table/cards branch for phones, plus two bugs it exposed: invisible error stripe (fillMaxHeight in a wrap-content Row) and the Arabic date reordered by dataMonoLtr (latent in the table) | feature/subscriptions/.../ReminderQueueScreen.kt, ReminderQueueLayoutTest.kt (new), TestDoubles.kt, build.gradle.kts, core/i18n x3, CLAUDE.md | 3 layout tests falsified both directions; check + both iOS targets green; verified on device in English and Arabic RTL -- stripe visible, chip on one line, "17 أغسطس 2026" correct | ~38000 |
+| 21:41 | Session end: 63 writes across 34 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 67 reads | ~85077 tok |
+| 21:43 | Session end: 63 writes across 34 files (R8SmokeTest.kt, proguard-rules-test.pro, build.gradle.kts, proguard-rules-stage.pro, CLAUDE.md) | 67 reads | ~85077 tok |
+| 00:30 | Created ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | — | ~1532 |
+| 00:44 | Created ../../.claude/plans/plan-what-is-remaining-abundant-elephant.md | — | ~2182 |
+| 01:14 | Created design/sync-layer.md | — | ~6121 |
+
+## Session: 2026-08-26 01:17
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 01:20 | Created ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/sync-layer.html | — | ~12851 |
+| 01:20 | Edited ../../../../private/tmp/claude-502/-Users-abdelrahmanelgendy-AndroidStudioProjects-ANFAS/818830be-b2d3-4987-9d4f-99e711864f7b/scratchpad/sync-layer.html | 2→1 lines | ~8 |
+| 01:25 | Sync layer designed on paper: server-assigned sequence cursor (not updated_at), sync_outbox + sync_tombstones (not a deleted column), server-leased membership numbers, reminders never synced, tenancy scopes decided, 6-stage plan durability-first. Retracted 3 of my own premises in §1, incl. "sync unblocks desktop OCR" | design/sync-layer.md | written + published as artifact | ~13000 |
+| 01:21 | Session end: 2 writes across 1 files (sync-layer.html) | 0 reads | ~13776 tok |
+| 01:22 | Session end: 2 writes across 1 files (sync-layer.html) | 0 reads | ~13776 tok |
+| 01:28 | Edited core/ocr/src/commonMain/kotlin/com/anfas/core/ocr/OcrContracts.kt | modified adoptLegacyCaptures() | ~370 |
+| 01:28 | Edited core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/Ocr.android.kt | modified IntakeCaptureFiles() | ~398 |
+| 01:28 | Edited core/ocr/src/androidMain/kotlin/com/anfas/core/ocr/Ocr.android.kt | added 2 condition(s) | ~875 |
+| 01:28 | Created core/ocr/src/androidMain/res/xml/intake_file_paths.xml | — | ~240 |
+| 01:29 | Edited core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/ImageSource.ios.kt | modified intakeDirectory() | ~90 |
+| 01:29 | Edited core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/Ocr.ios.kt | added 2 condition(s) | ~558 |
+| 01:29 | Edited core/ocr/src/iosMain/kotlin/com/anfas/core/ocr/Ocr.ios.kt | 3→2 lines | ~19 |
+| 01:29 | Edited core/ocr/src/jvmMain/kotlin/com/anfas/core/ocr/Ocr.jvm.kt | modified adoptLegacyCaptures() | ~174 |
+| 01:30 | Edited core/database/src/commonMain/kotlin/com/anfas/core/database/IntakeEntity.kt | modified sourceImageUris() | ~355 |
+| 01:30 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/IntakeRepository.kt | modified createBatch() | ~57 |
+| 01:30 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/IntakeRepository.kt | modified discardBatch() | ~227 |
+| 01:30 | Edited core/data/src/commonMain/kotlin/com/anfas/core/data/OfflineFirstIntakeRepository.kt | modified discardBatch() | ~160 |
+| 01:31 | Created feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt | — | ~899 |
+| 01:31 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeOcrModule.kt | modified single() | ~284 |
+| 01:31 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeOcrModule.kt | added 4 import(s) | ~119 |
+| 01:31 | Edited feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/OcrFakes.kt | modified delete() | ~259 |
+| 01:31 | Edited feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponentTest.kt | expanded (+9 lines) | ~236 |
+| 01:31 | Edited feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/IntakeReviewComponentTest.kt | added optional chaining | ~244 |
+| 01:32 | Created feature/intake-ocr/src/commonTest/kotlin/com/anfas/feature/intakeocr/IntakeHousekeepingTest.kt | — | ~1387 |
+| 01:33 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt | modified run() | ~26 |
+| 01:34 | Edited feature/intake-ocr/src/commonMain/kotlin/com/anfas/feature/intakeocr/IntakeHousekeeping.kt | 3→4 lines | ~56 |
+| 01:36 | Edited CLAUDE.md | expanded (+39 lines) | ~953 |
+| 01:36 | Edited core/ocr/src/androidMain/res/xml/intake_file_paths.xml | inline fix | ~23 |
+| 01:36 | intake_file_paths.xml comment used "--" as em-dash, illegal in XML comments, failed core:ocr resource parsing before check even reached compile | core/ocr/src/androidMain/res/xml/intake_file_paths.xml | fixed, reran check | ~1200 |
+| 02:20 | Sync Stage 0: Android intake captures moved cacheDir->filesDir (OS cache purge was silently losing unreviewed sheets), files-path in FileProvider xml, adoptLegacyCaptures + IntakeHousekeeping as purgeExcept's first production caller, iOS purge stub implemented + delete root-confined. 5 new tests, falsified both directions. No schema change | core/ocr/*, core/data/*, core/database/IntakeEntity.kt, feature/intake-ocr/* | verifying | ~35000 |
+| 01:37 | Session end: 25 writes across 16 files (sync-layer.html, OcrContracts.kt, Ocr.android.kt, intake_file_paths.xml, ImageSource.ios.kt) | 15 reads | ~56882 tok |
+| 01:37 | Edited core/data/src/commonTest/kotlin/com/anfas/core/data/FakeIntakeDao.kt | added 1 condition(s) | ~186 |
+| 01:37 | FakeIntakeDao missing two new IntakeDao abstract members caused core:data test compile failure | core/data/src/commonTest/.../FakeIntakeDao.kt | fixed, reran check | ~900 |
+| 01:50 | Edited desktopApp/build.gradle.kts | added optional chaining | ~172 |
+| 02:21 | Edited desktopApp/build.gradle.kts | removed 6 lines | ~11 |
+| 02:24 | Verified Stage 0 intake-capture storage change end to end: check + both iOS targets green (2 real bugs fixed), Android FileProvider capture confirmed crash-free on emulator (highest-risk item), iOS build+launch verified via simctl (session seeded via NSUserDefaults, no typing needed), desktop verified via isolated scratch user.home | core/ocr, core/data, feature/intake-ocr, core/database | all platforms pass; android capture end-to-end incl. delete() confinement exercised; ios/desktop UI-navigation automation abandoned after a stray click landed in an unrelated Android Studio terminal window in this multi-display sandbox | ~large |
+| 02:26 | Edited CLAUDE.md | 4→8 lines | ~187 |
+| 02:26 | Session end: 29 writes across 18 files (sync-layer.html, OcrContracts.kt, Ocr.android.kt, intake_file_paths.xml, ImageSource.ios.kt) | 37 reads | ~57611 tok |
+| 02:27 | Session end: 29 writes across 18 files (sync-layer.html, OcrContracts.kt, Ocr.android.kt, intake_file_paths.xml, ImageSource.ios.kt) | 37 reads | ~57611 tok |
+
+## Session: 2026-08-29 13:01
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-08-29 13:02
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:21 | Edited feature/dashboard/src/commonTest/kotlin/com/anfas/feature/dashboard/DashboardComponentTest.kt | modified upsertPlans() | ~64 |
+| 13:21 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | 8→11 lines | ~208 |
+| 13:21 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | modified userVersion() | ~125 |
+| 13:22 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | removed 8 lines | ~1 |
+| 13:24 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | 11→11 lines | ~209 |
+| 13:24 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | 5→1 lines | ~22 |
+| 13:24 | Edited core/database/src/jvmTest/kotlin/com/anfas/core/database/MigrationFromV4Test.kt | expanded (+8 lines) | ~134 |
+| 13:26 | Edited feature/members/src/commonTest/kotlin/com/anfas/feature/members/MemberProfileComponentTest.kt | modified upsertPlans() | ~72 |
+| 13:26 | Edited feature/subscriptions/src/commonTest/kotlin/com/anfas/feature/subscriptions/TestDoubles.kt | modified upsertPlans() | ~74 |
+| 13:20 | Verified Sync Stage 1 (outbox migration v12->v13): fixed 3 test fakes missing seedPlans override + bumped stale hardcoded schema-version constant in MigrationFromV4Test (tried reflection off @Database annotation first, confirmed it NPEs at runtime -- SOURCE retention, reverted). check + both iOS compile targets green. Real v4->v13 auto-migration chain confirmed via MigrationFromV4Test. | core/database/.../MigrationFromV4Test.kt, feature/dashboard, feature/members, feature/subscriptions test fakes | check GREEN | ~large |
+| 14:05 | Sync Stage 1 device verification: real v12->v13 migration confirmed on 2 real devices (existing desktop db + existing Android emulator db, both had prior real data, both migrated cleanly with data intact). seedPlans confirmed populating 3 plans on iOS/Android/renewal-sheet UI. Check-in on Android: granted check-in wrote check_ins+members in one transaction and both rows landed in sync_outbox atomically (verified by reading device db via adb+sqlite3). iOS/desktop UI navigation limited to screenshots only (no Accessibility permission for osascript, no idb/mobile-mcp tool available this session) -- Android fully interactive via adb input. | core/database (schema), core/data (repositories) -- verification only, no further code changes | all real-device checks pass | ~large |
+| 04:10 | Sync Stage 1: schema v13 adds sync_outbox + sync_tombstones (two tables, zero columns on existing tables). 24 tracked write paths across 8 repositories, outbox entry in the same @Transaction. Member delete tombstones the 2-deep therapy cascade. seedPlans now insert-if-absent. 3 previously non-atomic writes made atomic. Falsified 3 invariants. Migration verified on two real v12 devices | core/database/*, core/data/*, CLAUDE.md | verified green | ~60000 |
+| 14:01 | Session end: 9 writes across 4 files (DashboardComponentTest.kt, MigrationFromV4Test.kt, MemberProfileComponentTest.kt, TestDoubles.kt) | 24 reads | ~5147 tok |
+| 14:03 | Session end: 9 writes across 4 files (DashboardComponentTest.kt, MigrationFromV4Test.kt, MemberProfileComponentTest.kt, TestDoubles.kt) | 24 reads | ~5147 tok |
+
+## Session: 2026-10-03 18:45
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 18:48 | Created design/README.md | — | ~4375 |
+| 18:48 | Wrote design/README.md (Claude Design brief: roles, tokens, 14 screens, states, a11y, not-built list) | design/README.md | done | ~3500 |
+| 18:48 | Session end: 1 writes across 1 files (README.md) | 0 reads | ~4687 tok |
+| 18:49 | Session end: 1 writes across 1 files (README.md) | 0 reads | ~4687 tok |
+| 19:01 | Session end: 1 writes across 1 files (README.md) | 0 reads | ~4687 tok |
+| 19:03 | Edited design/README.md | expanded (+35 lines) | ~683 |
+| 19:03 | Session end: 2 writes across 1 files (README.md) | 0 reads | ~5419 tok |
+| 19:03 | Session end: 2 writes across 1 files (README.md) | 0 reads | ~5419 tok |
+| 19:04 | Session end: 2 writes across 1 files (README.md) | 0 reads | ~5419 tok |
+| 19:16 | Created .github/workflows/release.yml | — | ~4351 |
+| 19:19 | Session end: 3 writes across 2 files (README.md, release.yml) | 0 reads | ~9770 tok |
+| 19:19 | Added .github/workflows/release.yml (tag-triggered release pipeline); updated CLAUDE.md CI note | .github/workflows/release.yml, CLAUDE.md | verified bundleRelease/assembleRelease/packageDmg locally | ~4000 |

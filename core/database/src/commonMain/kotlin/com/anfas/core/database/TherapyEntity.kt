@@ -5,8 +5,10 @@ import androidx.room3.Dao
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
+import androidx.room3.Insert
 import androidx.room3.PrimaryKey
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 
@@ -108,4 +110,24 @@ interface TherapyCaseDao {
 
     @Upsert
     suspend fun upsertSession(session: TherapySessionEntity)
+
+    // --- sync bookkeeping -------------------------------------------------------------------
+    // Declared here, not only on SyncDao, so an outbox entry shares a @Transaction with the write
+    // it describes. See SyncOutboxEntity: a change committed with no record of it never syncs,
+    // and nothing afterwards can detect that it happened.
+
+    @Insert
+    suspend fun recordChange(entry: SyncOutboxEntity)
+
+    @Transaction
+    suspend fun upsertCaseTracked(case: TherapyCaseEntity, change: SyncOutboxEntity) {
+        upsertCase(case)
+        recordChange(change)
+    }
+
+    @Transaction
+    suspend fun upsertSessionTracked(session: TherapySessionEntity, change: SyncOutboxEntity) {
+        upsertSession(session)
+        recordChange(change)
+    }
 }

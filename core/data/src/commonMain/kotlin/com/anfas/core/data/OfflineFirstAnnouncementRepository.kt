@@ -7,6 +7,7 @@ import com.anfas.core.database.AnnouncementEntity
 import com.anfas.core.database.MemberDao
 import com.anfas.core.database.StaffDao
 import com.anfas.core.database.SubscriptionDao
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.Announcement
 import com.anfas.core.model.AnnouncementAudience
 import com.anfas.core.model.AnnouncementId
@@ -65,8 +66,8 @@ internal class OfflineFirstAnnouncementRepository(
             if (problems.isNotEmpty()) return@runStorage SaveAnnouncementOutcome.Invalid(problems)
 
             val id = AnnouncementId(Uuid.random().toString())
-            announcements.upsert(
-                AnnouncementEntity(
+            announcements.upsertTracked(
+                announcement = AnnouncementEntity(
                     id = id.value,
                     title = title.trim(),
                     body = body.trim(),
@@ -79,6 +80,7 @@ internal class OfflineFirstAnnouncementRepository(
                     publishedAtEpochMs = null,
                     recipientCountAtPublish = null,
                 ),
+                change = changeFor(SyncTables.ANNOUNCEMENTS, id.value),
             )
             SaveAnnouncementOutcome.Saved(id)
         }
@@ -101,14 +103,15 @@ internal class OfflineFirstAnnouncementRepository(
             // Audience is frozen once published -- see the interface KDoc -- but title, body and
             // the event card may still be corrected regardless of status.
             val stillDraft = existing.status == AnnouncementStatus.DRAFT.name
-            announcements.upsert(
-                existing.copy(
+            announcements.upsertTracked(
+                announcement = existing.copy(
                     title = title.trim(),
                     body = body.trim(),
                     audience = if (stillDraft) audience.name else existing.audience,
                     eventDateEpochDay = eventDate?.toEpochDays(),
                     eventMinuteOfDay = eventTime?.toMinuteOfDay(),
                 ),
+                change = changeFor(SyncTables.ANNOUNCEMENTS, id.value),
             )
             SaveAnnouncementOutcome.Saved(id)
         }
@@ -132,12 +135,13 @@ internal class OfflineFirstAnnouncementRepository(
                     today,
                 )
 
-                announcements.upsert(
-                    existing.copy(
+                announcements.upsertTracked(
+                    announcement = existing.copy(
                         status = AnnouncementStatus.PUBLISHED.name,
                         publishedAtEpochMs = publishedAt.toEpochMilliseconds(),
                         recipientCountAtPublish = count,
                     ),
+                    change = changeFor(SyncTables.ANNOUNCEMENTS, id.value),
                 )
             }
         }
@@ -147,7 +151,7 @@ internal class OfflineFirstAnnouncementRepository(
             runStorage("Could not delete the announcement") {
                 val existing = announcements.findById(id.value) ?: return@runStorage Unit
                 if (existing.status == AnnouncementStatus.DRAFT.name) {
-                    announcements.delete(id.value)
+                    announcements.deleteTracked(id = id.value, nowEpochMs = capturedAt())
                 }
             }
         }

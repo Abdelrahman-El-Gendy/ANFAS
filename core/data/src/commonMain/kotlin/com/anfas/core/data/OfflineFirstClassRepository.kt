@@ -5,6 +5,7 @@ import com.anfas.core.common.AppResult
 import com.anfas.core.database.GymClassDao
 import com.anfas.core.database.GymClassEntity
 import com.anfas.core.database.StaffDao
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.ClassCategory
 import com.anfas.core.model.GymClass
 import com.anfas.core.model.GymClassId
@@ -47,7 +48,10 @@ internal class OfflineFirstClassRepository(
                     return@runStorage SaveClassOutcome.Invalid(problems)
                 }
 
-                classes.upsert(gymClass.toEntity())
+                classes.upsertTracked(
+                    gymClass = gymClass.toEntity(),
+                    change = changeFor(SyncTables.SCHEDULED_CLASSES, gymClass.id.value),
+                )
 
                 // Read back *after* writing rather than before, so the check sees the row as
                 // saved and cannot report a clash with the previous version of the class being
@@ -67,7 +71,9 @@ internal class OfflineFirstClassRepository(
         }
 
     override suspend fun delete(id: GymClassId): AppResult<Unit> = withContext(dispatchers.io) {
-        runStorage("Could not delete the class") { classes.delete(id.value) }
+        runStorage("Could not delete the class") {
+            classes.deleteTracked(id = id.value, nowEpochMs = capturedAt())
+        }
     }
 
     private fun validate(gymClass: GymClass): Set<ClassProblem> = buildSet {

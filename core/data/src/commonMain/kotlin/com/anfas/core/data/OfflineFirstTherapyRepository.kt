@@ -3,6 +3,7 @@ package com.anfas.core.data
 import com.anfas.core.common.AppDispatchers
 import com.anfas.core.common.AppResult
 import com.anfas.core.database.StaffDao
+import com.anfas.core.database.SyncTables
 import com.anfas.core.database.TherapyCaseDao
 import com.anfas.core.database.TherapyCaseEntity
 import com.anfas.core.database.TherapySessionEntity
@@ -68,8 +69,8 @@ internal class OfflineFirstTherapyRepository(
             }
 
             val id = TherapyCaseId(Uuid.random().toString())
-            cases.upsertCase(
-                TherapyCaseEntity(
+            cases.upsertCaseTracked(
+                case = TherapyCaseEntity(
                     id = id.value,
                     memberId = memberId.value,
                     condition = condition.trim(),
@@ -82,6 +83,7 @@ internal class OfflineFirstTherapyRepository(
                     mechanism = mechanism.trim(),
                     contraindications = contraindications?.trim()?.ifBlank { null },
                 ),
+                change = changeFor(SyncTables.THERAPY_CASES, id.value),
             )
             SaveCaseOutcome.Saved(id)
         }
@@ -102,8 +104,8 @@ internal class OfflineFirstTherapyRepository(
 
             val existing = cases.findById(caseId.value)
                 ?: return@runStorage SaveCaseOutcome.Invalid(emptySet())
-            cases.upsertCase(
-                existing.copy(
+            cases.upsertCaseTracked(
+                case = existing.copy(
                     condition = condition.trim(),
                     therapistStaffId = therapistStaffId,
                     referredBy = referredBy?.trim()?.ifBlank { null },
@@ -111,6 +113,7 @@ internal class OfflineFirstTherapyRepository(
                     mechanism = mechanism.trim(),
                     contraindications = contraindications?.trim()?.ifBlank { null },
                 ),
+                change = changeFor(SyncTables.THERAPY_CASES, caseId.value),
             )
             SaveCaseOutcome.Saved(caseId)
         }
@@ -120,11 +123,12 @@ internal class OfflineFirstTherapyRepository(
         withContext(dispatchers.io) {
             runStorage("Could not close the case") {
                 val existing = cases.findById(caseId.value) ?: return@runStorage Unit
-                cases.upsertCase(
-                    existing.copy(
+                cases.upsertCaseTracked(
+                    case = existing.copy(
                         status = CaseStatus.CLOSED.name,
                         closedOnEpochDay = closedOn.toEpochDays(),
                     ),
+                    change = changeFor(SyncTables.THERAPY_CASES, caseId.value),
                 )
             }
         }
@@ -151,9 +155,10 @@ internal class OfflineFirstTherapyRepository(
             }
             if (problems.isNotEmpty()) return@runStorage SaveSessionOutcome.Invalid(problems)
 
-            cases.upsertSession(
-                TherapySessionEntity(
-                    id = Uuid.random().toString(),
+            val sessionId = Uuid.random().toString()
+            cases.upsertSessionTracked(
+                session = TherapySessionEntity(
+                    id = sessionId,
                     caseId = caseId.value,
                     therapistStaffId = therapistStaffId,
                     atEpochMs = at.toEpochMilliseconds(),
@@ -162,6 +167,7 @@ internal class OfflineFirstTherapyRepository(
                     notes = notes.trim(),
                     painScore = painScore,
                 ),
+                change = changeFor(SyncTables.THERAPY_SESSIONS, sessionId),
             )
             SaveSessionOutcome.Saved
         }

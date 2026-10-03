@@ -4,6 +4,8 @@ import com.anfas.core.common.AppDispatchers
 import com.anfas.core.data.AuthRepository
 import com.anfas.core.data.MemberRepository
 import com.anfas.core.data.ReminderRepository
+import com.anfas.core.data.ReminderScheduler
+import com.anfas.core.data.ReminderSender
 import com.anfas.core.data.SubscriptionRepository
 import com.anfas.core.model.MemberId
 import com.anfas.core.model.SubscriptionTerm
@@ -15,6 +17,8 @@ import com.arkivanov.decompose.ComponentContext
  */
 class ReminderQueueComponentFactory internal constructor(
     private val reminders: ReminderRepository,
+    private val scheduler: ReminderScheduler,
+    private val sender: ReminderSender,
     private val auth: AuthRepository,
     private val dispatchers: AppDispatchers,
 ) {
@@ -25,6 +29,8 @@ class ReminderQueueComponentFactory internal constructor(
     ): ReminderQueueComponent = ReminderQueueComponent(
         componentContext = componentContext,
         repository = reminders,
+        scheduler = scheduler,
+        sender = sender,
         auth = auth,
         dispatchers = dispatchers,
         onOpenMemberClicked = onOpenMemberClicked,

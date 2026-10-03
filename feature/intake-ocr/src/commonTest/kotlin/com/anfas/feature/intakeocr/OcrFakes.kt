@@ -24,17 +24,32 @@ internal class FakeTextRecogniser(
     override suspend fun supportsArabicScript(): Boolean = false
 }
 
-/** Records deletions, which is the only way to assert the image-cleanup contract. */
-internal class RecordingImageStore : IntakeImageStore {
+/**
+ * Records deletions, which is the only way to assert the image-cleanup contract.
+ *
+ * [events] carries every call in order, because the adopt-then-purge ordering in
+ * `IntakeHousekeeping` is itself an invariant: a purge running first would delete the files
+ * adoption had just moved, and asserting only the outcomes would pass either way.
+ */
+internal class RecordingImageStore(private val legacyCaptures: Map<String, String> = emptyMap()) :
+    IntakeImageStore {
     val deleted = mutableListOf<String>()
     val purgedKeeping = mutableListOf<Set<String>>()
+    val events = mutableListOf<String>()
 
     override suspend fun delete(uri: String) {
+        events += "delete"
         deleted += uri
     }
 
     override suspend fun purgeExcept(keep: Set<String>) {
+        events += "purge"
         purgedKeeping += keep
+    }
+
+    override suspend fun adoptLegacyCaptures(): Map<String, String> {
+        events += "adopt"
+        return legacyCaptures
     }
 }
 

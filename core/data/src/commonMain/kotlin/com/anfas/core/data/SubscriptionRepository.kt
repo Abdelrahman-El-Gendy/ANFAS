@@ -38,4 +38,15 @@ interface SubscriptionRepository {
     ): AppResult<SubscriptionTerm>
 
     suspend fun upsertPlans(plans: List<SubscriptionPlan>): AppResult<Unit>
+
+    /**
+     * Insert-if-absent, for the startup seed — deliberately not [upsertPlans].
+     *
+     * `SubscriptionPlanSeed` is registered `createdAtStart`, so whatever it calls runs on every
+     * launch of every device. An upsert there rewrites the whole catalogue each time, which once
+     * plans sync makes every app start a conflict and silently reverts an owner's price change to
+     * the seeded value on the next launch — defeating the reason plans live in the database rather
+     * than in code. Seeding an empty install and then doing nothing is what a seed should do.
+     */
+    suspend fun seedPlans(plans: List<SubscriptionPlan>): AppResult<Unit>
 }

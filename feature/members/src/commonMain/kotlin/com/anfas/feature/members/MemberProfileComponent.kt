@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import kotlin.time.Clock
@@ -36,7 +37,7 @@ import kotlin.time.Clock
 class MemberProfileComponent(
     componentContext: ComponentContext,
     private val memberId: MemberId,
-    members: MemberRepository,
+    private val members: MemberRepository,
     subscriptions: SubscriptionRepository,
     auth: AuthRepository,
     dispatchers: AppDispatchers,
@@ -56,12 +57,34 @@ class MemberProfileComponent(
         MemberProfileState(
             content = contentOf(memberResult, termResult),
             mayViewTherapy = session?.can(Permission.VIEW_THERAPY) == true,
+            mayEdit = session?.can(Permission.EDIT_MEMBERS) == true,
         )
     }.stateIn(
         scope = scope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
         initialValue = MemberProfileState(),
     )
+
+    /**
+     * Records whether this member has agreed to receive WhatsApp reminders.
+     *
+     * Read-modify-write through `upsert`, because `MemberRepository` has no per-field update and
+     * inventing one for a single boolean would be a wider change than this needs. The member is
+     * taken from state rather than re-read: the screen cannot offer the toggle until it has loaded
+     * the member, so state is already the freshest copy.
+     *
+     * Permission is checked here as well as in the screen. A component method is callable from
+     * anywhere, so a hidden control is UX, not a boundary -- the same rule `ReminderQueueComponent`
+     * applies to retrying and `AnnouncementsComponent` to publishing.
+     */
+    fun onWhatsAppConsentChanged(consented: Boolean) {
+        if (!state.value.mayEdit) return
+        val member = state.value.member ?: return
+        if (member.whatsappOptIn == consented) return
+        scope.launch {
+            members.upsert(listOf(member.copy(whatsappOptIn = consented)))
+        }
+    }
 
     fun onRenew() = onRenewClicked(memberId)
 

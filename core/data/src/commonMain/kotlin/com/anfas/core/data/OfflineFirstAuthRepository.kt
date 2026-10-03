@@ -37,7 +37,60 @@ internal class OfflineFirstAuthRepository(
 
     private val log = logger("Auth")
 
-    override fun observeSession(): Flow<Session?> = sessionStore.observe()
+    /**
+     * The stored session, **re-derived from the `staff` row it names** rather than trusted as
+     * written.
+     *
+     * `Settings` and the database do not survive together. The Room file is deliberately excluded
+     * from cloud backup and device transfer because the whole domain is PII, while
+     * SharedPreferences / NSUserDefaults are not — so a restored or transferred install arrives
+     * holding a session id for a staff row that does not exist. Reading the store alone put such
+     * an install straight onto the dashboard as an authenticated nobody. Observed on the iOS
+     * simulator after wiping app data: the session outlived the database.
+     *
+     * Three states collapse to "not signed in", and each is a real one:
+     *  - **no row** — the transfer/restore case above, and the only way a row disappears at all,
+     *    since staff are disabled rather than deleted so history stays attributable;
+     *  - **row disabled** — an Owner revoking an account has to take effect on the device that
+     *    account is signed in on, not at its next sign-in. `SignInResult.AccountDisabled` already
+     *    refuses the front door; this closes the window someone is already through.
+     *  - **roles taken from the row, never from storage** — the stored copy is a snapshot from
+     *    whenever the person signed in, so a demoted Owner kept every Owner permission until they
+     *    happened to sign out. That is the part of this worth calling a privilege bug rather than
+     *    a restore bug.
+     *
+     * The stale keys are **not** cleared here, deliberately. Writing to storage from inside a cold
+     * flow would fire per collector, and a single unreadable read would then sign someone out
+     * permanently instead of transiently. Nothing is leaked by leaving them: the value is an id and
+     * role names, never a secret, and both signing in and signing out overwrite them.
+     *
+     * No new UI is needed for any of this. An install with no database has no staff rows either, so
+     * `SignInComponent` offers first-run setup — which is exactly the truth. The disabled and
+     * demoted cases land on the sign-in form, which is also the truth. This is why the export's
+     * `session-expired` screen still has no caller.
+     */
+    override fun observeSession(): Flow<Session?> = sessionStore.observe().flatMapLatest { stored ->
+        // flatMapLatest for the same reason observeCurrentStaff uses it: a sign-out must stop
+        // observing the row rather than keep evaluating the previous person's.
+        if (stored == null) {
+            flowOf(null)
+        } else {
+            dao.observeById(stored.userId).map { row ->
+                val roles = row?.rolesSet().orEmpty()
+                when {
+                    row == null || !row.isEnabled -> null
+
+                    // Same rule SettingsSessionStore applies to its own stored roles: a
+                    // session that can do nothing is worse than no session, because the shell
+                    // draws the whole app around a user who is then denied every screen.
+                    // Reachable if a row's roles string stops parsing -- a renamed Role entry.
+                    roles.isEmpty() -> null
+
+                    else -> Session(userId = stored.userId, roles = roles)
+                }
+            }
+        }
+    }
 
     override fun observeCurrentStaff(): Flow<StaffAccount?> =
         sessionStore.observe().flatMapLatest { session ->

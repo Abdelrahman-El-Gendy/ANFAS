@@ -8,6 +8,44 @@
 
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
 
+- **[2026-08-25] Every feature must be RUN on every platform before it is committed** — Android,
+  iOS and desktop, not just `./gradlew check` plus a compile check. Stated directly: "i need you
+  to check every feature first on each platform before commiting them." This corrects the prior
+  habit of treating a green `check` plus `compileKotlinIosArm64` as sufficient and committing on
+  that basis. It is a well-earned correction: the Equipment publish-guard bug and the intake
+  source-photo placeholder were both invisible to the entire test suite and only visible on a
+  screen. Compilation is not behaviour. `.claude/agents/feature-verifier.md` now carries this as
+  a mandatory second gate, including how to handle `Placement.DesktopOnly`/`WideOnly` screens that
+  are legitimately unreachable on a phone (confirm the absence; check the iPad, where the rail
+  actually appears).
+- **Prefers the phased, ship-it-properly loop** — implement, verify, bookkeep (`.wolf/` +
+  `CLAUDE.md`), then commit with a real explanatory message. Has asked for dedicated subagents for
+  the verify step and the branch/commit/push step rather than doing either inline.
+- **[2026-08-25] One descriptively-named branch per feature.** Stated as "choose a convinant name
+  for every branch descripting feature developed!" — a correction to having stacked Equipment, CI
+  and the intake photo fix all onto `hardening/phase-3-ocr`, a branch whose name describes none of
+  them. Convention now `<type>/<kebab-slug>` naming the subject, not the mechanism
+  (`feature/calendar-date-picker`, `fix/intake-source-pane-on-phone`). Recorded in
+  `.claude/agents/git-shipper.md`, which also now says to split work spanning several features
+  into a branch+commit each rather than one vaguely-named commit.
+- **[2026-08-25] Every successfully delivered feature gets merged into `main`.** Standing
+  instruction ("after each successful feature delevely merge it with main too and so on"), so it
+  is part of the ship step rather than something to ask about each time. Applies only to finished
+  work — committed, pushed, and green on both gates. `main` had been left at the pre-hardening
+  commit while 10+ phases accumulated on stacked branches, so it is normally a plain ancestor and
+  `--ff-only` is the right merge; a refusal means real divergence and should be reported, not
+  worked around. Encoded in `.claude/agents/git-shipper.md` step 5.
+- **[2026-08-25] Wants free-text dates replaced with a real date picker** — "i need to make the
+  date entered to be a date piker not a string as it is." Built as `AnfasDateField` wrapping
+  Material 3's calendar. The general principle behind it: a typed date needs a parser, a parser
+  can fail, and every screen then carries an "unreadable date" error path — a picker deletes all
+  three. The one place free text stays correct is correcting a date read off a photographed
+  sheet, where the text is a transcription and the confidence stripe is the point.
+- **[2026-08-25] Also wants UI *rendering* verified per platform**, not just behaviour — "check
+  the rendering ui component is properly set on each platform (ios, android and desktop)". So a
+  per-platform pass covers fonts/glyphs (Arabic must not tofu), theme colours, spacing, clipping,
+  RTL mirroring and breakpoint branches, not merely "the feature works".
+
 ## Key Learnings
 
 - **Project:** ANFAS
@@ -577,3 +615,276 @@
   image into that same box needs `ContentScale.FillBounds`, not `Fit` — `Fit` letterboxes the
   image at its own true aspect ratio inside the box, which visually detaches it from boxes
   positioned against the box's full extent.
+
+## Key Learnings — 2026-08-25 (Compose layout tests)
+
+- **A layout regression test must be proven to fail without its fix, and twice here it did not.**
+  First draft asserted `gap > 0` — but the real bug left a **1dp** gap (visually flush, technically
+  not overlapping), so it passed against the broken component. Second draft used the *device* width
+  (402dp) instead of the width the component is actually handed (370dp, after each screen's 16dp
+  page margin), where the title fits with 33dp to spare and no collision exists at all. Both drafts
+  were confidently green and worthless. Revert the fix, watch it go red, restore.
+- **When a layout assertion is hard to pin, probe the real numbers first.** A throwaway test that
+  printed `titleRight / actionLeft / gap` across six widths turned guesswork into a table: 0dp at
+  300-340dp, 1dp at 370dp, 26dp+ above. That is what revealed both mistakes and gave the 12dp
+  threshold an actual basis. Delete the probe afterwards.
+- **Compose UI tests on the JVM target need `compose.desktop.currentOs` on top of
+  `org.jetbrains.compose.ui:ui-test` + `ui-test-junit4`.** The runner really composes and measures,
+  so it needs Skiko's native renderer for the host; without it the failure is a class-load link
+  error, not an assertion. Both coordinates exist at the project's `composeMultiplatform` version
+  (checked against Maven Central rather than assumed).
+- **Keep these on `jvmTest`, not `commonTest`.** Layout is common Compose code and identical on
+  every target, so a common test would run three times for no extra coverage and pull a renderer
+  into the iOS test binary.
+- **`DpRect` from `getBoundsInRoot()` has no `.width` member in scope** — derive it as
+  `right - left` rather than hunting for the extension import.
+- **A suspiciously fast green (`BUILD SUCCESSFUL in 2s`) usually means nothing ran.** Confirm with
+  `--rerun` and by reading the JUnit XML's `tests=` count, not the exit code.
+
+## Key Learnings — 2026-08-26 (screen-level layout tests)
+
+- **`Modifier.size` is clamped by the test surface's constraints; `requiredSize` is not.** A test
+  box set to 1324dp inside `runComposeUiTest` was silently squeezed under the 1024dp breakpoint, so
+  the "desktop width" case was actually exercising the *narrow* branch and passing for the wrong
+  reason. The tell was that reverting the fix failed a test that had no business failing — if
+  reverting breaks more branches than the bug touched, the test is measuring something else.
+- **Third time this pattern has bitten: a layout test that passes against the bug.** First `gap > 0`
+  when the real defect was a 1dp gap; then the device width instead of the width the component
+  receives; now `size` instead of `requiredSize`. The revert-and-watch-it-fail step is not optional
+  ceremony — it is the only thing that has caught any of them.
+- **Check a module's existing test fakes before writing your own.** `feature/intake-ocr` already had
+  `OcrFakes.kt` (`FakeTextRecogniser`, `RecordingImageStore`, `FakeCameraPermissions`) and an
+  `internal FakeIntakeRepository` that revalidates on read like the real repository. Duplicating
+  them is not merely wasteful, it fails to compile: `jvmTest` sees `commonTest`, and same-package
+  top-level names collide across source sets even when both are `private`.
+- **A thin launcher can still own a testable invariant.** `desktopApp` has no logic, but its window
+  constants encode "stay above the layout breakpoint". Making them `internal` and asserting against
+  `AnfasBreakpoints.tabletMax` (never a copied literal) turns a reachability rule into 4 tests that
+  run in under a second with no emulator.
+- **Rendering a whole screen in a test needs the component, and that is affordable.** Building a
+  real `IntakeReviewComponent` took a `LifecycleRegistry`, five fakes and ~40 lines — cheaper than
+  refactoring the screen to be testable, and it exercises the real composable rather than a
+  simplified stand-in.
+
+
+## Key Learnings — 2026-08-26 (Android instrumented smoke tests)
+
+- **A test running against an R8-shrunk APK may only touch the app's own entry points.** The first
+  `R8SmokeTest` called `runBlocking`, `GlobalContext.getOrNull()`, a `DefaultComponentContext`
+  constructor and `kotlin.test`'s assertions. All five tests failed with
+  `NoSuchMethodError`/`NoClassDefFoundError` — the app never calls those, so R8 correctly removed
+  them. Any library API a test reaches for is by definition outside the app's reachable graph, so a
+  keep rule bringing it back proves only that the keep rule works. Use `ActivityScenario` plus
+  `org.junit.Assert` (Java, in the test APK) and nothing else.
+- **`kotlin.test` is unusable in an androidTest against a minified app** — its asserter lookup needs
+  `kotlin.collections.CollectionsKt`, which the app does not retain. `org.junit.Assert` has no
+  Kotlin dependency at all.
+- **`stage` shrinks but does NOT obfuscate.** AGP disables obfuscation and optimization for
+  debuggable build types. Verified in `build/outputs/mapping/stage/mapping.txt`: every non-identity
+  entry is `R8$$REMOVED$$CLASS$$n`, a deletion; zero renames. So `stage` cannot test a rename
+  hazard — don't write a test claiming it does.
+- **`ActivityScenario.recreate()` is the right way to test the Config-discriminator hazard**: a real
+  save-then-restore inside the minified app exercises Decompose's `StateKeeper` and the serializers
+  for real, instead of asserting about serial names. Pair it with an activity-identity assertion or
+  the test is vacuous if `recreate()` no-ops.
+- **AGP consistent resolution pins androidTest to the production runtime's versions.** Declaring
+  `libs.kotlinx.serialization.json` (catalog 1.11.0) on `androidTestImplementation` failed to
+  resolve, because `stageRuntimeClasspath` resolves `{strictly 1.8.0}` — the Android classpath never
+  asks for 1.11.0 and the transitively-supplied kotlinx BOM pins 1.8.0. Don't add a version to an
+  androidTest configuration; design the test not to need the dependency.
+- **Minifying the app means the test APK is minified too, and that needs two extra rule files** —
+  `testProguardFiles` for `-dontwarn com.google.errorprone.annotations.**`, and a build-type-scoped
+  file on `stage` for `-keep class kotlin.LazyKt*`. Never put either in `proguard-rules.pro`:
+  a production keep rule motivated by a test is one nobody can later justify. Prove the scoping —
+  `release`'s mapping still shows `kotlin.LazyKt__LazyKt -> R8$$REMOVED$$CLASS$$766`.
+- **`-dontshrink` in `testProguardFiles` does not solve a missing stdlib class.** Shared
+  dependencies ship in the app APK only, so stdlib is never the test APK's program input; the keep
+  rule has to be on the app side.
+- Emulator installs need `-Pandroid.injected.build.abi=arm64-v8a` on this machine (93% full /data).
+
+## Key Learnings — 2026-08-26 (desktop window geometry)
+
+- **`WindowState.position` stays `WindowPosition.PlatformDefault` when the platform placed the
+  window.** So a `snapshotFlow { windowState.toGeometry() }` that requires a specified position
+  emits nothing on first run and saves nothing at all. Read `window.x/y/width/height` off the AWT
+  frame instead (inside `FrameWindowScope`), via a `ComponentAdapter` for moves/resizes plus one
+  direct read for the initial placement, which fires no event.
+- **AWT `window.*` and `GraphicsConfiguration.getBounds()` are in the same logical user-space
+  units**, so reading geometry from the frame removes the dp-vs-px question entirely. On this
+  machine the screen is 1352x878 logical at scaleX=2.0.
+- **`defaults read com.apple.java.util.prefs` and plistlib both serve a stale cfprefsd cache** — a
+  key written seconds ago reads as absent. Verify `java.util.prefs` from a fresh JVM
+  (`Preferences.userRoot().node("...").keys()`). This cost a wrong "the write isn't happening"
+  diagnosis.
+- **macOS pulls a window fully on-screen itself** if the restored bounds overhang. A restore test
+  seeded with x+width > screen width will come back repositioned — that is the OS, not a bug in the
+  resolver. Seed a geometry that actually fits when testing exact round-trip.
+- **An overlap gate and a position clamp must not use the same threshold**, or the clamp is
+  unreachable dead code and every edge-parked window gets recentred. Gate on "any overlap at all";
+  clamp to the grabbable minimum. A test caught this, not review.
+- **The packaged app is where `java.prefs` can be missing.** Check the jlink module list in
+  `ANFAS.app/Contents/runtime/Contents/Home/release` — the `bin/java` binary is not in the app
+  image, so `--list-modules` cannot be run against it.
+- Window geometry, logging, crash handling, the EDT dance and shutdown ordering are all legitimate
+  `desktopApp` content — they have no Android/iOS counterpart. "The launcher holds no logic" means
+  no *feature* logic.
+
+## Do-Not-Repeat — 2026-08-26
+
+- **Do not take whole-screen `screencapture` shots to verify a desktop window.** Without
+  Accessibility permission the ANFAS window cannot be raised, so the capture shows whichever of the
+  user's apps has focus — this session captured their Outlook calendar, work timesheet and browser
+  tabs before I stopped. Verify desktop geometry numerically (seed prefs, launch, read back from a
+  fresh JVM) and say plainly that a content screenshot was not possible.
+
+## Key Learnings — 2026-08-26 (keyboard / IME handling)
+
+- **`enableEdgeToEdge()` requires `android:windowSoftInputMode="adjustResize"` in the manifest.**
+  Without it the system picks adjustPan and slides the whole window up — the app's own top bar ends
+  up under the status bar. If chrome that should be fixed is moving when the keyboard opens, that is
+  adjustPan.
+- **`imePadding()` on a child that a parent centres is wrong.** Padding makes the child taller and
+  centring splits the difference, so content rises by half the keyboard height. Put the inset on the
+  container so the space the child is centred in shrinks.
+- **Compose does not re-run bring-into-view when the keyboard resizes the viewport.** It scrolls on
+  focus arrival, before the keyboard is up. Fix: a `BringIntoViewRequester` with a `LaunchedEffect`
+  keyed on `WindowInsets.ime.getBottom(density)` as well as focus. This was the actual fix; the
+  container/inset changes were necessary but not sufficient.
+- **`KeyboardActions(onNext = { maybeNull?.invoke() })` disables the keyboard's Next key.** A
+  supplied handler replaces the platform default even when its body does nothing. Pass null to keep
+  the default (advance focus / dismiss).
+- **A non-zero `WindowInsets.ime` does not prove `imePadding()` is applying it.** Print the raw
+  inset in a temporary `Text` to separate "inset not reported" from "inset consumed by an ancestor"
+  before touching layout. I changed `App.kt` on the consumption hunch, found it made no difference,
+  and reverted it — `windowInsetsPadding(x.only(sides))` does limit its consumption correctly.
+- **Test the keyboard in landscape.** Portrait had enough slack to mask two of three bugs; landscape
+  leaves ~80dp of form area on a phone, which is where every mistake shows.
+- `Dialog` opens its own window and ignores the constraints of whatever composes it, so a dialog's
+  internal layout cannot be measured through the public composable. Split an `internal` panel
+  composable out and test that.
+
+## Do-Not-Repeat — 2026-08-26 (second entry)
+
+- **Do not conclude an inset is being consumed without measuring it.** I edited `App.kt` to swap
+  `safeDrawing` for `systemBars.union(displayCutout)` on the theory that safeDrawing's IME component
+  was being consumed, wrote a confident comment saying so, and it changed nothing — the real cause
+  was the missing bring-into-view. Reverted. Measure first, then edit.
+
+## Key Learnings — 2026-08-26 (session validity)
+
+- **A persisted session must be re-derived from the database on every emission, not trusted as
+  stored.** `Settings` (SharedPreferences / NSUserDefaults) survives backup and device transfer; the
+  Room file is deliberately excluded because the domain is PII. So a transferred install holds a
+  session id for a staff row that does not exist, and reading the store alone showed the dashboard to
+  an authenticated nobody. Reproduced on Android by writing only the two session keys into
+  `shared_prefs/anfas.xml` with no `databases` dir.
+- **Stored roles go stale and that is a privilege escalation.** A demoted Owner kept Owner
+  permissions until sign-out, because the session's role set was a snapshot. Derive roles from the
+  row.
+- **Do not clear storage from inside a cold flow** to "self-heal" a bad session: it fires per
+  collector, and one transient failure becomes a permanent sign-out. Emit null instead.
+- **AGP 9 writes the debug APK to `build/intermediates/apk/debug/`, and
+  `build/outputs/apk/debug/` can hold a stale artifact from an older build.** I side-loaded a
+  day-old APK and concluded a working fix had failed. Check the APK's mtime against the source, or
+  install via `installDebug` rather than a hand-picked path.
+- **The emulator's `/data` fills up.** `adb shell pm trim-caches 2000M` is the safe way to free space
+  (caches only, apps regenerate them) — never uninstall the user's other apps.
+- To create a "signed in" state without driving the UI: write `session.user_id` and `session.roles`
+  into `shared_prefs/anfas.xml` via `run-as com.anfas.app`. No password hash needed, because sign-in
+  is not involved.
+
+## Do-Not-Repeat — 2026-08-26 (third entry)
+
+- **Backtick test names must not contain commas** — Kotlin/Native fails with "Name contains illegal
+  characters". This is the third time (bug-069, and again here with `roles come from the staff row,
+  not from the stored session`). Only `compileTestKotlinIosSimulatorArm64` catches it, so `check`
+  must be run before shipping, not just the JVM tests.
+
+## Key Learnings — 2026-08-26 (instrumented tests in CI)
+
+- **A GitHub ubuntu runner needs a KVM udev rule before the Android emulator is usable.** `/dev/kvm`
+  exists but is not accessible to the runner user; without the rule the emulator either crawls or
+  times out. This is required setup, not tuning.
+- **`google_atd` / API 35 / x86_64 is the CI image of choice.** ATD = Automated Test Device, stripped
+  of apps a CI run never touches, so it boots far faster. Google APIs variant chosen so nothing rests
+  on whether ML Kit's bundled model needs Play Services — the app initialises ML Kit via
+  ComponentDiscovery at startup, which is what the R8 tests check.
+- **Never pass `-Pandroid.injected.build.abi=arm64-v8a` in CI.** Locally it exists only to fit a
+  nearly-full emulator disk; on an x86_64 runner it strips the libraries the runner needs and the
+  failure looks like a shrinking bug.
+- `system-images;android-36;{aosp_atd,google_atd,google_apis};x86_64` all exist — check with
+  `sdkmanager --list | grep system-images` before guessing an image spec.
+- **An action's input names can be verified without running CI**: fetch its `action.yml` from the
+  raw GitHub URL and diff the declared inputs against the ones used. Cheap, and catches the silent
+  failure mode where an unknown input is ignored.
+- What still cannot be verified locally is the runner/emulator combination itself. Same class of risk
+  as the macos-15 → macos-26 discovery: the first real CI run is the test.
+
+## Key Learnings — 2026-08-26 (WhatsApp Phase 1)
+
+- **A deterministic id can replace a dedupe query entirely.** `SubscriptionPlanSeed` already stated
+  the pattern ("an upsert keyed by a stable id, so re-running it cannot duplicate rows"). Applying it
+  to reminders (`renewal:<termId>`) removed two proposed columns — an idempotency key and a content
+  key — because the id is both.
+- **But `@Upsert` replaces every column by id**, so a scheduler must NOT upsert over existing rows:
+  it would reset a FAILED row to QUEUED and wipe its attempts. Add a `SELECT id ... WHERE id IN (:ids)`
+  query and insert only the missing ones. DAO-only change, no migration.
+- **Room refuses to build when a new NOT NULL column has no `defaultValue`** — "New NOT NULL column
+  added with no default value specified". So KSP guards presence; only a test can guard the *value*.
+  This repo's first added column (every earlier migration added/dropped whole tables).
+- **`stateIn(WhileSubscribed)` means `state.value` is the initial value until something collects.**
+  A component guard reading `state.value.mayX` therefore refuses until subscribed — fail-safe, but
+  tests must subscribe (Turbine) before acting, or they test the initial value instead.
+- **Seeding an Android app's database from the host:** the schema lives in the `-wal` until
+  checkpointed, so pulling only `anfas.db` gives a 4KB empty file. Pull `.db`, `-wal` and `-shm`
+  together, edit with python sqlite3, `PRAGMA wal_checkpoint(TRUNCATE)`, then push back and delete the
+  device's `-wal`/`-shm`. No `sqlite3` binary exists on the emulator.
+- **`uiautomator dump` beats eyeballing screenshots for finding tap targets** in Compose: clickable
+  nodes appear with real `bounds`, which both locates them and proves clickability. It is how I
+  confirmed the renewal tile had actually become clickable.
+- Found while verifying: the reminder queue's only phone entry point was the *failed reminders* tile,
+  gated on `failedReminders > 0` — so it was unreachable exactly when empty. CLAUDE.md had already
+  claimed the renewal tile was the route; now it is.
+
+## Key Learnings — 2026-08-26 (WhatsApp Phase 2)
+
+- **A "not configured" flag on an integration seam is worth more than a hidden button.** Binding a
+  null gateway with `isConfigured = false` lets the UI explain itself, and stops a run from marking
+  every row FAILED and spending its attempts before the integration exists. An absent Koin binding
+  would instead crash on first use.
+- **Distinguish "rejected" from "unreachable".** Unreachable means we do not know whether it sent,
+  which is precisely when an idempotency key earns its place. Same row outcome, different meaning.
+- **Increment the attempt counter BEFORE the call.** A crash mid-send otherwise leaves the row
+  looking untried and it is retried forever.
+- **Phone normalisation cannot be told apart by prefix alone.** Without a leading 0 or 00, only
+  length distinguishes a foreign international number from a local one missing its trunk zero.
+  Prepending the default country code unconditionally silently redirects every foreign number to a
+  stranger. My own test caught this.
+- **Backtick test names with commas fail Kotlin/Native only in `commonTest`.** `jvmTest` names may
+  keep their commas (DesktopDataDirTest has two, legitimately) — Kotlin/Native never compiles them.
+  That sharpens the rule I had been over-generalising. `./gradlew check` catches it; running only
+  `jvmTest` does not.
+- **Making a parked feature real turns its placeholder copy into a lie.** The queue's empty state
+  promised "once the daily job schedules them"; there is no daily job. Re-read the copy of any
+  screen a feature newly populates.
+- To exercise a `isConfigured = true` branch on a device without shipping a fake: flip the null
+  object temporarily, install, verify, revert. Same falsification discipline as reverting a fix.
+
+## Key Learnings — 2026-08-26 (queue table on a phone)
+
+- **`fillMaxHeight()` on a leading-edge stripe needs `Modifier.height(IntrinsicSize.Min)` on the
+  parent Row.** In a wrap-content Row there is no height to fill, so it silently resolves to zero
+  and the stripe disappears. Copying the construct from a row that sets its own height does not
+  carry the height with it.
+- **`dataMonoLtr` on `scheduledLabel()` was a latent RTL bug in the table**, invisible until the
+  queue held a reminder old enough to print an absolute date rather than "Today". Arabic rendered
+  `17 أغسطس 2026` as `أغسطس 17 2026`. The rule is about the *string*, not the screen: a localised
+  date is never a Latin-only run, however numeric it looks.
+- **A layout test's boundary case must be stated in the width the component receives.** Asserting
+  the table appears at exactly `AnfasTableMinWidth` of *window* failed, because the screen's own
+  horizontal padding means the table is handed less. I turned the failure into the assertion — the
+  padding effect is now documented by a passing test rather than lying in wait.
+- **Falsify a responsive branch in both directions.** Forcing always-table reddened the two card
+  tests; forcing always-cards reddened the wide test. Neither alone proves the branch is real.
+- Reuse the module's `TestDoubles.kt`: promoting file-private fakes to `internal` there is what lets
+  a `jvmTest` layout test use them, instead of declaring rivals that collide across source sets.

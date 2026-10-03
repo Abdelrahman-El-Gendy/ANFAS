@@ -5,8 +5,10 @@ import androidx.room3.Dao
 import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
+import androidx.room3.Insert
 import androidx.room3.PrimaryKey
 import androidx.room3.Query
+import androidx.room3.Transaction
 import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 
@@ -84,4 +86,35 @@ interface EquipmentDao {
 
     @Upsert
     suspend fun insertLogEntry(entry: MaintenanceLogEntryEntity)
+
+    // --- sync bookkeeping -------------------------------------------------------------------
+    // Declared here, not only on SyncDao, so an outbox entry shares a @Transaction with the write
+    // it describes. See SyncOutboxEntity: a change committed with no record of it never syncs,
+    // and nothing afterwards can detect that it happened.
+
+    @Insert
+    suspend fun recordChange(entry: SyncOutboxEntity)
+
+    @Transaction
+    suspend fun upsertTracked(equipment: EquipmentEntity, change: SyncOutboxEntity) {
+        upsert(equipment)
+        recordChange(change)
+    }
+
+    /**
+     * The log entry and the machine's new status land together, because writing up what was done
+     * is what says which state it leaves the machine in -- the reasoning `logMaintenance` already
+     * follows. They were two separate calls before; making them one transaction is what the
+     * outbox needed anyway.
+     */
+    @Transaction
+    suspend fun insertLogEntryTracked(
+        entry: MaintenanceLogEntryEntity,
+        equipment: EquipmentEntity,
+        changes: List<SyncOutboxEntity>,
+    ) {
+        insertLogEntry(entry)
+        upsert(equipment)
+        changes.forEach { recordChange(it) }
+    }
 }

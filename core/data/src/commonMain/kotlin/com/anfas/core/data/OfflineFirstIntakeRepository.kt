@@ -3,6 +3,7 @@ package com.anfas.core.data
 import com.anfas.core.common.AppResult
 import com.anfas.core.database.IntakeDao
 import com.anfas.core.database.MemberDao
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.IntakeBatch
 import com.anfas.core.model.IntakeBatchId
 import com.anfas.core.model.IntakeBatchStatus
@@ -59,9 +60,14 @@ internal class OfflineFirstIntakeRepository(
 
     override suspend fun createBatch(batch: IntakeBatch): AppResult<Unit> =
         runStorage("Could not save the scanned sheet") {
-            intakeDao.upsertBatchWithRows(
+            val at = capturedAt()
+            intakeDao.upsertBatchWithRowsTracked(
                 batch = batch.toEntity(),
                 rows = batch.rows.map { it.toEntity(batch.id) },
+                changes = buildList {
+                    add(changeFor(SyncTables.INTAKE_BATCHES, batch.id.value, at))
+                    addAll(changesFor(SyncTables.INTAKE_ROWS, batch.rows.map { it.id.value }, at))
+                },
             )
         }
 
@@ -73,7 +79,10 @@ internal class OfflineFirstIntakeRepository(
         val row = intakeDao.rowOnce(rowId.value)
             ?: throw IllegalStateException("No intake row ${rowId.value}")
         val edited = row.toDomain().editField(field, value)
-        intakeDao.upsertRows(listOf(edited.toEntity(IntakeBatchId(row.batchId))))
+        intakeDao.upsertRowsTracked(
+            rows = listOf(edited.toEntity(IntakeBatchId(row.batchId))),
+            changes = listOf(changeFor(SyncTables.INTAKE_ROWS, rowId.value)),
+        )
     }
 
     override suspend fun importBatch(id: IntakeBatchId): AppResult<ImportOutcome> =
@@ -90,25 +99,50 @@ internal class OfflineFirstIntakeRepository(
             }
 
             val importable = batch.importableRows
+            val at = capturedAt()
+            var created = emptyList<Member>()
             if (importable.isNotEmpty()) {
                 // The whole run is allocated in one pass, so two rows cannot be handed the same
                 // number -- which happened once, and Room's upsert silently collapsed eight
                 // members into one. Shared with the manual add form: see MembershipNumbers.
                 val issued = memberDao.observeAll().first().map { it.membershipNumber }
                 val numbers = MembershipNumbers.nextRun(issued, count = importable.size)
-                val members = importable.mapIndexed { index, row ->
+                created = importable.mapIndexed { index, row ->
                     row.toMember(id = newId(), membershipNumber = numbers[index])
                 }
-                memberDao.upsertAll(members.map { it.toEntity() })
             }
-            intakeDao.setStatus(id.value, IntakeBatchStatus.IMPORTED.name)
+            // The members and the batch's new status go in one transaction. They were two calls
+            // through two DAOs, so a failure between them left members created from a sheet still
+            // marked REVIEWING -- and importing it again registered every one of them a second
+            // time under fresh membership numbers.
+            intakeDao.importTracked(
+                batchId = id.value,
+                status = IntakeBatchStatus.IMPORTED.name,
+                members = created.map { it.toEntity() },
+                changes = buildList {
+                    addAll(changesFor(SyncTables.MEMBERS, created.map { it.id.value }, at))
+                    add(changeFor(SyncTables.INTAKE_BATCHES, id.value, at))
+                },
+            )
 
             ImportOutcome(imported = importable.size, skipped = batch.blockedRows.size)
         }
 
     override suspend fun discardBatch(id: IntakeBatchId): AppResult<Unit> =
         runStorage("Could not discard the sheet") {
-            intakeDao.setStatus(id.value, IntakeBatchStatus.DISCARDED.name)
+            intakeDao.setStatusTracked(
+                id = id.value,
+                status = IntakeBatchStatus.DISCARDED.name,
+                change = changeFor(SyncTables.INTAKE_BATCHES, id.value),
+            )
+        }
+
+    override suspend fun sourceImageUris(): AppResult<List<String>> =
+        runStorage("Could not read the captured sheets") { intakeDao.sourceImageUris() }
+
+    override suspend fun relocateSourceImage(from: String, to: String): AppResult<Unit> =
+        runStorage("Could not repoint a captured sheet") {
+            intakeDao.relocateSourceImage(from = from, to = to)
         }
 
     private fun IntakeRow.toMember(id: String, membershipNumber: String) = Member(

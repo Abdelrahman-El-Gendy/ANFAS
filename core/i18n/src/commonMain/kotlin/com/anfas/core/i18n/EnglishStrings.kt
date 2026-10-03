@@ -22,6 +22,7 @@ object EnglishStrings : AppStrings {
         override val zoomIn = "Zoom in"
         override val zoomOut = "Zoom out"
         override val selected = "selected"
+        override val selectAll = "Select all"
 
         override fun today(time: String, separator: String) = "Today$separator$time"
         override fun yesterday(time: String, separator: String) = "Yesterday$separator$time"
@@ -38,6 +39,10 @@ object EnglishStrings : AppStrings {
         override fun dayNameShort(isoDayNumber: Int) = dayName(isoDayNumber).take(3).uppercase()
         override val back = "Back"
         override val moreOptions = "Account and settings"
+        override val chooseDate = "Choose a date"
+        override val openDatePicker = "Open the calendar"
+        override val confirmDate = "Select"
+        override val clearDate = "Clear"
     }
 
     override val members = object : AppStrings.Members {
@@ -84,6 +89,9 @@ object EnglishStrings : AppStrings {
         override val profileNotFoundMessage =
             "This member may have been deleted on another device."
         override val profileNoPhone = "No phone number"
+        override val profileWhatsAppConsent = "Send WhatsApp reminders"
+        override val profileWhatsAppConsentHint =
+            "Only members who have agreed are messaged. Ask before turning this on."
         override fun profileExpiresInDays(days: Int) =
             if (days == 1) "Expires tomorrow" else "Expires in $days days"
         override val profileExpired = "Expired"
@@ -128,10 +136,16 @@ object EnglishStrings : AppStrings {
             "The queue is clear. Last $delivered messages delivered."
         override val noFailedMessage = "The queue is clear and running without interruptions."
         override val nothingQueuedTitle = "Nothing queued"
+
+        // Was "once the daily job schedules them" -- there is no daily job, and now that Build
+        // queue exists the honest copy names the thing the user can actually press.
         override val nothingQueuedMessage =
-            "Reminders appear here once the daily job schedules them."
+            "Build the queue to find members whose membership is expiring."
         override val nothingSentTitle = "Nothing sent yet"
-        override val nothingSentMessage = "Delivered reminders will be listed here."
+
+        // Not "delivered": SENT means WhatsApp accepted the message. Delivery receipts need
+        // webhooks, which do not exist -- see design/whatsapp-send-system.md §8.
+        override val nothingSentMessage = "Reminders that have been sent will be listed here."
         override val filteredEmptyTitle = "No reminders match these filters"
         override val filteredEmptyMessage = "Try a different template, or clear the search."
         override val clearFilters = "CLEAR FILTERS"
@@ -169,6 +183,36 @@ object EnglishStrings : AppStrings {
         override val failureUnknownTitle = "Message not delivered"
         override val failureUnknownExplanation =
             "The provider did not say why. Check the technical details below."
+        override val buildQueue = "Build queue"
+        override val building = "Building…"
+        override fun queueBuilt(queued: Int) =
+            if (queued == 1) "Queued 1 reminder" else "Queued $queued reminders"
+
+        override fun queueBuiltNothing(noConsent: Int, noPhone: Int, alreadyQueued: Int): String {
+            val reasons = buildList {
+                if (noConsent > 0) add("$noConsent not opted in")
+                if (noPhone > 0) add("$noPhone without a phone number")
+                if (alreadyQueued > 0) add("$alreadyQueued already reminded")
+            }
+            return if (reasons.isEmpty()) {
+                "Nothing needs renewing yet"
+            } else {
+                "Nothing to queue: " + reasons.joinToString(", ")
+            }
+        }
+        override val runQueue = "Run queue"
+        override val running = "Sending…"
+        override val notConnected =
+            "WhatsApp is not connected yet, so these cannot be sent."
+
+        override fun runFinished(sent: Int, failed: Int): String {
+            val sentText = if (sent == 1) "Sent 1 message" else "Sent $sent messages"
+            return if (failed == 0) sentText else "$sentText, $failed failed"
+        }
+
+        override fun runStoppedEarly(sent: Int) =
+            "Stopped after $sent: WhatsApp is limiting how fast we can send. " +
+                "The rest are still queued."
     }
 
     override val renewal = object : AppStrings.Renewal {
@@ -488,8 +532,6 @@ object EnglishStrings : AppStrings {
         override val deleted = "Draft deleted."
         override val errorTitleBlank = "Give the announcement a title."
         override val errorBodyBlank = "Write the body."
-        override val errorEventDateUnreadable =
-            "Could not read that date. Try \"1 Nov 2026\" or \"2026-11-01\"."
     }
 
     override val therapy = object : AppStrings.Therapy {

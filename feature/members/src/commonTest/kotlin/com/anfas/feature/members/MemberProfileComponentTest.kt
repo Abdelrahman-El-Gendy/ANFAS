@@ -158,6 +158,9 @@ private class FakeSubscriptions : SubscriptionRepository {
 
     override suspend fun upsertPlans(plans: List<SubscriptionPlan>): AppResult<Unit> =
         AppResult.Success(Unit)
+
+    override suspend fun seedPlans(plans: List<SubscriptionPlan>): AppResult<Unit> =
+        AppResult.Success(Unit)
 }
 
 private class FakeProfileAuth(private val roles: Set<Role>) : AuthRepository {

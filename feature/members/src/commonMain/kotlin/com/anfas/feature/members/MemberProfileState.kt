@@ -31,6 +31,13 @@ data class MemberProfileState(
     val content: MemberProfileContent = MemberProfileContent.Loading,
     /** Whether this session holds `Permission.VIEW_THERAPY`. */
     val mayViewTherapy: Boolean = false,
+    /**
+     * Whether this session holds `Permission.EDIT_MEMBERS`, which gates the WhatsApp consent
+     * toggle. Shown-but-disabled rather than hidden, unlike the Therapy button: consent is a fact
+     * about the member that everyone who can see the profile should be able to read, even when
+     * they may not change it.
+     */
+    val mayEdit: Boolean = false,
 ) {
     val member: Member? get() = (content as? MemberProfileContent.Loaded)?.member
 

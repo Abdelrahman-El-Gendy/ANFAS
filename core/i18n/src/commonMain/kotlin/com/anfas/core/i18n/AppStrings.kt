@@ -34,6 +34,7 @@ interface AppStrings {
         val zoomIn: String
         val zoomOut: String
         val selected: String
+        val selectAll: String
 
         /** "Today 08:15" / "Yesterday, 17:30" — [separator] differs per table in the design. */
         fun today(time: String, separator: String): String
@@ -65,6 +66,16 @@ interface AppStrings {
          * reader would announce with no hint of what is inside, so this names the group.
          */
         val moreOptions: String
+
+        /**
+         * `AnfasDateField`'s own chrome. In [Common] rather than per-feature because every date
+         * field in the app shares one picker, and four copies of "Choose a date" is four chances
+         * for one of them to be translated differently.
+         */
+        val chooseDate: String
+        val openDatePicker: String
+        val confirmDate: String
+        val clearDate: String
     }
 
     interface Members {
@@ -110,6 +121,10 @@ interface AppStrings {
         val profileNotFoundTitle: String
         val profileNotFoundMessage: String
         val profileNoPhone: String
+
+        /** The WhatsApp consent toggle on the profile, and the line under it. */
+        val profileWhatsAppConsent: String
+        val profileWhatsAppConsentHint: String
 
         /** Status pill above the membership card. */
         fun profileExpiresInDays(days: Int): String
@@ -184,6 +199,19 @@ interface AppStrings {
         val failureTemplatePausedExplanation: String
         val failureUnknownTitle: String
         val failureUnknownExplanation: String
+
+        /** The Build queue action, and the notices reporting what one build did. */
+        val buildQueue: String
+        val building: String
+        fun queueBuilt(queued: Int): String
+        fun queueBuiltNothing(noConsent: Int, noPhone: Int, alreadyQueued: Int): String
+
+        /** Running the queue: the action, its in-flight label, and what one run did. */
+        val runQueue: String
+        val running: String
+        val notConnected: String
+        fun runFinished(sent: Int, failed: Int): String
+        fun runStoppedEarly(sent: Int): String
     }
 
     interface Renewal {
@@ -544,7 +572,6 @@ interface AppStrings {
         val deleted: String
         val errorTitleBlank: String
         val errorBodyBlank: String
-        val errorEventDateUnreadable: String
     }
 
     interface Therapy {

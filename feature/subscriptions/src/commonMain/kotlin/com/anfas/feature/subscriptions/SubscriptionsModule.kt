@@ -11,6 +11,8 @@ val SubscriptionsModule: Module = module {
     factory {
         ReminderQueueComponentFactory(
             reminders = get(),
+            scheduler = get(),
+            sender = get(),
             auth = get(),
             dispatchers = get(),
         )

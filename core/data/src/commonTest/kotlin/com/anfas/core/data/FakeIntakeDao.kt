@@ -4,6 +4,9 @@ import com.anfas.core.database.IntakeBatchEntity
 import com.anfas.core.database.IntakeDao
 import com.anfas.core.database.IntakeFieldColumns
 import com.anfas.core.database.IntakeRowEntity
+import com.anfas.core.database.MemberEntity
+import com.anfas.core.database.SyncOutboxEntity
+import com.anfas.core.database.SyncTombstoneEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -16,6 +19,15 @@ import kotlinx.coroutines.flow.map
 internal class FakeIntakeDao(
     batches: List<IntakeBatchEntity> = emptyList(),
     rows: List<IntakeRowEntity> = emptyList(),
+    /**
+     * The member store importing writes into.
+     *
+     * `IntakeDao` gained `upsertMembers` so the members and the batch's new status land in one
+     * transaction — in Room that is one `members` table however many DAOs declare a write to it,
+     * but two unconnected fakes would silently model it as two. Passing the same [FakeMemberDao]
+     * the repository reads through keeps the fake honest about that.
+     */
+    private val members: FakeMemberDao? = null,
 ) : IntakeDao {
 
     private val batchRows = MutableStateFlow(batches)
@@ -80,6 +92,37 @@ internal class FakeIntakeDao(
         // The real table has ON DELETE CASCADE.
         rowRows.value = rowRows.value.filterNot { it.batchId == id }
     }
+
+    override suspend fun sourceImageUris(): List<String> {
+        failure?.let { throw it }
+        return batchRows.value.mapNotNull { it.sourceImageUri }
+    }
+
+    override suspend fun relocateSourceImage(from: String, to: String) {
+        failure?.let { throw it }
+        batchRows.value = batchRows.value.map {
+            if (it.sourceImageUri == from) it.copy(sourceImageUri = to) else it
+        }
+    }
+
+    // --- sync bookkeeping. The tracked writes are default methods on the DAO, so implementing
+    // these two gives this fake the production sequencing rather than a re-implementation of it.
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
+
+    override suspend fun recordTombstones(entries: List<SyncTombstoneEntity>) = sync.record(entries)
+
+    override suspend fun upsertMembers(members: List<MemberEntity>) {
+        importedMembers += members
+        this.members?.upsertAll(members)
+    }
+
+    override suspend fun rowIdsForBatch(batchId: String): List<String> =
+        rowRows.value.filter { it.batchId == batchId }.map { it.id }
+
+    /** Every member row importing wrote, so a test can assert the transaction carried both. */
+    val importedMembers = mutableListOf<MemberEntity>()
 }
 
 internal fun batchEntity(

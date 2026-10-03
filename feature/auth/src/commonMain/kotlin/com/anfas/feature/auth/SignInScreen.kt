@@ -1,7 +1,7 @@
 package com.anfas.feature.auth
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,18 +49,34 @@ fun SignInScreen(component: SignInComponent, modifier: Modifier = Modifier) {
     val state by component.state.collectAsState()
     val s = strings
 
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    BoxWithConstraints(
+        // imePadding belongs on the container, not on the centred child. As a modifier on the
+        // Column it made the *child* taller by the keyboard's height, and a Box centring that
+        // child then split the difference: content rose by only half the keyboard, and the
+        // Column's scroll viewport still extended behind it, so a focused field could be
+        // scrolled "into view" and remain two-thirds covered. Insetting the container shrinks
+        // the space the child is centred in, which is what was meant all along.
+        //
+        // BoxWithConstraints rather than Box so [maxHeight] is the height that is actually left
+        // once the keyboard has taken its share, which is what decides whether the heading fits.
+        modifier = modifier.fillMaxSize().imePadding(),
+        contentAlignment = Alignment.Center,
+    ) {
+        // Measured against this container, never against the window: by the time the form is laid
+        // out it has already lost the status bar, the shell's 56dp top bar and the keyboard, and
+        // on a landscape phone what remains is about 80dp -- barely one field. A window-sized
+        // breakpoint would call that "a phone in landscape" and keep the heading.
+        val short = maxHeight < SHORT_VIEWPORT
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                // imePadding so the submit button is not left under the keyboard on a phone;
-                // verticalScroll so a short landscape window can still reach it.
-                .imePadding()
+                // verticalScroll so a window too short for the form -- a phone in landscape with
+                // the keyboard up is the real case -- can still reach the submit button.
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 32.dp)
+                .padding(horizontal = 24.dp, vertical = if (short) 12.dp else 32.dp)
                 .widthIn(max = FORM_MAX_WIDTH),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(if (short) 8.dp else 16.dp),
         ) {
             when (state.mode) {
                 // Deliberately blank rather than a spinner: deciding between sign-in and setup is
@@ -68,32 +84,45 @@ fun SignInScreen(component: SignInComponent, modifier: Modifier = Modifier) {
                 // jank rather than progress.
                 SignInMode.Checking -> Spacer(Modifier.size(0.dp))
 
-                SignInMode.SignIn -> Form(state, component, s, isSetup = false)
+                SignInMode.SignIn -> Form(state, component, s, isSetup = false, short = short)
 
-                SignInMode.FirstRun -> Form(state, component, s, isSetup = true)
+                SignInMode.FirstRun -> Form(state, component, s, isSetup = true, short = short)
             }
         }
     }
 }
 
 @Composable
-private fun Form(state: SignInState, component: SignInComponent, s: AppStrings, isSetup: Boolean) {
+private fun Form(
+    state: SignInState,
+    component: SignInComponent,
+    s: AppStrings,
+    isSetup: Boolean,
+    short: Boolean,
+) {
     val scheme = MaterialTheme.colorScheme
 
-    Text(
-        text = if (isSetup) s.auth.setupTitle else s.auth.signInTitle,
-        style = AnfasTheme.textStyles.headlineLarge,
-        color = scheme.onSurface,
-        textAlign = TextAlign.Center,
-    )
-    Text(
-        text = if (isSetup) s.auth.setupMessage else s.auth.signInTagline,
-        style = AnfasTheme.textStyles.bodyMedium,
-        color = scheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-    )
+    // The heading is dropped, not shrunk, when there is no room for it. A landscape phone with the
+    // keyboard open leaves roughly one field's worth of height, and spending it on a title and a
+    // tagline is what pushed the fields themselves off the bottom. Nothing is lost that the user
+    // needs in order to type: they arrived here deliberately, the fields are labelled, and the
+    // submit button says which of the two things this form does.
+    if (!short) {
+        Text(
+            text = if (isSetup) s.auth.setupTitle else s.auth.signInTitle,
+            style = AnfasTheme.textStyles.headlineLarge,
+            color = scheme.onSurface,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = if (isSetup) s.auth.setupMessage else s.auth.signInTagline,
+            style = AnfasTheme.textStyles.bodyMedium,
+            color = scheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
 
-    Spacer(Modifier.size(8.dp))
+        Spacer(Modifier.size(8.dp))
+    }
 
     state.error?.let { error ->
         AnfasCallout(
@@ -179,3 +208,12 @@ private fun Form(state: SignInState, component: SignInComponent, s: AppStrings, 
 
 /** Wider than this and the form's fields become uncomfortably long lines on a desktop window. */
 private val FORM_MAX_WIDTH = 420.dp
+
+/**
+ * Below this much height the heading is dropped so the fields get the space.
+ *
+ * Sized from the content rather than picked: the three-field setup form needs about 250dp, and the
+ * heading plus its spacing is another 150dp. Anything under 400dp cannot show both, and a landscape
+ * phone with the keyboard up offers roughly 80dp.
+ */
+private val SHORT_VIEWPORT = 400.dp

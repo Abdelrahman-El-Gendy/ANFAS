@@ -6,6 +6,7 @@ import com.anfas.core.data.MaintenanceProblem
 import com.anfas.core.model.Equipment
 import com.anfas.core.model.EquipmentStatus
 import com.anfas.core.model.EquipmentZone
+import kotlinx.datetime.LocalDate
 
 sealed interface EquipmentContent {
     data object Loading : EquipmentContent
@@ -49,10 +50,10 @@ data class AddEquipmentForm(
     val status: EquipmentStatus = EquipmentStatus.OPERATIONAL,
     val manufacturer: String = "",
     val serialNumber: String = "",
-    /** Free text, parsed with `IntakeValidator.parseDate` the same way the announcement
-     * composer's event date is -- blank means unknown, not "on order with no date". */
-    val purchasedOnText: String = "",
-    val warrantyUntilText: String = "",
+    /** Chosen from `AnfasDateField`'s calendar. Null means unknown — which is the normal state
+     * for something still `ON_ORDER`, not an error. */
+    val purchasedOn: LocalDate? = null,
+    val warrantyUntil: LocalDate? = null,
     val isSubmitting: Boolean = false,
     val problems: Set<EquipmentProblem> = emptySet(),
 ) {

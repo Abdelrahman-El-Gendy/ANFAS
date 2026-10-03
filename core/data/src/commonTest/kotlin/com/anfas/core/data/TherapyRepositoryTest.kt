@@ -3,6 +3,8 @@ package com.anfas.core.data
 import app.cash.turbine.test
 import com.anfas.core.database.StaffDao
 import com.anfas.core.database.StaffEntity
+import com.anfas.core.database.SyncOutboxEntity
+import com.anfas.core.database.SyncTables
 import com.anfas.core.database.TherapyCaseDao
 import com.anfas.core.database.TherapyCaseEntity
 import com.anfas.core.database.TherapySessionEntity
@@ -396,6 +398,55 @@ class TherapyRepositoryTest {
         assertEquals(SaveSessionOutcome.Saved, result)
     }
 
+    /** Every write path here files an outbox entry. See SyncOutboxTest for why that matters. */
+    @Test
+    fun `each therapy write files an outbox entry`() = runTest {
+        val dao = FakeTherapyCaseDao()
+        val repository = repository(dao)
+        val memberId = MemberId("m-1")
+
+        val opened = repository.openCase(
+            memberId = memberId,
+            condition = "Shoulder",
+            therapistStaffId = null,
+            referredBy = null,
+            onset = "May",
+            mechanism = "Overhead",
+            contraindications = null,
+            openedOn = LocalDate.parse("2026-06-01"),
+        ).valueOrFail()
+        val caseId = assertIs<SaveCaseOutcome.Saved>(opened).caseId
+        assertEquals(listOf(caseId.value), dao.sync.upserts(SyncTables.THERAPY_CASES))
+
+        repository.updateCase(
+            caseId = caseId,
+            condition = "Shoulder impingement",
+            therapistStaffId = null,
+            referredBy = null,
+            onset = "May",
+            mechanism = "Overhead",
+            contraindications = null,
+        ).valueOrFail()
+
+        repository.logSession(
+            caseId = caseId,
+            therapistStaffId = null,
+            at = Instant.fromEpochMilliseconds(0),
+            durationMinutes = 30,
+            treatmentTypes = emptySet(),
+            notes = "",
+            painScore = 4,
+        ).valueOrFail()
+        assertEquals(1, dao.sync.upserts(SyncTables.THERAPY_SESSIONS).size)
+
+        repository.closeCase(caseId, LocalDate.parse("2026-07-01")).valueOrFail()
+        assertEquals(
+            listOf(caseId.value, caseId.value, caseId.value),
+            dao.sync.upserts(SyncTables.THERAPY_CASES),
+            "open, update and close are three separate changes and each has to be pushed",
+        )
+    }
+
     private fun repository(
         dao: FakeTherapyCaseDao,
         staff: FakeTherapyStaff = FakeTherapyStaff(emptyMap()),
@@ -406,7 +457,7 @@ class TherapyRepositoryTest {
     )
 }
 
-private class FakeTherapyCaseDao : TherapyCaseDao {
+internal class FakeTherapyCaseDao : TherapyCaseDao {
     private val caseRows = MutableStateFlow<List<TherapyCaseEntity>>(emptyList())
     private val sessionRows = MutableStateFlow<List<TherapySessionEntity>>(emptyList())
 
@@ -433,9 +484,15 @@ private class FakeTherapyCaseDao : TherapyCaseDao {
     override suspend fun upsertSession(session: TherapySessionEntity) {
         sessionRows.value = sessionRows.value.filterNot { it.id == session.id } + session
     }
+
+    // --- sync bookkeeping. The tracked writes are default methods on the DAO, so implementing
+    // these two gives this fake the production sequencing rather than a re-implementation of it.
+    val sync = OutboxRecorder()
+
+    override suspend fun recordChange(entry: SyncOutboxEntity) = sync.record(entry)
 }
 
-private class FakeTherapyStaff(initial: Map<String, String>) : StaffDao {
+internal class FakeTherapyStaff(initial: Map<String, String>) : StaffDao {
     private val rows = MutableStateFlow(initial)
 
     fun rename(id: String, name: String) {

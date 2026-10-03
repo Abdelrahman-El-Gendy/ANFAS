@@ -44,6 +44,23 @@ data class ReminderQueueState(
     val notice: QueueNotice? = null,
     /** Whether this session holds `Permission.RETRY_REMINDERS`. */
     val mayRetry: Boolean = false,
+    /**
+     * Whether this session may rebuild the queue. Backed by `RETRY_REMINDERS` -- the existing
+     * "may change the reminder queue" permission -- rather than a new one: building is not sending,
+     * and Phase 2 introduces `SEND_REMINDERS` when there is an actual send to gate.
+     */
+    val mayBuildQueue: Boolean = false,
+    /** True while a build is in flight, so the action cannot be pressed twice. */
+    val isBuilding: Boolean = false,
+    /** Whether this session holds `SEND_REMINDERS`. */
+    val maySend: Boolean = false,
+    /**
+     * Whether a WhatsApp gateway exists at all. False until Phase 3, and the reason the Run queue
+     * action is replaced by an explanation rather than simply hidden: staff should learn the
+     * feature is there and why it is inert, not wonder where it went.
+     */
+    val gatewayConnected: Boolean = false,
+    val isSending: Boolean = false,
 ) {
     val visibleReminders: List<Reminder>
         get() = (content as? ReminderQueueContent.Loaded)?.reminders ?: emptyList()
@@ -67,5 +84,16 @@ sealed interface QueueNotice {
     /** [requeued] of [requested] actually went; the rest could not be retried. */
     data class Requeued(val requeued: Int, val requested: Int) : QueueNotice
     data object NothingRetryable : QueueNotice
+
+    /** One queue build, itemised so "nothing happened" can explain itself. */
+    data class QueueBuilt(val queued: Int) : QueueNotice
+
+    data class QueueBuiltNothing(val noConsent: Int, val noPhone: Int, val alreadyQueued: Int) :
+        QueueNotice
+
+    /** One send run. [RunStoppedEarly] is separate: it means the rest are still waiting. */
+    data class RunFinished(val sent: Int, val failed: Int) : QueueNotice
+
+    data class RunStoppedEarly(val sent: Int) : QueueNotice
     data class Failed(val message: String) : QueueNotice
 }

@@ -139,10 +139,10 @@ Real disagreements found. Each needs a decision before the token layer is frozen
 
 | screen | | target module |
 |---|---|---|
-| `staff-login` | M | **gap** — no auth feature module exists; `:core:auth` holds session/RBAC only |
-| `staff-dashboard` | M | **gap** — no dashboard module |
-| `reception-dashboard` | D | **gap** — no dashboard module |
-| `live-checkin-log` | M | **gap** — check-in has no module |
+| `staff-login` | M | `:feature:auth` |
+| `staff-dashboard` | M | **not built, deliberately** — see CLAUDE.md → Dashboards |
+| `reception-dashboard` | D | `:feature:dashboard` |
+| `live-checkin-log` | M | `:feature:checkin` |
 | `member-directory` | M | `:feature:members` |
 | `member-profile` | M | `:feature:members` |
 | `members-list-empty` | D | `:feature:members` |
@@ -163,6 +163,11 @@ Real disagreements found. Each needs a decision before the token layer is frozen
 | `session-expired` | D | cross-cutting state → `:core:designsystem` |
 | `permission-denied` | D | cross-cutting state → `:core:designsystem` |
 
-**Coverage note:** every existing `:feature:*` module has at least one screen. Four screens
-(login, two dashboards, check-in log) have **no** module in the graph — see CLAUDE.md's module
-list. Four more are cross-cutting states that belong in the design system, not a feature.
+**Coverage note (as of 2026-08-25):** every `:feature:*` module has at least one real screen, and
+every screen above is accounted for. 15 are implemented as their own screen or dialog; 4 are
+*states* of one of those (`members-list-empty` and `search-no-results` inside the directory,
+`reminder-queue-empty`, `ocr-intake-empty`) rather than separate screens. `staff-dashboard` was
+declined — four fabricated figures is not a screen worth shipping. Of the four cross-cutting states,
+`permission-denied` is wired; `sync-conflict`, `offline-banner` and `session-expired` are built as
+components/strings with **no caller**, waiting on the sync layer and a session-expiry concept that
+do not exist — see CLAUDE.md → Cross-cutting state screens.

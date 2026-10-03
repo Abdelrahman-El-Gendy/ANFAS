@@ -5,6 +5,7 @@ import com.anfas.core.model.IntakeValidator
 import com.anfas.core.model.Member
 import com.anfas.core.model.MemberId
 import com.anfas.core.model.MembershipStatus
+import com.anfas.core.model.TemplateLanguage
 import kotlin.time.Instant
 
 /**
@@ -21,6 +22,13 @@ internal fun MemberEntity.toDomain(): Member = Member(
     status = MembershipStatus.entries.firstOrNull { it.name == status } ?: MembershipStatus.PAUSED,
     lastCheckInAt = lastCheckInAtEpochMs?.let { Instant.fromEpochMilliseconds(it) },
     avatarUrl = avatarUrl,
+    whatsappOptIn = whatsappOptIn,
+    // Null on an unreadable value as well as on an absent one, and both mean the same thing to
+    // the scheduler: not asked, so fall back to Arabic. Degrading rather than throwing for the
+    // same reason `status` does above.
+    preferredLanguage = preferredLanguage?.let { stored ->
+        TemplateLanguage.entries.firstOrNull { it.name == stored }
+    },
 )
 
 /**
@@ -40,4 +48,6 @@ internal fun Member.toEntity(): MemberEntity = MemberEntity(
     status = status.name,
     lastCheckInAtEpochMs = lastCheckInAt?.toEpochMilliseconds(),
     avatarUrl = avatarUrl,
+    whatsappOptIn = whatsappOptIn,
+    preferredLanguage = preferredLanguage?.name,
 )

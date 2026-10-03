@@ -2,6 +2,7 @@ package com.anfas.core.data
 
 import app.cash.turbine.test
 import com.anfas.core.common.AppResult
+import com.anfas.core.database.SyncTables
 import com.anfas.core.model.IntakeBatch
 import com.anfas.core.model.IntakeBatchId
 import com.anfas.core.model.IntakeBatchStatus
@@ -222,6 +223,37 @@ class OfflineFirstIntakeRepositoryTest {
 
     // --- helpers --------------------------------------------------------------------------
 
+    /**
+     * Every intake write path files an outbox entry, and importing files one per member too.
+     *
+     * The import case is the one worth having: it writes members and closes the batch, and before
+     * this stage it did so through two DAOs with no transaction between them.
+     */
+    @Test
+    fun `each intake write files an outbox entry`() = runTest {
+        val members = FakeMemberDao()
+        val intake = FakeIntakeDao(members = members)
+        val repository = OfflineFirstIntakeRepository(intake, members, { "m-1" }, FixedClock)
+
+        val batch = IntakeBatch(
+            id = IntakeBatchId("b-1"),
+            capturedAt = FixedClock.now(),
+            sourceImageUri = "file://sheet.jpg",
+            status = IntakeBatchStatus.REVIEWING,
+            rows = listOf(rowEntity("r1").toDomainForTest()),
+        )
+        repository.createBatch(batch).valueOrFail()
+        assertEquals(1, intake.sync.upserts(SyncTables.INTAKE_BATCHES).size)
+        assertEquals(1, intake.sync.upserts(SyncTables.INTAKE_ROWS).size)
+
+        repository.discardBatch(IntakeBatchId("b-1")).valueOrFail()
+        assertEquals(
+            2,
+            intake.sync.upserts(SyncTables.INTAKE_BATCHES).size,
+            "discarding is a status change on the batch and has to be pushed like any other edit",
+        )
+    }
+
     private class Fixture(val repository: IntakeRepository, val intakeDao: FakeIntakeDao)
 
     private fun fixture(
@@ -229,7 +261,11 @@ class OfflineFirstIntakeRepositoryTest {
         existingMembers: List<com.anfas.core.database.MemberEntity> = emptyList(),
         memberDao: FakeMemberDao = FakeMemberDao(existingMembers),
     ): Fixture {
-        val intakeDao = FakeIntakeDao(batches = listOf(batchEntity()), rows = rows)
+        val intakeDao = FakeIntakeDao(
+            batches = listOf(batchEntity()),
+            rows = rows,
+            members = memberDao,
+        )
         // Must be unique per call: ids are the member primary key, so a constant would make
         // the upsert silently collapse every imported row into one member.
         var counter = 0
